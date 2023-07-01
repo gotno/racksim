@@ -15,7 +15,7 @@ void AVCVCable::BeginPlay() {
 	
 }
 
-void AVCVCable::setModel(VCVCable vcv_cable) {
+void AVCVCable::init(VCVCable vcv_cable) {
   model = vcv_cable; 
   // UE_LOG(LogTemp, Warning, TEXT("cable model %lld: %lld:%lld"), model.id, model.inputModuleId, model.outputModuleId);
 }

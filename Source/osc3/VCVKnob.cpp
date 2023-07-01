@@ -38,8 +38,8 @@ void AVCVKnob::BeginPlay() {
   }
 }
 
-void AVCVKnob::setModel(VCVParam* vcv_param) {
-	Super::setModel(vcv_param);
+void AVCVKnob::init(VCVParam* vcv_param) {
+	Super::init(vcv_param);
   SetActorRotation(getRotationFromValue());
 }
 

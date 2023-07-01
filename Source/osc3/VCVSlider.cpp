@@ -50,8 +50,8 @@ void AVCVSlider::BeginPlay() {
   }
 }
 
-void AVCVSlider::setModel(VCVParam* vcv_param) {
-	Super::setModel(vcv_param);
+void AVCVSlider::init(VCVParam* vcv_param) {
+	Super::init(vcv_param);
 
   FVector minHandlePosition = GetActorLocation() + FVector(0, model->minHandlePos.x, model->minHandlePos.y);
   FVector maxHandlePosition = GetActorLocation() + FVector(0, model->maxHandlePos.x, model->maxHandlePos.y);

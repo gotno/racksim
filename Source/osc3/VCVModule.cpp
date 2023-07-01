@@ -44,7 +44,7 @@ void AVCVModule::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 }
 
-void AVCVModule::setModel(VCVModule vcv_module) {
+void AVCVModule::init(VCVModule vcv_module) {
   model = vcv_module; 
   SetActorScale3D(FVector(1, model.box.size.x, model.box.size.y));
   spawnComponents();
@@ -94,7 +94,7 @@ void AVCVModule::spawnComponents() {
         spawnParams
       );
       a_knob->AttachToComponent(StaticMeshComponent, FAttachmentTransformRules::KeepWorldTransform);
-      a_knob->setModel(&param);
+      a_knob->init(&param);
     } else if (param.type == ParamType::Slider) {
       AVCVSlider* a_slider = GetWorld()->SpawnActor<AVCVSlider>(
         AVCVSlider::StaticClass(),
@@ -103,7 +103,7 @@ void AVCVModule::spawnComponents() {
         spawnParams
       );
       a_slider->AttachToComponent(StaticMeshComponent, FAttachmentTransformRules::KeepWorldTransform);
-      a_slider->setModel(&param);
+      a_slider->init(&param);
     } else if (param.type == ParamType::Switch) {
       AVCVSwitch* a_switch = GetWorld()->SpawnActor<AVCVSwitch>(
         AVCVSwitch::StaticClass(),
@@ -112,7 +112,7 @@ void AVCVModule::spawnComponents() {
         spawnParams
       );
       a_switch->AttachToComponent(StaticMeshComponent, FAttachmentTransformRules::KeepWorldTransform);
-      a_switch->setModel(&param);
+      a_switch->init(&param);
     } else if (param.type == ParamType::Button) {
       AVCVButton* a_button = GetWorld()->SpawnActor<AVCVButton>(
         AVCVButton::StaticClass(),
@@ -121,7 +121,7 @@ void AVCVModule::spawnComponents() {
         spawnParams
       );
       a_button->AttachToComponent(StaticMeshComponent, FAttachmentTransformRules::KeepWorldTransform);
-      a_button->setModel(&param);
+      a_button->init(&param);
     }
   }
 
@@ -135,7 +135,7 @@ void AVCVModule::spawnComponents() {
       spawnParams
     );
     a_port->AttachToComponent(StaticMeshComponent, FAttachmentTransformRules::KeepWorldTransform);
-    a_port->SetModel(&port);
+    a_port->init(&port);
     InputActors.Add(port.id, a_port);
   }
 
@@ -149,7 +149,7 @@ void AVCVModule::spawnComponents() {
       spawnParams
     );
     a_port->AttachToComponent(StaticMeshComponent, FAttachmentTransformRules::KeepWorldTransform);
-    a_port->SetModel(&port);
+    a_port->init(&port);
     OutputActors.Add(port.id, a_port);
   }
 
@@ -162,7 +162,7 @@ void AVCVModule::spawnComponents() {
       FRotator(0, 0, 0)
     );
     a_light->AttachToComponent(StaticMeshComponent, FAttachmentTransformRules::KeepWorldTransform);
-    a_light->SetModel(&light);
+    a_light->init(&light);
     LightActors.Add(light.id, a_light);
   }
 
@@ -173,6 +173,6 @@ void AVCVModule::spawnComponents() {
       FRotator(0, 0, 0)
     );
     a_display->AttachToComponent(StaticMeshComponent, FAttachmentTransformRules::KeepWorldTransform);
-    a_display->SetModel(&display);
+    a_display->init(&display);
   }
 }

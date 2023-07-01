@@ -19,7 +19,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
   void draw();
-  void setModel(VCVCable model);
+  void init(VCVCable model);
   
 private:
   // bool drawn = false;

@@ -35,7 +35,7 @@ void AVCVDisplay::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 }
 
-void AVCVDisplay::SetModel(VCVDisplay* vcv_display) {
+void AVCVDisplay::init(VCVDisplay* vcv_display) {
   model = vcv_display;
   SetActorScale3D(FVector(1.f, model->box.size.x, model->box.size.y));
 }

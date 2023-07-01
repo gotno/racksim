@@ -17,7 +17,7 @@ protected:
 public:	
 	virtual void Tick(float DeltaTime) override;
 
-  void SetModel(struct VCVLight* model);
+  void init(struct VCVLight* model);
   void SetColor(FLinearColor color);
   void SetEmissiveColor(FLinearColor color);
   void SetEmissiveIntensity(float intensity);

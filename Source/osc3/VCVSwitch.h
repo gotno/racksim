@@ -15,7 +15,7 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-  void setModel(VCVParam* vcv_param) override;
+  void init(VCVParam* vcv_param) override;
 
 private:
   UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))

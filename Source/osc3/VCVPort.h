@@ -16,7 +16,7 @@ protected:
 
 public:	
 	virtual void Tick(float DeltaTime) override;
-  void SetModel(struct VCVPort* vcv_port);
+  void init(struct VCVPort* vcv_port);
 
 private:
   UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))

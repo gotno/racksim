@@ -19,7 +19,7 @@ protected:
 public:	
 	virtual void Tick(float DeltaTime) override;
 
-  void setModel(VCVModule model);
+  void init(VCVModule model);
   
   void GetPortInfo(PortIdentity identity, FVector& portLocation, FVector& portForwardVector);
   void UpdateLight(int32 lightId, FLinearColor color);

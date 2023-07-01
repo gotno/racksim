@@ -28,8 +28,8 @@ void AVCVButton::BeginPlay() {
   }
 }
 
-void AVCVButton::setModel(VCVParam* vcv_param) {
-  Super::setModel(vcv_param);
+void AVCVButton::init(VCVParam* vcv_param) {
+  Super::init(vcv_param);
   // spawnLights(HandleMeshComponent);
 }
 

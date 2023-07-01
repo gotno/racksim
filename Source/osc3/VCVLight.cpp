@@ -39,7 +39,7 @@ void AVCVLight::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 }
 
-void AVCVLight::SetModel(VCVLight* vcv_light) {
+void AVCVLight::init(VCVLight* vcv_light) {
   model = vcv_light;
   SetActorScale3D(FVector(1.f, model->box.size.x, model->box.size.y));
 

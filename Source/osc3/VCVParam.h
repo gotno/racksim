@@ -26,7 +26,7 @@ private:
 public:	
 	virtual void Tick(float DeltaTime) override;
 
-  virtual void setModel(struct VCVParam* model);
+  virtual void init(struct VCVParam* model);
   VCVParam* model;
 
   virtual void setValue(float newValue);

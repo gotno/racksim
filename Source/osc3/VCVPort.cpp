@@ -40,7 +40,7 @@ void AVCVPort::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 }
 
-void AVCVPort::SetModel(VCVPort* vcv_port) {
+void AVCVPort::init(VCVPort* vcv_port) {
   model = vcv_port;
   SetActorScale3D(FVector(1, model->box.size.x, model->box.size.y));
 

@@ -47,8 +47,8 @@ void AVCVSwitch::BeginPlay() {
   }
 }
 
-void AVCVSwitch::setModel(VCVParam* vcv_param) {
-	Super::setModel(vcv_param);
+void AVCVSwitch::init(VCVParam* vcv_param) {
+	Super::init(vcv_param);
   
   // TODO: frame count is just maxValue + 1
   // but also this isn't the way every switch works so maybe don't TODO

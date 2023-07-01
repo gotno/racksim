@@ -53,7 +53,7 @@ void Aosc3GameModeBase::SpawnModule(VCVModule module) {
     );
   
   ModuleActors.Add(module.id, a_module);
-  a_module->setModel(module);
+  a_module->init(module);
 
   spawnXPositionCursor += module.box.size.x / 2;
 }
@@ -67,7 +67,7 @@ void Aosc3GameModeBase::SpawnCable(VCVCable cable) {
     );
   
   CableActors.Add(cable.id, a_cable);
-  a_cable->setModel(cable);
+  a_cable->init(cable);
 }
 
 void Aosc3GameModeBase::UpdateLight(int64_t moduleId, int32 lightId, FLinearColor color) {

@@ -28,7 +28,7 @@ void ALED::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 }
 
-void ALED::SetModel(VCVLight* vcv_light) {
+void ALED::init(VCVLight* vcv_light) {
   model = vcv_light;
   // light->SetAttenuationRadius(model->box.size.x);
   light->SetLightColor(FLinearColor(model->color));

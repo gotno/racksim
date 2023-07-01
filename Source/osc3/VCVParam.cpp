@@ -20,7 +20,7 @@ void AVCVParam::Tick(float DeltaTime) {
   }
 }
 
-void AVCVParam::setModel(VCVParam* vcv_param) {
+void AVCVParam::init(VCVParam* vcv_param) {
   model = vcv_param; 
   owner = Cast<AVCVModule>(GetOwner());
   SetActorScale3D(FVector(1, model->box.size.x, model->box.size.y));
@@ -45,7 +45,7 @@ void AVCVParam::SpawnLights(USceneComponent* attachTo) {
       spawnParams
     );
     a_light->AttachToComponent(attachTo, FAttachmentTransformRules::KeepWorldTransform);
-    a_light->SetModel(&light);
+    a_light->init(&light);
     owner->registerParamLight(light.id, a_light);
   }
 }

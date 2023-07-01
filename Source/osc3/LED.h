@@ -14,7 +14,7 @@ public:
   USceneComponent* root;
   class UPointLightComponent* light;
   
-  void SetModel(struct VCVLight* model);
+  void init(struct VCVLight* model);
   void SetColor(FColor color);
 
 protected:
