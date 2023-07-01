@@ -13,13 +13,11 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+  virtual void spawnLights(USceneComponent* attachTo, FVector offset);
   
 private:
   class AVCVModule* owner;
   
-  FVector lightOffset;
-  void SpawnLights(USceneComponent* attachTo);
-
   bool engaged = false;
   float alterRatio = 1.f;
 

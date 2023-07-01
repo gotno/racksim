@@ -30,7 +30,11 @@ void AVCVButton::BeginPlay() {
 
 void AVCVButton::init(VCVParam* vcv_param) {
   Super::init(vcv_param);
-  // spawnLights(HandleMeshComponent);
+  spawnLights(BaseMeshComponent, lightOffset);
+}
+
+void AVCVButton::spawnLights(USceneComponent* attachTo, FVector offset) {
+  Super::spawnLights(attachTo, offset);
 }
 
 void AVCVButton::engage() {

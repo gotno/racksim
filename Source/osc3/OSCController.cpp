@@ -284,10 +284,16 @@ void AOSCController::AddLight(const FOSCAddress& AddressPattern, const FOSCMessa
   } else {
     Modules[moduleId].Params[paramId].Lights.Add(lightId, VCVLight(lightId, moduleId));
   }
+
   VCVLight& light =
     paramId == -1
       ? Modules[moduleId].Lights[lightId]
       : Modules[moduleId].Params[paramId].Lights[lightId];
+
+  if (paramId != -1) {
+    ParamType& type = Modules[moduleId].Params[paramId].type;
+    if (type == ParamType::Button || type == ParamType::Slider) light.transparent = true;
+  }
 
   UOSCManager::GetFloat(message, 3, light.box.pos.x);
   UOSCManager::GetFloat(message, 4, light.box.pos.y);

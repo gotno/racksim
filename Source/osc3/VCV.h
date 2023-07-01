@@ -39,6 +39,7 @@ struct VCVLight {
   LightShape shape;
   FLinearColor color;
   FLinearColor bgColor;
+  bool transparent = false;
 
   VCVLight() {}
   VCVLight(int32 _id, int64_t _moduleId) : id(_id), moduleId(_moduleId) {}

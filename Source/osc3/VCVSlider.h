@@ -60,6 +60,7 @@ private:
   float getValueFromOffset();
   
   FVector lightOffset{-0.11f, 0, 0};
+  void spawnLights(USceneComponent* attachTo, FVector offset) override;
 
 public:
   virtual void engage();

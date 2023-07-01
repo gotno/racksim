@@ -57,6 +57,7 @@ void AVCVSlider::init(VCVParam* vcv_param) {
   FVector maxHandlePosition = GetActorLocation() + FVector(0, model->maxHandlePos.x, model->maxHandlePos.y);
   
   HandleMeshComponent->SetWorldScale3D(FVector(1, model->handleBox.size.x, model->handleBox.size.y));
+  spawnLights(HandleMeshComponent, lightOffset);
 
   if (model->horizontal) {
     direction = HandleMeshComponent->GetRightVector();
@@ -70,7 +71,10 @@ void AVCVSlider::init(VCVParam* vcv_param) {
   HandleMeshComponent->SetWorldLocation(minHandlePosition + direction * worldOffset);
   shadowOffset = worldOffset;
   
-  // spawnLights(HandleMeshComponent);
+}
+
+void AVCVSlider::spawnLights(USceneComponent* attachTo, FVector offset) {
+  Super::spawnLights(attachTo, offset);
 }
 
 float AVCVSlider::getOffsetFromValue() {
