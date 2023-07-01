@@ -1,0 +1,45 @@
+#pragma once
+
+#include "CoreMinimal.h"
+#include "GameFramework/Pawn.h"
+#include "Avatar.generated.h"
+
+UCLASS()
+class OSC3_API AAvatar : public APawn {
+	GENERATED_BODY()
+
+public:
+	AAvatar();
+
+protected:
+	virtual void BeginPlay() override;
+
+public:	
+	virtual void Tick(float DeltaTime) override;
+	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+private:
+  UPROPERTY(EditAnywhere)
+  class UCameraComponent* cameraComponent; 
+  UPROPERTY(EditAnywhere)
+  class UFloatingPawnMovement* movementComponent;
+  
+  FHitResult hitResult;
+  bool hasHit = false;
+  float interactDistance = 40.f;
+  void sweep();
+
+  void moveForward(float axisValue);
+  void moveRight(float axisValue);
+  void moveUp(float axisValue);
+  
+  void click();
+  void release();
+  float clickMouseX;
+  float clickMouseY;
+  
+  class AVCVParam* controlledParam;
+  bool controllingParam = false;
+
+  virtual void AddControllerPitchInput(float axisValue) override;
+  virtual void AddControllerYawInput(float axisValue) override;
+};
