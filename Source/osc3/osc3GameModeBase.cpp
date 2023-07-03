@@ -19,7 +19,7 @@ Aosc3GameModeBase::Aosc3GameModeBase() {
   DefaultPawnClass = AAvatar::StaticClass();
 
   OSCctrl = CreateDefaultSubobject<AOSCController>(FName(TEXT("OSCctrl")));
-  HUDClass = AIndicatorHUD::StaticClass();
+  // HUDClass = AIndicatorHUD::StaticClass();
 }
 
 void Aosc3GameModeBase::BeginPlay() {
