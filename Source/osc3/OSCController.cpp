@@ -341,7 +341,7 @@ void AOSCController::AddCable(const FOSCAddress& AddressPattern, const FOSCMessa
 
   NotifyReceived("cable", cableId);
 
-  gameMode->SpawnCable(Cables[cableId]);
+  gameMode->QueueCableSpawn(Cables[cableId]);
 }
 
 void AOSCController::UpdateLight(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port) {

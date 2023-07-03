@@ -62,6 +62,14 @@ void AVCVModule::GetPortInfo(PortIdentity identity, FVector& portLocation, FVect
   portForwardVector = port->GetActorForwardVector();
 }
 
+void AVCVModule::ConnectCable(const PortIdentity& identity, int64_t cableId) {
+  if (identity.type == PortType::Input) {
+    InputActors[identity.portId]->addCableId(cableId);
+  } else {
+    OutputActors[identity.portId]->addCableId(cableId);
+  }
+}
+
 void AVCVModule::UpdateLight(int32 lightId, FLinearColor color) {
   if (LightActors.Contains(lightId)) {
     LightActors[lightId]->SetEmissiveColor(color);

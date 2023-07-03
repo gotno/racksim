@@ -6,7 +6,7 @@ AVCVPort::AVCVPort() {
 
   BaseMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Static Mesh"));
   RootComponent = BaseMeshComponent;
-  BaseMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+  // BaseMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
   
   static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshBody(TEXT("/Script/Engine.StaticMesh'/Game/meshes/unit_port.unit_port'"));
   
@@ -51,3 +51,12 @@ void AVCVPort::init(VCVPort* vcv_port) {
   }
 }
 
+void AVCVPort::addCableId(int64_t cableId) {
+  cableIds.Push(cableId);
+}
+
+bool AVCVPort::getCableId(int64_t& cableId) {
+  if (cableIds.Num() == 0) return false;
+  cableId = cableIds.Pop();
+  return true;
+}

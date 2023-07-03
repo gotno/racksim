@@ -16,7 +16,10 @@ protected:
 
 public:	
 	virtual void Tick(float DeltaTime) override;
-  void init(struct VCVPort* vcv_port);
+  void init(struct VCVPort* model);
+  
+  void addCableId(int64_t cableId);
+  bool getCableId(int64_t& cableId);
 
 private:
   UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
@@ -40,4 +43,5 @@ private:
   TCHAR* HoleMaterialReference = TEXT("/Script/Engine.Material'/Game/materials/port_hole.port_hole'");
   
   VCVPort* model;
+  TArray<int64_t> cableIds;
 };

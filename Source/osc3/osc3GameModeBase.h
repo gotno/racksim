@@ -23,21 +23,13 @@ protected:
 
 public:
   void SpawnModule(struct VCVModule module);
-  void SpawnCable(struct VCVCable cable);
+  void QueueCableSpawn(VCVCable cable);
 
   bool GetPortInfo(
     PortIdentity identity,
     FVector& portLocation,
     FVector& portForwardVector
   );
-  // bool GetPortInfo(
-  //   int64 moduleId,
-  //   int portId,
-  //   PortType type,
-  //   FVector& portLocation,
-  //   FVector& portForwardVector,
-  //   FRotator& portRotation
-  // );
 
   void UpdateLight(int64_t moduleId, int32 lightId, FLinearColor color);
 
@@ -45,14 +37,19 @@ public:
 private:
   UPROPERTY()
   AOSCController* OSCctrl;
+
+  class Aosc3PlayerController* PlayerController;
   
   float spawnXPositionCursor = 31.f;
   float spawnYPositionCursor = 0.f;
+
+  void SpawnCable(struct VCVCable cable);
+  void ProcessSpawnCableQueue();
+  TArray<VCVCable> cableQueue;
 
   UPROPERTY()
   TMap<int64, class AVCVModule*> ModuleActors;
   UPROPERTY()
   TMap<int64, class AVCVCable*> CableActors;
   
-  class Aosc3PlayerController* PlayerController;
 };

@@ -33,6 +33,7 @@ void Aosc3GameModeBase::BeginPlay() {
 
 void Aosc3GameModeBase::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
+  
 }
 
 void Aosc3GameModeBase::SpawnModule(VCVModule module) {
@@ -56,6 +57,8 @@ void Aosc3GameModeBase::SpawnModule(VCVModule module) {
   a_module->init(module);
 
   spawnXPositionCursor += module.box.size.x / 2;
+
+  ProcessSpawnCableQueue();
 }
 
 void Aosc3GameModeBase::SpawnCable(VCVCable cable) {
@@ -68,6 +71,36 @@ void Aosc3GameModeBase::SpawnCable(VCVCable cable) {
   
   CableActors.Add(cable.id, a_cable);
   a_cable->init(cable);
+  
+  const PortIdentity& inputIdentity = cable.getInputIdentity();
+  const PortIdentity& outputIdentity = cable.getOutputIdentity();
+  ModuleActors[inputIdentity.moduleId]->ConnectCable(inputIdentity, cable.id);
+  ModuleActors[outputIdentity.moduleId]->ConnectCable(outputIdentity, cable.id);
+}
+
+void Aosc3GameModeBase::QueueCableSpawn(VCVCable cable) {
+  cableQueue.Push(cable);
+}
+
+void Aosc3GameModeBase::ProcessSpawnCableQueue() {
+  TArray<VCVCable> spawnedCables;
+
+  for (VCVCable cable : cableQueue) {
+    int64_t inputModuleId = cable.getInputIdentity().moduleId;
+    int64_t outputModuleId = cable.getOutputIdentity().moduleId;
+
+    if (ModuleActors.Contains(inputModuleId) && ModuleActors.Contains(outputModuleId)) {
+      SpawnCable(cable);
+      spawnedCables.Push(cable);
+    } else {
+      UE_LOG(LogTemp, Warning, TEXT("awaiting modules %lld:%lld for cable %lld"), inputModuleId, outputModuleId, cable.id);
+    }
+  }
+
+  for (VCVCable cable : spawnedCables) {
+    cableQueue.RemoveSwap(cable);
+  }
+  spawnedCables.Empty();
 }
 
 void Aosc3GameModeBase::UpdateLight(int64_t moduleId, int32 lightId, FLinearColor color) {

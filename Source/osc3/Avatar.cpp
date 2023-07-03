@@ -123,6 +123,17 @@ void AAvatar::click() {
     if (Cast<AVCVParam>(hitActor)) {
       controlledParam = Cast<AVCVParam>(hitActor);
       controlledParam->engage();
+    } else if (Cast<AVCVPort>(hitActor)) {
+      UE_LOG(LogTemp, Warning, TEXT("clicked port %s"), *hitActor->GetName());
+
+      AVCVPort* clickedPort = Cast<AVCVPort>(hitActor);
+      int64_t cableId = -1;
+
+      if (clickedPort->getCableId(cableId)) {
+        UE_LOG(LogTemp, Warning, TEXT("got cableId %lld"), cableId);
+      } else {
+        UE_LOG(LogTemp, Warning, TEXT("no cable"));
+      }
     }
   }
 }

@@ -142,6 +142,18 @@ struct VCVCable {
     { PortType::Input, PortIdentity(PortType::Input) },
     { PortType::Output, PortIdentity(PortType::Output) }
   };
+  
+  PortIdentity getInputIdentity() {
+    return portIdentities[PortType::Input];
+  }
+
+  PortIdentity getOutputIdentity() {
+    return portIdentities[PortType::Output];
+  }
+  
+  bool operator==(const VCVCable& other) {
+    return id == other.id;
+  }
   // int64_t inputModuleId, outputModuleId;
   // int32 inputPortId, outputPortId;
   
