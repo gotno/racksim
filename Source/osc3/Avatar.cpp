@@ -1,6 +1,7 @@
 #include "Avatar.h"
 
 #include "VCVParam.h"
+#include "VCVPort.h"
 
 #include "Camera/CameraComponent.h"
 #include "GameFramework/FloatingPawnMovement.h"
@@ -26,6 +27,7 @@ void AAvatar::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 
   sweep();
+  drawIndicator();
 
   if (controlledParam) {
     float moveMouseX, moveMouseY;
@@ -34,20 +36,6 @@ void AAvatar::Tick(float DeltaTime) {
     // UE_LOG(LogTemp, Warning, TEXT("controlling param %s, y distance: %f"), *controlledParam->GetActorNameOrLabel(), clickMouseY - moveMouseY);
     controlledParam->alter(clickMouseY - moveMouseY);
   }
-
-  // FTransform transform;
-  // transform.SetIdentity();
-  // FVector translation = GetActorLocation() + cameraComponent->GetForwardVector() * 2.f;
-  // transform.SetTranslation(translation);
-  // transform.SetRotation(cameraComponent->GetForwardVector().Rotation().Quaternion());
-
-  // DrawDebugCircle(
-  //   GetWorld(),
-  //   transform.ToMatrixNoScale(),
-  //   0.05f,
-  //   64,
-  //   FColor(0, 0, 0)
-  // );
 }
 
 void AAvatar::sweep() {
@@ -59,6 +47,34 @@ void AAvatar::sweep() {
     start,
     end,
     ECC_Visibility
+  );
+  
+  if (!hasHit) {
+    hovering = false;
+    return;
+  }
+  
+  AActor* hitActor = hitResult.GetActor();
+  if (Cast<AVCVParam>(hitActor) || Cast<AVCVPort>(hitActor)) {
+    hovering = true;
+  }
+}
+
+void AAvatar::drawIndicator() {
+  FTransform transform;
+  transform.SetIdentity();
+  FVector translation = GetActorLocation() + cameraComponent->GetForwardVector() * 2.f;
+  transform.SetTranslation(translation);
+  transform.SetRotation(cameraComponent->GetForwardVector().Rotation().Quaternion());
+
+  DrawDebugCircle(
+    GetWorld(),
+    transform.ToMatrixNoScale(),
+    0.02f,
+    64,
+    hovering ? indicatorColorHover : indicatorColor,
+    false, -1.f, 0,
+    0.005f
   );
 }
 

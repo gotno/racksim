@@ -27,6 +27,7 @@ private:
   bool hasHit = false;
   float interactDistance = 40.f;
   void sweep();
+  void drawIndicator();
 
   void moveForward(float axisValue);
   void moveRight(float axisValue);
@@ -39,6 +40,11 @@ private:
   
   class AVCVParam* controlledParam;
   bool controllingParam = false;
+  
+  bool hovering = false;
+  
+  FColor indicatorColor{FColor::Black};
+  FColor indicatorColorHover{FColor::Turquoise};
 
   virtual void AddControllerPitchInput(float axisValue) override;
   virtual void AddControllerYawInput(float axisValue) override;
