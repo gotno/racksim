@@ -1,11 +1,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/GameMode.h"
 
 #include "OSCController.h"
-#include "unordered_map"
 
+#include "GameFramework/GameMode.h"
 #include "osc3GameModeBase.generated.h"
 
 UCLASS()
@@ -25,11 +24,13 @@ public:
   void SpawnModule(struct VCVModule module);
   void QueueCableSpawn(VCVCable cable);
 
-  bool GetPortInfo(
+  void GetPortInfo(
     PortIdentity identity,
     FVector& portLocation,
     FVector& portForwardVector
   );
+  class AVCVCable* DetachCable(int64_t cableId, PortIdentity identity);
+  void AttachCable(int64_t cableId, PortIdentity identity);
 
   void UpdateLight(int64_t moduleId, int32 lightId, FLinearColor color);
 
@@ -50,6 +51,6 @@ private:
   UPROPERTY()
   TMap<int64, class AVCVModule*> ModuleActors;
   UPROPERTY()
-  TMap<int64, class AVCVCable*> CableActors;
+  TMap<int64, AVCVCable*> CableActors;
   
 };

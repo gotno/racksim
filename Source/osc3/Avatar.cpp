@@ -2,7 +2,10 @@
 
 #include "VCVParam.h"
 #include "VCVPort.h"
+#include "VCVCable.h"
+#include "osc3GameModeBase.h"
 
+#include "Kismet/GameplayStatics.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/FloatingPawnMovement.h"
 
@@ -20,7 +23,7 @@ AAvatar::AAvatar() {
 
 void AAvatar::BeginPlay() {
 	Super::BeginPlay();
-  
+  gameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(this));
 }
 
 void AAvatar::Tick(float DeltaTime) {
@@ -35,6 +38,30 @@ void AAvatar::Tick(float DeltaTime) {
 
     // UE_LOG(LogTemp, Warning, TEXT("controlling param %s, y distance: %f"), *controlledParam->GetActorNameOrLabel(), clickMouseY - moveMouseY);
     controlledParam->alter(clickMouseY - moveMouseY);
+  }
+  
+  // this is terrible :D
+  if (controlledCable) {
+    // UE_LOG(LogTemp, Warning, TEXT("controlling cable %s"), *controlledCable->GetName());
+    if (hasHit) {
+      AVCVPort* port = Cast<AVCVPort>(hitActor);
+      if (port && port->canConnect(controlledCable->getHangingType())) {
+        FVector location, direction;
+        gameMode->GetPortInfo(port->getIdentity(), location, direction);
+        controlledCable->setHangingLocation(location, direction);
+      } else {
+        controlledCable->setHangingLocation(
+          GetActorLocation() + cameraComponent->GetForwardVector() * 10.f,
+          -cameraComponent->GetForwardVector()
+        );
+      }
+    } else {
+      controlledCable->disconnectFrom(controlledCable->getHangingType());
+      controlledCable->setHangingLocation(
+        GetActorLocation() + cameraComponent->GetForwardVector() * 10.f,
+        -cameraComponent->GetForwardVector()
+      );
+    }
   }
 }
 
@@ -51,10 +78,11 @@ void AAvatar::sweep() {
   
   if (!hasHit) {
     hovering = false;
+    hitActor = nullptr;
     return;
   }
-  
-  AActor* hitActor = hitResult.GetActor();
+
+  hitActor = hitResult.GetActor();
   if (Cast<AVCVParam>(hitActor) || Cast<AVCVPort>(hitActor)) {
     hovering = true;
   }
@@ -116,23 +144,19 @@ void AAvatar::moveUp(float axisValue) {
 
 void AAvatar::click() {
   if (hasHit) {
-    AActor* hitActor = hitResult.GetActor();
-    
     Cast<APlayerController>(Controller)->GetMousePosition(clickMouseX, clickMouseY);
     
     if (Cast<AVCVParam>(hitActor)) {
       controlledParam = Cast<AVCVParam>(hitActor);
       controlledParam->engage();
-    } else if (Cast<AVCVPort>(hitActor)) {
-      UE_LOG(LogTemp, Warning, TEXT("clicked port %s"), *hitActor->GetName());
-
+    }
+    
+    if (Cast<AVCVPort>(hitActor)) {
       AVCVPort* clickedPort = Cast<AVCVPort>(hitActor);
       int64_t cableId = -1;
 
       if (clickedPort->getCableId(cableId)) {
-        UE_LOG(LogTemp, Warning, TEXT("got cableId %lld"), cableId);
-      } else {
-        UE_LOG(LogTemp, Warning, TEXT("no cable"));
+        controlledCable = gameMode->DetachCable(cableId, clickedPort->getIdentity());
       }
     }
   }
@@ -144,6 +168,16 @@ void AAvatar::release() {
     controlledParam = nullptr;
     clickMouseX = 0.f;
     clickMouseY = 0.f;
+  }
+
+  if (controlledCable) {
+    if (hasHit) {
+      AVCVPort* port = Cast<AVCVPort>(hitActor);
+      if (port && port->canConnect(controlledCable->getHangingType())) {
+        gameMode->AttachCable(controlledCable->getId(), port->getIdentity());
+      }
+    }
+    controlledCable = nullptr;
   }
 }
 

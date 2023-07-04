@@ -22,7 +22,7 @@ public:
   void init(VCVModule model);
   
   void GetPortInfo(PortIdentity identity, FVector& portLocation, FVector& portForwardVector);
-  void ConnectCable(const PortIdentity& identity, int64_t cableId);
+  void AttachCable(const PortIdentity& identity, int64_t cableId);
   void UpdateLight(int32 lightId, FLinearColor color);
 
   UPROPERTY()

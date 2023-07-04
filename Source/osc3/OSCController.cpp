@@ -214,7 +214,7 @@ void AOSCController::AddInput(const FOSCAddress& AddressPattern, const FOSCMessa
 
   int32 inputId;
   UOSCManager::GetInt32(message, 1, inputId);
-  Modules[moduleId].Inputs.Add(inputId, VCVPort(inputId, PortType::Input));
+  Modules[moduleId].Inputs.Add(inputId, VCVPort(inputId, PortType::Input, moduleId));
   VCVPort& input = Modules[moduleId].Inputs[inputId];
 
   UOSCManager::GetString(message, 2, input.name);
@@ -236,7 +236,7 @@ void AOSCController::AddOutput(const FOSCAddress& AddressPattern, const FOSCMess
 
   int32 outputId;
   UOSCManager::GetInt32(message, 1, outputId);
-  Modules[moduleId].Outputs.Add(outputId, VCVPort(outputId, PortType::Output));
+  Modules[moduleId].Outputs.Add(outputId, VCVPort(outputId, PortType::Output, moduleId));
   VCVPort& output = Modules[moduleId].Outputs[outputId];
 
   UOSCManager::GetString(message, 2, output.name);

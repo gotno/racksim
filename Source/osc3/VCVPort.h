@@ -1,5 +1,6 @@
 #pragma once
 
+#include "VCV.h"
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "VCVPort.generated.h"
@@ -20,6 +21,8 @@ public:
   
   void addCableId(int64_t cableId);
   bool getCableId(int64_t& cableId);
+  PortIdentity getIdentity();
+  bool canConnect(PortType type);
 
 private:
   UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))

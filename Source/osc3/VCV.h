@@ -94,22 +94,37 @@ enum PortType {
 };
 struct PortIdentity {
   PortType type;
-  int64_t moduleId;
-  int32 portId;
+  int64_t moduleId = -1;
+  int32 portId = -1;
+  
+  void nullify() {
+    moduleId = -1;
+    portId = -1;
+  }
+
+  bool isNull() {
+    return moduleId == -1 && portId == -1;
+  }
 
   PortIdentity() {}
   PortIdentity(PortType _type) : type(_type) {}
+  PortIdentity(PortType _type, int64_t _moduleId, int32 _portId) : type(_type), moduleId(_moduleId), portId(_portId) {}
 };
 struct VCVPort {
   int32 id;
   PortType type;
-  // PortIdentity identity;
+  int64_t moduleId;
   FString name;
   FString description;
   Rect box;
+
+  PortIdentity getIdentity() {
+    return PortIdentity(type, moduleId, id);
+  }
   
   VCVPort() {}
   VCVPort(int32 _id, PortType _type) : id(_id), type(_type) {}
+  VCVPort(int32 _id, PortType _type, int64_t _moduleId) : id(_id), type(_type), moduleId(_moduleId) {}
 };
 
 struct VCVDisplay {
@@ -143,19 +158,17 @@ struct VCVCable {
     { PortType::Output, PortIdentity(PortType::Output) }
   };
   
-  PortIdentity getInputIdentity() {
-    return portIdentities[PortType::Input];
+  PortIdentity getIdentity(PortType type) {
+    return portIdentities[type];
   }
 
-  PortIdentity getOutputIdentity() {
-    return portIdentities[PortType::Output];
+  void nullifyIdentity(PortType type) {
+    portIdentities[type].nullify();
   }
   
   bool operator==(const VCVCable& other) {
     return id == other.id;
   }
-  // int64_t inputModuleId, outputModuleId;
-  // int32 inputPortId, outputPortId;
   
   VCVCable() {}
   VCVCable(int64_t _id) : id(_id) {}

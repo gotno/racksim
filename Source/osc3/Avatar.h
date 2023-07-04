@@ -23,7 +23,10 @@ private:
   UPROPERTY(EditAnywhere)
   class UFloatingPawnMovement* movementComponent;
   
+  class Aosc3GameModeBase* gameMode;
+  
   FHitResult hitResult;
+  AActor* hitActor;
   bool hasHit = false;
   float interactDistance = 40.f;
   void sweep();
@@ -39,7 +42,7 @@ private:
   float clickMouseY;
   
   class AVCVParam* controlledParam;
-  bool controllingParam = false;
+  class AVCVCable* controlledCable;
   
   bool hovering = false;
   

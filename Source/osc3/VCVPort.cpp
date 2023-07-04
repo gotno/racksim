@@ -60,3 +60,13 @@ bool AVCVPort::getCableId(int64_t& cableId) {
   cableId = cableIds.Pop();
   return true;
 }
+
+bool AVCVPort::canConnect(PortType type) {
+  if (type != model->type) return false;
+  if (model->type == PortType::Input && cableIds.Num() != 0) return false;
+  return true;
+}
+
+PortIdentity AVCVPort::getIdentity() {
+  return model->getIdentity();
+}

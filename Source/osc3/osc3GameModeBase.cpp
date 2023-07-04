@@ -72,10 +72,10 @@ void Aosc3GameModeBase::SpawnCable(VCVCable cable) {
   CableActors.Add(cable.id, a_cable);
   a_cable->init(cable);
   
-  const PortIdentity& inputIdentity = cable.getInputIdentity();
-  const PortIdentity& outputIdentity = cable.getOutputIdentity();
-  ModuleActors[inputIdentity.moduleId]->ConnectCable(inputIdentity, cable.id);
-  ModuleActors[outputIdentity.moduleId]->ConnectCable(outputIdentity, cable.id);
+  const PortIdentity& inputIdentity = cable.getIdentity(PortType::Input);
+  const PortIdentity& outputIdentity = cable.getIdentity(PortType::Output);
+  ModuleActors[inputIdentity.moduleId]->AttachCable(inputIdentity, cable.id);
+  ModuleActors[outputIdentity.moduleId]->AttachCable(outputIdentity, cable.id);
 }
 
 void Aosc3GameModeBase::QueueCableSpawn(VCVCable cable) {
@@ -86,8 +86,8 @@ void Aosc3GameModeBase::ProcessSpawnCableQueue() {
   TArray<VCVCable> spawnedCables;
 
   for (VCVCable cable : cableQueue) {
-    int64_t inputModuleId = cable.getInputIdentity().moduleId;
-    int64_t outputModuleId = cable.getOutputIdentity().moduleId;
+    int64_t inputModuleId = cable.getIdentity(PortType::Input).moduleId;
+    int64_t outputModuleId = cable.getIdentity(PortType::Output).moduleId;
 
     if (ModuleActors.Contains(inputModuleId) && ModuleActors.Contains(outputModuleId)) {
       SpawnCable(cable);
@@ -103,18 +103,34 @@ void Aosc3GameModeBase::ProcessSpawnCableQueue() {
   spawnedCables.Empty();
 }
 
+AVCVCable* Aosc3GameModeBase::DetachCable(int64_t cableId, PortIdentity identity) {
+  // send destroy cable
+  AVCVCable* cable = CableActors[cableId];
+  cable->disconnectFrom(identity);
+  
+  return cable;
+}
+
+void Aosc3GameModeBase::AttachCable(int64_t cableId, PortIdentity identity) {
+  // destroy cable actor & send create cable
+  // 
+  // but in the meantime,
+  CableActors[cableId]->connectTo(identity);
+  ModuleActors[identity.moduleId]->AttachCable(identity, cableId);
+}
+
 void Aosc3GameModeBase::UpdateLight(int64_t moduleId, int32 lightId, FLinearColor color) {
   if (ModuleActors.Contains(moduleId)) {
     ModuleActors[moduleId]->UpdateLight(lightId, color);
   }
 }
 
-bool Aosc3GameModeBase::GetPortInfo(PortIdentity identity, FVector& portLocation, FVector& portForwardVector) {
-  if (!ModuleActors.Contains(identity.moduleId)) return false;
+void Aosc3GameModeBase::GetPortInfo(PortIdentity identity, FVector& portLocation, FVector& portForwardVector) {
+  // if (!ModuleActors.Contains(identity.moduleId)) return false;
 
   AVCVModule* module = ModuleActors[identity.moduleId];
   module->GetPortInfo(identity, portLocation, portForwardVector);
-  return true;
+  // return true;
 }
 
 void Aosc3GameModeBase::SendParamUpdate(int64_t moduleId, int32 paramId, float value) {

@@ -20,6 +20,11 @@ public:
 
   void draw();
   void init(VCVCable model);
+  void disconnectFrom(PortIdentity identity);
+  void connectTo(PortIdentity identity);
+  void setHangingLocation(FVector hangingLocation, FVector hangingForwardVector);
+  PortType getHangingType();
+  int64_t getId();
   
 private:
   // bool drawn = false;
@@ -28,4 +33,7 @@ private:
   float plugRadius = 0.2f;
   float lineWeight = 0.05f;
   FColor cableColor = FColor::MakeRandomColor();
+  
+  FVector hangingLocation, hangingForwardVector;
+  PortType hangingType;
 };
