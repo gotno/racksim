@@ -5,7 +5,7 @@
 #include "OSCManager.h"
 
 AOSCController::AOSCController() {
-  OSCClient = UOSCManager::CreateOSCClient("192.168.86.46", 7000, TEXT("OSCCtrlClient"), this);
+  OSCClient = UOSCManager::CreateOSCClient("127.0.0.1", 7000, TEXT("OSCCtrlClient"), this);
   OSCServer = UOSCManager::CreateOSCServer("127.0.0.1", 7001, false, false, TEXT("OSCCtrlServer"), this);
 }
 
