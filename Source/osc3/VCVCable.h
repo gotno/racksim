@@ -25,6 +25,7 @@ public:
   void setHangingLocation(FVector hangingLocation, FVector hangingForwardVector);
   PortType getHangingType();
   int64_t getId();
+  VCVCable getModel();
   
 private:
   // bool drawn = false;

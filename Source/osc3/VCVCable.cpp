@@ -22,13 +22,11 @@ void AVCVCable::init(VCVCable vcv_cable) {
 
 void AVCVCable::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
-
   draw();
 }
 
 void AVCVCable::disconnectFrom(PortIdentity identity) {
   model.nullifyIdentity(identity.type);
-  hangingType = identity.type;
 }
 
 void AVCVCable::connectTo(PortIdentity identity) {
@@ -43,18 +41,21 @@ void AVCVCable::setHangingLocation(FVector _hangingLocation, FVector _hangingFor
 }
 
 PortType AVCVCable::getHangingType() {
-  return hangingType;
+  if (model.portIdentities[PortType::Input].isNull()) return PortType::Input;
+  return PortType::Output;
 }
 
 int64_t AVCVCable::getId() {
   return model.id;
 }
 
+VCVCable AVCVCable::getModel() {
+  return model;
+}
+
 void AVCVCable::draw() {
-  if (model.id == -1) return;
   Aosc3GameModeBase* gameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
 
-  // bool inputModulePresent, outputModulePresent;
   FVector inputLocation, outputLocation, inputForwardVector, outputForwardVector;
 
   if (model.portIdentities[PortType::Input].isNull()) {
@@ -62,7 +63,6 @@ void AVCVCable::draw() {
     inputLocation = hangingLocation;
     inputForwardVector = hangingForwardVector;
   } else {
-  // inputModulePresent =
     // UE_LOG(LogTemp, Warning, TEXT("input not nullified"));
     gameMode->GetPortInfo(
       model.portIdentities[PortType::Input],
@@ -76,20 +76,12 @@ void AVCVCable::draw() {
     outputForwardVector = hangingForwardVector;
   } else {
     // UE_LOG(LogTemp, Warning, TEXT("output not nullified"));
-  // outputModulePresent =
     gameMode->GetPortInfo(
       model.portIdentities[PortType::Output],
       outputLocation,
       outputForwardVector
     );
   }
-  
-  // if (!inputModulePresent || !outputModulePresent) {
-  //   // UE_LOG(LogTemp, Warning, TEXT("module missing for cable %lld"), model.id);
-  //   return;
-  // } else {
-  //   // UE_LOG(LogTemp, Warning, TEXT("module found for cable %lld"), model.id);
-  // }
 
   FTransform inputTransform, outputTransform;
   inputTransform.SetIdentity();
@@ -104,6 +96,8 @@ void AVCVCable::draw() {
   inputTransform.SetRotation(inputForwardVector.Rotation().Quaternion());
   outputTransform.SetTranslation(outputTranslation);
   outputTransform.SetRotation(outputForwardVector.Rotation().Quaternion());
+
+  if (model.id == -1) cableColor = FColor::Black;
 
   DrawDebugCircle(
     GetWorld(),

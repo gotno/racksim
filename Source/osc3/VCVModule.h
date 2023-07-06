@@ -23,6 +23,7 @@ public:
   
   void GetPortInfo(PortIdentity identity, FVector& portLocation, FVector& portForwardVector);
   void AttachCable(const PortIdentity& identity, int64_t cableId);
+  void DetachCable(const PortIdentity& identity, int64_t cableId);
   void UpdateLight(int32 lightId, FLinearColor color);
 
   UPROPERTY()

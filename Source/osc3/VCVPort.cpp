@@ -55,6 +55,10 @@ void AVCVPort::addCableId(int64_t cableId) {
   cableIds.Push(cableId);
 }
 
+void AVCVPort::removeCableId(int64_t cableId) {
+  cableIds.Remove(cableId);
+}
+
 bool AVCVPort::getCableId(int64_t& cableId) {
   if (cableIds.Num() == 0) return false;
   cableId = cableIds.Pop();
@@ -63,8 +67,12 @@ bool AVCVPort::getCableId(int64_t& cableId) {
 
 bool AVCVPort::canConnect(PortType type) {
   if (type != model->type) return false;
-  if (model->type == PortType::Input && cableIds.Num() != 0) return false;
+  if (model->type == PortType::Input && hasCables()) return false;
   return true;
+}
+
+bool AVCVPort::hasCables() {
+  return cableIds.Num() > 0;
 }
 
 PortIdentity AVCVPort::getIdentity() {

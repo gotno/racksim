@@ -138,6 +138,27 @@ void AOSCController::SendParamUpdate(int64 moduleId, int paramId, float value) {
   OSCClient->SendOSCMessage(message);
 }
 
+void AOSCController::CreateCable(int64 inputModuleId, int64 outputModuleId, int inputPortId, int outputPortId) {
+  FOSCAddress address = UOSCManager::ConvertStringToOSCAddress(FString(TEXT("/create/cable")));
+  FOSCMessage message;
+  UOSCManager::SetOSCMessageAddress(message, address);
+  UOSCManager::AddInt64(message, inputModuleId);
+  UOSCManager::AddInt64(message, outputModuleId);
+  UOSCManager::AddInt32(message, inputPortId);
+  UOSCManager::AddInt32(message, outputPortId);
+
+  OSCClient->SendOSCMessage(message);
+}
+
+void AOSCController::DestroyCable(int64 cableId) {
+  FOSCAddress address = UOSCManager::ConvertStringToOSCAddress(FString(TEXT("/destroy/cable")));
+  FOSCMessage message;
+  UOSCManager::SetOSCMessageAddress(message, address);
+  UOSCManager::AddInt64(message, cableId);
+  
+  OSCClient->SendOSCMessage(message);
+}
+
 bool AOSCController::ModuleGuard(const FOSCMessage &message, int64_t &moduleId) {
   UOSCManager::GetInt64(message, 0, moduleId);
 

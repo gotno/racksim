@@ -21,8 +21,10 @@ public:
   
   void addCableId(int64_t cableId);
   bool getCableId(int64_t& cableId);
+  void removeCableId(int64_t cableId);
   PortIdentity getIdentity();
   bool canConnect(PortType type);
+  bool hasCables();
 
 private:
   UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))

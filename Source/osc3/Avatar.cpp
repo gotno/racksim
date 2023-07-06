@@ -157,6 +157,12 @@ void AAvatar::click() {
 
       if (clickedPort->getCableId(cableId)) {
         controlledCable = gameMode->DetachCable(cableId, clickedPort->getIdentity());
+        UE_LOG(LogTemp, Warning, TEXT("got cable %lld"), cableId);
+      } else {
+        UE_LOG(LogTemp, Warning, TEXT("spawning new cable"));
+        VCVCable cable(cableId);
+        cable.setIdentity(clickedPort->getIdentity());
+        controlledCable = gameMode->SpawnCable(cable);
       }
     }
   }
@@ -175,7 +181,11 @@ void AAvatar::release() {
       AVCVPort* port = Cast<AVCVPort>(hitActor);
       if (port && port->canConnect(controlledCable->getHangingType())) {
         gameMode->AttachCable(controlledCable->getId(), port->getIdentity());
+      } else {
+        gameMode->DestroyCable(controlledCable->getId());
       }
+    } else {
+      gameMode->DestroyCable(controlledCable->getId());
     }
     controlledCable = nullptr;
   }

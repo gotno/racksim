@@ -29,7 +29,9 @@ public:
     FVector& portLocation,
     FVector& portForwardVector
   );
-  class AVCVCable* DetachCable(int64_t cableId, PortIdentity identity);
+  class AVCVCable* SpawnCable(struct VCVCable cable);
+  void DestroyCable(int64_t cableId);
+  AVCVCable* DetachCable(int64_t cableId, PortIdentity identity);
   void AttachCable(int64_t cableId, PortIdentity identity);
 
   void UpdateLight(int64_t moduleId, int32 lightId, FLinearColor color);
@@ -44,7 +46,6 @@ private:
   float spawnXPositionCursor = 31.f;
   float spawnYPositionCursor = 0.f;
 
-  void SpawnCable(struct VCVCable cable);
   void ProcessSpawnCableQueue();
   TArray<VCVCable> cableQueue;
 

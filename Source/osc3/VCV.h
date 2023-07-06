@@ -158,6 +158,10 @@ struct VCVCable {
     { PortType::Output, PortIdentity(PortType::Output) }
   };
   
+  void setIdentity(PortIdentity identity) {
+    portIdentities[identity.type] = identity;
+  }
+
   PortIdentity getIdentity(PortType type) {
     return portIdentities[type];
   }

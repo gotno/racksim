@@ -70,6 +70,14 @@ void AVCVModule::AttachCable(const PortIdentity& identity, int64_t cableId) {
   }
 }
 
+void AVCVModule::DetachCable(const PortIdentity& identity, int64_t cableId) {
+  if (identity.type == PortType::Input) {
+    InputActors[identity.portId]->removeCableId(cableId);
+  } else {
+    OutputActors[identity.portId]->removeCableId(cableId);
+  }
+}
+
 void AVCVModule::UpdateLight(int32 lightId, FLinearColor color) {
   if (LightActors.Contains(lightId)) {
     LightActors[lightId]->SetEmissiveColor(color);
