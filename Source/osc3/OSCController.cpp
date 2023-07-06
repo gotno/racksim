@@ -118,7 +118,7 @@ void AOSCController::NotifyReceived(FString type, int64 outerId, int innerId) {
 
 void AOSCController::NotifyResync() {
   UE_LOG(LogTemp, Warning, TEXT("Sending NotifyResync"));
-  FOSCAddress address = UOSCManager::ConvertStringToOSCAddress(FString(TEXT("/resync")));
+  FOSCAddress address = UOSCManager::ConvertStringToOSCAddress(FString(TEXT("/sync")));
   FOSCMessage message;
   UOSCManager::SetOSCMessageAddress(message, address);
 
