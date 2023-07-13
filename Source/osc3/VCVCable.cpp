@@ -1,5 +1,6 @@
-#include "VCV.h"
 #include "VCVCable.h"
+
+#include "VCV.h"
 #include "osc3GameModeBase.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"

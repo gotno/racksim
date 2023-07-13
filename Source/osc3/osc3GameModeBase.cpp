@@ -98,8 +98,6 @@ void Aosc3GameModeBase::DestroyCable(int64_t cableId) {
 
   CableActors[cableId]->Destroy();
   CableActors.Remove(cableId);
-
-  // if (cableId != -1) OSCctrl->DestroyCable(cableId);
 }
 
 void Aosc3GameModeBase::QueueCableSpawn(VCVCable cable) {

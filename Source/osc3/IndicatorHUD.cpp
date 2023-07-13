@@ -19,7 +19,7 @@ void AIndicatorHUD::DrawHUD() {
       center.Y - (crosshair->GetSurfaceHeight() * 0.5f)
   );
   
-  FCanvasTileItem tileItem(crosshairPosition, crosshair->Resource, FLinearColor::White);
+  FCanvasTileItem tileItem(crosshairPosition, crosshair->GetResource(), FLinearColor::White);
   tileItem.BlendMode = SE_BLEND_Translucent;
   Canvas->DrawItem(tileItem);
 }
