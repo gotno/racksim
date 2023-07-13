@@ -36,6 +36,9 @@ public:
   
 private:
   UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+  USceneComponent* SceneComponent;
+
+  UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
   UStaticMeshComponent* StaticMeshComponent;
   
   UPROPERTY()

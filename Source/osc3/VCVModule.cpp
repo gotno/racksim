@@ -14,9 +14,12 @@
 AVCVModule::AVCVModule() {
 	PrimaryActorTick.bCanEverTick = true;
 
+  SceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
+  RootComponent = SceneComponent;
+
   StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Static Mesh"));
-  RootComponent = StaticMeshComponent;
   StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+  StaticMeshComponent->SetupAttachment(RootComponent);
   
   static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshBody(TEXT("/Script/Engine.StaticMesh'/Game/meshes/unit_module.unit_module'"));
   
@@ -46,7 +49,7 @@ void AVCVModule::Tick(float DeltaTime) {
 
 void AVCVModule::init(VCVModule vcv_module) {
   model = vcv_module; 
-  SetActorScale3D(FVector(1, model.box.size.x, model.box.size.y));
+  StaticMeshComponent->SetWorldScale3D(FVector(1, model.box.size.x, model.box.size.y));
   spawnComponents();
   SetActorRotation(FRotator(-8.f, 0, 0));
 }
