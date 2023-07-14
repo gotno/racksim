@@ -3,16 +3,25 @@
 #include "Blueprint/WidgetTree.h"
 
 #include "DefinitivePainter/Public/Canvas/DPCanvas.h"
-#include "Components/CanvasPanel.h"
-#include "Components/CanvasPanelSlot.h"
 #include "DefinitivePainter/Public/SVG/Importer/DPSVGImporter.h"
 #include "DefinitivePainter/Public/Widgets/DPSVG.h"
 #include "DefinitivePainter/Public/SVG/DPSVGAsset.h"
 
+#include "DefinitivePainter/Public/SVG/Tree/DPSVGRoot.h"
+#include "DefinitivePainter/Public/SVG/Tree/DPSVGElement.h"
+#include "DefinitivePainter/Public/SVG/Tree/DPSVGPaint.h"
+
 void USVGWidget::NativeOnInitialized() {
+  if (dpCanvas) return;
   Super::NativeOnInitialized();
 
   dpCanvas = WidgetTree->ConstructWidget<UDPCanvas>();
+
+  // without this,
+  // LogTemp: Error: Definitive Painter Context runtime error: Invalid window (BeginRendering)
+  // Private/Context/Base/DPContextGPU.cpp:L153
+  dpCanvas->EnableGPUAcceleration = false;
+
   dpCanvas->OneTimeRender = true;
   dpCanvas->ClearColor = FLinearColor(0, 0, 0, 1);
 
@@ -20,18 +29,15 @@ void USVGWidget::NativeOnInitialized() {
   svgAsset = NewObject<UDPSVGAsset>(this, UDPSVGAsset::StaticClass());
   svgWidget->SVG = svgAsset;
 
-  canvasPanel = NewObject<UCanvasPanel>(this, UCanvasPanel::StaticClass());
-  UCanvasPanelSlot* slot = canvasPanel->AddChildToCanvas(svgWidget);
-  slot->SetAnchors(FAnchors(0.f, 0.f, 1.f, 1.f));
-  slot->SetOffsets(FMargin(0.f, 0.f));
-  dpCanvas->AddChild(canvasPanel);
+  dpCanvas->AddChild(svgWidget);
 
   WidgetTree->RootWidget = dpCanvas;
 }
 
-void USVGWidget::SetSVG(FString path) {
+FLinearColor USVGWidget::SetSVG(FString path) {
   FDPSVGImporter importer;
   importer.PerformImport(path, svgAsset);
   Super::NativeOnInitialized();
-  svgAsset->GetImageSize();
+
+  return svgAsset->GetRootElement()->Paint.FillColor;
 }

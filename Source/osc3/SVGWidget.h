@@ -5,7 +5,6 @@
 #include "SVGWidget.generated.h"
 
 class UDPCanvas;
-class UCanvasPanel;
 class UDPSVG;
 class UDPSVGAsset;
 
@@ -17,11 +16,10 @@ protected:
   virtual void NativeOnInitialized() override;
 
 public:
-  void SetSVG(FString path);
+  FLinearColor SetSVG(FString path);
 
 private:
   UDPCanvas* dpCanvas = nullptr;
-  UCanvasPanel* canvasPanel;
   UDPSVG* svgWidget;
   UDPSVGAsset* svgAsset;
 };
