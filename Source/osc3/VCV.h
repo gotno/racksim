@@ -139,6 +139,7 @@ struct VCVModule {
   FString name;
   FString description;
   Rect box;
+  FString panelSvgPath;
 
   TMap<int32, VCVParam> Params;
   TMap<int32, VCVPort> Inputs;
@@ -147,8 +148,8 @@ struct VCVModule {
   std::vector<VCVDisplay> Displays;
 
 	VCVModule() {}
-  VCVModule(int64_t moduleId, FString moduleName, FString modelDescription, Rect panelBox)
-    : id(moduleId), name(moduleName), description(modelDescription), box(panelBox) {}
+  VCVModule(int64_t moduleId, FString moduleName, FString modelDescription, Rect panelBox, FString svgPath)
+    : id(moduleId), name(moduleName), description(modelDescription), box(panelBox), panelSvgPath(svgPath) {}
 };
 
 struct VCVCable {

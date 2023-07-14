@@ -95,11 +95,15 @@ void AOSCController::AddModule(const FOSCAddress& AddressPattern, const FOSCMess
   UOSCManager::GetFloat(message, 5, box.size.x);
   UOSCManager::GetFloat(message, 6, box.size.y);
   
+  FString panelSvgPath;
+  UOSCManager::GetString(message, 7, panelSvgPath);
+  
   Modules.Add(moduleId, VCVModule(
       moduleId,
       name,
       description,
-      box
+      box,
+      panelSvgPath
   ));
   
   NotifyReceived("module", moduleId);
