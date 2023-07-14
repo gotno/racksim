@@ -117,6 +117,7 @@ struct VCVPort {
   FString name;
   FString description;
   Rect box;
+  FString svgPath;
 
   PortIdentity getIdentity() {
     return PortIdentity(type, moduleId, id);

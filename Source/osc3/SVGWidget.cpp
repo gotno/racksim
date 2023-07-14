@@ -11,6 +11,9 @@
 #include "DefinitivePainter/Public/SVG/Tree/DPSVGElement.h"
 #include "DefinitivePainter/Public/SVG/Tree/DPSVGPaint.h"
 
+#include "osc3GameModeBase.h"
+#include "Kismet/GameplayStatics.h"
+
 void USVGWidget::NativeOnInitialized() {
   if (dpCanvas) return;
   Super::NativeOnInitialized();
@@ -26,8 +29,6 @@ void USVGWidget::NativeOnInitialized() {
   dpCanvas->ClearColor = FLinearColor(0, 0, 0, 1);
 
   svgWidget = NewObject<UDPSVG>(this, UDPSVG::StaticClass());
-  svgAsset = NewObject<UDPSVGAsset>(this, UDPSVGAsset::StaticClass());
-  svgWidget->SVG = svgAsset;
 
   dpCanvas->AddChild(svgWidget);
 
@@ -35,9 +36,10 @@ void USVGWidget::NativeOnInitialized() {
 }
 
 FLinearColor USVGWidget::SetSVG(FString path) {
-  FDPSVGImporter importer;
-  importer.PerformImport(path, svgAsset);
+  Aosc3GameModeBase* gm = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(this));
+  svgWidget->SVG = gm->GetSVGAsset(path);
+
   Super::NativeOnInitialized();
 
-  return svgAsset->GetRootElement()->Paint.FillColor;
+  return svgWidget->SVG->GetRootElement()->Paint.FillColor;
 }

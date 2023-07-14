@@ -12,6 +12,8 @@
 
 #include "IndicatorHUD.h"
 
+#include "DefinitivePainter/Public/SVG/DPSVGAsset.h"
+
 #include "Kismet/GameplayStatics.h"
 
 Aosc3GameModeBase::Aosc3GameModeBase() {
@@ -172,4 +174,17 @@ void Aosc3GameModeBase::GetPortInfo(PortIdentity identity, FVector& portLocation
 
 void Aosc3GameModeBase::SendParamUpdate(int64_t moduleId, int32 paramId, float value) {
   OSCctrl->SendParamUpdate(moduleId, paramId, value);
+}
+
+void Aosc3GameModeBase::RegisterSVG(FString filepath) {
+  if (SVGAssets.Contains(filepath)) return;
+  UE_LOG(LogTemp, Warning, TEXT("importing svg %s"), *filepath);
+
+  UDPSVGAsset* svgAsset = NewObject<UDPSVGAsset>(this, UDPSVGAsset::StaticClass());
+  SVGImporter.PerformImport(filepath, svgAsset);
+  SVGAssets.Add(filepath, svgAsset);
+}
+
+UDPSVGAsset* Aosc3GameModeBase::GetSVGAsset(FString filepath) {
+  return SVGAssets[filepath];
 }
