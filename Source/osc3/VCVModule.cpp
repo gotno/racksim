@@ -1,4 +1,6 @@
 #include "VCVModule.h"
+
+#include "osc3GameModeBase.h"
 #include "VCVLight.h"
 #include "VCVKnob.h"
 #include "VCVButton.h"
@@ -6,7 +8,9 @@
 #include "VCVSlider.h"
 #include "VCVPort.h"
 #include "VCVDisplay.h"
-#include "osc3GameModeBase.h"
+
+#include "SVGWidget.h"
+#include "Components/WidgetComponent.h"
 
 #include "Kismet/GameplayStatics.h"
 #include "UObject/ConstructorHelpers.h"
@@ -30,6 +34,20 @@ AVCVModule::AVCVModule() {
   if (Material.Object) {
     MaterialInterface = Cast<UMaterial>(Material.Object);
   }
+
+  static ConstructorHelpers::FObjectFinder<UMaterial> WidgetMaterial(TEXT("/Script/Engine.Material'/Game/materials/SVGMaterial.SVGMaterial'"));
+
+  if (WidgetMaterial.Object) {
+    UE_LOG(LogTemp, Warning, TEXT("WidgetMaterialObject"));
+    WidgetMaterialInterface = Cast<UMaterial>(WidgetMaterial.Object);
+  }
+  
+  WidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("Widget Component"));
+  WidgetComponent->SetupAttachment(RootComponent);
+  WidgetComponent->SetPivot(FVector2D(0.5f, 0.5f));
+  WidgetComponent->SetWidgetClass(USVGWidget::StaticClass());
+  WidgetComponent->SetWorldLocation(StaticMeshComponent->GetComponentLocation() - FVector(0.01f, 0, 0));
+  WidgetComponent->SetWorldRotation(FRotator(0, 180.f, 0));
 }
 
 void AVCVModule::BeginPlay() {
@@ -38,6 +56,10 @@ void AVCVModule::BeginPlay() {
   if (MaterialInterface) {
     MaterialInstance = UMaterialInstanceDynamic::Create(MaterialInterface, this);
     StaticMeshComponent->SetMaterial(0, MaterialInstance);
+  }
+
+  if (WidgetMaterialInterface) {
+    WidgetComponent->SetMaterial(0, WidgetMaterialInterface);
   }
   
   gameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(this));
@@ -49,9 +71,20 @@ void AVCVModule::Tick(float DeltaTime) {
 
 void AVCVModule::init(VCVModule vcv_module) {
   model = vcv_module; 
+
   StaticMeshComponent->SetWorldScale3D(FVector(1, model.box.size.x, model.box.size.y));
+  setPanelSVG();
   spawnComponents();
   SetActorRotation(FRotator(-8.f, 0, 0));
+}
+
+void AVCVModule::setPanelSVG() {
+  USVGWidget* panelWidget = Cast<USVGWidget>(WidgetComponent->GetWidget());
+  FLinearColor moduleColor = panelWidget->SetSVG(model.panelSvgPath);
+  MaterialInstance->SetVectorParameterValue(TEXT("Color"), moduleColor);
+
+  WidgetComponent->SetDrawSize(FVector2D(model.box.size.x, model.box.size.y) * drawSizeScale);
+  WidgetComponent->SetWorldScale3D(FVector(1, 1, 1) / drawSizeScale);
 }
 
 void AVCVModule::GetPortInfo(PortIdentity identity, FVector& portLocation, FVector& portForwardVector) {

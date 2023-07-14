@@ -40,19 +40,23 @@ private:
 
   UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
   UStaticMeshComponent* StaticMeshComponent;
-  
   UPROPERTY()
   UStaticMesh* StaticMesh;
-  
   UPROPERTY()
   UMaterialInstanceDynamic* MaterialInstance;
-
   UPROPERTY()
   UMaterialInterface* MaterialInterface;
 
+  UPROPERTY(VisibleAnywhere)
+  class UWidgetComponent* WidgetComponent;
+  UPROPERTY()
+  UMaterialInterface* WidgetMaterialInterface;
+
   void spawnComponents();
+  void setPanelSVG();
 
   VCVModule model;
+  float drawSizeScale{150.f};
   
   class Aosc3GameModeBase* gameMode;
 
