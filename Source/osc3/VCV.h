@@ -80,6 +80,10 @@ struct VCVParam {
 
   TMap<int32, VCVLight> Lights;
   int32 frameCount;
+  FString svgPath;
+  FString handleSvgPath;
+  FString backgroundSvgPath;
+  FString foregroundSvgPath;
   
   // internal operations, not useful?
   // float displayBase;

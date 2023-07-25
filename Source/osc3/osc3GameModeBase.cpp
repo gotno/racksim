@@ -2,18 +2,15 @@
 #include "osc3PlayerController.h"
 #include "Avatar.h"
 
-#include "DrawDebugHelpers.h"
-
 #include "VCV.h"
 #include "VCVModule.h"
 #include "VCVCable.h"
-#include "VCVLight.h"
-#include "VCVParam.h"
+#include "WidgetSurrogate.h"
 
-#include "IndicatorHUD.h"
+// #include "IndicatorHUD.h"
 
+#include "Engine/Texture2D.h"
 #include "DefinitivePainter/Public/SVG/DPSVGAsset.h"
-
 #include "Kismet/GameplayStatics.h"
 
 Aosc3GameModeBase::Aosc3GameModeBase() {
@@ -31,6 +28,7 @@ void Aosc3GameModeBase::BeginPlay() {
   OSCctrl->NotifyResync();
 
   PlayerController = Cast<Aosc3PlayerController>(UGameplayStatics::GetPlayerController(this, 0));
+  PlayerPawn = Cast<AAvatar>(UGameplayStatics::GetPlayerPawn(this, 0));
 }
 
 void Aosc3GameModeBase::Tick(float DeltaTime) {
@@ -75,12 +73,10 @@ AVCVCable* Aosc3GameModeBase::SpawnCable(VCVCable cable) {
   a_cable->init(cable);
   
   PortIdentity inputIdentity = cable.getIdentity(PortType::Input);
-  UE_LOG(LogTemp, Warning, TEXT("spawn cable inputIdentity %lld:%d, null? %d"), inputIdentity.moduleId, inputIdentity.portId, inputIdentity.isNull());
   if (!inputIdentity.isNull())
     ModuleActors[inputIdentity.moduleId]->AttachCable(inputIdentity, cable.id);
 
   PortIdentity outputIdentity = cable.getIdentity(PortType::Output);
-  UE_LOG(LogTemp, Warning, TEXT("spawn cable outputIdentity %lld:%d, null? %d"), outputIdentity.moduleId, outputIdentity.portId, outputIdentity.isNull());
   if (!outputIdentity.isNull())
     ModuleActors[outputIdentity.moduleId]->AttachCable(outputIdentity, cable.id);
 
@@ -176,15 +172,40 @@ void Aosc3GameModeBase::SendParamUpdate(int64_t moduleId, int32 paramId, float v
   OSCctrl->SendParamUpdate(moduleId, paramId, value);
 }
 
-void Aosc3GameModeBase::RegisterSVG(FString filepath) {
+void Aosc3GameModeBase::RegisterSVG(FString filepath, Vec2 size) {
   if (SVGAssets.Contains(filepath)) return;
   UE_LOG(LogTemp, Warning, TEXT("importing svg %s"), *filepath);
+  UE_LOG(LogTemp, Warning, TEXT("  box size: %f/%f"), size.x, size.y);
 
   UDPSVGAsset* svgAsset = NewObject<UDPSVGAsset>(this, UDPSVGAsset::StaticClass());
   SVGImporter.PerformImport(filepath, svgAsset);
   SVGAssets.Add(filepath, svgAsset);
+  
+  FVector surrogateLocation;
+  FRotator surrogateRotation;
+  PlayerPawn->GetRenderablePosition(surrogateLocation, surrogateRotation);
+
+  AWidgetSurrogate* surrogate = 
+    GetWorld()->SpawnActor<AWidgetSurrogate>(
+      AWidgetSurrogate::StaticClass(),
+      surrogateLocation,
+      surrogateRotation
+    );
+  
+  SVGWidgetSurrogates.Add(filepath, surrogate);
+  surrogate->SetSVG(svgAsset, size, filepath);
+  surrogate->SetActorScale3D(FVector(0.05f, 0.05f, 0.05f));
 }
 
-UDPSVGAsset* Aosc3GameModeBase::GetSVGAsset(FString filepath) {
-  return SVGAssets[filepath];
+void Aosc3GameModeBase::RegisterTexture(FString filepath, UTexture2D* texture) {
+  UE_LOG(LogTemp, Warning, TEXT("register %s"), *filepath);
+  UE_LOG(LogTemp, Warning, TEXT("  size %d/%d"), texture->GetSizeX(), texture->GetSizeY());
+  SVGTextures.Add(filepath, texture);
+  SVGWidgetSurrogates[filepath]->Destroy();
+  SVGWidgetSurrogates.Remove(filepath);
+}
+
+UTexture2D* Aosc3GameModeBase::GetTexture(FString filepath) {
+  if (!SVGTextures.Contains(filepath)) return nullptr;
+  return SVGTextures[filepath];
 }

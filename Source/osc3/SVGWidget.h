@@ -7,6 +7,7 @@
 class UDPCanvas;
 class UDPSVG;
 class UDPSVGAsset;
+class UTexture2D;
 
 UCLASS()
 class OSC3_API USVGWidget : public UUserWidget {
@@ -16,10 +17,10 @@ protected:
   virtual void NativeOnInitialized() override;
 
 public:
-  FLinearColor SetSVG(FString path);
+  void SetSVG(UDPSVGAsset* svgAsset);
+  UTexture2D* GetTexture();
 
 private:
+  UDPSVG* dpSvgWidget;
   UDPCanvas* dpCanvas = nullptr;
-  UDPSVG* svgWidget;
-  UDPSVGAsset* svgAsset;
 };

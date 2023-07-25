@@ -5,6 +5,9 @@
 #include "GameFramework/Actor.h"
 #include "VCVPort.generated.h"
 
+class Aosc3GameModeBase;
+class UTexture2D;
+
 UCLASS()
 class OSC3_API AVCVPort : public AActor {
 	GENERATED_BODY()
@@ -27,26 +30,25 @@ public:
   bool hasCables();
 
 private:
-  UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
-  UStaticMeshComponent* BaseMeshComponent;
-  
+  UPROPERTY(VisibleAnywhere)
+  UStaticMeshComponent* StaticMeshComponent;
   UPROPERTY()
   UStaticMesh* StaticMesh;
-  
-  UPROPERTY()
-  UMaterialInstanceDynamic* BodyMaterialInstance;
-  UPROPERTY()
-  UMaterialInstanceDynamic* HoleMaterialInstance;
 
   UPROPERTY()
-  UMaterialInterface* BodyMaterialInterface;
+  UMaterialInstanceDynamic* BaseMaterialInstance;
   UPROPERTY()
-  UMaterialInterface* HoleMaterialInterface;
+  UMaterialInterface* BaseMaterialInterface;
+  UPROPERTY()
+  UMaterialInstanceDynamic* FaceMaterialInstance;
+  UPROPERTY()
+  UMaterialInterface* FaceMaterialInterface;
+
+  UPROPERTY()
+  UTexture2D* texture;
   
-  TCHAR* MeshReference = TEXT("/Script/Engine.StaticMesh'/Game/meshes/unit_port.unit_port'");
-  TCHAR* BodyMaterialReference = TEXT("/Script/Engine.Material'/Game/materials/port_body.port_body'");
-  TCHAR* HoleMaterialReference = TEXT("/Script/Engine.Material'/Game/materials/port_hole.port_hole'");
-  
+  Aosc3GameModeBase* gameMode;
+
   VCVPort* model;
   TArray<int64_t> cableIds;
 };

@@ -3,43 +3,40 @@
 #include "Blueprint/WidgetTree.h"
 
 #include "DefinitivePainter/Public/Canvas/DPCanvas.h"
-#include "DefinitivePainter/Public/SVG/Importer/DPSVGImporter.h"
 #include "DefinitivePainter/Public/Widgets/DPSVG.h"
 #include "DefinitivePainter/Public/SVG/DPSVGAsset.h"
 
-#include "DefinitivePainter/Public/SVG/Tree/DPSVGRoot.h"
-#include "DefinitivePainter/Public/SVG/Tree/DPSVGElement.h"
-#include "DefinitivePainter/Public/SVG/Tree/DPSVGPaint.h"
+// for grabbing the color, currently not working
+// #include "DefinitivePainter/Public/SVG/Tree/DPSVGRoot.h"
+// #include "DefinitivePainter/Public/SVG/Tree/DPSVGElement.h"
+// #include "DefinitivePainter/Public/SVG/Tree/DPSVGPaint.h"
 
 #include "osc3GameModeBase.h"
 #include "Kismet/GameplayStatics.h"
 
+#include "Engine/Texture2D.h"
+
 void USVGWidget::NativeOnInitialized() {
-  if (dpCanvas) return;
   Super::NativeOnInitialized();
 
-  dpCanvas = WidgetTree->ConstructWidget<UDPCanvas>();
-
-  // without this,
+  dpCanvas = WidgetTree->ConstructWidget<UDPCanvas>(UDPCanvas::StaticClass(), FName("dpCanvas"));
+  // gpu accelartion with more than one widget leads to
   // LogTemp: Error: Definitive Painter Context runtime error: Invalid window (BeginRendering)
   // Private/Context/Base/DPContextGPU.cpp:L153
   dpCanvas->EnableGPUAcceleration = false;
-
   dpCanvas->OneTimeRender = true;
-  dpCanvas->ClearColor = FLinearColor(0, 0, 0, 1);
+  dpCanvas->ClearColor = FLinearColor::Transparent;
 
-  svgWidget = NewObject<UDPSVG>(this, UDPSVG::StaticClass());
-
-  dpCanvas->AddChild(svgWidget);
+  dpSvgWidget = NewObject<UDPSVG>(this, UDPSVG::StaticClass());
+  dpCanvas->AddChild(dpSvgWidget);
 
   WidgetTree->RootWidget = dpCanvas;
 }
 
-FLinearColor USVGWidget::SetSVG(FString path) {
-  Aosc3GameModeBase* gm = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(this));
-  svgWidget->SVG = gm->GetSVGAsset(path);
+void USVGWidget::SetSVG(UDPSVGAsset* svgAsset) {
+  dpSvgWidget->SVG = svgAsset;
+}
 
-  Super::NativeOnInitialized();
-
-  return svgWidget->SVG->GetRootElement()->Paint.FillColor;
+UTexture2D* USVGWidget::GetTexture() {
+  return dpCanvas->GetCanvasTexture();
 }

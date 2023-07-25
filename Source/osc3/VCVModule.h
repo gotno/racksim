@@ -6,6 +6,11 @@
 #include "GameFramework/Actor.h"
 #include "VCVModule.generated.h"
 
+class UTexture2D;
+class Aosc3GameModeBase;
+class AVCVLight;
+class AVCVPort;
+
 UCLASS()
 class OSC3_API AVCVModule : public AActor {
 	GENERATED_BODY()
@@ -27,40 +32,38 @@ public:
   void UpdateLight(int32 lightId, FLinearColor color);
 
   UPROPERTY()
-  TMap<int32, class AVCVLight*> LightActors;
+  TMap<int32, AVCVLight*> LightActors;
   UPROPERTY()
-  TMap<int32, class AVCVLight*> ParamLightActors;
+  TMap<int32, AVCVLight*> ParamLightActors;
   
   void registerParamLight(int64_t lightId, AVCVLight* lightActor);
   void paramUpdated(int32 paramId, float value);
   
 private:
-  UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
-  USceneComponent* SceneComponent;
-
-  UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+  UPROPERTY(VisibleAnywhere)
   UStaticMeshComponent* StaticMeshComponent;
   UPROPERTY()
   UStaticMesh* StaticMesh;
-  UPROPERTY()
-  UMaterialInstanceDynamic* MaterialInstance;
-  UPROPERTY()
-  UMaterialInterface* MaterialInterface;
 
-  UPROPERTY(VisibleAnywhere)
-  class UWidgetComponent* WidgetComponent;
   UPROPERTY()
-  UMaterialInterface* WidgetMaterialInterface;
+  UMaterialInstanceDynamic* BaseMaterialInstance;
+  UPROPERTY()
+  UMaterialInterface* BaseMaterialInterface;
+  UPROPERTY()
+  UMaterialInstanceDynamic* FaceMaterialInstance;
+  UPROPERTY()
+  UMaterialInterface* FaceMaterialInterface;
+
+  UPROPERTY()
+  UTexture2D* texture;
 
   void spawnComponents();
-  void setPanelSVG();
 
   VCVModule model;
-  float drawSizeScale{150.f};
   
-  class Aosc3GameModeBase* gameMode;
+  Aosc3GameModeBase* gameMode;
 
   // TMap<int, class AVCVParam*> ParamActors;
-  TMap<int, class AVCVPort*> InputActors;
-  TMap<int, class AVCVPort*> OutputActors;
+  TMap<int, AVCVPort*> InputActors;
+  TMap<int, AVCVPort*> OutputActors;
 };

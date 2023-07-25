@@ -106,7 +106,7 @@ void AOSCController::AddModule(const FOSCAddress& AddressPattern, const FOSCMess
       panelSvgPath
   ));
 
-  gameMode->RegisterSVG(panelSvgPath);
+  gameMode->RegisterSVG(panelSvgPath, box.size);
   
   NotifyReceived("module", moduleId);
 }
@@ -254,7 +254,7 @@ void AOSCController::AddInput(const FOSCAddress& AddressPattern, const FOSCMessa
 
   UOSCManager::GetString(message, 8, input.svgPath);
 
-  gameMode->RegisterSVG(input.svgPath);
+  gameMode->RegisterSVG(input.svgPath, input.box.size);
 
   NotifyReceived("input", moduleId, inputId);
 }
@@ -280,7 +280,7 @@ void AOSCController::AddOutput(const FOSCAddress& AddressPattern, const FOSCMess
 
   UOSCManager::GetString(message, 8, output.svgPath);
 
-  gameMode->RegisterSVG(output.svgPath);
+  gameMode->RegisterSVG(output.svgPath, output.box.size);
 
   NotifyReceived("output", moduleId, outputId);
 }

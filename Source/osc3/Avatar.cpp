@@ -88,6 +88,13 @@ void AAvatar::sweep() {
   }
 }
 
+// get the position+rotation for spawning a WidgetSurrogate in the camera's view
+// so it is invisible (facing away) but renders immediately
+void AAvatar::GetRenderablePosition(FVector& location, FRotator& rotation) {
+  location = GetActorLocation() + cameraComponent->GetForwardVector() * 10.f;
+  rotation = cameraComponent->GetForwardVector().Rotation();
+}
+
 void AAvatar::drawIndicator() {
   FTransform transform;
   transform.SetIdentity();

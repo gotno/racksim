@@ -8,11 +8,15 @@
 #include "GameFramework/GameMode.h"
 #include "osc3GameModeBase.generated.h"
 
-class AVCVCable;
-class UDPSVGAsset;
-class Aosc3PlayerController;
 struct VCVModule;
 struct VCVCable;
+class AAvatar;
+class AVCVCable;
+class AVCVModule;
+class AWidgetSurrogate;
+class Aosc3PlayerController;
+class UDPSVGAsset;
+class UTexture2D;
 
 UCLASS()
 class OSC3_API Aosc3GameModeBase : public AGameMode {
@@ -45,13 +49,15 @@ public:
 
   void SendParamUpdate(int64_t moduleId, int32 paramId, float value);
   
-  void RegisterSVG(FString filepath);
-  UDPSVGAsset* GetSVGAsset(FString filepath);
+  void RegisterSVG(FString filepath, Vec2 size);
+  void RegisterTexture(FString filepath, UTexture2D* texture);
+  UTexture2D* GetTexture(FString filepath);
 private:
   UPROPERTY()
   AOSCController* OSCctrl;
 
   Aosc3PlayerController* PlayerController;
+  AAvatar* PlayerPawn;
   
   float spawnXPositionCursor = 31.f;
   float spawnYPositionCursor = 0.f;
@@ -60,11 +66,15 @@ private:
   TArray<VCVCable> cableQueue;
 
   UPROPERTY()
-  TMap<int64, class AVCVModule*> ModuleActors;
+  TMap<int64, AVCVModule*> ModuleActors;
   UPROPERTY()
   TMap<int64, AVCVCable*> CableActors;
 
   FDPSVGImporter SVGImporter;
   UPROPERTY()
   TMap<FString, UDPSVGAsset*> SVGAssets;
+  UPROPERTY()
+  TMap<FString, AWidgetSurrogate*> SVGWidgetSurrogates;
+  UPROPERTY()
+  TMap<FString, UTexture2D*> SVGTextures;
 };

@@ -17,6 +17,7 @@ protected:
 public:	
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+  void GetRenderablePosition(FVector& location, FRotator& rotation);
 private:
   UPROPERTY(EditAnywhere)
   class UCameraComponent* cameraComponent; 

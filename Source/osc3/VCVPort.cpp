@@ -1,54 +1,61 @@
 #include "VCVPort.h"
+
+#include "osc3GameModeBase.h"
 #include "VCV.h"
+
+#include "engine/Texture2D.h"
+
+#include "Kismet/GameplayStatics.h"
+#include "UObject/ConstructorHelpers.h"
 
 AVCVPort::AVCVPort() {
 	PrimaryActorTick.bCanEverTick = true;
 
-  BaseMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Static Mesh"));
-  RootComponent = BaseMeshComponent;
-  // BaseMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-  
-  static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshBody(TEXT("/Script/Engine.StaticMesh'/Game/meshes/unit_port.unit_port'"));
-  
-  if (MeshBody.Object) BaseMeshComponent->SetStaticMesh(MeshBody.Object);
 
-  static ConstructorHelpers::FObjectFinder<UMaterial> BodyMaterial(BodyMaterialReference);
-  static ConstructorHelpers::FObjectFinder<UMaterial> HoleMaterial(HoleMaterialReference);
+  StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Static Mesh"));
+  RootComponent = StaticMeshComponent;
   
-  if (BodyMaterial.Object) {
-    BodyMaterialInterface = Cast<UMaterial>(BodyMaterial.Object);
+  static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshBody(TEXT("/Script/Engine.StaticMesh'/Game/meshes/faced/unit_port_faced.unit_port_faced'"));
+  if (MeshBody.Object) StaticMeshComponent->SetStaticMesh(MeshBody.Object);
+
+  static ConstructorHelpers::FObjectFinder<UMaterial> BaseMaterial(TEXT("/Script/Engine.Material'/Game/meshes/faced/generic_base.generic_base'"));
+  if (BaseMaterial.Object) {
+    BaseMaterialInterface = Cast<UMaterial>(BaseMaterial.Object);
   }
-  if (HoleMaterial.Object) {
-    HoleMaterialInterface = Cast<UMaterial>(HoleMaterial.Object);
+
+  static ConstructorHelpers::FObjectFinder<UMaterial> FaceMaterial(TEXT("/Script/Engine.Material'/Game/meshes/faced/texture_face.texture_face'"));
+  if (FaceMaterial.Object) {
+    FaceMaterialInterface = Cast<UMaterial>(FaceMaterial.Object);
   }
 }
 
 void AVCVPort::BeginPlay() {
 	Super::BeginPlay();
 
-  if (BodyMaterialInterface) {
-    BodyMaterialInstance = UMaterialInstanceDynamic::Create(BodyMaterialInterface, this);
-    BaseMeshComponent->SetMaterial(0, BodyMaterialInstance);
+  if (BaseMaterialInterface) {
+    BaseMaterialInstance = UMaterialInstanceDynamic::Create(BaseMaterialInterface, this);
+    StaticMeshComponent->SetMaterial(0, BaseMaterialInstance);
   }
-  if (HoleMaterialInterface) {
-    HoleMaterialInstance = UMaterialInstanceDynamic::Create(HoleMaterialInterface, this);
-    BaseMeshComponent->SetMaterial(1, HoleMaterialInstance);
+
+  if (FaceMaterialInterface) {
+    FaceMaterialInstance = UMaterialInstanceDynamic::Create(FaceMaterialInterface, this);
+    StaticMeshComponent->SetMaterial(1, FaceMaterialInstance);
   }
+  
+  gameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(this));
 }
 
 void AVCVPort::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
+  
+  if (texture) return;
+  texture = gameMode->GetTexture(model->svgPath);
+  if (texture) FaceMaterialInstance->SetTextureParameterValue(FName("texture"), texture);
 }
 
 void AVCVPort::init(VCVPort* vcv_port) {
   model = vcv_port;
-  SetActorScale3D(FVector(1, model->box.size.x, model->box.size.y));
-
-  if (model->type == PortType::Input) {
-    BodyMaterialInstance->SetVectorParameterValue(TEXT("Color"), FColor(247, 208, 96, 255));
-  } else {
-    BodyMaterialInstance->SetVectorParameterValue(TEXT("Color"), FColor(152, 216, 170, 255));
-  }
+  StaticMeshComponent->SetWorldScale3D(FVector(1, model->box.size.x, model->box.size.y));
 }
 
 void AVCVPort::addCableId(int64_t cableId) {
