@@ -62,6 +62,7 @@ struct VCVParam {
   float value;
 
   bool snap;
+  bool visible{true};
   
   // Knob
   float minAngle;

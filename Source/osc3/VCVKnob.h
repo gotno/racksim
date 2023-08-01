@@ -4,6 +4,9 @@
 #include "VCVParam.h"
 #include "VCVKnob.generated.h"
 
+class UTexture2D;
+class Aosc3GameModeBase;
+
 UCLASS()
 class OSC3_API AVCVKnob : public AVCVParam {
 	GENERATED_BODY()
@@ -15,9 +18,14 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
+	virtual void Tick(float DeltaTime) override;
   void init(struct VCVParam* vcv_param) override;
 
 private:
+  TCHAR* MeshReference = TEXT("/Script/Engine.StaticMesh'/Game/meshes/faced/unit_knob_faced.unit_knob_faced'");
+  TCHAR* BaseMaterialReference = TEXT("/Script/Engine.Material'/Game/materials/knob_base.knob_base'");
+  TCHAR* FaceMaterialReference = TEXT("/Script/Engine.Material'/Game/meshes/faced/texture_face3x.texture_face3x'");
+
   UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
   UStaticMeshComponent* BaseMeshComponent;
   
@@ -27,22 +35,28 @@ private:
   UPROPERTY()
   UMaterialInstanceDynamic* BaseMaterialInstance;
   UPROPERTY()
-  UMaterialInstanceDynamic* MarkerMaterialInstance;
+  UMaterialInstanceDynamic* FaceMaterialInstance;
 
   UPROPERTY()
   UMaterialInterface* BaseMaterialInterface;
   UPROPERTY()
-  UMaterialInterface* MarkerMaterialInterface;
+  UMaterialInterface* FaceMaterialInterface;
 
-  TCHAR* MeshReference = TEXT("/Script/Engine.StaticMesh'/Game/meshes/unit_knob.unit_knob'");
-  TCHAR* BaseMaterialReference = TEXT("/Script/Engine.Material'/Game/materials/knob_base.knob_base'");
-  TCHAR* MarkerMaterialReference = TEXT("/Script/Engine.Material'/Game/materials/knob_marker.knob_marker'");
+  UPROPERTY()
+  UTexture2D* textureBackground;
+  UPROPERTY()
+  UTexture2D* texture;
+  UPROPERTY()
+  UTexture2D* textureForeground;
+  
+  Aosc3GameModeBase* gameMode;
   
   float lastAmount = 0.f;
   float alterRatio = 1.f / 2.f;
 
   FRotator getRotationFromValue();
   float getValueFromRotation();
+  void updateRotation(FRotator newRotation);
   
   FRotator shadowRotation;
 

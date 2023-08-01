@@ -1,9 +1,13 @@
 #include "VCVKnob.h"
 
+#include "osc3GameModeBase.h"
 #include "VCV.h"
+
+#include "engine/Texture2D.h"
 
 #include "Math/UnrealMathUtility.h"
 #include "Kismet/GameplayStatics.h"
+#include "UObject/ConstructorHelpers.h"
 
 AVCVKnob::AVCVKnob() {
   BaseMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Static Mesh"));
@@ -15,13 +19,13 @@ AVCVKnob::AVCVKnob() {
   if (MeshBody.Object) BaseMeshComponent->SetStaticMesh(MeshBody.Object);
 
   static ConstructorHelpers::FObjectFinder<UMaterial> BaseMaterial(BaseMaterialReference);
-  static ConstructorHelpers::FObjectFinder<UMaterial> MarkerMaterial(MarkerMaterialReference);
+  static ConstructorHelpers::FObjectFinder<UMaterial> FaceMaterial(FaceMaterialReference);
   
   if (BaseMaterial.Object) {
     BaseMaterialInterface = Cast<UMaterial>(BaseMaterial.Object);
   }
-  if (MarkerMaterial.Object) {
-    MarkerMaterialInterface = Cast<UMaterial>(MarkerMaterial.Object);
+  if (FaceMaterial.Object) {
+    FaceMaterialInterface = Cast<UMaterial>(FaceMaterial.Object);
   }
 }
 
@@ -32,15 +36,38 @@ void AVCVKnob::BeginPlay() {
     BaseMaterialInstance = UMaterialInstanceDynamic::Create(BaseMaterialInterface, this);
     BaseMeshComponent->SetMaterial(0, BaseMaterialInstance);
   }
-  if (MarkerMaterialInterface) {
-    MarkerMaterialInstance = UMaterialInstanceDynamic::Create(MarkerMaterialInterface, this);
-    BaseMeshComponent->SetMaterial(1, MarkerMaterialInstance);
+  if (FaceMaterialInterface) {
+    FaceMaterialInstance = UMaterialInstanceDynamic::Create(FaceMaterialInterface, this);
+    BaseMeshComponent->SetMaterial(1, FaceMaterialInstance);
+  }
+  
+  gameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(this));
+}
+  
+void AVCVKnob::Tick(float DeltaTime) {
+	Super::Tick(DeltaTime);
+  if (!textureBackground && !model->backgroundSvgPath.IsEmpty()) {
+    textureBackground = gameMode->GetTexture(model->backgroundSvgPath);
+    if (textureBackground) FaceMaterialInstance->SetTextureParameterValue(FName("texture_bg"), textureBackground);
+  }
+  if (!texture && !model->svgPath.IsEmpty()) {
+    texture = gameMode->GetTexture(model->svgPath);
+    if (texture) FaceMaterialInstance->SetTextureParameterValue(FName("texture"), texture);
+  }
+  if (!textureForeground && !model->foregroundSvgPath.IsEmpty()) {
+    textureForeground = gameMode->GetTexture(model->foregroundSvgPath);
+    if (textureForeground) FaceMaterialInstance->SetTextureParameterValue(FName("texture_fg"), textureForeground);
   }
 }
 
 void AVCVKnob::init(VCVParam* vcv_param) {
 	Super::init(vcv_param);
-  SetActorRotation(getRotationFromValue());
+  updateRotation(getRotationFromValue());
+}
+
+void AVCVKnob::updateRotation(FRotator newRotation) {
+  FaceMaterialInstance->SetScalarParameterValue(FName("rotation"), -newRotation.Roll);
+  SetActorRotation(newRotation);
 }
 
 FRotator AVCVKnob::getRotationFromValue() {
@@ -74,7 +101,7 @@ void AVCVKnob::alter(float amount) {
     FMath::Clamp(shadowRotation.Roll + change, model->minAngle, model->maxAngle);
 
   setValue(getValueFromRotation());
-  SetActorRotation(model->snap ? getRotationFromValue() : shadowRotation);
+  updateRotation(model->snap ? getRotationFromValue() : shadowRotation);
 
   lastAmount = amount;
 }

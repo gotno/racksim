@@ -173,9 +173,10 @@ void Aosc3GameModeBase::SendParamUpdate(int64_t moduleId, int32 paramId, float v
 }
 
 void Aosc3GameModeBase::RegisterSVG(FString filepath, Vec2 size) {
+  if (filepath.Compare(FString("")) == 0) return;
   if (SVGAssets.Contains(filepath)) return;
+
   UE_LOG(LogTemp, Warning, TEXT("importing svg %s"), *filepath);
-  UE_LOG(LogTemp, Warning, TEXT("  box size: %f/%f"), size.x, size.y);
 
   UDPSVGAsset* svgAsset = NewObject<UDPSVGAsset>(this, UDPSVGAsset::StaticClass());
   SVGImporter.PerformImport(filepath, svgAsset);
@@ -198,9 +199,11 @@ void Aosc3GameModeBase::RegisterSVG(FString filepath, Vec2 size) {
 }
 
 void Aosc3GameModeBase::RegisterTexture(FString filepath, UTexture2D* texture) {
-  UE_LOG(LogTemp, Warning, TEXT("register %s"), *filepath);
-  UE_LOG(LogTemp, Warning, TEXT("  size %d/%d"), texture->GetSizeX(), texture->GetSizeY());
+  UE_LOG(LogTemp, Warning, TEXT("registering texture %s"), *filepath);
+  
   SVGTextures.Add(filepath, texture);
+  // use this to short-circuit surrogate destruction to preview rendering of a given svg
+  // if (filepath.Compare(FString("C:/VCV/rack-src/rack-gotno/res/ComponentLibrary/VCVSlider.svg")) == 0) return;
   SVGWidgetSurrogates[filepath]->Destroy();
   SVGWidgetSurrogates.Remove(filepath);
 }

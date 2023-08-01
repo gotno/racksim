@@ -4,6 +4,9 @@
 #include "VCVParam.h"
 #include "VCVSlider.generated.h"
 
+class Aosc3GameModeBase;
+class UTexture2D;
+
 UCLASS()
 class OSC3_API AVCVSlider : public AVCVParam {
 	GENERATED_BODY()
@@ -12,6 +15,7 @@ public:
   AVCVSlider();
 
 protected:
+	virtual void Tick(float DeltaTime) override;
 	virtual void BeginPlay() override;
 
 public:
@@ -31,17 +35,34 @@ private:
   UPROPERTY()
   UMaterialInstanceDynamic* BaseMaterialInstance;
   UPROPERTY()
+  UMaterialInstanceDynamic* BaseFaceMaterialInstance;
+  UPROPERTY()
   UMaterialInstanceDynamic* HandleMaterialInstance;
+  UPROPERTY()
+  UMaterialInstanceDynamic* HandleFaceMaterialInstance;
 
   UPROPERTY()
   UMaterialInterface* BaseMaterialInterface;
   UPROPERTY()
+  UMaterialInterface* BaseFaceMaterialInterface;
+  UPROPERTY()
   UMaterialInterface* HandleMaterialInterface;
+  UPROPERTY()
+  UMaterialInterface* HandleFaceMaterialInterface;
 
-  TCHAR* BaseMeshReference = TEXT("/Script/Engine.StaticMesh'/Game/meshes/unit_switch_base.unit_switch_base'");
-  TCHAR* HandleMeshReference = TEXT("/Script/Engine.StaticMesh'/Game/meshes/unit_switch_handle.unit_switch_handle'");
+  TCHAR* BaseMeshReference = TEXT("/Script/Engine.StaticMesh'/Game/meshes/faced/unit_switch_base_faced.unit_switch_base_faced'");
+  TCHAR* HandleMeshReference = TEXT("/Script/Engine.StaticMesh'/Game/meshes/faced/unit_switch_handle_faced.unit_switch_handle_faced'");
   TCHAR* BaseMaterialReference = TEXT("/Script/Engine.Material'/Game/materials/generic_color.generic_color'");
+  TCHAR* BaseFaceMaterialReference = TEXT("/Script/Engine.Material'/Game/meshes/faced/texture_face.texture_face'");
   TCHAR* HandleMaterialReference = TEXT("/Script/Engine.Material'/Game/materials/generic_color.generic_color'");
+  TCHAR* HandleFaceMaterialReference = TEXT("/Script/Engine.Material'/Game/meshes/faced/texture_face.texture_face'");
+
+  UPROPERTY()
+  UTexture2D* baseTexture;
+  UPROPERTY()
+  UTexture2D* handleTexture;
+
+  Aosc3GameModeBase* gameMode;
   
   float lastAlterAmount = 0.f;
   float lastValue;

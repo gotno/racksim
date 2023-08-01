@@ -23,6 +23,8 @@ void AVCVParam::Tick(float DeltaTime) {
 void AVCVParam::init(VCVParam* vcv_param) {
   model = vcv_param; 
   owner = Cast<AVCVModule>(GetOwner());
+  SetHidden(!model->visible);
+  SetActorEnableCollision(model->visible);
   SetActorScale3D(FVector(1, model->box.size.x, model->box.size.y));
 }
 

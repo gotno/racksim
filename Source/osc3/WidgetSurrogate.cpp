@@ -30,6 +30,11 @@ AWidgetSurrogate::AWidgetSurrogate() {
 
 void AWidgetSurrogate::BeginPlay() {
 	Super::BeginPlay();
+
+  if (WidgetMaterialInterface) {
+    WidgetComponent->SetMaterial(0, WidgetMaterialInterface);
+  }
+
   gameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(this));
 }
 
@@ -47,6 +52,5 @@ void AWidgetSurrogate::SetSVG(UDPSVGAsset* svgAsset, Vec2 size, FString filepath
   widget->SetSVG(svgAsset);
   svgFilepath = filepath;
 
-  // WidgetComponent->SetDrawSize(FVector2D(size.x, size.y) * drawSizeScale);
-  WidgetComponent->SetDrawSize(FVector2D(1024, 1024));
+  WidgetComponent->SetDrawSize(FVector2D(size.x, size.y) * drawSizeScale);
 }

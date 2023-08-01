@@ -49,6 +49,7 @@ void AVCVPort::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
   
   if (texture) return;
+  
   texture = gameMode->GetTexture(model->svgPath);
   if (texture) FaceMaterialInstance->SetTextureParameterValue(FName("texture"), texture);
 }

@@ -1,8 +1,13 @@
 #include "VCVSlider.h"
 
 #include "VCV.h"
+#include "osc3GameModeBase.h"
+
+#include "Engine/Texture2D.h"
 
 #include "VectorTypes.h"
+#include "Kismet/GameplayStatics.h"
+#include "UObject/ConstructorHelpers.h"
 
 AVCVSlider::AVCVSlider() {
   BaseMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Base Mesh"));
@@ -12,10 +17,14 @@ AVCVSlider::AVCVSlider() {
   if (MeshBase.Object) BaseMeshComponent->SetStaticMesh(MeshBase.Object);
   SetRootComponent(BaseMeshComponent);
 
-  // base material
+  // base materials
   static ConstructorHelpers::FObjectFinder<UMaterial> BaseMaterial(BaseMaterialReference);
   if (BaseMaterial.Object) {
     BaseMaterialInterface = Cast<UMaterial>(BaseMaterial.Object);
+  }
+  static ConstructorHelpers::FObjectFinder<UMaterial> BaseFaceMaterial(BaseFaceMaterialReference);
+  if (BaseFaceMaterial.Object) {
+    BaseFaceMaterialInterface = Cast<UMaterial>(BaseFaceMaterial.Object);
   }
 
   HandleMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Handle Mesh"));
@@ -26,10 +35,14 @@ AVCVSlider::AVCVSlider() {
   if (MeshHandle.Object) HandleMeshComponent->SetStaticMesh(MeshHandle.Object);
   HandleMeshComponent->SetupAttachment(GetRootComponent());
 
-  // handle material
+  // handle materials
   static ConstructorHelpers::FObjectFinder<UMaterial> HandleMaterial(HandleMaterialReference);
   if (HandleMaterial.Object) {
     HandleMaterialInterface = Cast<UMaterial>(HandleMaterial.Object);
+  }
+  static ConstructorHelpers::FObjectFinder<UMaterial> HandleFaceMaterial(HandleFaceMaterialReference);
+  if (HandleFaceMaterial.Object) {
+    HandleFaceMaterialInterface = Cast<UMaterial>(HandleFaceMaterial.Object);
   }
   
   SetActorEnableCollision(true);
@@ -41,12 +54,37 @@ void AVCVSlider::BeginPlay() {
   if (BaseMaterialInterface) {
     BaseMaterialInstance = UMaterialInstanceDynamic::Create(BaseMaterialInterface, this);
     BaseMeshComponent->SetMaterial(0, BaseMaterialInstance);
-    BaseMaterialInstance->SetVectorParameterValue(TEXT("Color"), FColor(181, 170, 169, 255));
+    BaseMaterialInstance->SetVectorParameterValue(FName("Color"), FColor::Transparent);
   }
+  if (BaseFaceMaterialInterface) {
+    BaseFaceMaterialInstance = UMaterialInstanceDynamic::Create(BaseFaceMaterialInterface, this);
+    BaseMeshComponent->SetMaterial(1, BaseFaceMaterialInstance);
+  }
+
   if (HandleMaterialInterface) {
     HandleMaterialInstance = UMaterialInstanceDynamic::Create(HandleMaterialInterface, this);
     HandleMeshComponent->SetMaterial(0, HandleMaterialInstance);
-    HandleMaterialInstance->SetVectorParameterValue(TEXT("Color"), FColor(255, 109, 96, 255));
+    HandleMaterialInstance->SetVectorParameterValue(FName("Color"), FColor::Black);
+  }
+  if (HandleFaceMaterialInterface) {
+    HandleFaceMaterialInstance = UMaterialInstanceDynamic::Create(HandleFaceMaterialInterface, this);
+    HandleMeshComponent->SetMaterial(1, HandleFaceMaterialInstance);
+  }
+  
+  gameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(this));
+}
+
+void AVCVSlider::Tick(float DeltaTime) {
+	Super::Tick(DeltaTime);
+  
+  if (!baseTexture) {
+    baseTexture = gameMode->GetTexture(model->svgPath);
+    if (baseTexture) BaseFaceMaterialInstance->SetTextureParameterValue(FName("texture"), baseTexture);
+  }
+
+  if (!handleTexture) {
+    handleTexture = gameMode->GetTexture(model->handleSvgPath);
+    if (handleTexture) HandleFaceMaterialInstance->SetTextureParameterValue(FName("texture"), handleTexture);
   }
 }
 
@@ -70,7 +108,6 @@ void AVCVSlider::init(VCVParam* vcv_param) {
   worldOffset = getOffsetFromValue();
   HandleMeshComponent->SetWorldLocation(minHandlePosition + direction * worldOffset);
   shadowOffset = worldOffset;
-  
 }
 
 void AVCVSlider::spawnLights(USceneComponent* attachTo, FVector offset) {

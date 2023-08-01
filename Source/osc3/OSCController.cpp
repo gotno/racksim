@@ -228,7 +228,20 @@ void AOSCController::AddParam(const FOSCAddress& AddressPattern, const FOSCMessa
   UOSCManager::GetBool(message, 27, param.latch);
   UOSCManager::GetBool(message, 28, param.momentary);
 
-  UOSCManager::GetInt32(message, 29, param.frameCount);
+  UOSCManager::GetString(message, 29, param.svgPath);
+  gameMode->RegisterSVG(param.svgPath, param.box.size);
+
+  UOSCManager::GetString(message, 30, param.handleSvgPath);
+  gameMode->RegisterSVG(param.handleSvgPath, param.handleBox.size);
+
+  UOSCManager::GetString(message, 31, param.backgroundSvgPath);
+  gameMode->RegisterSVG(param.backgroundSvgPath, param.box.size);
+
+  UOSCManager::GetString(message, 32, param.foregroundSvgPath);
+  gameMode->RegisterSVG(param.foregroundSvgPath, param.box.size);
+
+  UOSCManager::GetInt32(message, 33, param.frameCount);
+  UOSCManager::GetBool(message, 34, param.visible);
 
   NotifyReceived("param", moduleId, paramId);
 }

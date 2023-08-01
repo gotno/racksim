@@ -30,7 +30,7 @@ AVCVModule::AVCVModule() {
     BaseMaterialInterface = Cast<UMaterial>(BaseMaterial.Object);
   }
 
-  static ConstructorHelpers::FObjectFinder<UMaterial> FaceMaterial(TEXT("/Script/Engine.Material'/Game/meshes/faced/texture_face.texture_face'"));
+  static ConstructorHelpers::FObjectFinder<UMaterial> FaceMaterial(TEXT("/Script/Engine.Material'/Game/meshes/faced/texture_face_bg.texture_face_bg'"));
   if (FaceMaterial.Object) {
     FaceMaterialInterface = Cast<UMaterial>(FaceMaterial.Object);
   }
@@ -42,6 +42,7 @@ void AVCVModule::BeginPlay() {
   if (BaseMaterialInterface) {
     BaseMaterialInstance = UMaterialInstanceDynamic::Create(BaseMaterialInterface, this);
     StaticMeshComponent->SetMaterial(0, BaseMaterialInstance);
+    BaseMaterialInstance->SetVectorParameterValue(FName("color"), FLinearColor(0.902f, 0.902f, 0.902f));
   }
 
   if (FaceMaterialInterface) {
