@@ -4,6 +4,13 @@
 #include <unordered_map>
 #include <vector>
 
+// FLinearColor befacoPortRed = FLinearColor(0.863f, 0.078f, 0.078f);
+// FLinearColor befacoPortGrey = FLinearColor(0.18f, 0.18f, 0.18f);
+// FLinearColor befacoPanelGrey = FLinearColor(0.09f, 0.09f, 0.09f);
+
+// FLinearColor PJ301MPortGrey = FLinearColor(0.878f, 0.878f, 0.878f);
+// FLinearColor defaultPanelGrey = FLinearColor(0.902f, 0.902f, 0.902f);
+
 struct Vec2 {
   float x, y;
 
@@ -80,11 +87,10 @@ struct VCVParam {
   bool momentary;
 
   TMap<int32, VCVLight> Lights;
-  int32 frameCount;
-  FString svgPath;
-  FString handleSvgPath;
-  FString backgroundSvgPath;
-  FString foregroundSvgPath;
+  
+  // temp
+  int32 frameCount{3};
+  TArray<FString> svgPaths;
   
   // internal operations, not useful?
   // float displayBase;

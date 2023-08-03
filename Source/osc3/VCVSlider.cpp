@@ -78,12 +78,12 @@ void AVCVSlider::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
   
   if (!baseTexture) {
-    baseTexture = gameMode->GetTexture(model->svgPath);
+    baseTexture = gameMode->GetTexture(model->svgPaths[0]);
     if (baseTexture) BaseFaceMaterialInstance->SetTextureParameterValue(FName("texture"), baseTexture);
   }
 
   if (!handleTexture) {
-    handleTexture = gameMode->GetTexture(model->handleSvgPath);
+    handleTexture = gameMode->GetTexture(model->svgPaths[1]);
     if (handleTexture) HandleFaceMaterialInstance->SetTextureParameterValue(FName("texture"), handleTexture);
   }
 }

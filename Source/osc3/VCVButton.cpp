@@ -5,7 +5,6 @@
 AVCVButton::AVCVButton() {
   BaseMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Static Mesh"));
   RootComponent = BaseMeshComponent;
-  // BaseMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
   
   static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshBody(MeshReference);
   

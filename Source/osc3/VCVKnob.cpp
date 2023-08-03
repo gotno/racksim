@@ -46,16 +46,16 @@ void AVCVKnob::BeginPlay() {
   
 void AVCVKnob::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
-  if (!textureBackground && !model->backgroundSvgPath.IsEmpty()) {
-    textureBackground = gameMode->GetTexture(model->backgroundSvgPath);
+  if (!textureBackground && !model->svgPaths[0].IsEmpty()) {
+    textureBackground = gameMode->GetTexture(model->svgPaths[0]);
     if (textureBackground) FaceMaterialInstance->SetTextureParameterValue(FName("texture_bg"), textureBackground);
   }
-  if (!texture && !model->svgPath.IsEmpty()) {
-    texture = gameMode->GetTexture(model->svgPath);
+  if (!texture && !model->svgPaths[1].IsEmpty()) {
+    texture = gameMode->GetTexture(model->svgPaths[1]);
     if (texture) FaceMaterialInstance->SetTextureParameterValue(FName("texture"), texture);
   }
-  if (!textureForeground && !model->foregroundSvgPath.IsEmpty()) {
-    textureForeground = gameMode->GetTexture(model->foregroundSvgPath);
+  if (!textureForeground && !model->svgPaths[2].IsEmpty()) {
+    textureForeground = gameMode->GetTexture(model->svgPaths[2]);
     if (textureForeground) FaceMaterialInstance->SetTextureParameterValue(FName("texture_fg"), textureForeground);
   }
 }
