@@ -18,7 +18,7 @@ AVCVPort::AVCVPort() {
   static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshBody(TEXT("/Script/Engine.StaticMesh'/Game/meshes/faced/unit_port_faced.unit_port_faced'"));
   if (MeshBody.Object) StaticMeshComponent->SetStaticMesh(MeshBody.Object);
 
-  static ConstructorHelpers::FObjectFinder<UMaterial> BaseMaterial(TEXT("/Script/Engine.Material'/Game/meshes/faced/generic_base.generic_base'"));
+  static ConstructorHelpers::FObjectFinder<UMaterial> BaseMaterial(TEXT("/Script/Engine.Material'/Game/materials/generic_color.generic_color'"));
   if (BaseMaterial.Object) {
     BaseMaterialInterface = Cast<UMaterial>(BaseMaterial.Object);
   }
