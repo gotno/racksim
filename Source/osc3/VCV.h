@@ -88,8 +88,6 @@ struct VCVParam {
 
   TMap<int32, VCVLight> Lights;
   
-  // temp
-  int32 frameCount{3};
   TArray<FString> svgPaths;
   
   // internal operations, not useful?
