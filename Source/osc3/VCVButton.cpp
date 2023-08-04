@@ -1,35 +1,69 @@
 #include "VCVButton.h"
 
 #include "VCV.h"
+#include "osc3GameModeBase.h"
+
+#include "Engine/Texture2D.h"
+#include "Kismet/GameplayStatics.h"
+#include "UObject/ConstructorHelpers.h"
 
 AVCVButton::AVCVButton() {
-  BaseMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Static Mesh"));
-  RootComponent = BaseMeshComponent;
+  MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Base Mesh"));
   
-  static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshBody(MeshReference);
-  
-  if (MeshBody.Object) BaseMeshComponent->SetStaticMesh(MeshBody.Object);
+  static ConstructorHelpers::FObjectFinder<UStaticMesh> Mesh(MeshReference);
+  if (Mesh.Object) MeshComponent->SetStaticMesh(Mesh.Object);
+  SetRootComponent(MeshComponent);
 
-  static ConstructorHelpers::FObjectFinder<UMaterial> Material(MaterialReference);
-  
-  if (Material.Object) {
-    MaterialInterface = Cast<UMaterial>(Material.Object);
+  // base material
+  static ConstructorHelpers::FObjectFinder<UMaterial> BaseMaterial(BaseMaterialReference);
+  if (BaseMaterial.Object) {
+    BaseMaterialInterface = Cast<UMaterial>(BaseMaterial.Object);
   }
+
+  // face material
+  static ConstructorHelpers::FObjectFinder<UMaterial> FaceMaterial(FaceMaterialReference);
+  if (FaceMaterial.Object) {
+    FaceMaterialInterface = Cast<UMaterial>(FaceMaterial.Object);
+  }
+
+  SetActorEnableCollision(true);
 }
 
 void AVCVButton::BeginPlay() {
   Super::BeginPlay();
 
-  if (MaterialInterface) {
-    MaterialInstance = UMaterialInstanceDynamic::Create(MaterialInterface, this);
-    BaseMeshComponent->SetMaterial(0, MaterialInstance);
-    MaterialInstance->SetVectorParameterValue(TEXT("Color"), FColor(243, 233, 159, 255));
+  if (BaseMaterialInterface) {
+    BaseMaterialInstance = UMaterialInstanceDynamic::Create(BaseMaterialInterface, this);
+    MeshComponent->SetMaterial(0, BaseMaterialInstance);
+    BaseMaterialInstance->SetVectorParameterValue(TEXT("Color"), FColor(181, 170, 169, 255));
+  }
+  if (FaceMaterialInterface) {
+    FaceMaterialInstance = UMaterialInstanceDynamic::Create(FaceMaterialInterface, this);
+    MeshComponent->SetMaterial(1, FaceMaterialInstance);
+  }
+
+  gameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(this));
+}
+
+void AVCVButton::Tick(float DeltaTime) {
+  for (int i = 0; i < model->svgPaths.Num(); i++) {
+    if (!frames[i]) {
+      frames[i] = gameMode->GetTexture(model->svgPaths[i]);
+      if (frames[i] && model->value == i) {
+        FaceMaterialInstance->SetTextureParameterValue(FName("texture"), frames[i]);
+      }
+    }
   }
 }
 
 void AVCVButton::init(VCVParam* vcv_param) {
   Super::init(vcv_param);
-  spawnLights(BaseMeshComponent, lightOffset);
+
+  // remove empty svg paths and init frames array to same size
+  vcv_param->svgPaths.Remove(FString(""));
+  frames.Init(nullptr, vcv_param->svgPaths.Num());
+
+  spawnLights(MeshComponent, lightOffset);
 }
 
 void AVCVButton::spawnLights(USceneComponent* attachTo, FVector offset) {
@@ -39,11 +73,13 @@ void AVCVButton::spawnLights(USceneComponent* attachTo, FVector offset) {
 void AVCVButton::engage() {
   Super::engage();
   setValue(model->value == 0 ? 1 : 0);
+  FaceMaterialInstance->SetTextureParameterValue(FName("texture"), frames[model->value]);
 }
 
 void AVCVButton::release() {
   Super::release();
   if (model->momentary) {
     setValue(0);
+    FaceMaterialInstance->SetTextureParameterValue(FName("texture"), frames[model->value]);
   }
 }

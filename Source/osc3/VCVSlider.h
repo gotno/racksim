@@ -15,10 +15,10 @@ public:
   AVCVSlider();
 
 protected:
-	virtual void Tick(float DeltaTime) override;
 	virtual void BeginPlay() override;
 
 public:
+	virtual void Tick(float DeltaTime) override;
   void init(VCVParam* vcv_param) override;
 
 private:

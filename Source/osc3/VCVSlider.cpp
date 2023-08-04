@@ -4,8 +4,6 @@
 #include "osc3GameModeBase.h"
 
 #include "Engine/Texture2D.h"
-
-#include "VectorTypes.h"
 #include "Kismet/GameplayStatics.h"
 #include "UObject/ConstructorHelpers.h"
 

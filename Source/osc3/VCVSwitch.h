@@ -4,6 +4,9 @@
 #include "VCVParam.h"
 #include "VCVSwitch.generated.h"
 
+class UTexture2D;
+class Aosc3GameModeBase;
+
 UCLASS()
 class OSC3_API AVCVSwitch : public AVCVParam {
 	GENERATED_BODY()
@@ -15,38 +18,32 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
+	virtual void Tick(float DeltaTime) override;
   void init(VCVParam* vcv_param) override;
 
 private:
   UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
-  UStaticMeshComponent* BaseMeshComponent;
-  UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
-  UStaticMeshComponent* HandleMeshComponent;
-  
+  UStaticMeshComponent* MeshComponent;
   UPROPERTY()
-  UStaticMesh* BaseStaticMesh;
-  UPROPERTY()
-  UStaticMesh* HandleStaticMesh;
+  UStaticMesh* StaticMesh;
   
   UPROPERTY()
   UMaterialInstanceDynamic* BaseMaterialInstance;
   UPROPERTY()
-  UMaterialInstanceDynamic* HandleMaterialInstance;
-
+  UMaterialInstanceDynamic* FaceMaterialInstance;
   UPROPERTY()
   UMaterialInterface* BaseMaterialInterface;
   UPROPERTY()
-  UMaterialInterface* HandleMaterialInterface;
+  UMaterialInterface* FaceMaterialInterface;
 
-  TCHAR* BaseMeshReference = TEXT("/Script/Engine.StaticMesh'/Game/meshes/unit_switch_base.unit_switch_base'");
-  TCHAR* HandleMeshReference = TEXT("/Script/Engine.StaticMesh'/Game/meshes/unit_switch_handle.unit_switch_handle'");
+  TCHAR* MeshReference = TEXT("/Script/Engine.StaticMesh'/Game/meshes/faced/unit_switch_faced.unit_switch_faced'");
   TCHAR* BaseMaterialReference = TEXT("/Script/Engine.Material'/Game/materials/generic_color.generic_color'");
-  TCHAR* HandleMaterialReference = TEXT("/Script/Engine.Material'/Game/materials/generic_color.generic_color'");
+  TCHAR* FaceMaterialReference = TEXT("/Script/Engine.Material'/Game/meshes/faced/texture_face.texture_face'");
   
-  FVector2D handleSize;
-  float getOffsetFromValue();
-  FVector direction;
-  float worldOffset;
+  UPROPERTY()
+  TArray<UTexture2D*> frames;
+  
+  Aosc3GameModeBase* gameMode;
 
 public:
   virtual void engage();
