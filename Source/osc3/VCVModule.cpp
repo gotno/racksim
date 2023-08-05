@@ -1,6 +1,7 @@
 #include "VCVModule.h"
 
 #include "osc3GameModeBase.h"
+#include "VCV.h"
 #include "VCVLight.h"
 #include "VCVKnob.h"
 #include "VCVButton.h"
@@ -10,7 +11,6 @@
 #include "VCVDisplay.h"
 
 #include "Engine/Texture2D.h"
-
 #include "Kismet/GameplayStatics.h"
 #include "UObject/ConstructorHelpers.h"
 
@@ -42,7 +42,6 @@ void AVCVModule::BeginPlay() {
   if (BaseMaterialInterface) {
     BaseMaterialInstance = UMaterialInstanceDynamic::Create(BaseMaterialInterface, this);
     StaticMeshComponent->SetMaterial(0, BaseMaterialInstance);
-    BaseMaterialInstance->SetVectorParameterValue(FName("color"), FLinearColor(0.902f, 0.902f, 0.902f));
   }
 
   if (FaceMaterialInterface) {
@@ -64,6 +63,9 @@ void AVCVModule::Tick(float DeltaTime) {
 
 void AVCVModule::init(VCVModule vcv_module) {
   model = vcv_module; 
+
+  VCVOverrides overrides;
+  BaseMaterialInstance->SetVectorParameterValue(FName("color"), overrides.getModuleColor(model.brand));
 
   StaticMeshComponent->SetWorldScale3D(FVector(1, model.box.size.x, model.box.size.y));
   spawnComponents();

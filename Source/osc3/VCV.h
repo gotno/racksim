@@ -6,10 +6,24 @@
 
 // FLinearColor befacoPortRed = FLinearColor(0.863f, 0.078f, 0.078f);
 // FLinearColor befacoPortGrey = FLinearColor(0.18f, 0.18f, 0.18f);
-// FLinearColor befacoPanelGrey = FLinearColor(0.09f, 0.09f, 0.09f);
-
+// FLinearColor instruo brassnut.svg = FLinearColor(0.867f, 0.761f, 0.557f);
 // FLinearColor PJ301MPortGrey = FLinearColor(0.878f, 0.878f, 0.878f);
-// FLinearColor defaultPanelGrey = FLinearColor(0.902f, 0.902f, 0.902f);
+
+struct VCVOverrides {
+  TMap<FString, FLinearColor> moduleColors;
+  
+  FLinearColor getModuleColor(FString brand) {
+    if (moduleColors.Contains(brand)) return moduleColors[brand];
+    return moduleColors["default"];
+  }
+  
+  VCVOverrides() {
+    moduleColors.Add("default", FLinearColor(0.902f, 0.902f, 0.902f));
+    moduleColors.Add("Befaco", FLinearColor(0.09f, 0.09f, 0.09f));
+    moduleColors.Add("Instruō", FLinearColor(0.118f, 0.118f, 0.118f));
+    moduleColors.Add("NANO Modules", FLinearColor(0.004f, 0.004f, 0.f));
+  };
+};
 
 struct Vec2 {
   float x, y;
