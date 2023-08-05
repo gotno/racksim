@@ -72,14 +72,15 @@ void AVCVButton::spawnLights(USceneComponent* attachTo, FVector offset) {
 
 void AVCVButton::engage() {
   Super::engage();
-  setValue(model->value == 0 ? 1 : 0);
-  FaceMaterialInstance->SetTextureParameterValue(FName("texture"), frames[model->value]);
+  setValue(model->value == model->minValue ? model->maxValue : model->minValue);
+  if (model->value < frames.Num())
+    FaceMaterialInstance->SetTextureParameterValue(FName("texture"), frames[model->value]);
 }
 
 void AVCVButton::release() {
   Super::release();
   if (model->momentary) {
-    setValue(0);
+    setValue(model->minValue);
     FaceMaterialInstance->SetTextureParameterValue(FName("texture"), frames[model->value]);
   }
 }
