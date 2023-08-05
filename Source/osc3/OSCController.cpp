@@ -81,25 +81,29 @@ void AOSCController::AddModule(const FOSCAddress& AddressPattern, const FOSCMess
     return;
   }
   
+  FString brand;
+  UOSCManager::GetString(message, 1, brand);
+  
   FString name;
-  UOSCManager::GetString(message, 1, name);
+  UOSCManager::GetString(message, 2, name);
 
-  UE_LOG(LogTemp, Warning, TEXT("AddModule %lld %s"), moduleId, *name);
+  UE_LOG(LogTemp, Warning, TEXT("AddModule %lld %s:%s"), moduleId, *brand, *name);
 
   FString description;
-  UOSCManager::GetString(message, 2, description);
+  UOSCManager::GetString(message, 3, description);
   
   Rect box;
-  UOSCManager::GetFloat(message, 3, box.pos.x);
-  UOSCManager::GetFloat(message, 4, box.pos.y);
-  UOSCManager::GetFloat(message, 5, box.size.x);
-  UOSCManager::GetFloat(message, 6, box.size.y);
+  UOSCManager::GetFloat(message, 4, box.pos.x);
+  UOSCManager::GetFloat(message, 5, box.pos.y);
+  UOSCManager::GetFloat(message, 6, box.size.x);
+  UOSCManager::GetFloat(message, 7, box.size.y);
   
   FString panelSvgPath;
-  UOSCManager::GetString(message, 7, panelSvgPath);
+  UOSCManager::GetString(message, 8, panelSvgPath);
   
   Modules.Add(moduleId, VCVModule(
       moduleId,
+      brand,
       name,
       description,
       box,

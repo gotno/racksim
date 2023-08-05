@@ -146,6 +146,7 @@ struct VCVDisplay {
 
 struct VCVModule {
   int64_t id;
+  FString brand;
   FString name;
   FString description;
   Rect box;
@@ -158,8 +159,8 @@ struct VCVModule {
   std::vector<VCVDisplay> Displays;
 
 	VCVModule() {}
-  VCVModule(int64_t moduleId, FString moduleName, FString modelDescription, Rect panelBox, FString svgPath)
-    : id(moduleId), name(moduleName), description(modelDescription), box(panelBox), panelSvgPath(svgPath) {}
+  VCVModule(int64_t moduleId, FString moduleBrand, FString moduleName, FString modelDescription, Rect panelBox, FString svgPath)
+    : id(moduleId), brand(moduleBrand), name(moduleName), description(modelDescription), box(panelBox), panelSvgPath(svgPath) {}
 };
 
 struct VCVCable {
