@@ -49,9 +49,7 @@ void AVCVSwitch::Tick(float DeltaTime) {
   for (int i = 0; i < model->svgPaths.Num(); i++) {
     if (!frames[i]) {
       frames[i] = gameMode->GetTexture(model->svgPaths[i]);
-      if (frames[i] && model->value == i) {
-        FaceMaterialInstance->SetTextureParameterValue(FName("texture"), frames[i]);
-      }
+      if (getFrameFromValue() == i && frames[i]) setFrame();
     }
   }
 }
@@ -67,7 +65,20 @@ void AVCVSwitch::init(VCVParam* vcv_param) {
 void AVCVSwitch::engage() {
   Super::engage();
   float newValue = model->value + 1;
-  if (newValue > model->maxValue) newValue = 0;
+  if (newValue > model->maxValue) newValue = model->minValue;
   setValue(newValue);
-  FaceMaterialInstance->SetTextureParameterValue(FName("texture"), frames[newValue]);
+  setFrame();
+}
+
+// some values don't align with frame index
+// (looking at you, instruo)
+// get the distance from min value instead
+int AVCVSwitch::getFrameFromValue() {
+  return model->value - model->minValue;
+}
+
+void AVCVSwitch::setFrame() {
+  int frame = getFrameFromValue();
+  if (frame >= 0 && frame < frames.Num())
+    FaceMaterialInstance->SetTextureParameterValue(FName("texture"), frames[frame]);
 }

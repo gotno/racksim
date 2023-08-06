@@ -47,6 +47,8 @@ private:
 
 public:
   virtual void engage();
+  void setFrame();
+  int getFrameFromValue();
   // virtual void alter(float amount);
   // virtual void release();
 };
