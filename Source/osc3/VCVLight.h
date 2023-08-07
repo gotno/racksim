@@ -22,6 +22,16 @@ public:
   void SetEmissiveColor(FLinearColor color);
   void SetEmissiveIntensity(float intensity);
   
+  UFUNCTION()
+  void onBeginOverlap(
+    class UPrimitiveComponent* OverlappedComp,
+    class AActor* OtherActor,
+    class UPrimitiveComponent* OtherComp,
+    int32 OtherBodyIndex,
+    bool bFromSweep,
+    const FHitResult& SweepResult
+  );
+  
 private:
   UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
   UStaticMeshComponent* BaseMeshComponent;

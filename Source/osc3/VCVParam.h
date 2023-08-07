@@ -13,7 +13,7 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
-  virtual void spawnLights(USceneComponent* attachTo, FVector offset);
+  virtual void spawnLights(USceneComponent* attachTo);
   
 private:
   class AVCVModule* owner;

@@ -1,5 +1,6 @@
 #include "VCVSlider.h"
 
+#include "osc3.h"
 #include "VCV.h"
 #include "osc3GameModeBase.h"
 
@@ -33,6 +34,11 @@ AVCVSlider::AVCVSlider() {
   if (MeshHandle.Object) HandleMeshComponent->SetStaticMesh(MeshHandle.Object);
   HandleMeshComponent->SetupAttachment(GetRootComponent());
 
+  HandleMeshComponent->SetGenerateOverlapEvents(true);
+  HandleMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+  HandleMeshComponent->SetCollisionObjectType(PARAM_OBJECT);
+  HandleMeshComponent->SetCollisionResponseToChannel(LIGHT_OBJECT, ECollisionResponse::ECR_Overlap);
+
   // handle materials
   static ConstructorHelpers::FObjectFinder<UMaterial> HandleMaterial(HandleMaterialReference);
   if (HandleMaterial.Object) {
@@ -52,7 +58,6 @@ void AVCVSlider::BeginPlay() {
   if (BaseMaterialInterface) {
     BaseMaterialInstance = UMaterialInstanceDynamic::Create(BaseMaterialInterface, this);
     BaseMeshComponent->SetMaterial(0, BaseMaterialInstance);
-    BaseMaterialInstance->SetVectorParameterValue(FName("Color"), FColor::Transparent);
   }
   if (BaseFaceMaterialInterface) {
     BaseFaceMaterialInstance = UMaterialInstanceDynamic::Create(BaseFaceMaterialInterface, this);
@@ -93,7 +98,7 @@ void AVCVSlider::init(VCVParam* vcv_param) {
   FVector maxHandlePosition = GetActorLocation() + FVector(0, model->maxHandlePos.x, model->maxHandlePos.y);
   
   HandleMeshComponent->SetWorldScale3D(FVector(1, model->handleBox.size.x, model->handleBox.size.y));
-  spawnLights(HandleMeshComponent, lightOffset);
+  spawnLights(HandleMeshComponent);
 
   if (model->horizontal) {
     direction = HandleMeshComponent->GetRightVector();
@@ -106,10 +111,6 @@ void AVCVSlider::init(VCVParam* vcv_param) {
   worldOffset = getOffsetFromValue();
   HandleMeshComponent->SetWorldLocation(minHandlePosition + direction * worldOffset);
   shadowOffset = worldOffset;
-}
-
-void AVCVSlider::spawnLights(USceneComponent* attachTo, FVector offset) {
-  Super::spawnLights(attachTo, offset);
 }
 
 float AVCVSlider::getOffsetFromValue() {

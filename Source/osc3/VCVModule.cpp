@@ -195,7 +195,8 @@ void AVCVModule::spawnComponents() {
     AVCVLight* a_light = GetWorld()->SpawnActor<AVCVLight>(
       AVCVLight::StaticClass(),
       GetActorLocation() + light.box.location(),
-      FRotator(0, 0, 0)
+      FRotator(0, 0, 0),
+      spawnParams
     );
     a_light->AttachToComponent(StaticMeshComponent, FAttachmentTransformRules::KeepWorldTransform);
     a_light->init(&light);
@@ -206,7 +207,8 @@ void AVCVModule::spawnComponents() {
     AVCVDisplay* a_display = GetWorld()->SpawnActor<AVCVDisplay>(
       AVCVDisplay::StaticClass(),
       GetActorLocation() + display.box.location(),
-      FRotator(0, 0, 0)
+      FRotator(0, 0, 0),
+      spawnParams
     );
     a_display->AttachToComponent(StaticMeshComponent, FAttachmentTransformRules::KeepWorldTransform);
     a_display->init(&display);

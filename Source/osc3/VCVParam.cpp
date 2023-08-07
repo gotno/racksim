@@ -28,14 +28,14 @@ void AVCVParam::init(VCVParam* vcv_param) {
   SetActorScale3D(FVector(1, model->box.size.x, model->box.size.y));
 }
 
-void AVCVParam::spawnLights(USceneComponent* attachTo, FVector offset) {
+void AVCVParam::spawnLights(USceneComponent* attachTo) {
   FActorSpawnParameters spawnParams;
   spawnParams.Owner = this;
 
   for (TPair<int32, VCVLight>& light_kvp : model->Lights) {
     VCVLight& light = light_kvp.Value;
 
-    FVector lightLocation = attachTo->GetComponentLocation() + offset;
+    FVector lightLocation = attachTo->GetComponentLocation();
 
     AVCVLight* a_light = GetWorld()->SpawnActor<AVCVLight>(
       AVCVLight::StaticClass(),

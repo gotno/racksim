@@ -1,5 +1,6 @@
 #include "VCVButton.h"
 
+#include "osc3.h"
 #include "VCV.h"
 #include "osc3GameModeBase.h"
 
@@ -9,10 +10,15 @@
 
 AVCVButton::AVCVButton() {
   MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Base Mesh"));
+  SetRootComponent(MeshComponent);
+
+  MeshComponent->SetGenerateOverlapEvents(true);
+  MeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+  MeshComponent->SetCollisionObjectType(PARAM_OBJECT);
+  MeshComponent->SetCollisionResponseToChannel(LIGHT_OBJECT, ECollisionResponse::ECR_Overlap);
   
   static ConstructorHelpers::FObjectFinder<UStaticMesh> Mesh(MeshReference);
   if (Mesh.Object) MeshComponent->SetStaticMesh(Mesh.Object);
-  SetRootComponent(MeshComponent);
 
   // base material
   static ConstructorHelpers::FObjectFinder<UMaterial> BaseMaterial(BaseMaterialReference);
@@ -63,11 +69,7 @@ void AVCVButton::init(VCVParam* vcv_param) {
   vcv_param->svgPaths.Remove(FString(""));
   frames.Init(nullptr, vcv_param->svgPaths.Num());
 
-  spawnLights(MeshComponent, lightOffset);
-}
-
-void AVCVButton::spawnLights(USceneComponent* attachTo, FVector offset) {
-  Super::spawnLights(attachTo, offset);
+  spawnLights(MeshComponent);
 }
 
 void AVCVButton::engage() {

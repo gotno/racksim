@@ -1,5 +1,6 @@
 #include "Avatar.h"
 
+#include "osc3.h"
 #include "VCVParam.h"
 #include "VCVPort.h"
 #include "VCVCable.h"
@@ -73,7 +74,7 @@ void AAvatar::sweep() {
     hitResult,
     start,
     end,
-    ECC_Visibility
+    PARAM_TRACE
   );
   
   if (!hasHit) {

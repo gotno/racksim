@@ -42,6 +42,11 @@ void AVCVSwitch::BeginPlay() {
     MeshComponent->SetMaterial(1, FaceMaterialInstance);
   }
 
+  MeshComponent->SetGenerateOverlapEvents(true);
+  MeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+  MeshComponent->SetCollisionObjectType(ECollisionChannel::ECC_WorldStatic);
+  MeshComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldStatic, ECollisionResponse::ECR_Overlap);
+
   gameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(this));
 }
 

@@ -44,9 +44,6 @@ private:
   TArray<UTexture2D*> frames;
   
   Aosc3GameModeBase* gameMode;
-  
-  FVector lightOffset{-0.11f, 0, 0};
-  void spawnLights(USceneComponent* attachTo, FVector offset) override;
 public:
   void engage() override;
   void release() override;
