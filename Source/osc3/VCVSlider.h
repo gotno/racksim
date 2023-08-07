@@ -50,9 +50,9 @@ private:
   UPROPERTY()
   UMaterialInterface* HandleFaceMaterialInterface;
 
-  TCHAR* BaseMeshReference = TEXT("/Script/Engine.StaticMesh'/Game/meshes/faced/unit_switch_base_faced.unit_switch_base_faced'");
+  TCHAR* BaseMeshReference = TEXT("/Script/Engine.StaticMesh'/Game/meshes/faced/unit_slider_base_faced.unit_slider_base_faced'");
   TCHAR* HandleMeshReference = TEXT("/Script/Engine.StaticMesh'/Game/meshes/faced/unit_switch_handle_faced.unit_switch_handle_faced'");
-  TCHAR* BaseMaterialReference = TEXT("/Script/Engine.Material'/Game/materials/generic_color.generic_color'");
+  TCHAR* BaseMaterialReference = TEXT("/Script/Engine.Material'/Game/materials/generic_transparent.generic_transparent'");
   TCHAR* BaseFaceMaterialReference = TEXT("/Script/Engine.Material'/Game/meshes/faced/texture_face.texture_face'");
   TCHAR* HandleMaterialReference = TEXT("/Script/Engine.Material'/Game/materials/generic_color.generic_color'");
   TCHAR* HandleFaceMaterialReference = TEXT("/Script/Engine.Material'/Game/meshes/faced/texture_face.texture_face'");
