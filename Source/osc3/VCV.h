@@ -58,6 +58,7 @@ struct VCVLight {
   int paramId = -1;
   Rect box;
   LightShape shape;
+  FString svgPath;
   FLinearColor color;
   FLinearColor bgColor;
   bool transparent{true};
