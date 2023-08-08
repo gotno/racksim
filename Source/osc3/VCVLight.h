@@ -4,6 +4,9 @@
 #include "GameFramework/Actor.h"
 #include "VCVLight.generated.h"
 
+class Aosc3GameModeBase;
+class UTexture2D;
+
 UCLASS()
 class OSC3_API AVCVLight : public AActor {
 	GENERATED_BODY()
@@ -35,21 +38,27 @@ public:
 private:
   UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
   UStaticMeshComponent* BaseMeshComponent;
-  
-  UPROPERTY()
-  UStaticMesh* StaticMesh;
-  
-  UPROPERTY()
-  UMaterialInstanceDynamic* MaterialInstance;
-
-  UPROPERTY()
-  UMaterialInterface* MaterialInterface;
-  
   UPROPERTY()
   UStaticMesh* circleMesh;
-  
   UPROPERTY()
   UStaticMesh* rectangleMesh;
+  TCHAR* CircleMeshReference = TEXT("/Script/Engine.StaticMesh'/Game/meshes/faced/unit_led_round_faced.unit_led_round_faced'");
+  TCHAR* RectangleMeshReference = TEXT("/Script/Engine.StaticMesh'/Game/meshes/faced/unit_led_rect_faced.unit_led_rect_faced'");
+
+  UPROPERTY()
+  UMaterialInstanceDynamic* BaseMaterialInstance;
+  UPROPERTY()
+  UMaterialInstanceDynamic* FaceMaterialInstance;
+  UPROPERTY()
+  UMaterialInterface* BaseMaterialInterface;
+  UPROPERTY()
+  UMaterialInterface* FaceMaterialInterface;
+  TCHAR* BaseMaterialReference = TEXT("/Script/Engine.Material'/Game/materials/led.led'");
+  TCHAR* FaceMaterialReference = TEXT("/Script/Engine.Material'/Game/meshes/faced/led_svg.led_svg'");
+
+  UTexture2D* texture; 
+
+  Aosc3GameModeBase* gameMode;
   
   VCVLight* model;
 };

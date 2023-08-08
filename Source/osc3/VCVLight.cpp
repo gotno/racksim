@@ -1,6 +1,7 @@
 #include "VCVLight.h"
 
 #include "osc3.h"
+#include "osc3GameModeBase.h"
 #include "VCV.h"
 #include "VCVKnob.h"
 #include "VCVParam.h"
@@ -8,9 +9,12 @@
 #include "VCVSlider.h"
 #include "VCVSwitch.h"
 
+
 #include "Engine.h"
-#include "Math/UnrealMathUtility.h"
+#include "Engine/Texture2D.h"
 #include "UObject/ConstructorHelpers.h"
+#include "Math/UnrealMathUtility.h"
+#include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 
 AVCVLight::AVCVLight() {
@@ -27,16 +31,20 @@ AVCVLight::AVCVLight() {
   
   BaseMeshComponent->OnComponentBeginOverlap.AddDynamic(this, &AVCVLight::onBeginOverlap);
   
-  static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshCircle(TEXT("/Script/Engine.StaticMesh'/Game/meshes/faced/unit_led_round_faced.unit_led_round_faced'"));
-  static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshRectangle(TEXT("/Script/Engine.StaticMesh'/Game/meshes/faced/unit_led_rect_faced.unit_led_rect_faced'"));
+  static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshCircle(CircleMeshReference);
+  static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshRectangle(RectangleMeshReference);
   
   if (MeshCircle.Object) circleMesh = Cast<UStaticMesh>(MeshCircle.Object);
   if (MeshRectangle.Object) rectangleMesh = Cast<UStaticMesh>(MeshRectangle.Object);
 
-  static ConstructorHelpers::FObjectFinder<UMaterial> Material(TEXT("/Script/Engine.Material'/Game/materials/led.led'"));
-  
-  if (Material.Object) {
-    MaterialInterface = Cast<UMaterial>(Material.Object);
+  static ConstructorHelpers::FObjectFinder<UMaterial> BaseMaterial(BaseMaterialReference);
+  if (BaseMaterial.Object) {
+    BaseMaterialInterface = Cast<UMaterial>(BaseMaterial.Object);
+  }
+
+  static ConstructorHelpers::FObjectFinder<UMaterial> FaceMaterial(FaceMaterialReference);
+  if (FaceMaterial.Object) {
+    FaceMaterialInterface = Cast<UMaterial>(FaceMaterial.Object);
   }
   
   SetActorEnableCollision(true);
@@ -45,15 +53,26 @@ AVCVLight::AVCVLight() {
 void AVCVLight::BeginPlay() {
 	Super::BeginPlay();
   
-  if (MaterialInterface) {
-    MaterialInstance = UMaterialInstanceDynamic::Create(MaterialInterface, this);
-    BaseMeshComponent->SetMaterial(0, MaterialInstance);
-    BaseMeshComponent->SetMaterial(1, MaterialInstance);
+  if (BaseMaterialInterface) {
+    BaseMaterialInstance = UMaterialInstanceDynamic::Create(BaseMaterialInterface, this);
+    BaseMeshComponent->SetMaterial(0, BaseMaterialInstance);
   }
+
+  if (FaceMaterialInterface) {
+    FaceMaterialInstance = UMaterialInstanceDynamic::Create(FaceMaterialInterface, this);
+    BaseMeshComponent->SetMaterial(1, FaceMaterialInstance);
+  }
+  
+  gameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(this));
 }
 
 void AVCVLight::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
+
+  if (!texture && !model->svgPath.IsEmpty()) {
+    texture = gameMode->GetTexture(model->svgPath);
+    if (texture) FaceMaterialInstance->SetTextureParameterValue(FName("texture"), texture);
+  }
 }
 
 void AVCVLight::onBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
@@ -70,7 +89,7 @@ void AVCVLight::onBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* Othe
     // UE_LOG(LogTemp, Warning, TEXT("%s overlapped with knob %s"), *GetActorNameOrLabel(), *OtherActor->GetActorNameOrLabel());
     // SetActorLocation(GetActorLocation() - GetActorForwardVector() * 1.f);
   } else {
-    UE_LOG(LogTemp, Warning, TEXT("%s:%s overlapped with something else: %s"), *GetOwner()->GetActorNameOrLabel(), *GetActorNameOrLabel(), *OtherActor->GetActorNameOrLabel());
+    // UE_LOG(LogTemp, Warning, TEXT("%s:%s overlapped with something else: %s"), *GetOwner()->GetActorNameOrLabel(), *GetActorNameOrLabel(), *OtherActor->GetActorNameOrLabel());
   }
 }
 
@@ -91,17 +110,19 @@ void AVCVLight::init(VCVLight* vcv_light) {
 }
 
 void AVCVLight::SetColor(FLinearColor color) {
-  MaterialInstance->SetVectorParameterValue(TEXT("Color"), color);
+  BaseMaterialInstance->SetVectorParameterValue(TEXT("color"), color);
+  FaceMaterialInstance->SetVectorParameterValue(TEXT("color"), color);
 }
 
 void AVCVLight::SetEmissiveColor(FLinearColor color) {
   if (color.A == 0.f) color = FLinearColor(0.f, 0.f, 0.f, 0.f);
-  MaterialInstance->SetVectorParameterValue(TEXT("EmissiveColor"), color);
+  BaseMaterialInstance->SetVectorParameterValue(TEXT("emissive_color"), color);
+  FaceMaterialInstance->SetVectorParameterValue(TEXT("emissive_color"), color);
 }
 
 void AVCVLight::SetEmissiveIntensity(float intensity) {
-  MaterialInstance->SetScalarParameterValue(TEXT("EmissiveIntensity"), intensity * 2);
-  if (model->transparent) {
-    MaterialInstance->SetScalarParameterValue(TEXT("Transparency"), intensity);
-  }
+  BaseMaterialInstance->SetScalarParameterValue(TEXT("emissive_intensity"), intensity * 2);
+  FaceMaterialInstance->SetScalarParameterValue(TEXT("emissive_intensity"), intensity * 2);
+  BaseMaterialInstance->SetScalarParameterValue(TEXT("transparency"), intensity);
+  FaceMaterialInstance->SetScalarParameterValue(TEXT("transparency"), intensity);
 }
