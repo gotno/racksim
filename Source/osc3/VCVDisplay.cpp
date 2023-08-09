@@ -1,5 +1,6 @@
 #include "VCVDisplay.h"
 
+#include "osc3.h"
 #include "VCV.h"
 
 #include "UObject/ConstructorHelpers.h"
@@ -9,7 +10,11 @@ AVCVDisplay::AVCVDisplay() {
 
   BaseMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Static Mesh"));
   RootComponent = BaseMeshComponent;
-  BaseMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+  BaseMeshComponent->SetGenerateOverlapEvents(true);
+  BaseMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+  BaseMeshComponent->SetCollisionObjectType(PARAM_OBJECT);
+  BaseMeshComponent->SetCollisionResponseToChannel(LIGHT_OBJECT, ECollisionResponse::ECR_Overlap);
   
   static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshBody(TEXT("/Script/Engine.StaticMesh'/Game/meshes/unit_lcd.unit_lcd'"));
   
@@ -20,6 +25,8 @@ AVCVDisplay::AVCVDisplay() {
   if (Material.Object) {
     MaterialInterface = Cast<UMaterial>(Material.Object);
   }
+
+  SetActorEnableCollision(true);
 }
 
 void AVCVDisplay::BeginPlay() {

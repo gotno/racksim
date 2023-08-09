@@ -3,6 +3,7 @@
 #include "osc3.h"
 #include "osc3GameModeBase.h"
 #include "VCV.h"
+#include "VCVDisplay.h"
 #include "VCVKnob.h"
 #include "VCVParam.h"
 #include "VCVButton.h"
@@ -84,6 +85,9 @@ void AVCVLight::onBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* Othe
   } else if (Cast<AVCVSlider>(OtherActor)) {
     // UE_LOG(LogTemp, Warning, TEXT("%s overlapped with slider %s"), *GetActorNameOrLabel(), *OtherActor->GetActorNameOrLabel());
     SetActorLocation(GetActorLocation() - GetActorForwardVector() * 0.2f);
+  } else if (Cast<AVCVDisplay>(OtherActor)) {
+    // UE_LOG(LogTemp, Warning, TEXT("%s overlapped with slider %s"), *GetActorNameOrLabel(), *OtherActor->GetActorNameOrLabel());
+    SetActorLocation(GetActorLocation() - GetActorForwardVector() * 0.05f);
   // } else if (Cast<AVCVKnob>(OtherActor)) {
     // TODO: overlap is a little eager? shouldn't be overlapping with neighboring knobs.
     // UE_LOG(LogTemp, Warning, TEXT("%s overlapped with knob %s"), *GetActorNameOrLabel(), *OtherActor->GetActorNameOrLabel());
