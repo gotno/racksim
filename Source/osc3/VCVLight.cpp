@@ -9,7 +9,6 @@
 #include "VCVSlider.h"
 #include "VCVSwitch.h"
 
-
 #include "Engine.h"
 #include "Engine/Texture2D.h"
 #include "UObject/ConstructorHelpers.h"
@@ -99,6 +98,9 @@ void AVCVLight::init(VCVLight* vcv_light) {
   SetColor(model->bgColor);
   SetEmissiveColor(model->color);
   SetEmissiveIntensity(model->color.A);
+
+  SetHidden(!model->visible);
+  SetActorEnableCollision(model->visible);
   
   if (model->shape == LightShape::Round) {
     BaseMeshComponent->SetStaticMesh(circleMesh);
