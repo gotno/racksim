@@ -77,13 +77,14 @@ void AVCVLight::Tick(float DeltaTime) {
 void AVCVLight::onBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
   if (Cast<AVCVSwitch>(OtherActor)) {
     // UE_LOG(LogTemp, Warning, TEXT("%s overlapped with switch %s"), *GetActorNameOrLabel(), *OtherActor->GetActorNameOrLabel());
+    SetActorLocation(GetActorLocation() - GetActorForwardVector() * 0.01f);
   } else if (Cast<AVCVButton>(OtherActor)) {
     // UE_LOG(LogTemp, Warning, TEXT("%s overlapped with button %s"), *GetActorNameOrLabel(), *OtherActor->GetActorNameOrLabel());
     SetActorLocation(GetActorLocation() - GetActorForwardVector() * 0.2f);
   } else if (Cast<AVCVSlider>(OtherActor)) {
     // UE_LOG(LogTemp, Warning, TEXT("%s overlapped with slider %s"), *GetActorNameOrLabel(), *OtherActor->GetActorNameOrLabel());
     SetActorLocation(GetActorLocation() - GetActorForwardVector() * 0.2f);
-  } else if (Cast<AVCVKnob>(OtherActor)) {
+  // } else if (Cast<AVCVKnob>(OtherActor)) {
     // TODO: overlap is a little eager? shouldn't be overlapping with neighboring knobs.
     // UE_LOG(LogTemp, Warning, TEXT("%s overlapped with knob %s"), *GetActorNameOrLabel(), *OtherActor->GetActorNameOrLabel());
     // SetActorLocation(GetActorLocation() - GetActorForwardVector() * 1.f);

@@ -1,5 +1,6 @@
 #include "VCVSwitch.h"
 
+#include "osc3.h"
 #include "VCV.h"
 #include "osc3GameModeBase.h"
 
@@ -9,10 +10,15 @@
 
 AVCVSwitch::AVCVSwitch() {
   MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Base Mesh"));
+  SetRootComponent(MeshComponent);
+
+  MeshComponent->SetGenerateOverlapEvents(true);
+  MeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+  MeshComponent->SetCollisionObjectType(PARAM_OBJECT);
+  MeshComponent->SetCollisionResponseToChannel(LIGHT_OBJECT, ECollisionResponse::ECR_Overlap);
   
   static ConstructorHelpers::FObjectFinder<UStaticMesh> Mesh(MeshReference);
   if (Mesh.Object) MeshComponent->SetStaticMesh(Mesh.Object);
-  SetRootComponent(MeshComponent);
 
   // base material
   static ConstructorHelpers::FObjectFinder<UMaterial> BaseMaterial(BaseMaterialReference);
@@ -42,11 +48,6 @@ void AVCVSwitch::BeginPlay() {
     MeshComponent->SetMaterial(1, FaceMaterialInstance);
   }
 
-  MeshComponent->SetGenerateOverlapEvents(true);
-  MeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-  MeshComponent->SetCollisionObjectType(ECollisionChannel::ECC_WorldStatic);
-  MeshComponent->SetCollisionResponseToChannel(ECollisionChannel::ECC_WorldStatic, ECollisionResponse::ECR_Overlap);
-
   gameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(this));
 }
 
@@ -65,6 +66,8 @@ void AVCVSwitch::init(VCVParam* vcv_param) {
   // remove empty svg paths and init frames array to same size
   vcv_param->svgPaths.Remove(FString(""));
   frames.Init(nullptr, vcv_param->svgPaths.Num());
+  
+  SetActorScale3D(FVector(1, model->box.size.x, model->box.size.y));
 }
 
 void AVCVSwitch::engage() {
