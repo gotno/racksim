@@ -124,8 +124,8 @@ void AVCVLight::SetEmissiveColor(FLinearColor color) {
 }
 
 void AVCVLight::SetEmissiveIntensity(float intensity) {
-  BaseMaterialInstance->SetScalarParameterValue(TEXT("emissive_intensity"), intensity * 2);
-  FaceMaterialInstance->SetScalarParameterValue(TEXT("emissive_intensity"), intensity * 2);
+  BaseMaterialInstance->SetScalarParameterValue(TEXT("emissive_intensity"), intensity);
+  FaceMaterialInstance->SetScalarParameterValue(TEXT("emissive_intensity"), intensity);
   BaseMaterialInstance->SetScalarParameterValue(TEXT("transparency"), intensity);
   FaceMaterialInstance->SetScalarParameterValue(TEXT("transparency"), intensity);
 }
