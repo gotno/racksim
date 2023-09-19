@@ -17,6 +17,7 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+  FString getModuleBrand();
 
 public:	
 	virtual void Tick(float DeltaTime) override;

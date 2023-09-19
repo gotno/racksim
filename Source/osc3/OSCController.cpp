@@ -111,7 +111,7 @@ void AOSCController::AddModule(const FOSCAddress& AddressPattern, const FOSCMess
   ));
 
   gameMode->RegisterSVG(panelSvgPath, box.size);
-  
+
   NotifyReceived("module", moduleId);
 }
 
@@ -378,7 +378,7 @@ void AOSCController::AddLight(const FOSCAddress& AddressPattern, const FOSCMessa
 
   UOSCManager::GetString(message, 16, light.svgPath);
   gameMode->RegisterSVG(light.svgPath, light.box.size);
-
+  
   UOSCManager::GetBool(message, 17, light.visible);
 
   NotifyReceived("module_light", moduleId, lightId);

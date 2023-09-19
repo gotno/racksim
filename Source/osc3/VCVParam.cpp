@@ -28,6 +28,10 @@ void AVCVParam::init(VCVParam* vcv_param) {
   SetActorScale3D(FVector(1, model->box.size.x, model->box.size.y));
 }
 
+FString AVCVParam::getModuleBrand() {
+  return owner->getBrand();
+}
+
 void AVCVParam::spawnLights(USceneComponent* attachTo) {
   FActorSpawnParameters spawnParams;
   spawnParams.Owner = this;

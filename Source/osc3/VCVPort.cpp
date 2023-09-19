@@ -2,6 +2,8 @@
 
 #include "osc3GameModeBase.h"
 #include "VCV.h"
+#include "VCVOverrides.h"
+#include "VCVModule.h"
 
 #include "engine/Texture2D.h"
 
@@ -57,6 +59,13 @@ void AVCVPort::Tick(float DeltaTime) {
 void AVCVPort::init(VCVPort* vcv_port) {
   model = vcv_port;
   StaticMeshComponent->SetWorldScale3D(FVector(1, model->box.size.x, model->box.size.y));
+  
+  VCVOverrides overrides;
+  BaseMaterialInstance->SetVectorParameterValue(FName("color"), overrides.getMatchingColor(getModuleBrand(), model->svgPath));
+}
+
+FString AVCVPort::getModuleBrand() {
+  return Cast<AVCVModule>(GetOwner())->getBrand();
 }
 
 void AVCVPort::addCableId(int64_t cableId) {

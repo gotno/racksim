@@ -2,6 +2,7 @@
 
 #include "osc3GameModeBase.h"
 #include "VCV.h"
+#include "VCVOverrides.h"
 #include "VCVLight.h"
 #include "VCVKnob.h"
 #include "VCVButton.h"
@@ -65,10 +66,17 @@ void AVCVModule::init(VCVModule vcv_module) {
   model = vcv_module; 
 
   VCVOverrides overrides;
-  BaseMaterialInstance->SetVectorParameterValue(FName("color"), overrides.getModuleColor(model.brand));
+  BaseMaterialInstance->SetVectorParameterValue(FName("color"), overrides.getMatchingColor(model.brand));
+  FaceMaterialInstance->SetScalarParameterValue(FName("uscale"), overrides.getUVOverride(model.brand).X);
+  FaceMaterialInstance->SetScalarParameterValue(FName("vscale"), overrides.getUVOverride(model.brand).Y);
 
-  StaticMeshComponent->SetWorldScale3D(FVector(1, model.box.size.x, model.box.size.y));
+  StaticMeshComponent->SetWorldScale3D(FVector(2, model.box.size.x, model.box.size.y));
   spawnComponents();
+  SetActorRotation(FRotator(-20.f, 0.f, 0.f));
+}
+
+FString AVCVModule::getBrand() {
+  return model.brand;
 }
 
 void AVCVModule::GetPortInfo(PortIdentity identity, FVector& portLocation, FVector& portForwardVector) {

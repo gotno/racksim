@@ -38,6 +38,8 @@ public:
   
   void registerParamLight(int64_t lightId, AVCVLight* lightActor);
   void paramUpdated(int32 paramId, float value);
+
+  FString getBrand();
   
 private:
   UPROPERTY(VisibleAnywhere)

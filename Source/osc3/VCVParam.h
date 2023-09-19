@@ -14,6 +14,7 @@ public:
 protected:
 	virtual void BeginPlay() override;
   virtual void spawnLights(USceneComponent* attachTo);
+  FString getModuleBrand();
   
 private:
   class AVCVModule* owner;

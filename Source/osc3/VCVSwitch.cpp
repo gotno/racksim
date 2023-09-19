@@ -66,8 +66,6 @@ void AVCVSwitch::init(VCVParam* vcv_param) {
   // remove empty svg paths and init frames array to same size
   vcv_param->svgPaths.Remove(FString(""));
   frames.Init(nullptr, vcv_param->svgPaths.Num());
-  
-  SetActorScale3D(FVector(1, model->box.size.x, model->box.size.y));
 }
 
 void AVCVSwitch::engage() {
