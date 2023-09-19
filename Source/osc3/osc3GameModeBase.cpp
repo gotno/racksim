@@ -1,8 +1,10 @@
 #include "osc3GameModeBase.h"
 #include "osc3PlayerController.h"
 #include "Avatar.h"
+#include "VRAvatar.h"
 
 #include "VCV.h"
+#include "VCVOverrides.h"
 #include "VCVModule.h"
 #include "VCVCable.h"
 #include "WidgetSurrogate.h"
@@ -15,7 +17,7 @@
 
 Aosc3GameModeBase::Aosc3GameModeBase() {
   PlayerControllerClass = Aosc3PlayerController::StaticClass();
-  DefaultPawnClass = AAvatar::StaticClass();
+  // DefaultPawnClass = AAvatar::StaticClass();
 
   OSCctrl = CreateDefaultSubobject<AOSCController>(FName(TEXT("OSCctrl")));
   // HUDClass = AIndicatorHUD::StaticClass();
@@ -28,7 +30,8 @@ void Aosc3GameModeBase::BeginPlay() {
   OSCctrl->NotifyResync();
 
   PlayerController = Cast<Aosc3PlayerController>(UGameplayStatics::GetPlayerController(this, 0));
-  PlayerPawn = Cast<AAvatar>(UGameplayStatics::GetPlayerPawn(this, 0));
+  // PlayerPawn = Cast<AAvatar>(UGameplayStatics::GetPlayerPawn(this, 0));
+  PlayerPawn = Cast<AVRAvatar>(UGameplayStatics::GetPlayerPawn(this, 0));
 }
 
 void Aosc3GameModeBase::Tick(float DeltaTime) {

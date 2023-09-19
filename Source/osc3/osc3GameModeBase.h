@@ -11,6 +11,7 @@
 struct VCVModule;
 struct VCVCable;
 class AAvatar;
+class AVRAvatar;
 class AVCVCable;
 class AVCVModule;
 class AWidgetSurrogate;
@@ -57,10 +58,11 @@ private:
   AOSCController* OSCctrl;
 
   Aosc3PlayerController* PlayerController;
-  AAvatar* PlayerPawn;
+  // AAvatar* PlayerPawn;
+  AVRAvatar* PlayerPawn;
   
-  float spawnXPositionCursor = 31.f;
-  float spawnYPositionCursor = 0.f;
+  float spawnXPositionCursor{0.f};
+  float spawnYPositionCursor{100.f};
 
   void ProcessSpawnCableQueue();
   TArray<VCVCable> cableQueue;
