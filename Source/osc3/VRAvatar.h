@@ -2,6 +2,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "EnhancedInputComponent.h"
+#include "MotionControllerComponent.h"
 
 #include "VRAvatar.generated.h"
 
@@ -96,12 +97,8 @@ private:
   FVector LastDestinationLocation{FVector::ZeroVector};
   bool bTeleportActive{false};
 
-  void StartRotateWorldLeft(const FInputActionValue& _Value);
-  void RotateWorldLeft(const FInputActionValue& _Value);
-  // bool bRotateWorldLeftActive{false};
-  void StartRotateWorldRight(const FInputActionValue& _Value);
-  void RotateWorldRight(const FInputActionValue& _Value);
-  // bool bRotateWorldRightActive{false};
+  void HandleStartRotateWorld(const FInputActionValue& _Value, EControllerHand hand);
+  void HandleRotateWorld(const FInputActionValue& _Value, EControllerHand hand);
   void RotateWorld(float degrees);
   void CompleteRotateWorld(const FInputActionValue& _Value);
   float LastRotateWorldDegrees{0.f};

@@ -6,7 +6,6 @@
 #include "osc3.h"
 
 #include "HeadMountedDisplayFunctionLibrary.h"
-#include "MotionControllerComponent.h"
 #include "InputTriggers.h"
 #include "EnhancedInputSubsystems.h"
 
@@ -106,10 +105,10 @@ void AVRAvatar::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
   // Input->BindAction(InputActions.Teleport, ETriggerEvent::Completed, this, &AVRAvatar::CompleteTeleport);
   
   // rotate world
-  Input->BindAction(InputActions.RotateWorldLeft, ETriggerEvent::Started, this, &AVRAvatar::StartRotateWorldLeft);
-  Input->BindAction(InputActions.RotateWorldRight, ETriggerEvent::Started, this, &AVRAvatar::StartRotateWorldRight);
-  Input->BindAction(InputActions.RotateWorldLeft, ETriggerEvent::Triggered, this, &AVRAvatar::RotateWorldLeft);
-  Input->BindAction(InputActions.RotateWorldRight, ETriggerEvent::Triggered, this, &AVRAvatar::RotateWorldRight);
+  Input->BindAction(InputActions.RotateWorldLeft, ETriggerEvent::Started, this, &AVRAvatar::HandleStartRotateWorld, EControllerHand::Left);
+  Input->BindAction(InputActions.RotateWorldRight, ETriggerEvent::Started, this, &AVRAvatar::HandleStartRotateWorld, EControllerHand::Right);
+  Input->BindAction(InputActions.RotateWorldLeft, ETriggerEvent::Triggered, this, &AVRAvatar::HandleRotateWorld, EControllerHand::Left);
+  Input->BindAction(InputActions.RotateWorldRight, ETriggerEvent::Triggered, this, &AVRAvatar::HandleRotateWorld, EControllerHand::Right);
   Input->BindAction(InputActions.RotateWorldLeft, ETriggerEvent::Completed, this, &AVRAvatar::CompleteRotateWorld);
   Input->BindAction(InputActions.RotateWorldRight, ETriggerEvent::Completed, this, &AVRAvatar::CompleteRotateWorld);
 
@@ -170,16 +169,31 @@ void AVRAvatar::SweepDestination(const FInputActionValue& _Value) {
 }
 
 // rotate world
-void AVRAvatar::StartRotateWorldLeft(const FInputActionValue& _Value) {
-  UE_LOG(LogTemp, Warning, TEXT("start rotate world left"));
-  LastLeftHandLocation = LeftController->GetComponentLocation();
+void AVRAvatar::HandleStartRotateWorld(const FInputActionValue& _Value, EControllerHand hand) {
+  FString handLabel(hand == EControllerHand::Left ? "left" : "right");
+  UE_LOG(LogTemp, Warning, TEXT("start rotate world %s"), *handLabel);
+
+  if (hand == EControllerHand::Left) {
+    LastLeftHandLocation = LeftController->GetComponentLocation();
+  } else {
+    LastRightHandLocation = RightController->GetComponentLocation();
+  }
 }
-void AVRAvatar::RotateWorldLeft(const FInputActionValue& _Value) {
-  FVector controllerLocation = LeftController->GetComponentLocation();
+void AVRAvatar::HandleRotateWorld(const FInputActionValue& _Value, EControllerHand hand) {
+  FVector controllerLocation;
+  FVector lastControllerLocation;
+
+  if (hand == EControllerHand::Left) {
+    controllerLocation = LeftController->GetComponentLocation();
+    lastControllerLocation = LastLeftHandLocation;
+  } else {
+    controllerLocation = RightController->GetComponentLocation();
+    lastControllerLocation = LastRightHandLocation;
+  }
 
   float rotateWorldDegrees =
     GetRotationalDistanceBetweenControllerPositions(
-      LastLeftHandLocation,
+      lastControllerLocation,
       controllerLocation
     ) * RotateWorldScale;
   
@@ -189,28 +203,11 @@ void AVRAvatar::RotateWorldLeft(const FInputActionValue& _Value) {
   
   RotateWorld(rotateWorldDegrees);
 
-  LastLeftHandLocation = LeftController->GetComponentLocation();
-}
-void AVRAvatar::StartRotateWorldRight(const FInputActionValue& _Value) {
-  UE_LOG(LogTemp, Warning, TEXT("start rotate world right"));
-  LastRightHandLocation = RightController->GetComponentLocation();
-}
-void AVRAvatar::RotateWorldRight(const FInputActionValue& _Value) {
-  FVector controllerLocation = RightController->GetComponentLocation();
-
-  float rotateWorldDegrees =
-    GetRotationalDistanceBetweenControllerPositions(
-      LastRightHandLocation,
-      controllerLocation
-    ) * RotateWorldScale;
-  
-  rotateWorldDegrees =
-    FMath::WeightedMovingAverage(rotateWorldDegrees, LastRotateWorldDegrees, 0.2f);
-  LastRotateWorldDegrees = rotateWorldDegrees;
-  
-  RotateWorld(rotateWorldDegrees);
-
-  LastRightHandLocation = RightController->GetComponentLocation();
+  if (hand == EControllerHand::Left) {
+    LastLeftHandLocation = LeftController->GetComponentLocation();
+  } else {
+    LastRightHandLocation = RightController->GetComponentLocation();
+  }
 }
 void AVRAvatar::RotateWorld(float degrees) {
   FVector vrOrigin = VRRoot->GetComponentLocation();
