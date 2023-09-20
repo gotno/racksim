@@ -11,6 +11,8 @@
 #include "EnhancedInputSubsystems.h"
 
 #include "Kismet/KismetMathLibrary.h"
+#include "Kismet/KismetSystemLibrary.h"
+#include "Kismet/GameplayStatics.h"
 #include "DrawDebugHelpers.h"
 
 AVRAvatar::AVRAvatar() {
@@ -51,9 +53,10 @@ void AVRAvatar::PawnClientRestart() {
   Camera->SetRelativeLocation(FVector(0, 0, -halfHeight));
 
   if (APlayerController* PC = Cast<APlayerController>(GetController())) {
-    if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer())) {
-      Subsystem->ClearAllMappings();
-      Subsystem->AddMappingContext(InputMappingContext, 0);
+    InputSubsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer());
+    if (InputSubsystem) {
+      InputSubsystem->ClearAllMappings();
+      InputSubsystem->AddMappingContext(InputMappingContexts.WorldManipulation, 0);
     }
   }	
 }
@@ -102,21 +105,20 @@ void AVRAvatar::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
   // Input->BindAction(InputActions.Teleport, ETriggerEvent::Triggered, this, &AVRAvatar::SweepDestination);
   // Input->BindAction(InputActions.Teleport, ETriggerEvent::Completed, this, &AVRAvatar::CompleteTeleport);
   
-  // left/right grip
-  Input->BindAction(InputActions.RightGrip, ETriggerEvent::Started, this, &AVRAvatar::StartRightGrip);
-  Input->BindAction(InputActions.RightGrip, ETriggerEvent::Completed, this, &AVRAvatar::CompleteRightGrip);
-  Input->BindAction(InputActions.LeftGrip, ETriggerEvent::Started, this, &AVRAvatar::StartLeftGrip);
-  Input->BindAction(InputActions.LeftGrip, ETriggerEvent::Completed, this, &AVRAvatar::CompleteLeftGrip);
-
   // rotate world
-  Input->BindAction(InputActions.RotateWorld, ETriggerEvent::Started, this, &AVRAvatar::StartRotateWorld);
-  Input->BindAction(InputActions.RotateWorld, ETriggerEvent::Triggered, this, &AVRAvatar::RotateWorld);
-  Input->BindAction(InputActions.RotateWorld, ETriggerEvent::Completed, this, &AVRAvatar::CompleteRotateWorld);
+  Input->BindAction(InputActions.RotateWorldLeft, ETriggerEvent::Started, this, &AVRAvatar::StartRotateWorldLeft);
+  Input->BindAction(InputActions.RotateWorldRight, ETriggerEvent::Started, this, &AVRAvatar::StartRotateWorldRight);
+  Input->BindAction(InputActions.RotateWorldLeft, ETriggerEvent::Triggered, this, &AVRAvatar::RotateWorldLeft);
+  Input->BindAction(InputActions.RotateWorldRight, ETriggerEvent::Triggered, this, &AVRAvatar::RotateWorldRight);
+  Input->BindAction(InputActions.RotateWorldLeft, ETriggerEvent::Completed, this, &AVRAvatar::CompleteRotateWorld);
+  Input->BindAction(InputActions.RotateWorldRight, ETriggerEvent::Completed, this, &AVRAvatar::CompleteRotateWorld);
 
   // translate world
   // Input->BindAction(InputActions.TranslateWorld, ETriggerEvent::Started, this, &AVRAvatar::StartTranslateWorld);
   // Input->BindAction(InputActions.TranslateWorld, ETriggerEvent::Triggered, this, &AVRAvatar::TranslateWorld);
   // Input->BindAction(InputActions.TranslateWorld, ETriggerEvent::Completed, this, &AVRAvatar::CompleteTranslateWorld);
+
+  Input->BindAction(InputActions.Quit, ETriggerEvent::Completed, this, &AVRAvatar::Quit);
 }
 
 // teleport
@@ -136,99 +138,92 @@ void AVRAvatar::CompleteTeleport(const FInputActionValue& _Value) {
   }
 }
 void AVRAvatar::SweepDestination(const FInputActionValue& _Value) {
-  if (bWorldTranslateActive) return;
+  // if (bWorldTranslateActive) return;
 
-  // const FName TraceTag("Destination Trace Tag");
-  // GetWorld()->DebugDrawTraceTag = TraceTag;
-  FCollisionQueryParams CollisionParams;
-  // CollisionParams.TraceTag = TraceTag;
+  // // const FName TraceTag("Destination Trace Tag");
+  // // GetWorld()->DebugDrawTraceTag = TraceTag;
+  // FCollisionQueryParams CollisionParams;
+  // // CollisionParams.TraceTag = TraceTag;
 
-  UMotionControllerComponent* controller = bRightGripActive ? RightController : LeftController;
-  HasDestinationHit =
-    GetWorld()->LineTraceSingleByChannel(
-      DestinationHitResult,
-      controller->GetComponentLocation(),
-      controller->GetComponentLocation() + controller->GetForwardVector() * 1000,
-      TELEPORT_TRACE,
-      CollisionParams
-    );
+  // UMotionControllerComponent* controller = bRightGripActive ? RightController : LeftController;
+  // HasDestinationHit =
+  //   GetWorld()->LineTraceSingleByChannel(
+  //     DestinationHitResult,
+  //     controller->GetComponentLocation(),
+  //     controller->GetComponentLocation() + controller->GetForwardVector() * 1000,
+  //     TELEPORT_TRACE,
+  //     CollisionParams
+  //   );
 
-  if (HasDestinationHit) {
-    FVector destinationLocation =
-      UKismetMathLibrary::WeightedMovingAverage_FVector(
-        DestinationHitResult.Location,
-        LastDestinationLocation, 0.2f
-      );
-    LastDestinationLocation = destinationLocation;
-    DestinationMarker->SetWorldLocation(destinationLocation);
-    DestinationMarker->SetVisibility(true);
-  } else {
-    DestinationMarker->SetVisibility(false);
-  }
-}
-
-// grips
-void AVRAvatar::StartRightGrip(const FInputActionValue& _Value) {
-  UE_LOG(LogTemp, Warning, TEXT("start right grip"));
-  bRightGripActive = true;
-  LastRightHandLocation = RightController->GetComponentLocation();
-}
-void AVRAvatar::CompleteRightGrip(const FInputActionValue& _Value) {
-  UE_LOG(LogTemp, Warning, TEXT("complete right grip"));
-  bRightGripActive = false;
-}
-
-void AVRAvatar::StartLeftGrip(const FInputActionValue& _Value) {
-  UE_LOG(LogTemp, Warning, TEXT("start left grip"));
-  bLeftGripActive = true;
-  LastLeftHandLocation = LeftController->GetComponentLocation();
-}
-void AVRAvatar::CompleteLeftGrip(const FInputActionValue& _Value) {
-  UE_LOG(LogTemp, Warning, TEXT("complete left grip"));
-  bLeftGripActive = false;
+  // if (HasDestinationHit) {
+  //   FVector destinationLocation =
+  //     UKismetMathLibrary::WeightedMovingAverage_FVector(
+  //       DestinationHitResult.Location,
+  //       LastDestinationLocation, 0.2f
+  //     );
+  //   LastDestinationLocation = destinationLocation;
+  //   DestinationMarker->SetWorldLocation(destinationLocation);
+  //   DestinationMarker->SetVisibility(true);
+  // } else {
+  //   DestinationMarker->SetVisibility(false);
+  // }
 }
 
 // rotate world
-void AVRAvatar::StartRotateWorld(const FInputActionValue& _Value) {
-  UE_LOG(LogTemp, Warning, TEXT("start rotate world"));
-  LastRotateWorldDegrees = 0.f;
+void AVRAvatar::StartRotateWorldLeft(const FInputActionValue& _Value) {
+  UE_LOG(LogTemp, Warning, TEXT("start rotate world left"));
+  LastLeftHandLocation = LeftController->GetComponentLocation();
 }
-void AVRAvatar::CompleteRotateWorld(const FInputActionValue& _Value) {
-  UE_LOG(LogTemp, Warning, TEXT("complete rotate world"));
-}
-void AVRAvatar::RotateWorld(const FInputActionValue& _Value) {
-  // if (bWorldTranslateActive || bTeleportActive) return;
+void AVRAvatar::RotateWorldLeft(const FInputActionValue& _Value) {
+  FVector controllerLocation = LeftController->GetComponentLocation();
 
-  FVector leftControllerLocation = LeftController->GetComponentLocation();
-  FVector rightControllerLocation = RightController->GetComponentLocation();
-
-  // TODO: favor dominant hand?
   float rotateWorldDegrees =
     GetRotationalDistanceBetweenControllerPositions(
-      bLeftGripActive ? LastLeftHandLocation : LastRightHandLocation,
-      bLeftGripActive ? leftControllerLocation : rightControllerLocation
+      LastLeftHandLocation,
+      controllerLocation
     ) * RotateWorldScale;
   
   rotateWorldDegrees =
     FMath::WeightedMovingAverage(rotateWorldDegrees, LastRotateWorldDegrees, 0.2f);
   LastRotateWorldDegrees = rotateWorldDegrees;
+  
+  RotateWorld(rotateWorldDegrees);
 
-  // RotateWorldByDegrees(rotateWorldDegrees);
-  // d10j
+  LastLeftHandLocation = LeftController->GetComponentLocation();
+}
+void AVRAvatar::StartRotateWorldRight(const FInputActionValue& _Value) {
+  UE_LOG(LogTemp, Warning, TEXT("start rotate world right"));
+  LastRightHandLocation = RightController->GetComponentLocation();
+}
+void AVRAvatar::RotateWorldRight(const FInputActionValue& _Value) {
+  FVector controllerLocation = RightController->GetComponentLocation();
 
-  FRotator inputRotation(0.f, rotateWorldDegrees, 0.f);
+  float rotateWorldDegrees =
+    GetRotationalDistanceBetweenControllerPositions(
+      LastRightHandLocation,
+      controllerLocation
+    ) * RotateWorldScale;
+  
+  rotateWorldDegrees =
+    FMath::WeightedMovingAverage(rotateWorldDegrees, LastRotateWorldDegrees, 0.2f);
+  LastRotateWorldDegrees = rotateWorldDegrees;
+  
+  RotateWorld(rotateWorldDegrees);
 
-  // UE_LOG(LogTemp, Warning, TEXT("rotating %fdeg"), rotateWorldDegrees);
-
+  LastRightHandLocation = RightController->GetComponentLocation();
+}
+void AVRAvatar::RotateWorld(float degrees) {
   FVector vrOrigin = VRRoot->GetComponentLocation();
   FVector cameraLocation = Camera->GetComponentLocation();
   FVector translation = vrOrigin - cameraLocation;
-  FVector rotated = translation.RotateAngleAxis(rotateWorldDegrees, FVector::UpVector);
-  VRRoot->SetWorldLocation(cameraLocation + rotated);
-  VRRoot->AddRelativeRotation(inputRotation);
+  FVector rotatedTranslation = translation.RotateAngleAxis(degrees, FVector::UpVector);
+  VRRoot->SetWorldLocation(cameraLocation + rotatedTranslation);
+  VRRoot->AddRelativeRotation(FRotator (0.f, degrees, 0.f));
+}
 
-  LastLeftHandLocation = LeftController->GetComponentLocation();
-  LastRightHandLocation = RightController->GetComponentLocation();
+void AVRAvatar::CompleteRotateWorld(const FInputActionValue& _Value) {
+  UE_LOG(LogTemp, Warning, TEXT("complete rotate world"));
+  LastRotateWorldDegrees = 0.f;
 }
 
 // translate world
@@ -271,6 +266,15 @@ void AVRAvatar::TranslateWorld(const FInputActionValue& _Value) {
 
   LastLeftHandLocation = LeftController->GetComponentLocation();
   LastRightHandLocation = RightController->GetComponentLocation();
+}
+
+void AVRAvatar::Quit(const FInputActionValue& _Value) {
+  UKismetSystemLibrary::QuitGame(
+    GetWorld(),
+    UGameplayStatics::GetPlayerController(this, 0),
+    EQuitPreference::Quit,
+    false
+  );
 }
 
 void AVRAvatar::MoveForward(float throttle) {

@@ -19,17 +19,30 @@ struct FInputActions {
   UInputAction* Teleport;
 
   UPROPERTY(EditDefaultsOnly)
-  UInputAction* LeftGrip;
-  UPROPERTY(EditDefaultsOnly)
-  UInputAction* RightGrip;
-
-  UPROPERTY(EditDefaultsOnly)
   UInputAction* TranslateWorld;
   UPROPERTY(EditDefaultsOnly)
-  UInputAction* RotateWorld;
+  UInputAction* RotateWorldRight;
+  UPROPERTY(EditDefaultsOnly)
+  UInputAction* RotateWorldLeft;
+
+  UPROPERTY(EditDefaultsOnly)
+  UInputAction* Quit;
 };
 
+USTRUCT()
+struct FInputMappingContexts {
+	GENERATED_BODY()
+    
+  UPROPERTY(EditDefaultsOnly)
+  UInputMappingContext* WorldManipulation;
+    
+  UPROPERTY(EditDefaultsOnly)
+  UInputMappingContext* RotateWorldLeft;
+  UPROPERTY(EditDefaultsOnly)
+  UInputMappingContext* RotateWorldRight;
+};
 
+class UEnhancedInputLocalPlayerSubsystem;
 UCLASS()
 class OSC3_API AVRAvatar : public ACharacter {
 	GENERATED_BODY()
@@ -40,7 +53,9 @@ public:
   UPROPERTY(EditAnywhere, Category="Input")
   FInputActions InputActions;
   UPROPERTY(EditAnywhere, Category="Input")
-  UInputMappingContext* InputMappingContext;
+  FInputMappingContexts InputMappingContexts;
+
+  UEnhancedInputLocalPlayerSubsystem* InputSubsystem;
   
   float GetCameraHeight();
   void GetRenderablePosition(FVector& location, FRotator& rotation);
@@ -68,7 +83,6 @@ private:
   UPROPERTY(VisibleAnywhere)
   UStaticMeshComponent* DestinationMarker;
   
-  
   float GetRotationalDistanceBetweenControllerPositions(const FVector& c1, const FVector& c2);
   
   void MoveForward(float throttle);
@@ -82,16 +96,14 @@ private:
   FVector LastDestinationLocation{FVector::ZeroVector};
   bool bTeleportActive{false};
 
-  void StartRightGrip(const FInputActionValue& _Value);
-  void CompleteRightGrip(const FInputActionValue& _Value);
-  bool bRightGripActive{false};
-  void StartLeftGrip(const FInputActionValue& _Value);
-  void CompleteLeftGrip(const FInputActionValue& _Value);
-  bool bLeftGripActive{false};
-
-  void StartRotateWorld(const FInputActionValue& _Value);
+  void StartRotateWorldLeft(const FInputActionValue& _Value);
+  void RotateWorldLeft(const FInputActionValue& _Value);
+  // bool bRotateWorldLeftActive{false};
+  void StartRotateWorldRight(const FInputActionValue& _Value);
+  void RotateWorldRight(const FInputActionValue& _Value);
+  // bool bRotateWorldRightActive{false};
+  void RotateWorld(float degrees);
   void CompleteRotateWorld(const FInputActionValue& _Value);
-  void RotateWorld(const FInputActionValue& _Value);
   float LastRotateWorldDegrees{0.f};
 
   UPROPERTY(EditDefaultsOnly, Category="Input")
@@ -106,6 +118,7 @@ private:
   UPROPERTY(EditDefaultsOnly, Category="Input")
   float TranslateWorldScale{1.f};
 
+  void Quit(const FInputActionValue& _Value);
 
   FVector LastLeftHandLocation{FVector::ZeroVector};
   FVector LastRightHandLocation{FVector::ZeroVector};
