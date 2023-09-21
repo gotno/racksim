@@ -13,18 +13,26 @@ class UStaticMeshComponent;
 struct FHitResult;
 
 USTRUCT()
-struct FInputActions {
+struct FWorldManipulationActions {
 	GENERATED_BODY()
-    
-  UPROPERTY(EditDefaultsOnly)
-  UInputAction* Teleport;
 
   UPROPERTY(EditDefaultsOnly)
-  UInputAction* TranslateWorld;
+  UInputAction* TranslateWorldLeft;
   UPROPERTY(EditDefaultsOnly)
-  UInputAction* RotateWorldRight;
+  UInputAction* TranslateWorldRight;
+  
   UPROPERTY(EditDefaultsOnly)
   UInputAction* RotateWorldLeft;
+  UPROPERTY(EditDefaultsOnly)
+  UInputAction* RotateWorldRight;
+
+  UPROPERTY(EditDefaultsOnly)
+  UInputAction* RotoTranslateWorld;
+    
+  UPROPERTY(EditDefaultsOnly)
+  UInputAction* TeleportLeft;
+  UPROPERTY(EditDefaultsOnly)
+  UInputAction* TeleportRight;
 
   UPROPERTY(EditDefaultsOnly)
   UInputAction* Quit;
@@ -52,7 +60,7 @@ public:
 	AVRAvatar();
   
   UPROPERTY(EditAnywhere, Category="Input")
-  FInputActions InputActions;
+  FWorldManipulationActions WorldManipulationActions;
   UPROPERTY(EditAnywhere, Category="Input")
   FInputMappingContexts InputMappingContexts;
 
@@ -89,31 +97,36 @@ private:
   void MoveForward(float throttle);
   void MoveRight(float throttle);
 
-  void StartTeleport(const FInputActionValue& _Value);
-  void SweepDestination(const FInputActionValue& _Value);
-  void CompleteTeleport(const FInputActionValue& _Value);
+  void HandleStartTeleport(const FInputActionValue& _Value);
+  void HandleTeleport(const FInputActionValue& Value, EControllerHand hand);
+  void HandleCompleteTeleport(const FInputActionValue& _Value);
+  void SweepDestination(EControllerHand hand);
   FHitResult DestinationHitResult;
   bool HasDestinationHit;
   FVector LastDestinationLocation{FVector::ZeroVector};
-  bool bTeleportActive{false};
 
   void HandleStartRotateWorld(const FInputActionValue& _Value, EControllerHand hand);
   void HandleRotateWorld(const FInputActionValue& _Value, EControllerHand hand);
-  void RotateWorld(float degrees);
-  void CompleteRotateWorld(const FInputActionValue& _Value);
-  float LastRotateWorldDegrees{0.f};
+  void RotateWorldAroundPivot(float degrees, FVector pivot);
+  void HandleCompleteRotateWorld(const FInputActionValue& _Value);
+  float LastRotateWorldDelta{0.f};
 
   UPROPERTY(EditDefaultsOnly, Category="Input")
-  float RotateWorldScale{2.f};
+  float RotateWorldScale{1.f};
 
-  void StartTranslateWorld(const FInputActionValue& _Value);
-  void CompleteTranslateWorld(const FInputActionValue& _Value);
-  bool bWorldTranslateActive{false};
-  void TranslateWorld(const FInputActionValue& _Value);
-  FVector LastTranslateWorldOffset{FVector::ZeroVector};
+  void HandleStartTranslateWorld(const FInputActionValue& _Value, EControllerHand hand);
+  void HandleTranslateWorld(const FInputActionValue& _Value, EControllerHand hand);
+  void HandleCompleteTranslateWorld(const FInputActionValue& _Value);
+  FVector LastTranslateWorldDelta{FVector::ZeroVector};
 
   UPROPERTY(EditDefaultsOnly, Category="Input")
   float TranslateWorldScale{1.f};
+
+  void HandleStartRotoTranslateWorld(const FInputActionValue& _Value);
+  void HandleRotoTranslateWorld(const FInputActionValue& _Value);
+  void HandleCompleteRotoTranslateWorld(const FInputActionValue& _Value);
+
+  void LogInput(const FInputActionValue& _Value, FString msg);
 
   void Quit(const FInputActionValue& _Value);
 
