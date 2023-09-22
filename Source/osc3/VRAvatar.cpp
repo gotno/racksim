@@ -60,16 +60,6 @@ void AVRAvatar::PawnClientRestart() {
   }	
 }
 
-float AVRAvatar::GetRotationalDistanceBetweenControllerPositions(const FVector& c1, const FVector& c2) {
-  FVector rootLocation = Camera->GetComponentLocation();
-  rootLocation.Z = 0.f;
-  FVector c1Vector = FVector(c1.X, c1.Y, 0.f) - rootLocation;
-  c1Vector.Normalize();
-  FVector c2Vector = FVector(c2.X, c2.Y, 0.f) - rootLocation;
-
-  return c1Vector.Rotation().Yaw - c2Vector.Rotation().Yaw;
-}
-
 void AVRAvatar::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
   
@@ -81,7 +71,10 @@ void AVRAvatar::Tick(float DeltaTime) {
   DrawDebugSphere(GetWorld(), cameraLocation, 10.f, 32, FColor::Blue);
   DrawDebugSphere(GetWorld(), GetActorLocation(), 5.f, 32, FColor::Green);
 
-  DrawDebugSphere(GetWorld(), FVector(200.f, 200.f, 10.f), 5.f, 32, FColor::Cyan);
+  DrawDebugSphere(GetWorld(), FVector(200.f, 200.f, 10.f), 5.f, 32, FColor::Magenta);
+  DrawDebugSphere(GetWorld(), FVector(-200.f, 200.f, 10.f), 5.f, 32, FColor::Magenta);
+  DrawDebugSphere(GetWorld(), FVector(-200.f, -200.f, 10.f), 5.f, 32, FColor::Magenta);
+  DrawDebugSphere(GetWorld(), FVector(200.f, -200.f, 10.f), 5.f, 32, FColor::Magenta);
 }
 
 void AVRAvatar::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
@@ -168,6 +161,16 @@ void AVRAvatar::SweepDestination(EControllerHand hand) {
       controller->GetComponentLocation() + controller->GetForwardVector() * 1000,
       TELEPORT_TRACE
     );
+}
+
+float AVRAvatar::GetRotationalDistanceBetweenControllerPositions(const FVector& c1, const FVector& c2) {
+  FVector rootLocation = Camera->GetComponentLocation();
+  rootLocation.Z = 0.f;
+  FVector c1Vector = FVector(c1.X, c1.Y, 0.f) - rootLocation;
+  c1Vector.Normalize();
+  FVector c2Vector = FVector(c2.X, c2.Y, 0.f) - rootLocation;
+
+  return c1Vector.Rotation().Yaw - c2Vector.Rotation().Yaw;
 }
 
 // rotate world
@@ -312,14 +315,6 @@ void AVRAvatar::Quit(const FInputActionValue& _Value) {
     EQuitPreference::Quit,
     false
   );
-}
-
-void AVRAvatar::MoveForward(float throttle) {
-  AddMovementInput(Camera->GetForwardVector(), throttle);
-}
-
-void AVRAvatar::MoveRight(float throttle) {
-  AddMovementInput(Camera->GetRightVector(), throttle);
 }
 
 // get the position+rotation for spawning a WidgetSurrogate in the camera's view

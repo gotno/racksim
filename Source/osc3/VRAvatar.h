@@ -91,11 +91,6 @@ private:
 
   UPROPERTY(VisibleAnywhere)
   UStaticMeshComponent* DestinationMarker;
-  
-  float GetRotationalDistanceBetweenControllerPositions(const FVector& c1, const FVector& c2);
-  
-  void MoveForward(float throttle);
-  void MoveRight(float throttle);
 
   void HandleStartTeleport(const FInputActionValue& _Value);
   void HandleTeleport(const FInputActionValue& Value, EControllerHand hand);
@@ -105,6 +100,7 @@ private:
   bool HasDestinationHit;
   FVector LastDestinationLocation{FVector::ZeroVector};
 
+  float GetRotationalDistanceBetweenControllerPositions(const FVector& c1, const FVector& c2);
   void HandleStartRotateWorld(const FInputActionValue& _Value, EControllerHand hand);
   void HandleRotateWorld(const FInputActionValue& _Value, EControllerHand hand);
   void RotateWorldAroundPivot(float degrees, FVector pivot);
@@ -132,5 +128,4 @@ private:
 
   FVector LastLeftHandLocation{FVector::ZeroVector};
   FVector LastRightHandLocation{FVector::ZeroVector};
-  
 };
