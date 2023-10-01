@@ -2,18 +2,17 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "EnhancedInputComponent.h"
-#include "MotionControllerComponent.h"
 
 #include "VRAvatar.generated.h"
 
-class UMotionControllerComponent;
 class UCameraComponent;
 class USceneComponent;
 class UStaticMeshComponent;
+class AVRMotionController;
 struct FHitResult;
 
 USTRUCT()
-struct FWorldManipulationActions {
+struct FActions {
 	GENERATED_BODY()
 
   UPROPERTY(EditDefaultsOnly)
@@ -33,6 +32,11 @@ struct FWorldManipulationActions {
   UInputAction* TeleportLeft;
   UPROPERTY(EditDefaultsOnly)
   UInputAction* TeleportRight;
+  
+  UPROPERTY(EditDefaultsOnly)
+  UInputAction* GrabLeft;
+  UPROPERTY(EditDefaultsOnly)
+  UInputAction* GrabRight;
 
   UPROPERTY(EditDefaultsOnly)
   UInputAction* Quit;
@@ -43,15 +47,21 @@ struct FInputMappingContexts {
 	GENERATED_BODY()
     
   UPROPERTY(EditDefaultsOnly)
-  UInputMappingContext* WorldManipulation;
+  UInputMappingContext* Base;
+
+  UPROPERTY(EditDefaultsOnly)
+  UInputMappingContext* ModuleManipulationLeft;
+  UPROPERTY(EditDefaultsOnly)
+  UInputMappingContext* ModuleManipulationRight;
     
   UPROPERTY(EditDefaultsOnly)
-  UInputMappingContext* RotateWorldLeft;
+  UInputMappingContext* WorldManipulationLeft;
   UPROPERTY(EditDefaultsOnly)
-  UInputMappingContext* RotateWorldRight;
+  UInputMappingContext* WorldManipulationRight;
 };
 
 class UEnhancedInputLocalPlayerSubsystem;
+
 UCLASS()
 class OSC3_API AVRAvatar : public ACharacter {
 	GENERATED_BODY()
@@ -60,13 +70,14 @@ public:
 	AVRAvatar();
   
   UPROPERTY(EditAnywhere, Category="Input")
-  FWorldManipulationActions WorldManipulationActions;
+  FActions Actions;
   UPROPERTY(EditAnywhere, Category="Input")
   FInputMappingContexts InputMappingContexts;
 
   UEnhancedInputLocalPlayerSubsystem* InputSubsystem;
   
-  float GetCameraHeight();
+  void SetControllerInteracting(EControllerHand Hand, bool bInteracting);
+  
   void GetRenderablePosition(FVector& location, FRotator& rotation);
 
 protected:
@@ -81,38 +92,48 @@ private:
   UPROPERTY(VisibleAnywhere)
   UCameraComponent* Camera;
 
+  UPROPERTY(EditDefaultsOnly, Category="Input")
+  TSubclassOf<AVRMotionController> MotionControllerClass;
   UPROPERTY(VisibleAnywhere)
-  UMotionControllerComponent* LeftController;
+  AVRMotionController* LeftController;
   UPROPERTY(VisibleAnywhere)
-  UMotionControllerComponent* RightController;
+  AVRMotionController* RightController;
 
   UPROPERTY(VisibleAnywhere)
   USceneComponent* VRRoot;
 
   UPROPERTY(VisibleAnywhere)
   UStaticMeshComponent* DestinationMarker;
+  
+  // world manipulation
+  bool bLeftHandWorldManipulationActive{false};
+  bool bRightHandWorldManipulationActive{false};
+  void SetWorldManipulationActive(EControllerHand Hand, bool Active);
 
-  void HandleStartTeleport(const FInputActionValue& _Value);
-  void HandleTeleport(const FInputActionValue& Value, EControllerHand hand);
-  void HandleCompleteTeleport(const FInputActionValue& _Value);
-  void SweepDestination(EControllerHand hand);
+  FVector LastLeftHandLocation{FVector::ZeroVector};
+  FVector LastRightHandLocation{FVector::ZeroVector};
+
+  void HandleStartTeleport(const FInputActionValue& _Value, EControllerHand Hand);
+  void HandleTeleport(const FInputActionValue& Value, EControllerHand Hand);
+  void HandleCompleteTeleport(const FInputActionValue& _Value, EControllerHand Hand);
+  void SweepDestination(EControllerHand Hand);
   FHitResult DestinationHitResult;
   bool HasDestinationHit;
   FVector LastDestinationLocation{FVector::ZeroVector};
 
   float GetRotationalDistanceBetweenControllerPositions(const FVector& c1, const FVector& c2);
-  void HandleStartRotateWorld(const FInputActionValue& _Value, EControllerHand hand);
-  void HandleRotateWorld(const FInputActionValue& _Value, EControllerHand hand);
+  void HandleStartRotateWorld(const FInputActionValue& _Value, EControllerHand Hand);
+  void HandleRotateWorld(const FInputActionValue& _Value, EControllerHand Hand);
   void RotateWorldAroundPivot(float degrees, FVector pivot);
-  void HandleCompleteRotateWorld(const FInputActionValue& _Value);
+  void HandleCompleteRotateWorld(const FInputActionValue& _Value, EControllerHand Hand);
   float LastRotateWorldDelta{0.f};
 
   UPROPERTY(EditDefaultsOnly, Category="Input")
   float RotateWorldScale{1.f};
 
-  void HandleStartTranslateWorld(const FInputActionValue& _Value, EControllerHand hand);
-  void HandleTranslateWorld(const FInputActionValue& _Value, EControllerHand hand);
-  void HandleCompleteTranslateWorld(const FInputActionValue& _Value);
+  void HandleStartTranslateWorld(const FInputActionValue& _Value, EControllerHand Hand);
+  void HandleTranslateWorld(const FInputActionValue& _Value, EControllerHand Hand);
+  void HandleCompleteTranslateWorld(const FInputActionValue& _Value, EControllerHand Hand);
   FVector LastTranslateWorldDelta{FVector::ZeroVector};
 
   UPROPERTY(EditDefaultsOnly, Category="Input")
@@ -122,10 +143,13 @@ private:
   void HandleRotoTranslateWorld(const FInputActionValue& _Value);
   void HandleCompleteRotoTranslateWorld(const FInputActionValue& _Value);
 
+  // module manipulation
+  void HandleStartGrab(const FInputActionValue& _Value, EControllerHand Hand);
+  void HandleGrab(const FInputActionValue& _Value, EControllerHand Hand);
+  void HandleCompleteGrab(const FInputActionValue& _Value, EControllerHand Hand);
+
   void LogInput(const FInputActionValue& _Value, FString msg);
 
+  // general controls
   void Quit(const FInputActionValue& _Value);
-
-  FVector LastLeftHandLocation{FVector::ZeroVector};
-  FVector LastRightHandLocation{FVector::ZeroVector};
 };

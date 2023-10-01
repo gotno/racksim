@@ -40,6 +40,10 @@ public:
   void paramUpdated(int32 paramId, float value);
 
   FString getBrand();
+
+  void EngageGrab(FVector GrabbedLocation, FRotator GrabbedRotation);
+  void AlterGrab(FVector GrabbedLocation, FRotator GrabbedRotation);
+  void ReleaseGrab();
   
 private:
   UPROPERTY(VisibleAnywhere)
@@ -64,6 +68,16 @@ private:
   VCVModule model;
   
   Aosc3GameModeBase* gameMode;
+  
+  UFUNCTION()
+  void HandleBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherCompomponent, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+  UFUNCTION()
+  void HandleEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherCompomponent, int32 OtherBodyIndex);
+  void SetHighlighted(bool bHighlighted);
+
+  bool bGrabEngaged{false};
+  FVector LastGrabbedLocation;
+  FRotator LastGrabbedRotation;
 
   // TMap<int, class AVCVParam*> ParamActors;
   TMap<int, AVCVPort*> InputActors;

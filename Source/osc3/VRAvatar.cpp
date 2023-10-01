@@ -5,6 +5,13 @@
 #include "Components/StaticMeshComponent.h"
 #include "osc3.h"
 
+#include "VCVModule.h"
+#include "VCVParam.h"
+#include "VCVPort.h"
+
+#include "VRMotionController.h"
+#include "MotionControllerComponent.h"
+
 #include "HeadMountedDisplayFunctionLibrary.h"
 #include "InputTriggers.h"
 #include "EnhancedInputSubsystems.h"
@@ -17,6 +24,8 @@
 AVRAvatar::AVRAvatar() {
 	PrimaryActorTick.bCanEverTick = true;
   
+  Cast<UCapsuleComponent>(GetRootComponent())->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
   VRRoot = CreateDefaultSubobject<USceneComponent>(TEXT("VRRoot"));
   VRRoot->SetupAttachment(GetRootComponent());
 
@@ -26,14 +35,6 @@ AVRAvatar::AVRAvatar() {
   DestinationMarker = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Destination"));
   DestinationMarker->SetupAttachment(VRRoot);
   DestinationMarker->SetVisibility(false);
-
-  LeftController = CreateDefaultSubobject<UMotionControllerComponent>(TEXT("LeftController"));
-  LeftController->SetupAttachment(VRRoot);
-  LeftController->SetTrackingSource(EControllerHand::Left);
-
-  RightController = CreateDefaultSubobject<UMotionControllerComponent>(TEXT("RightController"));
-  RightController->SetupAttachment(VRRoot);
-  RightController->SetTrackingSource(EControllerHand::Right);
 }
 
 void AVRAvatar::BeginPlay() {
@@ -55,9 +56,21 @@ void AVRAvatar::PawnClientRestart() {
     InputSubsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PC->GetLocalPlayer());
     if (InputSubsystem) {
       InputSubsystem->ClearAllMappings();
-      InputSubsystem->AddMappingContext(InputMappingContexts.WorldManipulation, 0);
+      InputSubsystem->AddMappingContext(InputMappingContexts.Base, 0);
+      InputSubsystem->AddMappingContext(InputMappingContexts.WorldManipulationLeft, 1);
+      InputSubsystem->AddMappingContext(InputMappingContexts.WorldManipulationRight, 1);
     }
   }	
+  
+  LeftController = GetWorld()->SpawnActor<AVRMotionController>(MotionControllerClass);
+  LeftController->AttachToComponent(VRRoot, FAttachmentTransformRules::KeepRelativeTransform);
+  LeftController->SetOwner(this);
+  LeftController->SetTrackingSource(EControllerHand::Left);
+
+  RightController = GetWorld()->SpawnActor<AVRMotionController>(MotionControllerClass);
+  RightController->AttachToComponent(VRRoot, FAttachmentTransformRules::KeepRelativeTransform);
+  RightController->SetOwner(this);
+  RightController->SetTrackingSource(EControllerHand::Right);
 }
 
 void AVRAvatar::Tick(float DeltaTime) {
@@ -82,51 +95,87 @@ void AVRAvatar::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
   
   UEnhancedInputComponent* Input = Cast<UEnhancedInputComponent>(PlayerInputComponent);
 
+  // world manipulation
   // teleport
-  Input->BindAction(WorldManipulationActions.TeleportLeft, ETriggerEvent::Started, this, &AVRAvatar::HandleStartTeleport);
-  Input->BindAction(WorldManipulationActions.TeleportRight, ETriggerEvent::Started, this, &AVRAvatar::HandleStartTeleport);
-  Input->BindAction(WorldManipulationActions.TeleportLeft, ETriggerEvent::Triggered, this, &AVRAvatar::HandleTeleport, EControllerHand::Left);
-  Input->BindAction(WorldManipulationActions.TeleportRight, ETriggerEvent::Triggered, this, &AVRAvatar::HandleTeleport, EControllerHand::Right);
-  Input->BindAction(WorldManipulationActions.TeleportLeft, ETriggerEvent::Completed, this, &AVRAvatar::HandleCompleteTeleport);
-  Input->BindAction(WorldManipulationActions.TeleportRight, ETriggerEvent::Completed, this, &AVRAvatar::HandleCompleteTeleport);
+  Input->BindAction(Actions.TeleportLeft, ETriggerEvent::Started, this, &AVRAvatar::HandleStartTeleport, EControllerHand::Left);
+  Input->BindAction(Actions.TeleportRight, ETriggerEvent::Started, this, &AVRAvatar::HandleStartTeleport, EControllerHand::Right);
+  Input->BindAction(Actions.TeleportLeft, ETriggerEvent::Triggered, this, &AVRAvatar::HandleTeleport, EControllerHand::Left);
+  Input->BindAction(Actions.TeleportRight, ETriggerEvent::Triggered, this, &AVRAvatar::HandleTeleport, EControllerHand::Right);
+  Input->BindAction(Actions.TeleportLeft, ETriggerEvent::Completed, this, &AVRAvatar::HandleCompleteTeleport, EControllerHand::Left);
+  Input->BindAction(Actions.TeleportRight, ETriggerEvent::Completed, this, &AVRAvatar::HandleCompleteTeleport, EControllerHand::Right);
   
   // rotate world
-  Input->BindAction(WorldManipulationActions.RotateWorldLeft, ETriggerEvent::Started, this, &AVRAvatar::HandleStartRotateWorld, EControllerHand::Left);
-  Input->BindAction(WorldManipulationActions.RotateWorldRight, ETriggerEvent::Started, this, &AVRAvatar::HandleStartRotateWorld, EControllerHand::Right);
-  Input->BindAction(WorldManipulationActions.RotateWorldLeft, ETriggerEvent::Triggered, this, &AVRAvatar::HandleRotateWorld, EControllerHand::Left);
-  Input->BindAction(WorldManipulationActions.RotateWorldRight, ETriggerEvent::Triggered, this, &AVRAvatar::HandleRotateWorld, EControllerHand::Right);
-  Input->BindAction(WorldManipulationActions.RotateWorldLeft, ETriggerEvent::Completed, this, &AVRAvatar::HandleCompleteRotateWorld);
-  Input->BindAction(WorldManipulationActions.RotateWorldRight, ETriggerEvent::Completed, this, &AVRAvatar::HandleCompleteRotateWorld);
+  Input->BindAction(Actions.RotateWorldLeft, ETriggerEvent::Started, this, &AVRAvatar::HandleStartRotateWorld, EControllerHand::Left);
+  Input->BindAction(Actions.RotateWorldRight, ETriggerEvent::Started, this, &AVRAvatar::HandleStartRotateWorld, EControllerHand::Right);
+  Input->BindAction(Actions.RotateWorldLeft, ETriggerEvent::Triggered, this, &AVRAvatar::HandleRotateWorld, EControllerHand::Left);
+  Input->BindAction(Actions.RotateWorldRight, ETriggerEvent::Triggered, this, &AVRAvatar::HandleRotateWorld, EControllerHand::Right);
+  Input->BindAction(Actions.RotateWorldLeft, ETriggerEvent::Completed, this, &AVRAvatar::HandleCompleteRotateWorld, EControllerHand::Left);
+  Input->BindAction(Actions.RotateWorldRight, ETriggerEvent::Completed, this, &AVRAvatar::HandleCompleteRotateWorld, EControllerHand::Right);
 
   // translate world
-  Input->BindAction(WorldManipulationActions.TranslateWorldLeft, ETriggerEvent::Started, this, &AVRAvatar::HandleStartTranslateWorld, EControllerHand::Left);
-  Input->BindAction(WorldManipulationActions.TranslateWorldLeft, ETriggerEvent::Triggered, this, &AVRAvatar::HandleTranslateWorld, EControllerHand::Left);
-  Input->BindAction(WorldManipulationActions.TranslateWorldLeft, ETriggerEvent::Completed, this, &AVRAvatar::HandleCompleteTranslateWorld);
-
-  Input->BindAction(WorldManipulationActions.TranslateWorldRight, ETriggerEvent::Started, this, &AVRAvatar::HandleStartTranslateWorld, EControllerHand::Right);
-  Input->BindAction(WorldManipulationActions.TranslateWorldRight, ETriggerEvent::Triggered, this, &AVRAvatar::HandleTranslateWorld, EControllerHand::Right);
-  Input->BindAction(WorldManipulationActions.TranslateWorldRight, ETriggerEvent::Completed, this, &AVRAvatar::HandleCompleteTranslateWorld);
+  Input->BindAction(Actions.TranslateWorldLeft, ETriggerEvent::Started, this, &AVRAvatar::HandleStartTranslateWorld, EControllerHand::Left);
+  Input->BindAction(Actions.TranslateWorldRight, ETriggerEvent::Started, this, &AVRAvatar::HandleStartTranslateWorld, EControllerHand::Right);
+  Input->BindAction(Actions.TranslateWorldLeft, ETriggerEvent::Triggered, this, &AVRAvatar::HandleTranslateWorld, EControllerHand::Left);
+  Input->BindAction(Actions.TranslateWorldRight, ETriggerEvent::Triggered, this, &AVRAvatar::HandleTranslateWorld, EControllerHand::Right);
+  Input->BindAction(Actions.TranslateWorldLeft, ETriggerEvent::Completed, this, &AVRAvatar::HandleCompleteTranslateWorld, EControllerHand::Left);
+  Input->BindAction(Actions.TranslateWorldRight, ETriggerEvent::Completed, this, &AVRAvatar::HandleCompleteTranslateWorld, EControllerHand::Right);
 
   // roto-translate world
-  Input->BindAction(WorldManipulationActions.RotoTranslateWorld, ETriggerEvent::Started, this, &AVRAvatar::HandleStartRotoTranslateWorld);
-  Input->BindAction(WorldManipulationActions.RotoTranslateWorld, ETriggerEvent::Triggered, this, &AVRAvatar::HandleRotoTranslateWorld);
-  Input->BindAction(WorldManipulationActions.RotoTranslateWorld, ETriggerEvent::Completed, this, &AVRAvatar::HandleCompleteRotoTranslateWorld);
+  Input->BindAction(Actions.RotoTranslateWorld, ETriggerEvent::Started, this, &AVRAvatar::HandleStartRotoTranslateWorld);
+  Input->BindAction(Actions.RotoTranslateWorld, ETriggerEvent::Triggered, this, &AVRAvatar::HandleRotoTranslateWorld);
+  Input->BindAction(Actions.RotoTranslateWorld, ETriggerEvent::Completed, this, &AVRAvatar::HandleCompleteRotoTranslateWorld);
 
+  // module manipulation
+  // grab
+  Input->BindAction(Actions.GrabLeft, ETriggerEvent::Started, this, &AVRAvatar::HandleStartGrab, EControllerHand::Left);
+  Input->BindAction(Actions.GrabRight, ETriggerEvent::Started, this, &AVRAvatar::HandleStartGrab, EControllerHand::Right);
+  Input->BindAction(Actions.GrabLeft, ETriggerEvent::Triggered, this, &AVRAvatar::HandleGrab, EControllerHand::Left);
+  Input->BindAction(Actions.GrabRight, ETriggerEvent::Triggered, this, &AVRAvatar::HandleGrab, EControllerHand::Right);
+  Input->BindAction(Actions.GrabLeft, ETriggerEvent::Completed, this, &AVRAvatar::HandleCompleteGrab, EControllerHand::Left);
+  Input->BindAction(Actions.GrabRight, ETriggerEvent::Completed, this, &AVRAvatar::HandleCompleteGrab, EControllerHand::Right);
+
+  // general
   // quit
-  Input->BindAction(WorldManipulationActions.Quit, ETriggerEvent::Completed, this, &AVRAvatar::Quit);
+  Input->BindAction(Actions.Quit, ETriggerEvent::Completed, this, &AVRAvatar::Quit);
+}
+
+void AVRAvatar::SetControllerInteracting(EControllerHand Hand, bool bInteracting) {
+  if (Hand == EControllerHand::Left && bLeftHandWorldManipulationActive) return;
+  if (Hand == EControllerHand::Right && bRightHandWorldManipulationActive) return;
+
+  UInputMappingContext* moduleManipulationMappingContext = 
+    Hand == EControllerHand::Left
+      ? InputMappingContexts.ModuleManipulationLeft
+      : InputMappingContexts.ModuleManipulationRight;
+
+  if (bInteracting) {
+    InputSubsystem->AddMappingContext(moduleManipulationMappingContext, 2);
+  } else {
+    InputSubsystem->RemoveMappingContext(moduleManipulationMappingContext);
+  }
 }
 
 void AVRAvatar::LogInput(const FInputActionValue& _Value, FString msg) {
   UE_LOG(LogTemp, Warning, TEXT("input: %s"), *msg);
 }
 
-// teleport
-void AVRAvatar::HandleStartTeleport(const FInputActionValue& _Value) {
-  LastDestinationLocation = FVector::ZeroVector;
+
+void AVRAvatar::SetWorldManipulationActive(EControllerHand Hand, bool Active) {
+  if (Hand == EControllerHand::Left) {
+    bLeftHandWorldManipulationActive = Active;
+  } else {
+    bRightHandWorldManipulationActive = Active;
+  }
 }
-void AVRAvatar::HandleTeleport(const FInputActionValue& Value, EControllerHand hand) {
+
+// teleport
+void AVRAvatar::HandleStartTeleport(const FInputActionValue& _Value, EControllerHand Hand) {
+  LastDestinationLocation = FVector::ZeroVector;
+  SetWorldManipulationActive(Hand, true);
+}
+void AVRAvatar::HandleTeleport(const FInputActionValue& Value, EControllerHand Hand) {
   if (Value.GetMagnitude() > 0.f) {
-    SweepDestination(hand);
+    SweepDestination(Hand);
   }
 
   if (HasDestinationHit) {
@@ -142,7 +191,8 @@ void AVRAvatar::HandleTeleport(const FInputActionValue& Value, EControllerHand h
     DestinationMarker->SetVisibility(false);
   }
 }
-void AVRAvatar::HandleCompleteTeleport(const FInputActionValue& _Value) {
+void AVRAvatar::HandleCompleteTeleport(const FInputActionValue& _Value, EControllerHand Hand) {
+  SetWorldManipulationActive(Hand, false);
   if (HasDestinationHit) {
     FVector offset = DestinationHitResult.Location - Camera->GetComponentLocation();
     offset.Z = 0.f;
@@ -151,14 +201,15 @@ void AVRAvatar::HandleCompleteTeleport(const FInputActionValue& _Value) {
   HasDestinationHit = false;
   DestinationMarker->SetVisibility(false);
 }
-void AVRAvatar::SweepDestination(EControllerHand hand) {
-  UMotionControllerComponent* controller =
-    hand == EControllerHand::Left ? LeftController : RightController;
+void AVRAvatar::SweepDestination(EControllerHand Hand) {
+  AVRMotionController* controller =
+    Hand == EControllerHand::Left ? LeftController : RightController;
+  FVector controllerLocation = controller->GetActorLocation();
   HasDestinationHit =
     GetWorld()->LineTraceSingleByChannel(
       DestinationHitResult,
-      controller->GetComponentLocation(),
-      controller->GetComponentLocation() + controller->GetForwardVector() * 1000,
+      controllerLocation,
+      controllerLocation + controller->GetActorForwardVector() * 1000,
       TELEPORT_TRACE
     );
 }
@@ -174,24 +225,26 @@ float AVRAvatar::GetRotationalDistanceBetweenControllerPositions(const FVector& 
 }
 
 // rotate world
-void AVRAvatar::HandleStartRotateWorld(const FInputActionValue& _Value, EControllerHand hand) {
-  if (hand == EControllerHand::Left) {
-    LastLeftHandLocation = LeftController->GetComponentLocation();
+void AVRAvatar::HandleStartRotateWorld(const FInputActionValue& _Value, EControllerHand Hand) {
+  SetWorldManipulationActive(Hand, true);
+  if (Hand == EControllerHand::Left) {
+    LastLeftHandLocation = LeftController->GetActorLocation();
   } else {
-    LastRightHandLocation = RightController->GetComponentLocation();
+    LastRightHandLocation = RightController->GetActorLocation();
   }
 }
-void AVRAvatar::HandleRotateWorld(const FInputActionValue& _Value, EControllerHand hand) {
+void AVRAvatar::HandleRotateWorld(const FInputActionValue& _Value, EControllerHand Hand) {
   FVector controllerLocation;
   FVector lastControllerLocation;
 
-  if (hand == EControllerHand::Left) {
-    controllerLocation = LeftController->GetComponentLocation();
+  if (Hand == EControllerHand::Left) {
+    controllerLocation = LeftController->GetActorLocation();
     lastControllerLocation = LastLeftHandLocation;
   } else {
-    controllerLocation = RightController->GetComponentLocation();
+    controllerLocation = RightController->GetActorLocation();
     lastControllerLocation = LastRightHandLocation;
   }
+
 
   float deltaYaw =
     GetRotationalDistanceBetweenControllerPositions(
@@ -205,10 +258,10 @@ void AVRAvatar::HandleRotateWorld(const FInputActionValue& _Value, EControllerHa
   
   RotateWorldAroundPivot(deltaYaw, Camera->GetComponentLocation());
 
-  if (hand == EControllerHand::Left) {
-    LastLeftHandLocation = LeftController->GetComponentLocation();
+  if (Hand == EControllerHand::Left) {
+    LastLeftHandLocation = LeftController->GetActorLocation();
   } else {
-    LastRightHandLocation = RightController->GetComponentLocation();
+    LastRightHandLocation = RightController->GetActorLocation();
   }
 }
 void AVRAvatar::RotateWorldAroundPivot(float degrees, FVector pivot) {
@@ -220,32 +273,35 @@ void AVRAvatar::RotateWorldAroundPivot(float degrees, FVector pivot) {
   VRRoot->AddRelativeRotation(FRotator (0.f, degrees, 0.f));
 }
 
-void AVRAvatar::HandleCompleteRotateWorld(const FInputActionValue& _Value) {
+void AVRAvatar::HandleCompleteRotateWorld(const FInputActionValue& _Value, EControllerHand Hand) {
+  SetWorldManipulationActive(Hand, false);
   LastRotateWorldDelta = 0.f;
 }
 
 // translate world
-void AVRAvatar::HandleStartTranslateWorld(const FInputActionValue& _Value, EControllerHand hand) {
-  FString handLabel(hand == EControllerHand::Left ? "left" : "right");
+void AVRAvatar::HandleStartTranslateWorld(const FInputActionValue& _Value, EControllerHand Hand) {
+  SetWorldManipulationActive(Hand, true);
+  FString handLabel(Hand == EControllerHand::Left ? "left" : "right");
 
-  if (hand == EControllerHand::Left) {
-    LastLeftHandLocation = LeftController->GetComponentLocation();
+  if (Hand == EControllerHand::Left) {
+    LastLeftHandLocation = LeftController->GetActorLocation();
   } else {
-    LastRightHandLocation = RightController->GetComponentLocation();
+    LastRightHandLocation = RightController->GetActorLocation();
   }
 }
-void AVRAvatar::HandleCompleteTranslateWorld(const FInputActionValue& _Value) {
+void AVRAvatar::HandleCompleteTranslateWorld(const FInputActionValue& _Value, EControllerHand Hand) {
+  SetWorldManipulationActive(Hand, false);
   LastTranslateWorldDelta = FVector::ZeroVector;
 }
-void AVRAvatar::HandleTranslateWorld(const FInputActionValue& _Value, EControllerHand hand) {
+void AVRAvatar::HandleTranslateWorld(const FInputActionValue& _Value, EControllerHand Hand) {
   FVector cameraLocation = Camera->GetComponentLocation();
   FVector controllerLocation, lastControllerLocation;
 
-  if (hand == EControllerHand::Left) {
-    controllerLocation = LeftController->GetComponentLocation();
+  if (Hand == EControllerHand::Left) {
+    controllerLocation = LeftController->GetActorLocation();
     lastControllerLocation = LastLeftHandLocation;
   } else {
-    controllerLocation = RightController->GetComponentLocation();
+    controllerLocation = RightController->GetActorLocation();
     lastControllerLocation = LastRightHandLocation;
   }
 
@@ -259,24 +315,30 @@ void AVRAvatar::HandleTranslateWorld(const FInputActionValue& _Value, EControlle
 
   AddActorWorldOffset(locationDelta);
 
-  if (hand == EControllerHand::Left) {
-    LastLeftHandLocation = LeftController->GetComponentLocation();
+  if (Hand == EControllerHand::Left) {
+    LastLeftHandLocation = LeftController->GetActorLocation();
   } else {
-    LastRightHandLocation = RightController->GetComponentLocation();
+    LastRightHandLocation = RightController->GetActorLocation();
   }
 }
 
 void AVRAvatar::HandleStartRotoTranslateWorld(const FInputActionValue& _Value) {
-  LastLeftHandLocation = LeftController->GetComponentLocation();
-  LastRightHandLocation = RightController->GetComponentLocation();
+  // UE_LOG(LogTemp, Warning, TEXT("start roto-translate"));
+  SetWorldManipulationActive(EControllerHand::Left, true);
+  SetWorldManipulationActive(EControllerHand::Right, true);
+  LastLeftHandLocation = LeftController->GetActorLocation();
+  LastRightHandLocation = RightController->GetActorLocation();
 }
 void AVRAvatar::HandleCompleteRotoTranslateWorld(const FInputActionValue& _Value) {
+  // UE_LOG(LogTemp, Warning, TEXT("complete roto-translate"));
+  SetWorldManipulationActive(EControllerHand::Left, false);
+  SetWorldManipulationActive(EControllerHand::Right, false);
   LastTranslateWorldDelta = FVector::ZeroVector;
   LastRotateWorldDelta = 0.f;
 }
 void AVRAvatar::HandleRotoTranslateWorld(const FInputActionValue& _Value) {
-  FVector leftControllerLocation = LeftController->GetComponentLocation();
-  FVector rightControllerLocation = RightController->GetComponentLocation();
+  FVector leftControllerLocation = LeftController->GetActorLocation();
+  FVector rightControllerLocation = RightController->GetActorLocation();
 
   FRotator lastRotation = (LastLeftHandLocation - LastRightHandLocation).Rotation();
   FRotator thisRotation = (leftControllerLocation - rightControllerLocation).Rotation();
@@ -304,8 +366,49 @@ void AVRAvatar::HandleRotoTranslateWorld(const FInputActionValue& _Value) {
 
   AddActorWorldOffset(locationDelta);
 
-  LastLeftHandLocation = LeftController->GetComponentLocation();
-  LastRightHandLocation = RightController->GetComponentLocation();
+  // UE_LOG(LogTemp, Warning, TEXT("ran roto-translate %f %s"), deltaYaw, *locationDelta.ToCompactString());
+
+  LastLeftHandLocation = LeftController->GetActorLocation();
+  LastRightHandLocation = RightController->GetActorLocation();
+}
+
+void AVRAvatar::HandleStartGrab(const FInputActionValue& _Value, EControllerHand Hand) {
+  AVRMotionController* controller = 
+    Hand == EControllerHand::Left ? LeftController : RightController;
+  
+  AVCVModule* grabbedModule = Cast<AVCVModule>(controller->GetActorToGrab());
+
+  UE_LOG(LogTemp, Warning, TEXT("%s hand grab start"), *FString(Hand == EControllerHand::Left ? "left" : "right"));
+  if (grabbedModule) {
+    UE_LOG(LogTemp, Warning, TEXT("  grabbing %s"), *grabbedModule->GetActorNameOrLabel());
+    controller->StartGrab();
+    grabbedModule->EngageGrab(controller->GetActorLocation(), controller->GetActorRotation());
+  }
+}
+
+void AVRAvatar::HandleGrab(const FInputActionValue& _Value, EControllerHand Hand) {
+  AVRMotionController* controller = 
+    Hand == EControllerHand::Left ? LeftController : RightController;
+  
+  AVCVModule* grabbedModule = Cast<AVCVModule>(controller->GetActorToGrab());
+
+  if (grabbedModule) {
+    grabbedModule->AlterGrab(controller->GetActorLocation(), controller->GetActorRotation());
+  }
+}
+
+void AVRAvatar::HandleCompleteGrab(const FInputActionValue& _Value, EControllerHand Hand) {
+  AVRMotionController* controller = 
+    Hand == EControllerHand::Left ? LeftController : RightController;
+  
+  AVCVModule* grabbedModule = Cast<AVCVModule>(controller->GetActorToGrab());
+
+  UE_LOG(LogTemp, Warning, TEXT("%s hand grab complete"), *FString(Hand == EControllerHand::Left ? "left" : "right"));
+  if (grabbedModule) {
+    UE_LOG(LogTemp, Warning, TEXT("  releasing %s"), *grabbedModule->GetActorNameOrLabel());
+    grabbedModule->ReleaseGrab();
+    controller->EndGrab();
+  }
 }
 
 void AVRAvatar::Quit(const FInputActionValue& _Value) {
@@ -320,6 +423,8 @@ void AVRAvatar::Quit(const FInputActionValue& _Value) {
 // get the position+rotation for spawning a WidgetSurrogate in the camera's view
 // so it is invisible (facing away) but renders immediately
 void AVRAvatar::GetRenderablePosition(FVector& location, FRotator& rotation) {
-  location = GetActorLocation() + Camera->GetForwardVector() * 10.f;
-  rotation = Camera->GetForwardVector().Rotation();
+  // location = Camera->GetComponentLocation() + Camera->GetForwardVector() * 10.f;
+  // rotation = Camera->GetForwardVector().Rotation();
+  location = GetActorLocation() + GetActorForwardVector() * 10.f;
+  rotation = GetActorForwardVector().Rotation();
 }

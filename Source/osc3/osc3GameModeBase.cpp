@@ -55,7 +55,7 @@ void Aosc3GameModeBase::SpawnModule(VCVModule module) {
       FVector(0, spawnXPositionCursor, spawnYPositionCursor),
       FRotator(0, 0, 0)
     );
-  
+ 
   ModuleActors.Add(module.id, a_module);
   a_module->init(module);
 
