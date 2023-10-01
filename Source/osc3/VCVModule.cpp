@@ -21,9 +21,12 @@
 AVCVModule::AVCVModule() {
 	PrimaryActorTick.bCanEverTick = true;
 
+  RootSceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root Scene Component"));
+  SetRootComponent(RootSceneComponent);
+
   StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Static Mesh"));
   StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-  SetRootComponent(StaticMeshComponent);
+  StaticMeshComponent->SetupAttachment(GetRootComponent());
   
   static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshBody(TEXT("/Script/Engine.StaticMesh'/Game/meshes/faced/unit_module_faced.unit_module_faced'"));
   
@@ -95,6 +98,9 @@ void AVCVModule::EngageGrab(FVector GrabbedLocation, FRotator GrabbedRotation) {
   LastGrabbedLocation = GrabbedLocation;
   LastGrabbedRotation = GrabbedRotation;
   SetHighlighted(false);
+
+  GrabOffset = GrabbedLocation - GetActorLocation();
+  StaticMeshComponent->AddWorldOffset(-GrabOffset);
 }
 
 void AVCVModule::AlterGrab(FVector GrabbedLocation, FRotator GrabbedRotation) {
@@ -112,6 +118,8 @@ void AVCVModule::AlterGrab(FVector GrabbedLocation, FRotator GrabbedRotation) {
 void AVCVModule::ReleaseGrab() {
   // UE_LOG(LogTemp, Warning, TEXT("%s: grab release"), *GetActorNameOrLabel());
   bGrabEngaged = false;
+  StaticMeshComponent->AddWorldOffset(GrabOffset);
+  AddActorWorldOffset(-GrabOffset);
 }
 
 void AVCVModule::Tick(float DeltaTime) {

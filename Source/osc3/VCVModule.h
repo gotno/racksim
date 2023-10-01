@@ -47,6 +47,8 @@ public:
   
 private:
   UPROPERTY(VisibleAnywhere)
+  USceneComponent* RootSceneComponent;
+  UPROPERTY(VisibleAnywhere)
   UStaticMeshComponent* StaticMeshComponent;
   UPROPERTY()
   UStaticMesh* StaticMesh;
@@ -76,6 +78,7 @@ private:
   void SetHighlighted(bool bHighlighted);
 
   bool bGrabEngaged{false};
+  FVector GrabOffset;
   FVector LastGrabbedLocation;
   FRotator LastGrabbedRotation;
 
