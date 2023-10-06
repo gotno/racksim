@@ -1,5 +1,6 @@
 #include "VCVPort.h"
 
+#include "osc3.h"
 #include "osc3GameModeBase.h"
 #include "VCV.h"
 #include "VCVOverrides.h"
@@ -45,6 +46,8 @@ void AVCVPort::BeginPlay() {
   }
   
   gameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(this));
+  
+  Tags.Add(TAG_INTERACTABLE_PORT);
 }
 
 void AVCVPort::Tick(float DeltaTime) {

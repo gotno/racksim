@@ -31,6 +31,9 @@ public:
   virtual void setValue(float newValue);
   
   virtual void engage();
+  virtual void engage(float _value);
+  virtual void engage(FVector _location);
   virtual void alter(float amount);
+  virtual void alter(FVector _location);
   virtual void release();
 };

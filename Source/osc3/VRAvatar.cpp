@@ -8,6 +8,8 @@
 #include "VCVModule.h"
 #include "VCVParam.h"
 #include "VCVPort.h"
+#include "VCVKnob.h"
+#include "VCVSlider.h"
 
 #include "VRMotionController.h"
 #include "MotionControllerComponent.h"
@@ -97,49 +99,58 @@ void AVRAvatar::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
   // world manipulation
   // teleport
-  Input->BindAction(Actions.TeleportLeft, ETriggerEvent::Started, this, &AVRAvatar::HandleStartTeleport, EControllerHand::Left);
-  Input->BindAction(Actions.TeleportRight, ETriggerEvent::Started, this, &AVRAvatar::HandleStartTeleport, EControllerHand::Right);
-  Input->BindAction(Actions.TeleportLeft, ETriggerEvent::Triggered, this, &AVRAvatar::HandleTeleport, EControllerHand::Left);
-  Input->BindAction(Actions.TeleportRight, ETriggerEvent::Triggered, this, &AVRAvatar::HandleTeleport, EControllerHand::Right);
-  Input->BindAction(Actions.TeleportLeft, ETriggerEvent::Completed, this, &AVRAvatar::HandleCompleteTeleport, EControllerHand::Left);
-  Input->BindAction(Actions.TeleportRight, ETriggerEvent::Completed, this, &AVRAvatar::HandleCompleteTeleport, EControllerHand::Right);
+  Input->BindAction(WorldManipulationActions.TeleportLeft, ETriggerEvent::Started, this, &AVRAvatar::HandleStartTeleport, EControllerHand::Left);
+  Input->BindAction(WorldManipulationActions.TeleportRight, ETriggerEvent::Started, this, &AVRAvatar::HandleStartTeleport, EControllerHand::Right);
+  Input->BindAction(WorldManipulationActions.TeleportLeft, ETriggerEvent::Triggered, this, &AVRAvatar::HandleTeleport, EControllerHand::Left);
+  Input->BindAction(WorldManipulationActions.TeleportRight, ETriggerEvent::Triggered, this, &AVRAvatar::HandleTeleport, EControllerHand::Right);
+  Input->BindAction(WorldManipulationActions.TeleportLeft, ETriggerEvent::Completed, this, &AVRAvatar::HandleCompleteTeleport, EControllerHand::Left);
+  Input->BindAction(WorldManipulationActions.TeleportRight, ETriggerEvent::Completed, this, &AVRAvatar::HandleCompleteTeleport, EControllerHand::Right);
   
   // rotate world
-  Input->BindAction(Actions.RotateWorldLeft, ETriggerEvent::Started, this, &AVRAvatar::HandleStartRotateWorld, EControllerHand::Left);
-  Input->BindAction(Actions.RotateWorldRight, ETriggerEvent::Started, this, &AVRAvatar::HandleStartRotateWorld, EControllerHand::Right);
-  Input->BindAction(Actions.RotateWorldLeft, ETriggerEvent::Triggered, this, &AVRAvatar::HandleRotateWorld, EControllerHand::Left);
-  Input->BindAction(Actions.RotateWorldRight, ETriggerEvent::Triggered, this, &AVRAvatar::HandleRotateWorld, EControllerHand::Right);
-  Input->BindAction(Actions.RotateWorldLeft, ETriggerEvent::Completed, this, &AVRAvatar::HandleCompleteRotateWorld, EControllerHand::Left);
-  Input->BindAction(Actions.RotateWorldRight, ETriggerEvent::Completed, this, &AVRAvatar::HandleCompleteRotateWorld, EControllerHand::Right);
+  Input->BindAction(WorldManipulationActions.RotateWorldLeft, ETriggerEvent::Started, this, &AVRAvatar::HandleStartRotateWorld, EControllerHand::Left);
+  Input->BindAction(WorldManipulationActions.RotateWorldRight, ETriggerEvent::Started, this, &AVRAvatar::HandleStartRotateWorld, EControllerHand::Right);
+  Input->BindAction(WorldManipulationActions.RotateWorldLeft, ETriggerEvent::Triggered, this, &AVRAvatar::HandleRotateWorld, EControllerHand::Left);
+  Input->BindAction(WorldManipulationActions.RotateWorldRight, ETriggerEvent::Triggered, this, &AVRAvatar::HandleRotateWorld, EControllerHand::Right);
+  Input->BindAction(WorldManipulationActions.RotateWorldLeft, ETriggerEvent::Completed, this, &AVRAvatar::HandleCompleteRotateWorld, EControllerHand::Left);
+  Input->BindAction(WorldManipulationActions.RotateWorldRight, ETriggerEvent::Completed, this, &AVRAvatar::HandleCompleteRotateWorld, EControllerHand::Right);
 
   // translate world
-  Input->BindAction(Actions.TranslateWorldLeft, ETriggerEvent::Started, this, &AVRAvatar::HandleStartTranslateWorld, EControllerHand::Left);
-  Input->BindAction(Actions.TranslateWorldRight, ETriggerEvent::Started, this, &AVRAvatar::HandleStartTranslateWorld, EControllerHand::Right);
-  Input->BindAction(Actions.TranslateWorldLeft, ETriggerEvent::Triggered, this, &AVRAvatar::HandleTranslateWorld, EControllerHand::Left);
-  Input->BindAction(Actions.TranslateWorldRight, ETriggerEvent::Triggered, this, &AVRAvatar::HandleTranslateWorld, EControllerHand::Right);
-  Input->BindAction(Actions.TranslateWorldLeft, ETriggerEvent::Completed, this, &AVRAvatar::HandleCompleteTranslateWorld, EControllerHand::Left);
-  Input->BindAction(Actions.TranslateWorldRight, ETriggerEvent::Completed, this, &AVRAvatar::HandleCompleteTranslateWorld, EControllerHand::Right);
+  Input->BindAction(WorldManipulationActions.TranslateWorldLeft, ETriggerEvent::Started, this, &AVRAvatar::HandleStartTranslateWorld, EControllerHand::Left);
+  Input->BindAction(WorldManipulationActions.TranslateWorldRight, ETriggerEvent::Started, this, &AVRAvatar::HandleStartTranslateWorld, EControllerHand::Right);
+  Input->BindAction(WorldManipulationActions.TranslateWorldLeft, ETriggerEvent::Triggered, this, &AVRAvatar::HandleTranslateWorld, EControllerHand::Left);
+  Input->BindAction(WorldManipulationActions.TranslateWorldRight, ETriggerEvent::Triggered, this, &AVRAvatar::HandleTranslateWorld, EControllerHand::Right);
+  Input->BindAction(WorldManipulationActions.TranslateWorldLeft, ETriggerEvent::Completed, this, &AVRAvatar::HandleCompleteTranslateWorld, EControllerHand::Left);
+  Input->BindAction(WorldManipulationActions.TranslateWorldRight, ETriggerEvent::Completed, this, &AVRAvatar::HandleCompleteTranslateWorld, EControllerHand::Right);
 
   // roto-translate world
-  Input->BindAction(Actions.RotoTranslateWorld, ETriggerEvent::Started, this, &AVRAvatar::HandleStartRotoTranslateWorld);
-  Input->BindAction(Actions.RotoTranslateWorld, ETriggerEvent::Triggered, this, &AVRAvatar::HandleRotoTranslateWorld);
-  Input->BindAction(Actions.RotoTranslateWorld, ETriggerEvent::Completed, this, &AVRAvatar::HandleCompleteRotoTranslateWorld);
+  Input->BindAction(WorldManipulationActions.RotoTranslateWorld, ETriggerEvent::Started, this, &AVRAvatar::HandleStartRotoTranslateWorld);
+  Input->BindAction(WorldManipulationActions.RotoTranslateWorld, ETriggerEvent::Triggered, this, &AVRAvatar::HandleRotoTranslateWorld);
+  Input->BindAction(WorldManipulationActions.RotoTranslateWorld, ETriggerEvent::Completed, this, &AVRAvatar::HandleCompleteRotoTranslateWorld);
 
   // module manipulation
   // grab
-  Input->BindAction(Actions.GrabLeft, ETriggerEvent::Started, this, &AVRAvatar::HandleStartGrab, EControllerHand::Left);
-  Input->BindAction(Actions.GrabRight, ETriggerEvent::Started, this, &AVRAvatar::HandleStartGrab, EControllerHand::Right);
-  Input->BindAction(Actions.GrabLeft, ETriggerEvent::Triggered, this, &AVRAvatar::HandleGrab, EControllerHand::Left);
-  Input->BindAction(Actions.GrabRight, ETriggerEvent::Triggered, this, &AVRAvatar::HandleGrab, EControllerHand::Right);
-  Input->BindAction(Actions.GrabLeft, ETriggerEvent::Completed, this, &AVRAvatar::HandleCompleteGrab, EControllerHand::Left);
-  Input->BindAction(Actions.GrabRight, ETriggerEvent::Completed, this, &AVRAvatar::HandleCompleteGrab, EControllerHand::Right);
+  Input->BindAction(ModuleManipulationActions.GrabLeft, ETriggerEvent::Started, this, &AVRAvatar::HandleStartGrab, EControllerHand::Left);
+  Input->BindAction(ModuleManipulationActions.GrabRight, ETriggerEvent::Started, this, &AVRAvatar::HandleStartGrab, EControllerHand::Right);
+  Input->BindAction(ModuleManipulationActions.GrabLeft, ETriggerEvent::Triggered, this, &AVRAvatar::HandleGrab, EControllerHand::Left);
+  Input->BindAction(ModuleManipulationActions.GrabRight, ETriggerEvent::Triggered, this, &AVRAvatar::HandleGrab, EControllerHand::Right);
+  Input->BindAction(ModuleManipulationActions.GrabLeft, ETriggerEvent::Completed, this, &AVRAvatar::HandleCompleteGrab, EControllerHand::Left);
+  Input->BindAction(ModuleManipulationActions.GrabRight, ETriggerEvent::Completed, this, &AVRAvatar::HandleCompleteGrab, EControllerHand::Right);
+
+  // param interaction
+  // engage
+  Input->BindAction(ParamInteractionActions.ParamEngageLeft, ETriggerEvent::Started, this, &AVRAvatar::HandleStartParamEngage, EControllerHand::Left);
+  Input->BindAction(ParamInteractionActions.ParamEngageRight, ETriggerEvent::Started, this, &AVRAvatar::HandleStartParamEngage, EControllerHand::Right);
+  Input->BindAction(ParamInteractionActions.ParamEngageLeft, ETriggerEvent::Triggered, this, &AVRAvatar::HandleParamEngage, EControllerHand::Left);
+  Input->BindAction(ParamInteractionActions.ParamEngageRight, ETriggerEvent::Triggered, this, &AVRAvatar::HandleParamEngage, EControllerHand::Right);
+  Input->BindAction(ParamInteractionActions.ParamEngageLeft, ETriggerEvent::Completed, this, &AVRAvatar::HandleCompleteParamEngage, EControllerHand::Left);
+  Input->BindAction(ParamInteractionActions.ParamEngageRight, ETriggerEvent::Completed, this, &AVRAvatar::HandleCompleteParamEngage, EControllerHand::Right);
 
   // general
   // quit
-  Input->BindAction(Actions.Quit, ETriggerEvent::Completed, this, &AVRAvatar::Quit);
+  Input->BindAction(BaseActions.Quit, ETriggerEvent::Completed, this, &AVRAvatar::Quit);
 }
 
-void AVRAvatar::SetControllerInteracting(EControllerHand Hand, bool bInteracting) {
+void AVRAvatar::SetControllerGrabbing(EControllerHand Hand, bool bGrabbing) {
   if (Hand == EControllerHand::Left && bLeftHandWorldManipulationActive) return;
   if (Hand == EControllerHand::Right && bRightHandWorldManipulationActive) return;
 
@@ -148,10 +159,30 @@ void AVRAvatar::SetControllerInteracting(EControllerHand Hand, bool bInteracting
       ? InputMappingContexts.ModuleManipulationLeft
       : InputMappingContexts.ModuleManipulationRight;
 
-  if (bInteracting) {
+  UE_LOG(LogTemp, Warning, TEXT("setting module grabbing mapping %d"), bGrabbing);
+
+  if (bGrabbing) {
     InputSubsystem->AddMappingContext(moduleManipulationMappingContext, 2);
   } else {
     InputSubsystem->RemoveMappingContext(moduleManipulationMappingContext);
+  }
+}
+
+void AVRAvatar::SetControllerParamInteracting(EControllerHand Hand, bool bInteracting) {
+  if (Hand == EControllerHand::Left && bLeftHandWorldManipulationActive) return;
+  if (Hand == EControllerHand::Right && bRightHandWorldManipulationActive) return;
+
+  UInputMappingContext* paramInteractingMappingContext = 
+    Hand == EControllerHand::Left
+      ? InputMappingContexts.ParamInteractionLeft
+      : InputMappingContexts.ParamInteractionRight;
+  
+  UE_LOG(LogTemp, Warning, TEXT("setting param interacting mapping %d"), bInteracting);
+
+  if (bInteracting) {
+    InputSubsystem->AddMappingContext(paramInteractingMappingContext, 3);
+  } else {
+    InputSubsystem->RemoveMappingContext(paramInteractingMappingContext);
   }
 }
 
@@ -323,14 +354,16 @@ void AVRAvatar::HandleTranslateWorld(const FInputActionValue& _Value, EControlle
 }
 
 void AVRAvatar::HandleStartRotoTranslateWorld(const FInputActionValue& _Value) {
-  // UE_LOG(LogTemp, Warning, TEXT("start roto-translate"));
+  // bLeftHandRotoTranslateActive = true;
+
+  UE_LOG(LogTemp, Warning, TEXT("start roto-translate"));
   SetWorldManipulationActive(EControllerHand::Left, true);
   SetWorldManipulationActive(EControllerHand::Right, true);
   LastLeftHandLocation = LeftController->GetActorLocation();
   LastRightHandLocation = RightController->GetActorLocation();
 }
 void AVRAvatar::HandleCompleteRotoTranslateWorld(const FInputActionValue& _Value) {
-  // UE_LOG(LogTemp, Warning, TEXT("complete roto-translate"));
+  UE_LOG(LogTemp, Warning, TEXT("complete roto-translate"));
   SetWorldManipulationActive(EControllerHand::Left, false);
   SetWorldManipulationActive(EControllerHand::Right, false);
   LastTranslateWorldDelta = FVector::ZeroVector;
@@ -389,7 +422,7 @@ void AVRAvatar::HandleStartGrab(const FInputActionValue& _Value, EControllerHand
 void AVRAvatar::HandleGrab(const FInputActionValue& _Value, EControllerHand Hand) {
   AVRMotionController* controller = 
     Hand == EControllerHand::Left ? LeftController : RightController;
-  
+
   AVCVModule* grabbedModule = Cast<AVCVModule>(controller->GetActorToGrab());
 
   if (grabbedModule) {
@@ -409,6 +442,57 @@ void AVRAvatar::HandleCompleteGrab(const FInputActionValue& _Value, EControllerH
     grabbedModule->ReleaseGrab();
     controller->EndGrab();
   }
+}
+
+void AVRAvatar::HandleStartParamEngage(const FInputActionValue& _Value, EControllerHand Hand) {
+  AVRMotionController* controller = 
+    Hand == EControllerHand::Left ? LeftController : RightController;
+  
+  UE_LOG(LogTemp, Warning, TEXT("%s hand param engage start"), *FString(Hand == EControllerHand::Left ? "left" : "right"));
+
+  AVCVParam* interactingParam = Cast<AVCVParam>(controller->GetParamActorToInteract());
+  if (!interactingParam) return;
+
+  UE_LOG(LogTemp, Warning, TEXT("  engaging %s"), *interactingParam->GetActorNameOrLabel());
+
+  controller->StartParamInteract();
+  if (Cast<AVCVKnob>(interactingParam)) {
+    interactingParam->engage(controller->GetActorRotation().Roll);
+  } else if (Cast<AVCVSlider>(interactingParam)) {
+    interactingParam->engage(controller->GetActorLocation());
+  } else {
+    interactingParam->engage();
+  }
+}
+
+void AVRAvatar::HandleParamEngage(const FInputActionValue& _Value, EControllerHand Hand) {
+  AVRMotionController* controller = 
+    Hand == EControllerHand::Left ? LeftController : RightController;
+  
+  AVCVParam* interactingParam = Cast<AVCVParam>(controller->GetParamActorToInteract());
+
+  if (!interactingParam) return;
+
+  if (Cast<AVCVKnob>(interactingParam)) {
+    interactingParam->alter(controller->GetActorRotation().Roll);
+  } else if (Cast<AVCVSlider>(interactingParam)) {
+    interactingParam->alter(controller->GetActorLocation());
+  }
+}
+
+void AVRAvatar::HandleCompleteParamEngage(const FInputActionValue& _Value, EControllerHand Hand) {
+  AVRMotionController* controller = 
+    Hand == EControllerHand::Left ? LeftController : RightController;
+  
+  UE_LOG(LogTemp, Warning, TEXT("%s hand param engage complete"), *FString(Hand == EControllerHand::Left ? "left" : "right"));
+
+  AVCVParam* interactingParam = Cast<AVCVParam>(controller->GetParamActorToInteract());
+  if (!interactingParam) return;
+
+  UE_LOG(LogTemp, Warning, TEXT("  releasing %s"), *interactingParam->GetActorNameOrLabel());
+
+  controller->EndParamInteract();
+  interactingParam->release();
 }
 
 void AVRAvatar::Quit(const FInputActionValue& _Value) {

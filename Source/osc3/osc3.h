@@ -12,3 +12,6 @@
 #define TAG_INTERACTABLE FName("interactable")
 #define TAG_GRABBABLE FName("grabbable")
 #define TAG_GRABBER FName("grabber")
+
+#define TAG_INTERACTABLE_PARAM FName("interactable_param")
+#define TAG_INTERACTABLE_PORT FName("interactable_param")

@@ -1,5 +1,6 @@
 #include "VCVParam.h"
 
+#include "osc3.h"
 #include "VCV.h"
 #include "VCVModule.h"
 #include "VCVLight.h"
@@ -10,14 +11,16 @@ AVCVParam::AVCVParam() {
 
 void AVCVParam::BeginPlay() {
 	Super::BeginPlay();
+  
+  Tags.Add(TAG_INTERACTABLE_PARAM);
 }
 
 void AVCVParam::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
   
-  if (engaged) {
-    // UE_LOG(LogTemp, Warning, TEXT("engaged %s"), *GetName());
-  }
+  // if (engaged) {
+  //   UE_LOG(LogTemp, Warning, TEXT("engaged %s"), *GetName());
+  // }
 }
 
 void AVCVParam::init(VCVParam* vcv_param) {
@@ -65,8 +68,22 @@ void AVCVParam::engage() {
   engaged = true;
 }
 
+void AVCVParam::engage(float _value) {
+  // UE_LOG(LogTemp, Warning, TEXT("param engage"));
+  engaged = true;
+}
+
+void AVCVParam::engage(FVector _value) {
+  // UE_LOG(LogTemp, Warning, TEXT("param engage"));
+  engaged = true;
+}
+
 void AVCVParam::alter(float amount) {
   // UE_LOG(LogTemp, Warning, TEXT("param alter %f, ratio'd: %f"), amount, amount * alterRatio);
+}
+
+void AVCVParam::alter(FVector _value) {
+  // UE_LOG(LogTemp, Warning, TEXT("param alter %s, ratio'd: %s"), *_value.ToCompactString(), *(_value * alterRatio).ToCompactString());
 }
 
 void AVCVParam::release() {

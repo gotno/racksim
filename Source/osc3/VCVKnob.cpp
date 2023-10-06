@@ -96,26 +96,29 @@ float AVCVKnob::getValueFromRotation() {
   return value;
 }
 
-void AVCVKnob::engage() {
-  Super::engage();
+void AVCVKnob::engage(float ControllerRoll) {
+  Super::engage(ControllerRoll);
   shadowRotation = GetActorRotation();
+  LastControllerRoll = ControllerRoll;
 }
 
-void AVCVKnob::alter(float amount) {
-  Super::alter(amount);
-  if (amount == lastAmount) return;
+void AVCVKnob::alter(float ControllerRoll) {
+  Super::alter(ControllerRoll);
 
-  float change = (amount - lastAmount) * alterRatio;
+  float deltaRoll = (ControllerRoll - LastControllerRoll) * alterRatio;
+  deltaRoll =
+    FMath::WeightedMovingAverage(deltaRoll, LastDeltaRoll, 0.2f);
+  LastDeltaRoll = deltaRoll;
+
   shadowRotation.Roll =
-    FMath::Clamp(shadowRotation.Roll + change, model->minAngle, model->maxAngle);
+    FMath::Clamp(shadowRotation.Roll + deltaRoll, model->minAngle, model->maxAngle);
 
   setValue(getValueFromRotation());
   updateRotation(model->snap ? getRotationFromValue() : shadowRotation);
 
-  lastAmount = amount;
+  LastControllerRoll = ControllerRoll;
 }
 
 void AVCVKnob::release() {
   Super::release();
-  lastAmount = 0.f;
 }

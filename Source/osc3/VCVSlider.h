@@ -66,22 +66,25 @@ private:
   
   float lastAlterAmount = 0.f;
   float lastValue;
-  float alterRatio = 1.f / 128.f;
+  float AlterRatio = 0.8f;
+  
+  FVector LastControllerPosition;
+  float LastPositionDelta{0.f};
   
   // unit vector direction to move, updated every `engage`
-  FVector direction;
+  FVector SliderDirectionVector;
   // max move distance
   float minMaxOffsetDelta;
   // offset to track dragged position vs snap position
-  float shadowOffset;
+  float ShadowOffset;
   // actual offset from zero in world
-  float worldOffset;
+  float WorldOffset;
 
   float getOffsetFromValue();
   float getValueFromOffset();
 
 public:
-  virtual void engage();
-  virtual void alter(float amount);
-  virtual void release();
+  void engage(FVector ControllerPosition) override;
+  void alter(FVector ControllerPosition) override;
+  void release() override;
 };

@@ -10,9 +10,18 @@ class USceneComponent;
 class UStaticMeshComponent;
 class AVRMotionController;
 struct FHitResult;
+class UHapticFeedbackEffect_Base;
 
 USTRUCT()
-struct FActions {
+struct FBaseActions {
+	GENERATED_BODY()
+
+  UPROPERTY(EditDefaultsOnly)
+  UInputAction* Quit;
+};
+
+USTRUCT()
+struct FWorldManipulationActions {
 	GENERATED_BODY()
 
   UPROPERTY(EditDefaultsOnly)
@@ -32,14 +41,26 @@ struct FActions {
   UInputAction* TeleportLeft;
   UPROPERTY(EditDefaultsOnly)
   UInputAction* TeleportRight;
-  
+};
+
+USTRUCT()
+struct FModuleManipulationActions {
+	GENERATED_BODY()
+
   UPROPERTY(EditDefaultsOnly)
   UInputAction* GrabLeft;
   UPROPERTY(EditDefaultsOnly)
   UInputAction* GrabRight;
+};
+
+USTRUCT()
+struct FParamInteractionActions {
+	GENERATED_BODY()
 
   UPROPERTY(EditDefaultsOnly)
-  UInputAction* Quit;
+  UInputAction* ParamEngageLeft;
+  UPROPERTY(EditDefaultsOnly)
+  UInputAction* ParamEngageRight;
 };
 
 USTRUCT()
@@ -58,6 +79,11 @@ struct FInputMappingContexts {
   UInputMappingContext* WorldManipulationLeft;
   UPROPERTY(EditDefaultsOnly)
   UInputMappingContext* WorldManipulationRight;
+
+  UPROPERTY(EditDefaultsOnly)
+  UInputMappingContext* ParamInteractionLeft;
+  UPROPERTY(EditDefaultsOnly)
+  UInputMappingContext* ParamInteractionRight;
 };
 
 class UEnhancedInputLocalPlayerSubsystem;
@@ -68,17 +94,6 @@ class OSC3_API AVRAvatar : public ACharacter {
 
 public:
 	AVRAvatar();
-  
-  UPROPERTY(EditAnywhere, Category="Input")
-  FActions Actions;
-  UPROPERTY(EditAnywhere, Category="Input")
-  FInputMappingContexts InputMappingContexts;
-
-  UEnhancedInputLocalPlayerSubsystem* InputSubsystem;
-  
-  void SetControllerInteracting(EControllerHand Hand, bool bInteracting);
-  
-  void GetRenderablePosition(FVector& location, FRotator& rotation);
 
 protected:
 	virtual void BeginPlay() override;
@@ -87,6 +102,25 @@ protected:
 public:	
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+
+  UPROPERTY(EditAnywhere, Category="Input")
+  FBaseActions BaseActions;
+  UPROPERTY(EditAnywhere, Category="Input")
+  FWorldManipulationActions WorldManipulationActions;
+  UPROPERTY(EditAnywhere, Category="Input")
+  FModuleManipulationActions ModuleManipulationActions;
+  UPROPERTY(EditAnywhere, Category="Input")
+  FParamInteractionActions ParamInteractionActions;
+
+  UPROPERTY(EditAnywhere, Category="Input")
+  FInputMappingContexts InputMappingContexts;
+
+  UEnhancedInputLocalPlayerSubsystem* InputSubsystem;
+  
+  void SetControllerGrabbing(EControllerHand Hand, bool bGrabbing);
+  void SetControllerParamInteracting(EControllerHand Hand, bool bInteracting);
+  
+  void GetRenderablePosition(FVector& location, FRotator& rotation);
 
 private:
   UPROPERTY(VisibleAnywhere)
@@ -104,7 +138,7 @@ private:
 
   UPROPERTY(VisibleAnywhere)
   UStaticMeshComponent* DestinationMarker;
-  
+
   // world manipulation
   bool bLeftHandWorldManipulationActive{false};
   bool bRightHandWorldManipulationActive{false};
@@ -139,6 +173,7 @@ private:
   UPROPERTY(EditDefaultsOnly, Category="Input")
   float TranslateWorldScale{1.f};
 
+  bool bLeftHandRotoTranslateActive{false};
   void HandleStartRotoTranslateWorld(const FInputActionValue& _Value);
   void HandleRotoTranslateWorld(const FInputActionValue& _Value);
   void HandleCompleteRotoTranslateWorld(const FInputActionValue& _Value);
@@ -147,6 +182,11 @@ private:
   void HandleStartGrab(const FInputActionValue& _Value, EControllerHand Hand);
   void HandleGrab(const FInputActionValue& _Value, EControllerHand Hand);
   void HandleCompleteGrab(const FInputActionValue& _Value, EControllerHand Hand);
+
+  // param interaction
+  void HandleStartParamEngage(const FInputActionValue& _Value, EControllerHand Hand);
+  void HandleParamEngage(const FInputActionValue& _Value, EControllerHand Hand);
+  void HandleCompleteParamEngage(const FInputActionValue& _Value, EControllerHand Hand);
 
   void LogInput(const FInputActionValue& _Value, FString msg);
 

@@ -51,17 +51,19 @@ private:
   
   Aosc3GameModeBase* gameMode;
   
-  float lastAmount = 0.f;
-  float alterRatio = 1.f / 2.f;
+  // float lastAmount = 0.f;
+  float alterRatio = 2.f;
 
   FRotator getRotationFromValue();
   float getValueFromRotation();
   void updateRotation(FRotator newRotation);
   
   FRotator shadowRotation;
+  float LastControllerRoll;
+  float LastDeltaRoll;
 
 public:
-  void engage() override;
-  void alter(float amount) override;
+  void engage(float ControllerRoll) override;
+  void alter(float ControllerRoll) override;
   void release() override;
 };
