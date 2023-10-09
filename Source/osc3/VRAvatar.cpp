@@ -5,11 +5,13 @@
 #include "Components/StaticMeshComponent.h"
 #include "osc3.h"
 
+#include "osc3GameModeBase.h"
 #include "VCVModule.h"
 #include "VCVParam.h"
-#include "VCVPort.h"
-#include "VCVKnob.h"
 #include "VCVSlider.h"
+#include "VCVKnob.h"
+#include "VCVPort.h"
+#include "VCVCable.h"
 
 #include "VRMotionController.h"
 #include "MotionControllerComponent.h"
@@ -42,6 +44,7 @@ AVRAvatar::AVRAvatar() {
 void AVRAvatar::BeginPlay() {
 	Super::BeginPlay();
   DestinationMarker->SetVisibility(false);
+  GameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(this));
 }
 
 void AVRAvatar::PawnClientRestart() {
@@ -168,7 +171,7 @@ void AVRAvatar::SetControllerGrabbing(EControllerHand Hand, bool bGrabbing) {
   }
 }
 
-void AVRAvatar::SetControllerParamInteracting(EControllerHand Hand, bool bInteracting) {
+void AVRAvatar::SetControllerParamOrPortInteracting(EControllerHand Hand, bool bInteracting) {
   if (Hand == EControllerHand::Left && bLeftHandWorldManipulationActive) return;
   if (Hand == EControllerHand::Right && bRightHandWorldManipulationActive) return;
 
@@ -451,17 +454,22 @@ void AVRAvatar::HandleStartParamEngage(const FInputActionValue& _Value, EControl
   UE_LOG(LogTemp, Warning, TEXT("%s hand param engage start"), *FString(Hand == EControllerHand::Left ? "left" : "right"));
 
   AVCVParam* interactingParam = Cast<AVCVParam>(controller->GetParamActorToInteract());
-  if (!interactingParam) return;
+  if (interactingParam) {
+    UE_LOG(LogTemp, Warning, TEXT("  engaging param %s"), *interactingParam->GetActorNameOrLabel());
+    controller->StartParamInteract();
 
-  UE_LOG(LogTemp, Warning, TEXT("  engaging %s"), *interactingParam->GetActorNameOrLabel());
+    if (Cast<AVCVKnob>(interactingParam)) {
+      interactingParam->engage(controller->GetActorRotation().Roll);
+    } else if (Cast<AVCVSlider>(interactingParam)) {
+      interactingParam->engage(controller->GetActorLocation());
+    } else {
+      interactingParam->engage();
+    }
+  }
 
-  controller->StartParamInteract();
-  if (Cast<AVCVKnob>(interactingParam)) {
-    interactingParam->engage(controller->GetActorRotation().Roll);
-  } else if (Cast<AVCVSlider>(interactingParam)) {
-    interactingParam->engage(controller->GetActorLocation());
-  } else {
-    interactingParam->engage();
+  AVCVPort* interactingPort = controller->GetPortActorToInteract();
+  if (interactingPort) {
+    controller->StartPortInteract();
   }
 }
 
@@ -470,13 +478,27 @@ void AVRAvatar::HandleParamEngage(const FInputActionValue& _Value, EControllerHa
     Hand == EControllerHand::Left ? LeftController : RightController;
   
   AVCVParam* interactingParam = Cast<AVCVParam>(controller->GetParamActorToInteract());
+  if (interactingParam) {
+    if (Cast<AVCVKnob>(interactingParam)) {
+      interactingParam->alter(controller->GetActorRotation().Roll);
+    } else if (Cast<AVCVSlider>(interactingParam)) {
+      interactingParam->alter(controller->GetActorLocation());
+    }
+  }
 
-  if (!interactingParam) return;
-
-  if (Cast<AVCVKnob>(interactingParam)) {
-    interactingParam->alter(controller->GetActorRotation().Roll);
-  } else if (Cast<AVCVSlider>(interactingParam)) {
-    interactingParam->alter(controller->GetActorLocation());
+  AVCVCable* heldCable = controller->GetHeldCable();
+  if (heldCable) {
+    AVCVPort* destinationPort = controller->GetDestinationPortActor();
+    if (destinationPort) {
+      FVector location, direction;
+      GameMode->GetPortInfo(destinationPort->getIdentity(), location, direction);
+      heldCable->setHangingLocation(location, direction);
+    } else {
+      heldCable->setHangingLocation(
+        controller->GetActorLocation() + controller->GetActorForwardVector() * 5.f,
+        -controller->GetActorForwardVector()
+      );
+    }
   }
 }
 
@@ -487,12 +509,17 @@ void AVRAvatar::HandleCompleteParamEngage(const FInputActionValue& _Value, ECont
   UE_LOG(LogTemp, Warning, TEXT("%s hand param engage complete"), *FString(Hand == EControllerHand::Left ? "left" : "right"));
 
   AVCVParam* interactingParam = Cast<AVCVParam>(controller->GetParamActorToInteract());
-  if (!interactingParam) return;
+  if (interactingParam) {
+    UE_LOG(LogTemp, Warning, TEXT("  releasing %s"), *interactingParam->GetActorNameOrLabel());
 
-  UE_LOG(LogTemp, Warning, TEXT("  releasing %s"), *interactingParam->GetActorNameOrLabel());
+    controller->EndParamInteract();
+    interactingParam->release();
+  }
 
-  controller->EndParamInteract();
-  interactingParam->release();
+  AVCVCable* heldCable = controller->GetHeldCable();
+  if (heldCable) {
+    controller->EndPortInteract();
+  }
 }
 
 void AVRAvatar::Quit(const FInputActionValue& _Value) {

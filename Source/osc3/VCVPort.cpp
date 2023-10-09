@@ -64,7 +64,13 @@ void AVCVPort::init(VCVPort* vcv_port) {
   StaticMeshComponent->SetWorldScale3D(FVector(1, model->box.size.x, model->box.size.y));
   
   VCVOverrides overrides;
-  BaseMaterialInstance->SetVectorParameterValue(FName("color"), overrides.getMatchingColor(getModuleBrand(), model->svgPath));
+  BaseMaterialInstance->SetVectorParameterValue(
+    FName("color"),
+    overrides.getMatchingColor(
+      getModuleBrand(),
+      model->svgPath
+    )
+  );
 }
 
 FString AVCVPort::getModuleBrand() {

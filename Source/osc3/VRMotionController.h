@@ -10,7 +10,11 @@
 class USphereComponent;
 class UCapsuleComponent;
 class UPrimitiveComponent;
+class Aosc3GameModeBase;
 class APlayerController;
+class AVRAvatar;
+class AVCVCable;
+class AVCVPort;
 
 USTRUCT()
 struct FHapticEffects {
@@ -41,16 +45,23 @@ public:
 
   AActor* GetActorToGrab() { return ActorToGrab; }
   AActor* GetParamActorToInteract() { return ParamActorToInteract; }
-  AActor* GetPortActorToInteract() { return PortActorToInteract; }
+  AVCVPort* GetPortActorToInteract() { return PortActorToInteract; }
+  AVCVPort* GetDestinationPortActor() { return DestinationPortActor; }
+  AVCVCable* GetHeldCable() { return HeldCable; }
   void StartGrab();
   void EndGrab();
   void StartParamInteract();
   void EndParamInteract();
+  void StartPortInteract();
+  void EndPortInteract();
 
   UPROPERTY(EditAnywhere, Category="Input")
   FHapticEffects HapticEffects;
   
 private:
+  AVRAvatar* Avatar;
+  Aosc3GameModeBase* GameMode;
+
   FString HandName;
 
   APlayerController* PlayerController;
@@ -87,7 +98,12 @@ private:
   void HandleInteractorBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
   UFUNCTION()
   void HandleInteractorEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
-  bool bIsInteracting{false};
+
+  bool bIsParamInteracting{false};
   AActor* ParamActorToInteract;
-  AActor* PortActorToInteract;
+
+  bool bIsPortInteracting{false};
+  AVCVPort* PortActorToInteract;
+  AVCVPort* DestinationPortActor;
+  AVCVCable* HeldCable;
 };

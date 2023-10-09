@@ -11,6 +11,8 @@ class UStaticMeshComponent;
 class AVRMotionController;
 struct FHitResult;
 class UHapticFeedbackEffect_Base;
+class Aosc3GameModeBase;
+class AVCVCable;
 
 USTRUCT()
 struct FBaseActions {
@@ -118,7 +120,7 @@ public:
   UEnhancedInputLocalPlayerSubsystem* InputSubsystem;
   
   void SetControllerGrabbing(EControllerHand Hand, bool bGrabbing);
-  void SetControllerParamInteracting(EControllerHand Hand, bool bInteracting);
+  void SetControllerParamOrPortInteracting(EControllerHand Hand, bool bInteracting);
   
   void GetRenderablePosition(FVector& location, FRotator& rotation);
 
@@ -138,6 +140,8 @@ private:
 
   UPROPERTY(VisibleAnywhere)
   UStaticMeshComponent* DestinationMarker;
+  
+  Aosc3GameModeBase* GameMode;
 
   // world manipulation
   bool bLeftHandWorldManipulationActive{false};
@@ -187,6 +191,8 @@ private:
   void HandleStartParamEngage(const FInputActionValue& _Value, EControllerHand Hand);
   void HandleParamEngage(const FInputActionValue& _Value, EControllerHand Hand);
   void HandleCompleteParamEngage(const FInputActionValue& _Value, EControllerHand Hand);
+  AVCVCable* LeftHandControlledCable;
+  AVCVCable* RightHandControlledCable;
 
   void LogInput(const FInputActionValue& _Value, FString msg);
 

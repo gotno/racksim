@@ -1,7 +1,11 @@
 #include "VRMotionController.h"
 
 #include "osc3.h"
+#include "osc3GameModeBase.h"
+#include "VCV.h"
 #include "VRAvatar.h"
+#include "VCVCable.h"
+#include "VCVPort.h"
 
 #include "Components/SphereComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -26,6 +30,9 @@ AVRMotionController::AVRMotionController() {
 
 void AVRMotionController::BeginPlay() {
 	Super::BeginPlay();
+  
+  Avatar = Cast<AVRAvatar>(GetOwner());
+  GameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(this));
   
   // GrabSphere->OnComponentBeginOverlap.AddDynamic(this, &AVRMotionController::LogOverlap);
 
@@ -70,55 +77,123 @@ void AVRMotionController::LogOverlap(UPrimitiveComponent* OverlappedComponent, A
 }
 
 void AVRMotionController::HandleInteractorBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult) {
-  if (bIsGrabbing || bIsInteracting) return;
+  if (bIsGrabbing || bIsParamInteracting) return;
 
-  if (OtherActor->ActorHasTag(TAG_INTERACTABLE_PARAM) || OtherActor->ActorHasTag(TAG_INTERACTABLE_PORT)) {
+  if (OtherActor->ActorHasTag(TAG_INTERACTABLE_PARAM) && !bIsPortInteracting) {
     ParamActorToInteract = OtherActor;
-    Cast<AVRAvatar>(GetOwner())->SetControllerParamInteracting(
+    PortActorToInteract = nullptr;
+
+    Avatar->SetControllerParamOrPortInteracting(
       MotionController->GetTrackingSource(),
       true
     );
-  }
 
-  if (OtherActor->ActorHasTag(TAG_INTERACTABLE_PARAM)) {
-    UE_LOG(LogTemp, Warning, TEXT("%s hand can interact param %s"), *HandName, *OtherActor->GetActorNameOrLabel());
     PlayerController->PlayHapticEffect(HapticEffects.Bump, MotionController->GetTrackingSource());
-  } else if (OtherActor->ActorHasTag(TAG_INTERACTABLE_PORT)) {
-    UE_LOG(LogTemp, Warning, TEXT("%s hand can interact port %s"), *HandName, *OtherActor->GetActorNameOrLabel());
-    PlayerController->PlayHapticEffect(HapticEffects.Bump, MotionController->GetTrackingSource());
+    
+    return;
+  }
+  
+  if (OtherActor->ActorHasTag(TAG_INTERACTABLE_PORT)) {
+    if (!bIsPortInteracting) {
+      Avatar->SetControllerParamOrPortInteracting(
+        MotionController->GetTrackingSource(),
+        true
+      );
+
+      PortActorToInteract = Cast<AVCVPort>(OtherActor);
+      ParamActorToInteract = nullptr;
+      PlayerController->PlayHapticEffect(HapticEffects.Bump, MotionController->GetTrackingSource());
+    } else if (HeldCable && Cast<AVCVPort>(OtherActor)->canConnect(HeldCable->getHangingType())) {
+      DestinationPortActor = Cast<AVCVPort>(OtherActor);
+      PlayerController->PlayHapticEffect(HapticEffects.Bump, MotionController->GetTrackingSource());
+    }
   }
 }
 
 void AVRMotionController::StartParamInteract() {
   UE_LOG(LogTemp, Display, TEXT("%s start param interact"), *HandName);
-  bIsInteracting = true;
+  bIsParamInteracting = true;
 }
 
 void AVRMotionController::EndParamInteract() {
   UE_LOG(LogTemp, Display, TEXT("%s end param interact"), *HandName);
-  bIsInteracting = false;
+  bIsParamInteracting = false;
 
   TSet<AActor*> overlappingActors;
   InteractCapsule->GetOverlappingActors(overlappingActors);
 
   if (!overlappingActors.Contains(ParamActorToInteract)) {
     ParamActorToInteract = nullptr;
-    Cast<AVRAvatar>(GetOwner())->SetControllerParamInteracting(
+    Avatar->SetControllerParamOrPortInteracting(
       MotionController->GetTrackingSource(),
       false
     );
   }
 }
 
+void AVRMotionController::StartPortInteract() {
+  UE_LOG(LogTemp, Display, TEXT("%s start port interact"), *HandName);
+  bIsPortInteracting = true;
+
+  int64_t cableId;
+  if (PortActorToInteract->getCableId(cableId)) {
+    HeldCable = GameMode->DetachCable(cableId, PortActorToInteract->getIdentity());
+    UE_LOG(LogTemp, Warning, TEXT("got cable %lld"), cableId);
+  } else {
+    UE_LOG(LogTemp, Warning, TEXT("spawning new cable"));
+    VCVCable cable(-1);
+    cable.setIdentity(PortActorToInteract->getIdentity());
+    HeldCable = GameMode->SpawnCable(cable);
+  }
+}
+
+void AVRMotionController::EndPortInteract() {
+  UE_LOG(LogTemp, Display, TEXT("%s end port interact"), *HandName);
+
+  if (DestinationPortActor && DestinationPortActor->canConnect(HeldCable->getHangingType())) {
+    GameMode->AttachCable(HeldCable->getId(), DestinationPortActor->getIdentity());
+  } else {
+    GameMode->DestroyCable(HeldCable->getId());
+  }
+
+  bIsPortInteracting = false;
+  HeldCable = nullptr;
+
+  TSet<AActor*> overlappingActors;
+  InteractCapsule->GetOverlappingActors(overlappingActors);
+
+  if (!overlappingActors.Contains(PortActorToInteract) && !overlappingActors.Contains(DestinationPortActor)) {
+    PortActorToInteract = nullptr;
+    DestinationPortActor = nullptr;
+
+    Avatar->SetControllerParamOrPortInteracting(
+      MotionController->GetTrackingSource(),
+      false
+    );
+  } else if (overlappingActors.Contains(DestinationPortActor)) {
+    PortActorToInteract = DestinationPortActor;
+    DestinationPortActor = nullptr;
+  } else {
+    DestinationPortActor = nullptr;
+  }
+}
+
 void AVRMotionController::HandleInteractorEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex) {
-  if (bIsGrabbing || bIsInteracting) return;
+  if (bIsGrabbing || bIsParamInteracting) return;
+  
+  if (bIsPortInteracting && OtherActor->ActorHasTag(TAG_INTERACTABLE_PORT)) {
+    DestinationPortActor = nullptr;
+    return;
+  } else if (bIsPortInteracting) {
+    return;
+  }
 
   TSet<AActor*> overlappingActors;
   InteractCapsule->GetOverlappingActors(overlappingActors);
 
   if ((OtherActor->ActorHasTag(TAG_INTERACTABLE_PARAM) || OtherActor->ActorHasTag(TAG_INTERACTABLE_PORT)) && !overlappingActors.Contains(ParamActorToInteract)) {
     UE_LOG(LogTemp, Display, TEXT("%s end param/port interact"), *HandName);
-    Cast<AVRAvatar>(GetOwner())->SetControllerParamInteracting(
+    Avatar->SetControllerParamOrPortInteracting(
       MotionController->GetTrackingSource(),
       false
     );
@@ -126,13 +201,13 @@ void AVRMotionController::HandleInteractorEndOverlap(UPrimitiveComponent* Overla
 }
 
 void AVRMotionController::HandleGrabberBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult) {
-  if (bIsGrabbing || bIsInteracting) return;
+  if (bIsGrabbing || bIsParamInteracting) return;
 
   if (OtherActor->ActorHasTag(TAG_GRABBABLE)) {
     UE_LOG(LogTemp, Display, TEXT("%s set ActorToGrab %s"), *HandName, *OtherActor->GetActorNameOrLabel());
 
     ActorToGrab = OtherActor;
-    Cast<AVRAvatar>(GetOwner())->SetControllerGrabbing(
+    Avatar->SetControllerGrabbing(
       MotionController->GetTrackingSource(),
       true
     );
@@ -155,7 +230,7 @@ void AVRMotionController::EndGrab() {
 
   if (!overlappingActors.Contains(ActorToGrab)) {
     ActorToGrab = nullptr;
-    Cast<AVRAvatar>(GetOwner())->SetControllerGrabbing(
+    Avatar->SetControllerGrabbing(
       MotionController->GetTrackingSource(),
       false
     );
@@ -163,7 +238,7 @@ void AVRMotionController::EndGrab() {
 }
 
 void AVRMotionController::HandleGrabberEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex) {
-  if (bIsGrabbing || bIsInteracting) return;
+  if (bIsGrabbing || bIsParamInteracting) return;
 
   TSet<AActor*> overlappingActors;
   GrabSphere->GetOverlappingActors(overlappingActors);
@@ -171,7 +246,7 @@ void AVRMotionController::HandleGrabberEndOverlap(UPrimitiveComponent* Overlappe
   if (OtherActor->ActorHasTag(TAG_GRABBABLE) && !overlappingActors.Contains(ActorToGrab)) {
     UE_LOG(LogTemp, Display, TEXT("%s end overlap"), *HandName);
     ActorToGrab = nullptr;
-    Cast<AVRAvatar>(GetOwner())->SetControllerGrabbing(
+    Avatar->SetControllerGrabbing(
       MotionController->GetTrackingSource(),
       false
     );

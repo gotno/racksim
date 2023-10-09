@@ -1,5 +1,6 @@
 #include "VCVCable.h"
 
+#include "osc3.h"
 #include "VCV.h"
 #include "osc3GameModeBase.h"
 #include "Kismet/GameplayStatics.h"
@@ -98,12 +99,12 @@ void AVCVCable::draw() {
   outputTransform.SetTranslation(outputTranslation);
   outputTransform.SetRotation(outputForwardVector.Rotation().Quaternion());
 
-  if (model.id == -1) cableColor = FColor::Black;
+  if (model.id == -1) cableColor = FColor::White;
 
   DrawDebugCircle(
     GetWorld(),
     inputTransform.ToMatrixNoScale(),
-    plugRadius,
+    plugRadius * RENDER_SCALE,
     64,
     cableColor,
     false,
@@ -114,8 +115,8 @@ void AVCVCable::draw() {
   );
   DrawDebugLine(
     GetWorld(),
-    inputTranslation + directionUnitVector * plugRadius,
-    outputTranslation + -directionUnitVector * plugRadius,
+    inputTranslation + directionUnitVector * (plugRadius * RENDER_SCALE),
+    outputTranslation + -directionUnitVector * (plugRadius * RENDER_SCALE),
     cableColor,
     false,
     -1.f,
@@ -125,7 +126,7 @@ void AVCVCable::draw() {
   DrawDebugCircle(
     GetWorld(),
     outputTransform.ToMatrixNoScale(),
-    plugRadius,
+    plugRadius * RENDER_SCALE,
     64,
     cableColor,
     false,
