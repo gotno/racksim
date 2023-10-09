@@ -1,5 +1,6 @@
 #include "VCVKnob.h"
 
+#include "osc3.h"
 #include "osc3GameModeBase.h"
 #include "VCV.h"
 #include "VCVOverrides.h"
@@ -68,7 +69,7 @@ void AVCVKnob::init(VCVParam* vcv_param) {
   VCVOverrides overrides;
 
   FVector scaleMultiplier = overrides.getScaleMultiplier(getModuleBrand(), model->svgPaths[1]);
-  SetActorScale3D(GetActorScale3D() * scaleMultiplier);
+  SetActorScale3D(GetActorScale3D() * scaleMultiplier * FVector(RENDER_SCALE, 1.f, 1.f));
 
   FLinearColor knobColor = overrides.getMatchingColor(getModuleBrand(), model->svgPaths[1]);
   BaseMaterialInstance->SetVectorParameterValue(FName("color"), knobColor);

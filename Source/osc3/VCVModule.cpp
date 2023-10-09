@@ -139,7 +139,7 @@ void AVCVModule::init(VCVModule vcv_module) {
   FaceMaterialInstance->SetScalarParameterValue(FName("uscale"), overrides.getUVOverride(model.brand).X);
   FaceMaterialInstance->SetScalarParameterValue(FName("vscale"), overrides.getUVOverride(model.brand).Y);
 
-  StaticMeshComponent->SetWorldScale3D(FVector(2, model.box.size.x, model.box.size.y));
+  StaticMeshComponent->SetWorldScale3D(FVector(RENDER_SCALE, model.box.size.x, model.box.size.y));
   spawnComponents();
   SetActorRotation(FRotator(-20.f, 0.f, 0.f));
 }

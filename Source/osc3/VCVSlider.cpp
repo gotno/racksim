@@ -97,7 +97,7 @@ void AVCVSlider::init(VCVParam* vcv_param) {
   FVector minHandlePosition = GetActorLocation() + FVector(0, model->minHandlePos.x, model->minHandlePos.y);
   FVector maxHandlePosition = GetActorLocation() + FVector(0, model->maxHandlePos.x, model->maxHandlePos.y);
   
-  HandleMeshComponent->SetWorldScale3D(FVector(1, model->handleBox.size.x, model->handleBox.size.y));
+  HandleMeshComponent->SetWorldScale3D(FVector(RENDER_SCALE, model->handleBox.size.x, model->handleBox.size.y));
   spawnLights(HandleMeshComponent);
 
   if (model->horizontal) {

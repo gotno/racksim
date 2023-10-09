@@ -61,7 +61,7 @@ void AVCVPort::Tick(float DeltaTime) {
 
 void AVCVPort::init(VCVPort* vcv_port) {
   model = vcv_port;
-  StaticMeshComponent->SetWorldScale3D(FVector(1, model->box.size.x, model->box.size.y));
+  StaticMeshComponent->SetWorldScale3D(FVector(RENDER_SCALE, model->box.size.x, model->box.size.y));
   
   VCVOverrides overrides;
   BaseMaterialInstance->SetVectorParameterValue(

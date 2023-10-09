@@ -70,6 +70,8 @@ void AVCVButton::init(VCVParam* vcv_param) {
   frames.Init(nullptr, vcv_param->svgPaths.Num());
 
   spawnLights(MeshComponent);
+  
+  SetActorScale3D(GetActorScale3D() * FVector(RENDER_SCALE, 1.f, 1.f));
 }
 
 void AVCVButton::engage() {
