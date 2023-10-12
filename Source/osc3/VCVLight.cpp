@@ -3,12 +3,7 @@
 #include "osc3.h"
 #include "osc3GameModeBase.h"
 #include "VCV.h"
-#include "VCVDisplay.h"
-#include "VCVKnob.h"
-#include "VCVParam.h"
-#include "VCVButton.h"
-#include "VCVSlider.h"
-#include "VCVSwitch.h"
+#include "VCVModule.h"
 
 #include "Engine.h"
 #include "Engine/Texture2D.h"
@@ -19,18 +14,17 @@
 
 AVCVLight::AVCVLight() {
 	PrimaryActorTick.bCanEverTick = true;
-
+  
   BaseMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Static Mesh"));
   RootComponent = BaseMeshComponent;
 
   BaseMeshComponent->SetGenerateOverlapEvents(true);
   BaseMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
   BaseMeshComponent->SetCollisionObjectType(LIGHT_OBJECT);
+  BaseMeshComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
   BaseMeshComponent->SetCollisionResponseToChannel(PARAM_OBJECT, ECollisionResponse::ECR_Overlap);
-  BaseMeshComponent->SetCollisionResponseToChannel(PARAM_TRACE, ECollisionResponse::ECR_Ignore);
-  
-  BaseMeshComponent->OnComponentBeginOverlap.AddDynamic(this, &AVCVLight::onBeginOverlap);
-  
+  BaseMeshComponent->OnComponentBeginOverlap.AddDynamic(this, &AVCVLight::HandleBeginOverlap);
+
   static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshCircle(CircleMeshReference);
   static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshRectangle(RectangleMeshReference);
   
@@ -75,28 +69,6 @@ void AVCVLight::Tick(float DeltaTime) {
   }
 }
 
-void AVCVLight::onBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
-  if (Cast<AVCVSwitch>(OtherActor)) {
-    // UE_LOG(LogTemp, Warning, TEXT("%s overlapped with switch %s"), *GetActorNameOrLabel(), *OtherActor->GetActorNameOrLabel());
-    SetActorLocation(GetActorLocation() - GetActorForwardVector() * 0.01f);
-  } else if (Cast<AVCVButton>(OtherActor)) {
-    // UE_LOG(LogTemp, Warning, TEXT("%s overlapped with button %s"), *GetActorNameOrLabel(), *OtherActor->GetActorNameOrLabel());
-    SetActorLocation(GetActorLocation() - GetActorForwardVector() * 0.2f);
-  } else if (Cast<AVCVSlider>(OtherActor)) {
-    // UE_LOG(LogTemp, Warning, TEXT("%s overlapped with slider %s"), *GetActorNameOrLabel(), *OtherActor->GetActorNameOrLabel());
-    SetActorLocation(GetActorLocation() - GetActorForwardVector() * 0.2f);
-  } else if (Cast<AVCVDisplay>(OtherActor)) {
-    // UE_LOG(LogTemp, Warning, TEXT("%s overlapped with slider %s"), *GetActorNameOrLabel(), *OtherActor->GetActorNameOrLabel());
-    SetActorLocation(GetActorLocation() - GetActorForwardVector() * 0.05f);
-  // } else if (Cast<AVCVKnob>(OtherActor)) {
-    // TODO: overlap is a little eager? shouldn't be overlapping with neighboring knobs.
-    // UE_LOG(LogTemp, Warning, TEXT("%s overlapped with knob %s"), *GetActorNameOrLabel(), *OtherActor->GetActorNameOrLabel());
-    // SetActorLocation(GetActorLocation() - GetActorForwardVector() * 1.f);
-  } else {
-    // UE_LOG(LogTemp, Warning, TEXT("%s:%s overlapped with something else: %s"), *GetOwner()->GetActorNameOrLabel(), *GetActorNameOrLabel(), *OtherActor->GetActorNameOrLabel());
-  }
-}
-
 void AVCVLight::init(VCVLight* vcv_light) {
   model = vcv_light;
 
@@ -114,6 +86,21 @@ void AVCVLight::init(VCVLight* vcv_light) {
   }
   
   SetActorScale3D(FVector(0.01f, model->box.size.x, model->box.size.y));
+}
+
+void AVCVLight::HandleBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
+  if (bHandledOverlap) return;
+
+  AVCVModule* ownerModule = Cast<AVCVModule>(GetOwner())
+    ? Cast<AVCVModule>(GetOwner())
+    : Cast<AVCVModule>(GetOwner()->GetOwner());
+  if (ownerModule != OtherActor->GetOwner()) return;
+
+  FVector _, otherActorExtent;
+  OtherActor->GetActorBounds(false, _, otherActorExtent);
+  AddActorLocalOffset(FVector(-otherActorExtent.X, 0.f, 0.f));
+
+  bHandledOverlap = true;
 }
 
 void AVCVLight::SetColor(FLinearColor color) {

@@ -15,7 +15,9 @@ AVCVButton::AVCVButton() {
   MeshComponent->SetGenerateOverlapEvents(true);
   MeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
   MeshComponent->SetCollisionObjectType(PARAM_OBJECT);
+  MeshComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
   MeshComponent->SetCollisionResponseToChannel(LIGHT_OBJECT, ECollisionResponse::ECR_Overlap);
+  MeshComponent->SetCollisionResponseToChannel(INTERACTOR_OBJECT, ECollisionResponse::ECR_Overlap);
   
   static ConstructorHelpers::FObjectFinder<UStaticMesh> Mesh(MeshReference);
   if (Mesh.Object) MeshComponent->SetStaticMesh(Mesh.Object);
@@ -70,8 +72,6 @@ void AVCVButton::init(VCVParam* vcv_param) {
   frames.Init(nullptr, vcv_param->svgPaths.Num());
 
   spawnLights(MeshComponent);
-  
-  SetActorScale3D(GetActorScale3D() * FVector(RENDER_SCALE, 1.f, 1.f));
 }
 
 void AVCVButton::engage() {

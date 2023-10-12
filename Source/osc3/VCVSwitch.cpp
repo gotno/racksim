@@ -15,7 +15,9 @@ AVCVSwitch::AVCVSwitch() {
   MeshComponent->SetGenerateOverlapEvents(true);
   MeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
   MeshComponent->SetCollisionObjectType(PARAM_OBJECT);
+  MeshComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
   MeshComponent->SetCollisionResponseToChannel(LIGHT_OBJECT, ECollisionResponse::ECR_Overlap);
+  MeshComponent->SetCollisionResponseToChannel(INTERACTOR_OBJECT, ECollisionResponse::ECR_Overlap);
   
   static ConstructorHelpers::FObjectFinder<UStaticMesh> Mesh(MeshReference);
   if (Mesh.Object) MeshComponent->SetStaticMesh(Mesh.Object);

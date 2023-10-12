@@ -141,7 +141,7 @@ void AVCVModule::init(VCVModule vcv_module) {
 
   StaticMeshComponent->SetWorldScale3D(FVector(RENDER_SCALE, model.box.size.x, model.box.size.y));
   spawnComponents();
-  SetActorRotation(FRotator(-20.f, 0.f, 0.f));
+  SetActorRotation(FRotator(0.f, 0.f, 0.f));
 }
 
 FString AVCVModule::getBrand() {

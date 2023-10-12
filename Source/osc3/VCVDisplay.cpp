@@ -14,6 +14,7 @@ AVCVDisplay::AVCVDisplay() {
   BaseMeshComponent->SetGenerateOverlapEvents(true);
   BaseMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
   BaseMeshComponent->SetCollisionObjectType(PARAM_OBJECT);
+  BaseMeshComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
   BaseMeshComponent->SetCollisionResponseToChannel(LIGHT_OBJECT, ECollisionResponse::ECR_Overlap);
   
   static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshBody(TEXT("/Script/Engine.StaticMesh'/Game/meshes/unit_lcd.unit_lcd'"));
@@ -36,6 +37,7 @@ void AVCVDisplay::BeginPlay() {
     MaterialInstance = UMaterialInstanceDynamic::Create(MaterialInterface, this);
     BaseMeshComponent->SetMaterial(0, MaterialInstance);
   }
+
 }
 
 void AVCVDisplay::Tick(float DeltaTime) {

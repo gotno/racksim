@@ -37,7 +37,9 @@ AVCVSlider::AVCVSlider() {
   HandleMeshComponent->SetGenerateOverlapEvents(true);
   HandleMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
   HandleMeshComponent->SetCollisionObjectType(PARAM_OBJECT);
+  HandleMeshComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
   HandleMeshComponent->SetCollisionResponseToChannel(LIGHT_OBJECT, ECollisionResponse::ECR_Overlap);
+  HandleMeshComponent->SetCollisionResponseToChannel(INTERACTOR_OBJECT, ECollisionResponse::ECR_Overlap);
 
   // handle materials
   static ConstructorHelpers::FObjectFinder<UMaterial> HandleMaterial(HandleMaterialReference);
@@ -98,6 +100,7 @@ void AVCVSlider::init(VCVParam* vcv_param) {
   FVector maxHandlePosition = GetActorLocation() + FVector(0, model->maxHandlePos.x, model->maxHandlePos.y);
   
   HandleMeshComponent->SetWorldScale3D(FVector(RENDER_SCALE, model->handleBox.size.x, model->handleBox.size.y));
+  
   spawnLights(HandleMeshComponent);
 
   if (model->horizontal) {

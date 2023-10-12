@@ -14,7 +14,6 @@
 AVCVKnob::AVCVKnob() {
   BaseMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Static Mesh"));
   RootComponent = BaseMeshComponent;
-  // BaseMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
   
   static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshBody(MeshReference);
   
@@ -69,7 +68,8 @@ void AVCVKnob::init(VCVParam* vcv_param) {
   VCVOverrides overrides;
 
   FVector scaleMultiplier = overrides.getScaleMultiplier(getModuleBrand(), model->svgPaths[1]);
-  SetActorScale3D(GetActorScale3D() * scaleMultiplier * FVector(RENDER_SCALE, 1.f, 1.f));
+  // SetActorScale3D(GetActorScale3D() * scaleMultiplier * FVector(RENDER_SCALE, 1.f, 1.f));
+  SetActorScale3D(GetActorScale3D() * scaleMultiplier);
 
   FLinearColor knobColor = overrides.getMatchingColor(getModuleBrand(), model->svgPaths[1]);
   BaseMaterialInstance->SetVectorParameterValue(FName("color"), knobColor);

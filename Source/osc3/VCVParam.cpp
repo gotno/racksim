@@ -7,20 +7,16 @@
 
 AVCVParam::AVCVParam() {
 	PrimaryActorTick.bCanEverTick = true;
-}
-
-void AVCVParam::BeginPlay() {
-	Super::BeginPlay();
   
   Tags.Add(TAG_INTERACTABLE_PARAM);
 }
 
+void AVCVParam::BeginPlay() {
+	Super::BeginPlay();
+}
+
 void AVCVParam::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
-  
-  // if (engaged) {
-  //   UE_LOG(LogTemp, Warning, TEXT("engaged %s"), *GetName());
-  // }
 }
 
 void AVCVParam::init(VCVParam* vcv_param) {
@@ -28,7 +24,7 @@ void AVCVParam::init(VCVParam* vcv_param) {
   owner = Cast<AVCVModule>(GetOwner());
   SetHidden(!model->visible);
   SetActorEnableCollision(model->visible);
-  SetActorScale3D(FVector(1, model->box.size.x, model->box.size.y));
+  SetActorScale3D(FVector(RENDER_SCALE, model->box.size.x, model->box.size.y));
 }
 
 FString AVCVParam::getModuleBrand() {
