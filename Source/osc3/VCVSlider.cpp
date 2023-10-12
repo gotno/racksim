@@ -131,11 +131,6 @@ float AVCVSlider::getValueFromOffset() {
 void AVCVSlider::engage(FVector ControllerPosition) {
   Super::engage();
 
-  SliderDirectionVector =
-    model->horizontal
-      ? HandleMeshComponent->GetRightVector()
-      : HandleMeshComponent->GetUpVector();
-
   LastControllerPosition = ControllerPosition;
   LastPositionDelta = 0.f;
   lastValue = model->value;
@@ -143,6 +138,11 @@ void AVCVSlider::engage(FVector ControllerPosition) {
 
 void AVCVSlider::alter(FVector ControllerPosition) {
   Super::alter(ControllerPosition);
+
+  SliderDirectionVector =
+    model->horizontal
+      ? HandleMeshComponent->GetRightVector()
+      : HandleMeshComponent->GetUpVector();
 
   FVector controllerVector = ControllerPosition - LastControllerPosition; 
   float positionDelta = FVector::DotProduct(controllerVector, SliderDirectionVector);
