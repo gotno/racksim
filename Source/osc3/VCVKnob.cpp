@@ -111,7 +111,9 @@ void AVCVKnob::alter(float ControllerRoll) {
     FMath::WeightedMovingAverage(deltaRoll, LastDeltaRoll, 0.2f);
   LastDeltaRoll = deltaRoll;
 
-  shadowRotation = GetActorRotation();
+  FRotator actorRotation = GetActorRotation();
+  shadowRotation.Pitch = actorRotation.Pitch;
+  shadowRotation.Yaw = actorRotation.Yaw;
   shadowRotation.Roll =
     FMath::Clamp(shadowRotation.Roll + deltaRoll, model->minAngle, model->maxAngle);
 
