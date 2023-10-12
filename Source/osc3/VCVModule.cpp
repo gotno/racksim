@@ -95,20 +95,29 @@ void AVCVModule::HandleEndOverlap(UPrimitiveComponent* OverlappedComponent, AAct
 void AVCVModule::EngageGrab(FVector GrabbedLocation, FRotator GrabbedRotation) {
   // UE_LOG(LogTemp, Warning, TEXT("%s: grab engage"), *GetActorNameOrLabel());
   bGrabEngaged = true;
-  LastGrabbedLocation = GrabbedLocation;
-  LastGrabbedRotation = GrabbedRotation;
-  SetHighlighted(false);
-
   GrabOffset = GrabbedLocation - GetActorLocation();
   StaticMeshComponent->AddWorldOffset(-GrabOffset);
+
+  LastGrabbedRotation = GrabbedRotation;
+  LastGrabbedLocation = GrabbedLocation - GrabOffset;
+  LastLocationDelta = FVector(0.f, 0.f, 0.f);
+  SetHighlighted(false);
 }
 
 void AVCVModule::AlterGrab(FVector GrabbedLocation, FRotator GrabbedRotation) {
   FQuat qFrom = LastGrabbedRotation.Quaternion();
   FQuat qTo =  GrabbedRotation.Quaternion();
   FQuat qDelta = qTo * qFrom.Inverse();
+  
+  FVector locationDelta = GrabbedLocation - LastGrabbedLocation;
+  locationDelta = UKismetMathLibrary::WeightedMovingAverage_FVector(
+    locationDelta,
+    LastLocationDelta,
+    0.4f
+  );
+  LastLocationDelta = locationDelta;
 
-  SetActorLocation(GrabbedLocation);
+  AddActorWorldOffset(locationDelta);
   AddActorWorldRotation(qDelta);
 
   LastGrabbedLocation = GrabbedLocation;

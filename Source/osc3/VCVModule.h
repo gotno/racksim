@@ -81,6 +81,7 @@ private:
   FVector GrabOffset;
   FVector LastGrabbedLocation;
   FRotator LastGrabbedRotation;
+  FVector LastLocationDelta;
 
   // TMap<int, class AVCVParam*> ParamActors;
   TMap<int, AVCVPort*> InputActors;

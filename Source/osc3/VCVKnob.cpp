@@ -7,9 +7,10 @@
 
 #include "engine/Texture2D.h"
 
+#include "UObject/ConstructorHelpers.h"
 #include "Math/UnrealMathUtility.h"
 #include "Kismet/GameplayStatics.h"
-#include "UObject/ConstructorHelpers.h"
+#include "Kismet/KismetMathLibrary.h"
 
 AVCVKnob::AVCVKnob() {
   BaseMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Static Mesh"));
@@ -68,7 +69,6 @@ void AVCVKnob::init(VCVParam* vcv_param) {
   VCVOverrides overrides;
 
   FVector scaleMultiplier = overrides.getScaleMultiplier(getModuleBrand(), model->svgPaths[1]);
-  // SetActorScale3D(GetActorScale3D() * scaleMultiplier * FVector(RENDER_SCALE, 1.f, 1.f));
   SetActorScale3D(GetActorScale3D() * scaleMultiplier);
 
   FLinearColor knobColor = overrides.getMatchingColor(getModuleBrand(), model->svgPaths[1]);
