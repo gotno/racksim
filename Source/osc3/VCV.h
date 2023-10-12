@@ -55,7 +55,7 @@ struct VCVParam {
   ParamType type;
   FString name;
   FString unit;
-  FString description;
+  FString displayValue;
   Rect box;
   
   float minValue;

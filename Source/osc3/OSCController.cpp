@@ -197,7 +197,7 @@ void AOSCController::AddParam(const FOSCAddress& AddressPattern, const FOSCMessa
 
   UOSCManager::GetString(message, 3, param.name);
   UOSCManager::GetString(message, 4, param.unit);
-  UOSCManager::GetString(message, 5, param.description);
+  UOSCManager::GetString(message, 5, param.displayValue);
 
   UOSCManager::GetFloat(message, 6, param.box.pos.x);
   UOSCManager::GetFloat(message, 7, param.box.pos.y);
