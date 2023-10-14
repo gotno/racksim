@@ -54,7 +54,6 @@ struct VCVParam {
   int32 id;
   ParamType type;
   FString name;
-  FString unit;
   FString displayValue;
   Rect box;
   

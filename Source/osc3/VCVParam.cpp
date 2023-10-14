@@ -5,6 +5,8 @@
 #include "VCVModule.h"
 #include "VCVLight.h"
 
+#include "Misc/ScopeRWLock.h"
+
 AVCVParam::AVCVParam() {
 	PrimaryActorTick.bCanEverTick = true;
   
@@ -25,10 +27,22 @@ void AVCVParam::init(VCVParam* vcv_param) {
   SetHidden(!model->visible);
   SetActorEnableCollision(model->visible);
   SetActorScale3D(FVector(RENDER_SCALE, model->box.size.x, model->box.size.y));
+  // UE_LOG(LogTemp, Warning, TEXT("%s: %s%s"), *(model->name), *(model->displayValue), *(model->unit));
 }
 
 FString AVCVParam::getModuleBrand() {
   return owner->getBrand();
+}
+
+void AVCVParam::GetTooltipText(FString& Label, FString& DisplayValue) {
+  FRWScopeLock Lock(DataGuard, FRWScopeLockType::SLT_ReadOnly);
+  Label = model->name;
+  DisplayValue = model->displayValue;
+}
+
+void AVCVParam::UpdateDisplayValue(const FString& DisplayValue) {
+  FRWScopeLock Lock(DataGuard, FRWScopeLockType::SLT_Write);
+  model->displayValue = DisplayValue;
 }
 
 void AVCVParam::spawnLights(USceneComponent* attachTo) {
@@ -53,9 +67,11 @@ void AVCVParam::spawnLights(USceneComponent* attachTo) {
 }
 
 void AVCVParam::setValue(float newValue) {
-  if (newValue == model->value) return;
+  float roundedValue = FMath::RoundHalfToEven(newValue * 1000) / 1000;
+  if (roundedValue == model->value) return;
 
-  model->value = newValue;
+  FRWScopeLock Lock(DataGuard, FRWScopeLockType::SLT_Write);
+  model->value = roundedValue;
   owner->paramUpdated(model->id, model->value);
 }
 

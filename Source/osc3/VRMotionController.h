@@ -10,6 +10,8 @@
 class USphereComponent;
 class UCapsuleComponent;
 class UPrimitiveComponent;
+class UWidgetComponent;
+class UTooltip;
 class Aosc3GameModeBase;
 class APlayerController;
 class AVRAvatar;
@@ -55,23 +57,31 @@ public:
   void StartPortInteract();
   void EndPortInteract();
 
+  void UpdateTooltip();
+
   UPROPERTY(EditAnywhere, Category="Input")
   FHapticEffects HapticEffects;
   
 private:
   AVRAvatar* Avatar;
   Aosc3GameModeBase* GameMode;
+  APlayerController* PlayerController;
 
   FString HandName;
 
-  APlayerController* PlayerController;
+  UPROPERTY(EditDefaultsOnly)
+  UWidgetComponent* TooltipWidgetComponent;
+  UTooltip* TooltipWidget;
 
   UPROPERTY(VisibleAnywhere)
   UMotionControllerComponent* MotionController;
   
   UPROPERTY(VisibleAnywhere)
   USphereComponent* GrabSphere;
+  UPROPERTY(EditDefaultsOnly, Category="Interaction")
   float GrabSphereRadius{2.f};
+  UPROPERTY(EditDefaultsOnly, Category="Interaction")
+  float GrabSphereUpOffset{-2.f};
 
   UPROPERTY(VisibleAnywhere)
   UCapsuleComponent* InteractCapsule;

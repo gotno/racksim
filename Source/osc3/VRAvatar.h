@@ -123,6 +123,7 @@ public:
   void SetControllerParamOrPortInteracting(EControllerHand Hand, bool bInteracting);
   
   void GetRenderablePosition(FVector& location, FRotator& rotation);
+  FRotator GetLookAtCameraRotation(FVector FromLocation);
 
 private:
   UPROPERTY(VisibleAnywhere)

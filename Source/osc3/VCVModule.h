@@ -10,6 +10,7 @@ class UTexture2D;
 class Aosc3GameModeBase;
 class AVCVLight;
 class AVCVPort;
+class AVCVParam;
 
 UCLASS()
 class OSC3_API AVCVModule : public AActor {
@@ -30,6 +31,7 @@ public:
   void AttachCable(const PortIdentity& identity, int64_t cableId);
   void DetachCable(const PortIdentity& identity, int64_t cableId);
   void UpdateLight(int32 lightId, FLinearColor color);
+  AVCVParam* GetParamActor(const int& paramId) { return ParamActors[paramId]; }
 
   UPROPERTY()
   TMap<int32, AVCVLight*> LightActors;
@@ -83,7 +85,7 @@ private:
   FRotator LastGrabbedRotation;
   FVector LastLocationDelta;
 
-  // TMap<int, class AVCVParam*> ParamActors;
+  TMap<int, AVCVParam*> ParamActors;
   TMap<int, AVCVPort*> InputActors;
   TMap<int, AVCVPort*> OutputActors;
 };

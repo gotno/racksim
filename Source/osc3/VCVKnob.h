@@ -52,7 +52,7 @@ private:
   Aosc3GameModeBase* gameMode;
   
   // float lastAmount = 0.f;
-  float alterRatio = 2.f;
+  float alterRatio = 1.f;
 
   FRotator getRotationFromValue();
   float getValueFromRotation();

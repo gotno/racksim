@@ -3,12 +3,15 @@
 #include "osc3.h"
 #include "osc3GameModeBase.h"
 #include "VCV.h"
-#include "VRAvatar.h"
+#include "VCVParam.h"
 #include "VCVCable.h"
 #include "VCVPort.h"
+#include "VRAvatar.h"
+#include "Tooltip.h"
 
 #include "Components/SphereComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/WidgetComponent.h"
 #include "DrawDebugHelpers.h"
 
 #include "Kismet/GameplayStatics.h"
@@ -26,6 +29,9 @@ AVRMotionController::AVRMotionController() {
   InteractCapsule = CreateDefaultSubobject<UCapsuleComponent>(TEXT("InteractCapsule"));
   InteractCapsule->SetupAttachment(MotionController);
   InteractCapsule->InitCapsuleSize(InteractCapsuleRadius, InteractCapsuleHalfHeight);
+
+  TooltipWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("Tooltip"));
+  TooltipWidgetComponent->SetupAttachment(MotionController);
 }
 
 void AVRMotionController::BeginPlay() {
@@ -39,6 +45,7 @@ void AVRMotionController::BeginPlay() {
   GrabSphere->OnComponentBeginOverlap.AddDynamic(this, &AVRMotionController::HandleGrabberBeginOverlap);
   GrabSphere->OnComponentEndOverlap.AddDynamic(this, &AVRMotionController::HandleGrabberEndOverlap);
 
+  GrabSphere->AddLocalOffset(MotionController->GetUpVector() * GrabSphereUpOffset);
   GrabSphere->ComponentTags.Add(TAG_GRABBER);
 
   InteractCapsule->SetWorldRotation(FRotator(-90.f + InteractCapsuleAngleOffset, 0.f, 0.f));
@@ -49,6 +56,14 @@ void AVRMotionController::BeginPlay() {
   InteractCapsule->OnComponentEndOverlap.AddDynamic(this, &AVRMotionController::HandleInteractorEndOverlap);
 
   PlayerController = UGameplayStatics::GetPlayerController(this, 0);
+
+  TooltipWidgetComponent->SetWorldScale3D(FVector(0.04f, 0.04f, 0.04f));
+  TooltipWidgetComponent->SetVisibility(false, true);
+  TooltipWidget = Cast<UTooltip>(TooltipWidgetComponent->GetUserWidgetObject());
+  if (TooltipWidget) {
+    TooltipWidget->SetLabel(FString("brabel"));
+    TooltipWidget->SetDisplayValue(FString("display bralue"));
+  }
 }
 
 void AVRMotionController::Tick(float DeltaTime) {
@@ -62,6 +77,11 @@ void AVRMotionController::Tick(float DeltaTime) {
     InteractCapsule->GetUnscaledCapsuleRadius(),
     InteractCapsule->GetComponentRotation().Quaternion(),
     FColor::Blue
+  );
+
+  // Tooltip->SetWorldLocation(MotionController->GetComponentLocation() + MotionController->GetUpVector() * 5.f);
+  TooltipWidgetComponent->SetWorldRotation(
+    Avatar->GetLookAtCameraRotation(TooltipWidgetComponent->GetComponentLocation())
   );
 }
 
@@ -77,6 +97,13 @@ void AVRMotionController::LogOverlap(UPrimitiveComponent* OverlappedComponent, A
   }
 }
 
+void AVRMotionController::UpdateTooltip() {
+  FString label, displayValue;
+  Cast<AVCVParam>(ParamActorToInteract)->GetTooltipText(label, displayValue);
+  TooltipWidget->SetLabel(label);
+  TooltipWidget->SetDisplayValue(displayValue);
+}
+
 void AVRMotionController::HandleInteractorBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult) {
   if (bIsGrabbing || bIsParamInteracting) return;
 
@@ -90,6 +117,9 @@ void AVRMotionController::HandleInteractorBeginOverlap(UPrimitiveComponent* Over
     );
 
     PlayerController->PlayHapticEffect(HapticEffects.Bump, MotionController->GetTrackingSource());
+    
+    TooltipWidgetComponent->SetVisibility(true, true);
+    UpdateTooltip();
     
     return;
   }
@@ -129,6 +159,8 @@ void AVRMotionController::EndParamInteract() {
       MotionController->GetTrackingSource(),
       false
     );
+
+    TooltipWidgetComponent->SetVisibility(false, true);
   }
 }
 
@@ -198,6 +230,8 @@ void AVRMotionController::HandleInteractorEndOverlap(UPrimitiveComponent* Overla
       MotionController->GetTrackingSource(),
       false
     );
+    
+    TooltipWidgetComponent->SetVisibility(false, true);
   }
 }
 

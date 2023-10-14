@@ -29,6 +29,8 @@ void AOSCController::Init() {
 
   AddRoute("/module_sync_complete/*", FName(TEXT("ModuleSyncComplete")));
 
+  AddRoute("/param/display_value_sync/*", FName(TEXT("ParamDisplayValueSync")));
+
   // OSCServer->OnOscBundleReceived.AddDynamic(this, &AOSCController::TestBundle);
   // OSCServer->OnOscMessageReceived.AddDynamic(this, &AOSCController::TestMessage);
 
@@ -196,58 +198,57 @@ void AOSCController::AddParam(const FOSCAddress& AddressPattern, const FOSCMessa
   param.type = static_cast<ParamType>(type);
 
   UOSCManager::GetString(message, 3, param.name);
-  UOSCManager::GetString(message, 4, param.unit);
-  UOSCManager::GetString(message, 5, param.displayValue);
+  UOSCManager::GetString(message, 4, param.displayValue);
 
-  UOSCManager::GetFloat(message, 6, param.box.pos.x);
-  UOSCManager::GetFloat(message, 7, param.box.pos.y);
-  UOSCManager::GetFloat(message, 8, param.box.size.x);
-  UOSCManager::GetFloat(message, 9, param.box.size.y);
+  UOSCManager::GetFloat(message, 5, param.box.pos.x);
+  UOSCManager::GetFloat(message, 6, param.box.pos.y);
+  UOSCManager::GetFloat(message, 7, param.box.size.x);
+  UOSCManager::GetFloat(message, 8, param.box.size.y);
 
-  UOSCManager::GetFloat(message, 10, param.minValue);
-  UOSCManager::GetFloat(message, 11, param.maxValue);
-  UOSCManager::GetFloat(message, 12, param.defaultValue);
-  UOSCManager::GetFloat(message, 13, param.value);
+  UOSCManager::GetFloat(message, 9, param.minValue);
+  UOSCManager::GetFloat(message, 10, param.maxValue);
+  UOSCManager::GetFloat(message, 11, param.defaultValue);
+  UOSCManager::GetFloat(message, 12, param.value);
   
-  UOSCManager::GetBool(message, 14, param.snap);
+  UOSCManager::GetBool(message, 13, param.snap);
 
-  UOSCManager::GetFloat(message, 15, param.minAngle);
-  UOSCManager::GetFloat(message, 16, param.maxAngle);
+  UOSCManager::GetFloat(message, 14, param.minAngle);
+  UOSCManager::GetFloat(message, 15, param.maxAngle);
   param.minAngle = FMath::RadiansToDegrees(param.minAngle);
   param.maxAngle = FMath::RadiansToDegrees(param.maxAngle);
 
-  UOSCManager::GetFloat(message, 17, param.minHandlePos.x);
-  UOSCManager::GetFloat(message, 18, param.minHandlePos.y);
-  UOSCManager::GetFloat(message, 19, param.maxHandlePos.x);
-  UOSCManager::GetFloat(message, 20, param.maxHandlePos.y);
-  UOSCManager::GetFloat(message, 21, param.handleBox.pos.x);
-  UOSCManager::GetFloat(message, 22, param.handleBox.pos.y);
-  UOSCManager::GetFloat(message, 23, param.handleBox.size.x);
-  UOSCManager::GetFloat(message, 24, param.handleBox.size.y);
+  UOSCManager::GetFloat(message, 16, param.minHandlePos.x);
+  UOSCManager::GetFloat(message, 17, param.minHandlePos.y);
+  UOSCManager::GetFloat(message, 18, param.maxHandlePos.x);
+  UOSCManager::GetFloat(message, 19, param.maxHandlePos.y);
+  UOSCManager::GetFloat(message, 20, param.handleBox.pos.x);
+  UOSCManager::GetFloat(message, 21, param.handleBox.pos.y);
+  UOSCManager::GetFloat(message, 22, param.handleBox.size.x);
+  UOSCManager::GetFloat(message, 23, param.handleBox.size.y);
 
-  UOSCManager::GetBool(message, 25, param.horizontal);
+  UOSCManager::GetBool(message, 24, param.horizontal);
 
-  UOSCManager::GetFloat(message, 26, param.speed);
+  UOSCManager::GetFloat(message, 25, param.speed);
 
-  UOSCManager::GetBool(message, 27, param.latch);
-  UOSCManager::GetBool(message, 28, param.momentary);
-  UOSCManager::GetBool(message, 29, param.visible);
+  UOSCManager::GetBool(message, 26, param.latch);
+  UOSCManager::GetBool(message, 27, param.momentary);
+  UOSCManager::GetBool(message, 28, param.visible);
 
   param.svgPaths.SetNum(5);
 
-  UOSCManager::GetString(message, 30, param.svgPaths[0]);
+  UOSCManager::GetString(message, 29, param.svgPaths[0]);
   gameMode->RegisterSVG(param.svgPaths[0], param.box.size);
 
-  UOSCManager::GetString(message, 31, param.svgPaths[1]);
+  UOSCManager::GetString(message, 30, param.svgPaths[1]);
   gameMode->RegisterSVG(param.svgPaths[1], param.box.size);
 
-  UOSCManager::GetString(message, 32, param.svgPaths[2]);
+  UOSCManager::GetString(message, 31, param.svgPaths[2]);
   gameMode->RegisterSVG(param.svgPaths[2], param.box.size);
 
-  UOSCManager::GetString(message, 33, param.svgPaths[3]);
+  UOSCManager::GetString(message, 32, param.svgPaths[3]);
   gameMode->RegisterSVG(param.svgPaths[3], param.box.size);
 
-  UOSCManager::GetString(message, 34, param.svgPaths[4]);
+  UOSCManager::GetString(message, 33, param.svgPaths[4]);
   gameMode->RegisterSVG(param.svgPaths[4], param.box.size);
 
   NotifyReceived("param", moduleId, paramId);
@@ -420,6 +421,18 @@ void AOSCController::UpdateLight(const FOSCAddress& AddressPattern, const FOSCMe
   UOSCManager::GetFloat(message, 5, a);
 
   gameMode->UpdateLight(moduleId, lightId, FLinearColor(r, g, b, a));
+}
+
+void AOSCController::ParamDisplayValueSync(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port) {
+  int64_t moduleId;
+  if (ModuleGuard(message, moduleId)) return;
+  
+  int32 paramId;
+  FString displayValue;
+  UOSCManager::GetInt32(message, 1, paramId);
+  UOSCManager::GetString(message, 2, displayValue);
+  
+  gameMode->UpdateParamDisplayValue(moduleId, paramId, displayValue);
 }
 
 // void AOSCController::PrintVCVModule(VCVModule vcv_module) {

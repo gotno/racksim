@@ -22,11 +22,14 @@ private:
   bool engaged = false;
   float alterRatio = 1.f;
 
+  FRWLock DataGuard;
 public:	
 	virtual void Tick(float DeltaTime) override;
 
   virtual void init(struct VCVParam* model);
   VCVParam* model;
+
+  void UpdateDisplayValue(const FString& DisplayValue);
 
   virtual void setValue(float newValue);
   
@@ -36,4 +39,6 @@ public:
   virtual void alter(float amount);
   virtual void alter(FVector _location);
   virtual void release();
+  
+  void GetTooltipText(FString& Label, FString& DisplayValue);
 };

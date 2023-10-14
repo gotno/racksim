@@ -7,6 +7,7 @@
 #include "VCVOverrides.h"
 #include "VCVModule.h"
 #include "VCVCable.h"
+#include "VCVParam.h"
 #include "WidgetSurrogate.h"
 
 // #include "IndicatorHUD.h"
@@ -137,7 +138,6 @@ AVCVCable* Aosc3GameModeBase::DetachCable(int64_t cableId, PortIdentity identity
 
 void Aosc3GameModeBase::AttachCable(int64_t cableId, PortIdentity identity) {
   CableActors[cableId]->connectTo(identity);
-  // ModuleActors[identity.moduleId]->AttachCable(identity, cableId);
 
   VCVCable cable = CableActors[cableId]->getModel();
 
@@ -150,10 +150,7 @@ void Aosc3GameModeBase::AttachCable(int64_t cableId, PortIdentity identity) {
     inputIdentity.portId,
     outputIdentity.portId
   );
-  // destroy cable actor & send create cable
-  // 
-  // but in the meantime,
-  // CableActors[cableId]->connectTo(identity);
+
   DestroyCable(cable.id);
 }
 
@@ -163,12 +160,15 @@ void Aosc3GameModeBase::UpdateLight(int64_t moduleId, int32 lightId, FLinearColo
   }
 }
 
-void Aosc3GameModeBase::GetPortInfo(PortIdentity identity, FVector& portLocation, FVector& portForwardVector) {
-  // if (!ModuleActors.Contains(identity.moduleId)) return false;
+void Aosc3GameModeBase::UpdateParamDisplayValue(int64_t moduleId, int32 paramId, FString displayValue) {
+  if (ModuleActors.Contains(moduleId)) {
+    ModuleActors[moduleId]->GetParamActor(paramId)->UpdateDisplayValue(displayValue);
+  }
+}
 
+void Aosc3GameModeBase::GetPortInfo(PortIdentity identity, FVector& portLocation, FVector& portForwardVector) {
   AVCVModule* module = ModuleActors[identity.moduleId];
   module->GetPortInfo(identity, portLocation, portForwardVector);
-  // return true;
 }
 
 void Aosc3GameModeBase::SendParamUpdate(int64_t moduleId, int32 paramId, float value) {

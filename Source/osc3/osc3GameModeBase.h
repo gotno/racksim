@@ -47,6 +47,7 @@ public:
   void AttachCable(int64_t cableId, PortIdentity identity);
 
   void UpdateLight(int64_t moduleId, int32 lightId, FLinearColor color);
+  void UpdateParamDisplayValue(int64_t moduleId, int32 paramId, FString displayValue);
 
   void SendParamUpdate(int64_t moduleId, int32 paramId, float value);
   
@@ -58,7 +59,6 @@ private:
   AOSCController* OSCctrl;
 
   Aosc3PlayerController* PlayerController;
-  // AAvatar* PlayerPawn;
   AVRAvatar* PlayerPawn;
   
   float spawnXPositionCursor{0.f};
