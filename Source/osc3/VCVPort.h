@@ -30,6 +30,7 @@ public:
   bool canConnect(PortType type);
   bool hasCables();
 
+  void GetTooltipText(FString& Name, FString& Description);
 private:
   UPROPERTY(VisibleAnywhere)
   UStaticMeshComponent* StaticMeshComponent;

@@ -14,6 +14,7 @@ class AAvatar;
 class AVRAvatar;
 class AVCVCable;
 class AVCVModule;
+class AVCVPort;
 class AWidgetSurrogate;
 class Aosc3PlayerController;
 class UDPSVGAsset;
@@ -41,6 +42,7 @@ public:
     FVector& portLocation,
     FVector& portForwardVector
   );
+  AVCVPort* GetPortActor(PortIdentity identity);
   AVCVCable* SpawnCable(VCVCable cable);
   void DestroyCable(int64_t cableId);
   AVCVCable* DetachCable(int64_t cableId, PortIdentity identity);

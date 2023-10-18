@@ -10,18 +10,14 @@
 #include "VCVParam.h"
 #include "WidgetSurrogate.h"
 
-// #include "IndicatorHUD.h"
-
 #include "Engine/Texture2D.h"
 #include "DefinitivePainter/Public/SVG/DPSVGAsset.h"
 #include "Kismet/GameplayStatics.h"
 
 Aosc3GameModeBase::Aosc3GameModeBase() {
   PlayerControllerClass = Aosc3PlayerController::StaticClass();
-  // DefaultPawnClass = AAvatar::StaticClass();
 
   OSCctrl = CreateDefaultSubobject<AOSCController>(FName(TEXT("OSCctrl")));
-  // HUDClass = AIndicatorHUD::StaticClass();
 }
 
 void Aosc3GameModeBase::BeginPlay() {
@@ -31,7 +27,6 @@ void Aosc3GameModeBase::BeginPlay() {
   OSCctrl->NotifyResync();
 
   PlayerController = Cast<Aosc3PlayerController>(UGameplayStatics::GetPlayerController(this, 0));
-  // PlayerPawn = Cast<AAvatar>(UGameplayStatics::GetPlayerPawn(this, 0));
   PlayerPawn = Cast<AVRAvatar>(UGameplayStatics::GetPlayerPawn(this, 0));
 }
 
@@ -169,6 +164,11 @@ void Aosc3GameModeBase::UpdateParamDisplayValue(int64_t moduleId, int32 paramId,
 void Aosc3GameModeBase::GetPortInfo(PortIdentity identity, FVector& portLocation, FVector& portForwardVector) {
   AVCVModule* module = ModuleActors[identity.moduleId];
   module->GetPortInfo(identity, portLocation, portForwardVector);
+}
+
+AVCVPort* Aosc3GameModeBase::GetPortActor(PortIdentity identity) {
+  AVCVModule* module = ModuleActors[identity.moduleId];
+  return module->GetPortActor(identity);
 }
 
 void Aosc3GameModeBase::SendParamUpdate(int64_t moduleId, int32 paramId, float value) {

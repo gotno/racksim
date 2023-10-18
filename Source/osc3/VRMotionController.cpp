@@ -58,12 +58,42 @@ void AVRMotionController::BeginPlay() {
   PlayerController = UGameplayStatics::GetPlayerController(this, 0);
 
   TooltipWidgetComponent->SetWorldScale3D(FVector(0.04f, 0.04f, 0.04f));
-  TooltipWidgetComponent->SetVisibility(false, true);
+  TooltipWidgetComponent->SetVisibility(true, true);
   TooltipWidget = Cast<UTooltip>(TooltipWidgetComponent->GetUserWidgetObject());
-  if (TooltipWidget) {
-    TooltipWidget->SetLabel(FString("brabel"));
-    TooltipWidget->SetDisplayValue(FString("display bralue"));
-  }
+  // TooltipWidgets.OneLine = 
+  //   Cast<UTooltip>(
+  //     CreateWidget<UUserWidget>(
+  //       GetWorld(),
+  //       TooltipWidgetClasses.OneLine,
+  //       FName(FString("tooltip_one-line").Append(HandName))
+  //     )
+  //   );
+  // TooltipWidgets.TwoLines = 
+  //   Cast<UTooltip>(
+  //     CreateWidget<UUserWidget>(
+  //       GetWorld(),
+  //       TooltipWidgetClasses.TwoLines,
+  //       FName(FString("tooltip_two-lines").Append(HandName))
+  //     )
+  //   );
+  // // max emphasis 30
+  // TooltipWidgets.TwoLinesWithEmphasis = 
+  //   Cast<UTooltip>(
+  //     CreateWidget<UUserWidget>(
+  //       GetWorld(),
+  //       TooltipWidgetClasses.TwoLinesWithEmphasis,
+  //       FName(FString("tooltip_two-lines-with-emphasis").Append(HandName))
+  //     )
+  //   );
+  // // max sub 40
+  // TooltipWidgets.TwoLinesWithSub = 
+  //   Cast<UTooltip>(
+  //     CreateWidget<UUserWidget>(
+  //       GetWorld(),
+  //       TooltipWidgetClasses.TwoLinesWithSub,
+  //       FName(FString("tooltip_two-lines-with-sub").Append(HandName))
+  //     )
+  //   );
 }
 
 void AVRMotionController::Tick(float DeltaTime) {
@@ -98,10 +128,37 @@ void AVRMotionController::LogOverlap(UPrimitiveComponent* OverlappedComponent, A
 }
 
 void AVRMotionController::UpdateTooltip() {
-  FString label, displayValue;
-  Cast<AVCVParam>(ParamActorToInteract)->GetTooltipText(label, displayValue);
-  TooltipWidget->SetLabel(label);
-  TooltipWidget->SetDisplayValue(displayValue);
+  if (ParamActorToInteract) {
+    FString label, displayValue;
+    Cast<AVCVParam>(ParamActorToInteract)->GetTooltipText(label, displayValue);
+    
+    if (displayValue.IsEmpty()) {
+      TooltipWidget->SetText(label);
+    } else {
+      TooltipWidget->SetText(label, displayValue, true);
+    }
+  } else if (DestinationPortActor && OriginPortActor) {
+    FString fromName, _fromDescription;
+    Cast<AVCVPort>(OriginPortActor)->GetTooltipText(fromName, _fromDescription);
+    FString toName, _toDescription;
+    Cast<AVCVPort>(DestinationPortActor)->GetTooltipText(toName, _toDescription);
+
+    TooltipWidget->SetText(
+      FString("from: ").Append(fromName),
+      FString("to: ").Append(toName)
+    );
+  } else if (OriginPortActor) {
+    FString name, description;
+    Cast<AVCVPort>(OriginPortActor)->GetTooltipText(name, description);
+
+    if (bIsPortInteracting) {
+      TooltipWidget->SetText(FString("from: ").Append(name));
+    } else if (description.IsEmpty()) {
+      TooltipWidget->SetText(name);
+    } else {
+      TooltipWidget->SetText(name, description, false, true);
+    }
+  }
 }
 
 void AVRMotionController::HandleInteractorBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult) {
@@ -109,7 +166,7 @@ void AVRMotionController::HandleInteractorBeginOverlap(UPrimitiveComponent* Over
 
   if (OtherActor->ActorHasTag(TAG_INTERACTABLE_PARAM) && !bIsPortInteracting) {
     ParamActorToInteract = OtherActor;
-    PortActorToInteract = nullptr;
+    OriginPortActor = nullptr;
 
     Avatar->SetControllerParamOrPortInteracting(
       MotionController->GetTrackingSource(),
@@ -131,13 +188,16 @@ void AVRMotionController::HandleInteractorBeginOverlap(UPrimitiveComponent* Over
         true
       );
 
-      PortActorToInteract = Cast<AVCVPort>(OtherActor);
+      OriginPortActor = Cast<AVCVPort>(OtherActor);
       ParamActorToInteract = nullptr;
       PlayerController->PlayHapticEffect(HapticEffects.Bump, MotionController->GetTrackingSource());
     } else if (HeldCable && Cast<AVCVPort>(OtherActor)->canConnect(HeldCable->getHangingType())) {
       DestinationPortActor = Cast<AVCVPort>(OtherActor);
       PlayerController->PlayHapticEffect(HapticEffects.Bump, MotionController->GetTrackingSource());
     }
+    
+    TooltipWidgetComponent->SetVisibility(true, true);
+    UpdateTooltip();
   }
 }
 
@@ -169,13 +229,15 @@ void AVRMotionController::StartPortInteract() {
   bIsPortInteracting = true;
 
   int64_t cableId;
-  if (PortActorToInteract->getCableId(cableId)) {
-    HeldCable = GameMode->DetachCable(cableId, PortActorToInteract->getIdentity());
+  if (OriginPortActor->getCableId(cableId)) {
+    HeldCable = GameMode->DetachCable(cableId, OriginPortActor->getIdentity());
     UE_LOG(LogTemp, Warning, TEXT("got cable %lld"), cableId);
+    OriginPortActor = GameMode->GetPortActor(HeldCable->getConnectedPortIdentity());
+    UpdateTooltip();
   } else {
     UE_LOG(LogTemp, Warning, TEXT("spawning new cable"));
     VCVCable cable(-1);
-    cable.setIdentity(PortActorToInteract->getIdentity());
+    cable.setIdentity(OriginPortActor->getIdentity());
     HeldCable = GameMode->SpawnCable(cable);
   }
 }
@@ -195,19 +257,23 @@ void AVRMotionController::EndPortInteract() {
   TSet<AActor*> overlappingActors;
   InteractCapsule->GetOverlappingActors(overlappingActors);
 
-  if (!overlappingActors.Contains(PortActorToInteract) && !overlappingActors.Contains(DestinationPortActor)) {
-    PortActorToInteract = nullptr;
+  if (!overlappingActors.Contains(OriginPortActor) && !overlappingActors.Contains(DestinationPortActor)) {
+    OriginPortActor = nullptr;
     DestinationPortActor = nullptr;
 
     Avatar->SetControllerParamOrPortInteracting(
       MotionController->GetTrackingSource(),
       false
     );
+
+    TooltipWidgetComponent->SetVisibility(false, true);
   } else if (overlappingActors.Contains(DestinationPortActor)) {
-    PortActorToInteract = DestinationPortActor;
+    OriginPortActor = DestinationPortActor;
     DestinationPortActor = nullptr;
+    UpdateTooltip();
   } else {
     DestinationPortActor = nullptr;
+    UpdateTooltip();
   }
 }
 
@@ -216,6 +282,7 @@ void AVRMotionController::HandleInteractorEndOverlap(UPrimitiveComponent* Overla
   
   if (bIsPortInteracting && OtherActor->ActorHasTag(TAG_INTERACTABLE_PORT)) {
     DestinationPortActor = nullptr;
+    UpdateTooltip();
     return;
   } else if (bIsPortInteracting) {
     return;

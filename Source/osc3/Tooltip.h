@@ -14,12 +14,18 @@ protected:
 	// virtual void NativeConstruct() override;
 
 	UPROPERTY(BlueprintReadOnly, meta=(BindWidget))
-	UTextBlock* Label;
+	UTextBlock* LineOne;
 
-	UPROPERTY(BlueprintReadOnly, meta=(BindWidget))
-	UTextBlock* DisplayValue;
+	UPROPERTY(BlueprintReadOnly, meta=(BindWidgetOptional))
+	UTextBlock* LineTwo;
 
 public:
-  void SetLabel(FString NewLabel);
-  void SetDisplayValue(FString NewDisplayValue);
+  void SetLineOne(FString NewLineOne);
+  void SetLineTwo(FString NewLineTwo);
+  void SetText(FString LineOne, FString LineTwo = FString(""), bool bEmphasis = false, bool bSubtitle = false);
+  
+private:
+  int32 DefaultTextSize{14};
+  int32 EmphasisTextSize{20};
+  int32 SubtitleTextSize{10};
 };

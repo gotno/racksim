@@ -1,3 +1,4 @@
+// Assertion failed: !"Unimplemented function called" [File:D:\build\++UE5\Sync\Engine\Plugins\Runtime\OSC\Source\OSC\Private\OSCMessagePacket.cpp] [Line: 180]
 #include "OSCController.h"
 #include "osc3GameModeBase.h"
 
@@ -29,7 +30,7 @@ void AOSCController::Init() {
 
   AddRoute("/module_sync_complete/*", FName(TEXT("ModuleSyncComplete")));
 
-  AddRoute("/param/display_value_sync/*", FName(TEXT("ParamDisplayValueSync")));
+  AddRoute("/param/sync/*", FName(TEXT("SyncParam")));
 
   // OSCServer->OnOscBundleReceived.AddDynamic(this, &AOSCController::TestBundle);
   // OSCServer->OnOscMessageReceived.AddDynamic(this, &AOSCController::TestMessage);
@@ -423,7 +424,7 @@ void AOSCController::UpdateLight(const FOSCAddress& AddressPattern, const FOSCMe
   gameMode->UpdateLight(moduleId, lightId, FLinearColor(r, g, b, a));
 }
 
-void AOSCController::ParamDisplayValueSync(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port) {
+void AOSCController::SyncParam(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port) {
   int64_t moduleId;
   if (ModuleGuard(message, moduleId)) return;
   

@@ -24,6 +24,7 @@ public:
   void connectTo(PortIdentity identity);
   void setHangingLocation(FVector hangingLocation, FVector hangingForwardVector);
   PortType getHangingType();
+  PortIdentity getConnectedPortIdentity();
   int64_t getId();
   VCVCable getModel();
   

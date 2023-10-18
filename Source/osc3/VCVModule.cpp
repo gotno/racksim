@@ -93,6 +93,11 @@ void AVCVModule::GetPortInfo(PortIdentity identity, FVector& portLocation, FVect
   portForwardVector = port->GetActorForwardVector();
 }
 
+AVCVPort* AVCVModule::GetPortActor(PortIdentity identity) {
+  if (identity.type == PortType::Input) return InputActors[identity.portId];
+  return OutputActors[identity.portId];
+}
+
 void AVCVModule::AttachCable(const PortIdentity& identity, int64_t cableId) {
   if (identity.type == PortType::Input) {
     InputActors[identity.portId]->addCableId(cableId);

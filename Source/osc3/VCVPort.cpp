@@ -104,3 +104,9 @@ bool AVCVPort::hasCables() {
 PortIdentity AVCVPort::getIdentity() {
   return model->getIdentity();
 }
+
+void AVCVPort::GetTooltipText(FString& Name, FString& Description) {
+  Name = model->name;
+  Name.Append(model->type == PortType::Input ? " input" : " output");
+  Description = model->description;
+}

@@ -35,13 +35,13 @@ FString AVCVParam::getModuleBrand() {
 }
 
 void AVCVParam::GetTooltipText(FString& Label, FString& DisplayValue) {
-  FRWScopeLock Lock(DataGuard, FRWScopeLockType::SLT_ReadOnly);
+  FScopeLock Lock(&DataGuard);
   Label = model->name;
   DisplayValue = model->displayValue;
 }
 
 void AVCVParam::UpdateDisplayValue(const FString& DisplayValue) {
-  FRWScopeLock Lock(DataGuard, FRWScopeLockType::SLT_Write);
+  FScopeLock Lock(&DataGuard);
   model->displayValue = DisplayValue;
 }
 
@@ -70,7 +70,7 @@ void AVCVParam::setValue(float newValue) {
   float roundedValue = FMath::RoundHalfToEven(newValue * 1000) / 1000;
   if (roundedValue == model->value) return;
 
-  FRWScopeLock Lock(DataGuard, FRWScopeLockType::SLT_Write);
+  FScopeLock Lock(&DataGuard);
   model->value = roundedValue;
   owner->paramUpdated(model->id, model->value);
 }

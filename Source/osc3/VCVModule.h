@@ -32,6 +32,7 @@ public:
   void DetachCable(const PortIdentity& identity, int64_t cableId);
   void UpdateLight(int32 lightId, FLinearColor color);
   AVCVParam* GetParamActor(const int& paramId) { return ParamActors[paramId]; }
+  AVCVPort* GetPortActor(PortIdentity identity);
 
   UPROPERTY()
   TMap<int32, AVCVLight*> LightActors;

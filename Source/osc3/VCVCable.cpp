@@ -47,6 +47,11 @@ PortType AVCVCable::getHangingType() {
   return PortType::Output;
 }
 
+PortIdentity AVCVCable::getConnectedPortIdentity() {
+  if (model.portIdentities[PortType::Input].isNull()) return model.portIdentities[PortType::Output];
+  return model.portIdentities[PortType::Input];
+}
+
 int64_t AVCVCable::getId() {
   return model.id;
 }

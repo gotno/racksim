@@ -22,7 +22,7 @@ private:
   bool engaged = false;
   float alterRatio = 1.f;
 
-  FRWLock DataGuard;
+  mutable FCriticalSection DataGuard;
 public:	
 	virtual void Tick(float DeltaTime) override;
 

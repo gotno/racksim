@@ -12,11 +12,43 @@ class UCapsuleComponent;
 class UPrimitiveComponent;
 class UWidgetComponent;
 class UTooltip;
+class UUserWidget;
 class Aosc3GameModeBase;
 class APlayerController;
 class AVRAvatar;
 class AVCVCable;
 class AVCVPort;
+
+// USTRUCT()
+// struct FTooltipWidgetClasses {
+// 	GENERATED_BODY()
+
+//   UPROPERTY(EditDefaultsOnly)
+//   TSubclassOf<UUserWidget> OneLine;
+
+//   UPROPERTY(EditDefaultsOnly)
+//   TSubclassOf<UUserWidget> TwoLines;
+
+//   UPROPERTY(EditDefaultsOnly)
+//   TSubclassOf<UUserWidget> TwoLinesWithEmphasis;
+
+//   UPROPERTY(EditDefaultsOnly)
+//   TSubclassOf<UUserWidget> TwoLinesWithSub;
+// };
+
+// USTRUCT()
+// struct FTooltipWidgets {
+// 	GENERATED_BODY()
+
+//   UPROPERTY()
+//   UTooltip* OneLine;
+//   UPROPERTY()
+//   UTooltip* TwoLines;
+//   UPROPERTY()
+//   UTooltip* TwoLinesWithEmphasis;
+//   UPROPERTY()
+//   UTooltip* TwoLinesWithSub;
+// };
 
 USTRUCT()
 struct FHapticEffects {
@@ -47,7 +79,7 @@ public:
 
   AActor* GetActorToGrab() { return ActorToGrab; }
   AActor* GetParamActorToInteract() { return ParamActorToInteract; }
-  AVCVPort* GetPortActorToInteract() { return PortActorToInteract; }
+  AVCVPort* GetPortActorToInteract() { return OriginPortActor; }
   AVCVPort* GetDestinationPortActor() { return DestinationPortActor; }
   AVCVCable* GetHeldCable() { return HeldCable; }
   void StartGrab();
@@ -61,6 +93,8 @@ public:
 
   UPROPERTY(EditAnywhere, Category="Input")
   FHapticEffects HapticEffects;
+  // UPROPERTY(EditDefaultsOnly, Category="Tooltip")
+  // FTooltipWidgetClasses TooltipWidgetClasses;
   
 private:
   AVRAvatar* Avatar;
@@ -71,6 +105,8 @@ private:
 
   UPROPERTY(EditDefaultsOnly)
   UWidgetComponent* TooltipWidgetComponent;
+  // UPROPERTY()
+  // FTooltipWidgets TooltipWidgets;
   UTooltip* TooltipWidget;
 
   UPROPERTY(VisibleAnywhere)
@@ -114,6 +150,7 @@ private:
 
   bool bIsPortInteracting{false};
   AVCVPort* PortActorToInteract;
+  AVCVPort* OriginPortActor;
   AVCVPort* DestinationPortActor;
   AVCVCable* HeldCable;
 };
