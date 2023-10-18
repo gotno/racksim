@@ -23,10 +23,6 @@
 			]
 		},
 		{
-			"Name": "OSC",
-			"Enabled": true
-		},
-		{
 			"Name": "DefinitivePainter",
 			"Enabled": true,
 			"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/product/274658a8e3d849cfb1b643dc406ad1e8",
@@ -48,6 +44,10 @@
 			"Name": "VRDebugPlugin",
 			"Enabled": true,
 			"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/content/9f6a7a87237b4f538e566391df2a778f"
+		},
+		{
+			"Name": "OSC",
+			"Enabled": true
 		}
 	]
 }
