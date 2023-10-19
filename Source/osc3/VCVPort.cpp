@@ -107,6 +107,10 @@ PortIdentity AVCVPort::getIdentity() {
 
 void AVCVPort::GetTooltipText(FString& Name, FString& Description) {
   Name = model->name;
+  if (Name.IsEmpty()) {
+    Name = FString("#");
+    Name.AppendInt(model->id + 1);
+  }
   Name.Append(model->type == PortType::Input ? " input" : " output");
   Description = model->description;
 }

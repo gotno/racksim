@@ -484,7 +484,7 @@ void AVRAvatar::HandleParamEngage(const FInputActionValue& _Value, EControllerHa
     } else if (Cast<AVCVSlider>(interactingParam)) {
       interactingParam->alter(controller->GetActorLocation());
     }
-    controller->UpdateTooltip();
+    controller->RefreshTooltip();
   }
 
   AVCVCable* heldCable = controller->GetHeldCable();

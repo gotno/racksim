@@ -60,9 +60,6 @@ void AVCVModule::BeginPlay() {
   
   Tags.Add(TAG_INTERACTABLE);
   Tags.Add(TAG_GRABBABLE);
-  
-  StaticMeshComponent->OnComponentBeginOverlap.AddDynamic(this, &AVCVModule::HandleBeginOverlap);
-  StaticMeshComponent->OnComponentEndOverlap.AddDynamic(this, &AVCVModule::HandleEndOverlap);
 }
 
 void AVCVModule::init(VCVModule vcv_module) {
@@ -244,20 +241,6 @@ void AVCVModule::SetHighlighted(bool bHighlighted) {
     FName("glow_intensity"),
     bHighlighted ? highlightGlowIntensity : 0.f
   );
-}
-
-void AVCVModule::HandleBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherCompomponent, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
-  // UE_LOG(LogTemp, Warning, TEXT("%s overlapped by %s"), *GetActorNameOrLabel(), *OtherActor->GetActorNameOrLabel());
-  if (!bGrabEngaged && OtherCompomponent->ComponentHasTag(TAG_GRABBER)) {
-    SetHighlighted(true);
-  }
-}
-
-void AVCVModule::HandleEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherCompomponent, int32 OtherBodyIndex) {
-  // UE_LOG(LogTemp, Warning, TEXT("%s end overlap"), *GetActorNameOrLabel());
-  if (!bGrabEngaged) {
-    SetHighlighted(false);
-  }
 }
 
 void AVCVModule::EngageGrab(FVector GrabbedLocation, FRotator GrabbedRotation) {

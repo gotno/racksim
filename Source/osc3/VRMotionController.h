@@ -7,48 +7,17 @@
 
 #include "VRMotionController.generated.h"
 
-class USphereComponent;
-class UCapsuleComponent;
-class UPrimitiveComponent;
-class UWidgetComponent;
-class UTooltip;
-class UUserWidget;
 class Aosc3GameModeBase;
 class APlayerController;
 class AVRAvatar;
 class AVCVCable;
 class AVCVPort;
+class UTooltip;
 
-// USTRUCT()
-// struct FTooltipWidgetClasses {
-// 	GENERATED_BODY()
-
-//   UPROPERTY(EditDefaultsOnly)
-//   TSubclassOf<UUserWidget> OneLine;
-
-//   UPROPERTY(EditDefaultsOnly)
-//   TSubclassOf<UUserWidget> TwoLines;
-
-//   UPROPERTY(EditDefaultsOnly)
-//   TSubclassOf<UUserWidget> TwoLinesWithEmphasis;
-
-//   UPROPERTY(EditDefaultsOnly)
-//   TSubclassOf<UUserWidget> TwoLinesWithSub;
-// };
-
-// USTRUCT()
-// struct FTooltipWidgets {
-// 	GENERATED_BODY()
-
-//   UPROPERTY()
-//   UTooltip* OneLine;
-//   UPROPERTY()
-//   UTooltip* TwoLines;
-//   UPROPERTY()
-//   UTooltip* TwoLinesWithEmphasis;
-//   UPROPERTY()
-//   UTooltip* TwoLinesWithSub;
-// };
+class USphereComponent;
+class UCapsuleComponent;
+class UPrimitiveComponent;
+class UWidgetComponent;
 
 USTRUCT()
 struct FHapticEffects {
@@ -89,12 +58,10 @@ public:
   void StartPortInteract();
   void EndPortInteract();
 
-  void UpdateTooltip();
+  void RefreshTooltip();
 
   UPROPERTY(EditAnywhere, Category="Input")
   FHapticEffects HapticEffects;
-  // UPROPERTY(EditDefaultsOnly, Category="Tooltip")
-  // FTooltipWidgetClasses TooltipWidgetClasses;
   
 private:
   AVRAvatar* Avatar;
@@ -105,8 +72,6 @@ private:
 
   UPROPERTY(EditDefaultsOnly)
   UWidgetComponent* TooltipWidgetComponent;
-  // UPROPERTY()
-  // FTooltipWidgets TooltipWidgets;
   UTooltip* TooltipWidget;
 
   UPROPERTY(VisibleAnywhere)
@@ -147,6 +112,10 @@ private:
 
   bool bIsParamInteracting{false};
   AActor* ParamActorToInteract;
+  
+  void SetTooltipVisibility(bool bVisible);
+  // TODO: user setting
+  bool bTooltipEnabled{true};
 
   bool bIsPortInteracting{false};
   AVCVPort* PortActorToInteract;
