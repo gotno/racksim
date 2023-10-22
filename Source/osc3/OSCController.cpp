@@ -94,15 +94,20 @@ void AOSCController::AddModule(const FOSCAddress& AddressPattern, const FOSCMess
 
   FString description;
   UOSCManager::GetString(message, 3, description);
+
+  FString slug;
+  UOSCManager::GetString(message, 4, slug);
+  FString pluginSlug;
+  UOSCManager::GetString(message, 5, pluginSlug);
   
   Rect box;
-  UOSCManager::GetFloat(message, 4, box.pos.x);
-  UOSCManager::GetFloat(message, 5, box.pos.y);
-  UOSCManager::GetFloat(message, 6, box.size.x);
-  UOSCManager::GetFloat(message, 7, box.size.y);
+  UOSCManager::GetFloat(message, 6, box.pos.x);
+  UOSCManager::GetFloat(message, 7, box.pos.y);
+  UOSCManager::GetFloat(message, 8, box.size.x);
+  UOSCManager::GetFloat(message, 9, box.size.y);
   
   FString panelSvgPath;
-  UOSCManager::GetString(message, 8, panelSvgPath);
+  UOSCManager::GetString(message, 10, panelSvgPath);
   
   Modules.Add(moduleId, VCVModule(
       moduleId,
@@ -112,6 +117,9 @@ void AOSCController::AddModule(const FOSCAddress& AddressPattern, const FOSCMess
       box,
       panelSvgPath
   ));
+  
+  Modules[moduleId].slug = slug;
+  Modules[moduleId].pluginSlug = pluginSlug;
 
   gameMode->RegisterSVG(panelSvgPath, box.size);
 
@@ -147,6 +155,17 @@ void AOSCController::SendParamUpdate(int64 moduleId, int paramId, float value) {
   UOSCManager::AddInt64(message, moduleId);
   UOSCManager::AddInt32(message, paramId);
   UOSCManager::AddFloat(message, value);
+
+  OSCClient->SendOSCMessage(message);
+}
+
+void AOSCController::CreateModule(FString pluginSlug, FString moduleSlug) {
+  UE_LOG(LogTemp, Warning, TEXT("Sending AddModule %s:%s"), *pluginSlug, *moduleSlug);
+  FOSCAddress address = UOSCManager::ConvertStringToOSCAddress(FString(TEXT("/create/module")));
+  FOSCMessage message;
+  UOSCManager::SetOSCMessageAddress(message, address);
+  UOSCManager::AddString(message, pluginSlug);
+  UOSCManager::AddString(message, moduleSlug);
 
   OSCClient->SendOSCMessage(message);
 }

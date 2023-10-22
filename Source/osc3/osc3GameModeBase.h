@@ -52,6 +52,7 @@ public:
   void UpdateParamDisplayValue(int64_t moduleId, int32 paramId, FString displayValue);
 
   void SendParamUpdate(int64_t moduleId, int32 paramId, float value);
+  void DuplicateModule(AVCVModule* Module);
   
   void RegisterSVG(FString filepath, Vec2 size);
   void RegisterTexture(FString filepath, UTexture2D* texture);

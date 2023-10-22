@@ -90,6 +90,11 @@ void AVCVModule::GetPortInfo(PortIdentity identity, FVector& portLocation, FVect
   portForwardVector = port->GetActorForwardVector();
 }
 
+void AVCVModule::GetSlugs(FString& PluginSlug, FString& Slug) {
+  PluginSlug = model.pluginSlug;
+  Slug = model.slug;
+}
+
 AVCVPort* AVCVModule::GetPortActor(PortIdentity identity) {
   if (identity.type == PortType::Input) return InputActors[identity.portId];
   return OutputActors[identity.portId];

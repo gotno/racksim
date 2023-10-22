@@ -25,8 +25,11 @@ public:
 
   UFUNCTION()
   void NotifyResync();
+
   UFUNCTION()
   void SendParamUpdate(int64 moduleId, int paramId, float value);
+  UFUNCTION()
+  void CreateModule(FString pluginSlug, FString moduleSlug);
   UFUNCTION()
   void CreateCable(int64 inputModuleId, int64 ouputModuleId, int inputPortId, int outputPortId);
   UFUNCTION()

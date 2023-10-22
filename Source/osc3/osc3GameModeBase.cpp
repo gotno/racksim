@@ -149,6 +149,12 @@ void Aosc3GameModeBase::AttachCable(int64_t cableId, PortIdentity identity) {
   DestroyCable(cable.id);
 }
 
+void Aosc3GameModeBase::DuplicateModule(AVCVModule* Module) {
+  FString pluginSlug, moduleSlug;
+  Module->GetSlugs(pluginSlug, moduleSlug);
+  OSCctrl->CreateModule(pluginSlug, moduleSlug);
+}
+
 void Aosc3GameModeBase::UpdateLight(int64_t moduleId, int32 lightId, FLinearColor color) {
   if (ModuleActors.Contains(moduleId)) {
     ModuleActors[moduleId]->UpdateLight(lightId, color);

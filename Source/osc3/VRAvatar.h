@@ -53,6 +53,11 @@ struct FModuleManipulationActions {
   UInputAction* GrabLeft;
   UPROPERTY(EditDefaultsOnly)
   UInputAction* GrabRight;
+
+  UPROPERTY(EditDefaultsOnly)
+  UInputAction* DuplicateModuleLeft;
+  UPROPERTY(EditDefaultsOnly)
+  UInputAction* DuplicateModuleRight;
 };
 
 USTRUCT()
@@ -187,6 +192,8 @@ private:
   void HandleStartGrab(const FInputActionValue& _Value, EControllerHand Hand);
   void HandleGrab(const FInputActionValue& _Value, EControllerHand Hand);
   void HandleCompleteGrab(const FInputActionValue& _Value, EControllerHand Hand);
+
+  void HandleDuplicateModule(const FInputActionValue& _Value, EControllerHand Hand);
 
   // param interaction
   void HandleStartParamEngage(const FInputActionValue& _Value, EControllerHand Hand);

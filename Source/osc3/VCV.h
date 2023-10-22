@@ -146,6 +146,9 @@ struct VCVModule {
   Rect box;
   FString panelSvgPath;
 
+  FString slug;
+  FString pluginSlug;
+
   TMap<int32, VCVParam> Params;
   TMap<int32, VCVPort> Inputs;
   TMap<int32, VCVPort> Outputs;
