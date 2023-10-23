@@ -73,6 +73,15 @@ private:
   UFUNCTION()
   void SyncParam(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port);
 
+  UFUNCTION()
+  void AddLibraryPlugin(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port);
+  UFUNCTION()
+  void AddLibraryModule(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port);
+  UFUNCTION()
+  void AddLibraryModuleTag(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port);
+  UFUNCTION()
+  void AddLibraryTag(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port);
+
   // UFUNCTION()
   // void TestBundle(const FOSCBundle& InBundle, const FString& InIPAddress, int32 InPort);
   // UFUNCTION()
@@ -85,4 +94,5 @@ private:
 
   TMap<int64, VCVModule> Modules;
   TMap<int64, VCVCable> Cables;
+  VCVLibrary Library;
 };

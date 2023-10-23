@@ -31,6 +31,11 @@ void AOSCController::Init() {
   AddRoute("/module_sync_complete/*", FName(TEXT("ModuleSyncComplete")));
 
   AddRoute("/param/sync/*", FName(TEXT("SyncParam")));
+  
+  AddRoute("/library/plugin/add/*", FName(TEXT("AddLibraryPlugin")));
+  AddRoute("/library/module/add/*", FName(TEXT("AddLibraryModule")));
+  AddRoute("/library/module_tag/add/*", FName(TEXT("AddLibraryModuleTag")));
+  AddRoute("/library/tag/add/*", FName(TEXT("AddLibraryTag")));
 
   // OSCServer->OnOscBundleReceived.AddDynamic(this, &AOSCController::TestBundle);
   // OSCServer->OnOscMessageReceived.AddDynamic(this, &AOSCController::TestMessage);
@@ -463,6 +468,49 @@ void AOSCController::SyncParam(const FOSCAddress& AddressPattern, const FOSCMess
   UOSCManager::GetString(message, 2, displayValue);
   
   gameMode->UpdateParamDisplayValue(moduleId, paramId, displayValue);
+}
+
+void AOSCController::AddLibraryPlugin(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port) {
+  FString name, slug;
+  UOSCManager::GetString(message, 0, name);
+  UOSCManager::GetString(message, 1, slug);
+  
+  Library.Plugins.Add(slug, VCVPluginInfo(name, slug));
+  UE_LOG(LogTemp, Warning, TEXT("added library plugin %s:%s"), *name, *slug);
+}
+
+void AOSCController::AddLibraryModule(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port) {
+  FString pluginSlug, name, slug, description;
+  UOSCManager::GetString(message, 0, pluginSlug);
+  UOSCManager::GetString(message, 1, name);
+  UOSCManager::GetString(message, 2, slug);
+  UOSCManager::GetString(message, 3, description);
+
+  Library.Plugins[pluginSlug].Modules.Add(slug, VCVModuleInfo(name, slug, description));
+  UE_LOG(LogTemp, Warning, TEXT("  added library module %s:%s (%s)"), *name, *slug, *description);
+}
+
+void AOSCController::AddLibraryModuleTag(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port) {
+  FString pluginSlug, moduleSlug;
+  int32 tagId;
+
+  UOSCManager::GetString(message, 0, pluginSlug);
+  UOSCManager::GetString(message, 1, moduleSlug);
+  UOSCManager::GetInt32(message, 2, tagId);
+  
+  Library.Plugins[pluginSlug].Modules[moduleSlug].Tags.Add(tagId);
+  UE_LOG(LogTemp, Warning, TEXT("    added module tag %d"), tagId);
+}
+
+void AOSCController::AddLibraryTag(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port) {
+  int32 tagId;
+  FString tagName;
+
+  UOSCManager::GetInt32(message, 0, tagId);
+  UOSCManager::GetString(message, 1, tagName);
+  
+  Library.TagNames.Add(tagId, tagName);
+  UE_LOG(LogTemp, Warning, TEXT("added library tag %d:%s"), tagId, *tagName);
 }
 
 // void AOSCController::PrintVCVModule(VCVModule vcv_module) {
