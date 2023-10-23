@@ -77,6 +77,12 @@ void AVCVModule::EndPlay(const EEndPlayReason::Type EndPlayReason) {
       gameMode->DestroyCable(cableId);
     }
   }
+
+  TArray<AActor*, FDefaultAllocator> attachedActors;
+  GetAttachedActors(attachedActors, true, true);
+  for (AActor* attachedActor : attachedActors) {
+    attachedActor->Destroy();
+  }
 }
 
 void AVCVModule::init(VCVModule vcv_module) {
