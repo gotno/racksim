@@ -83,6 +83,8 @@ AVCVCable* Aosc3GameModeBase::SpawnCable(VCVCable cable) {
 }
 
 void Aosc3GameModeBase::DestroyCable(int64_t cableId) {
+  if (!CableActors.Contains(cableId)) return;
+
   VCVCable cable = CableActors[cableId]->getModel();
 
   PortIdentity inputIdentity = cable.getIdentity(PortType::Input);
@@ -153,6 +155,12 @@ void Aosc3GameModeBase::DuplicateModule(AVCVModule* Module) {
   FString pluginSlug, moduleSlug;
   Module->GetSlugs(pluginSlug, moduleSlug);
   OSCctrl->CreateModule(pluginSlug, moduleSlug);
+}
+
+void Aosc3GameModeBase::DestroyModule(AVCVModule* Module) {
+  ModuleActors[Module->GetId()]->Destroy();
+  ModuleActors.Remove(Module->GetId());
+  OSCctrl->DestroyModule(Module->GetId());
 }
 
 void Aosc3GameModeBase::UpdateLight(int64_t moduleId, int32 lightId, FLinearColor color) {

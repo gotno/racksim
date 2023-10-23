@@ -58,6 +58,11 @@ struct FModuleManipulationActions {
   UInputAction* DuplicateModuleLeft;
   UPROPERTY(EditDefaultsOnly)
   UInputAction* DuplicateModuleRight;
+
+  UPROPERTY(EditDefaultsOnly)
+  UInputAction* DestroyModuleLeft;
+  UPROPERTY(EditDefaultsOnly)
+  UInputAction* DestroyModuleRight;
 };
 
 USTRUCT()
@@ -194,6 +199,7 @@ private:
   void HandleCompleteGrab(const FInputActionValue& _Value, EControllerHand Hand);
 
   void HandleDuplicateModule(const FInputActionValue& _Value, EControllerHand Hand);
+  void HandleDestroyModule(const FInputActionValue& _Value, EControllerHand Hand);
 
   // param interaction
   void HandleStartParamEngage(const FInputActionValue& _Value, EControllerHand Hand);

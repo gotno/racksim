@@ -143,6 +143,10 @@ void AVRAvatar::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
   Input->BindAction(ModuleManipulationActions.DuplicateModuleLeft, ETriggerEvent::Started, this, &AVRAvatar::HandleDuplicateModule, EControllerHand::Left);
   Input->BindAction(ModuleManipulationActions.DuplicateModuleRight, ETriggerEvent::Started, this, &AVRAvatar::HandleDuplicateModule, EControllerHand::Right);
 
+  // destroy module
+  Input->BindAction(ModuleManipulationActions.DestroyModuleLeft, ETriggerEvent::Started, this, &AVRAvatar::HandleDestroyModule, EControllerHand::Left);
+  Input->BindAction(ModuleManipulationActions.DestroyModuleRight, ETriggerEvent::Started, this, &AVRAvatar::HandleDestroyModule, EControllerHand::Right);
+
   // param interaction
   // engage
   Input->BindAction(ParamInteractionActions.ParamEngageLeft, ETriggerEvent::Started, this, &AVRAvatar::HandleStartParamEngage, EControllerHand::Left);
@@ -460,6 +464,18 @@ void AVRAvatar::HandleDuplicateModule(const FInputActionValue& _Value, EControll
   if (grabbedModule) {
     UE_LOG(LogTemp, Warning, TEXT("%s duplicate module %s"), Hand == EControllerHand::Left ? *FString("left") : *FString("right"), *grabbedModule->GetActorNameOrLabel());
     GameMode->DuplicateModule(grabbedModule);
+  }
+}
+
+void AVRAvatar::HandleDestroyModule(const FInputActionValue& _Value, EControllerHand Hand) {
+  AVRMotionController* controller = 
+    Hand == EControllerHand::Left ? LeftController : RightController;
+  
+  AVCVModule* grabbedModule = Cast<AVCVModule>(controller->GetActorToGrab());
+
+  if (grabbedModule) {
+    UE_LOG(LogTemp, Warning, TEXT("%s destroy module %s"), Hand == EControllerHand::Left ? *FString("left") : *FString("right"), *grabbedModule->GetActorNameOrLabel());
+    GameMode->DestroyModule(grabbedModule);
   }
 }
 

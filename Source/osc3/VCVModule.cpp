@@ -62,6 +62,23 @@ void AVCVModule::BeginPlay() {
   Tags.Add(TAG_GRABBABLE);
 }
 
+void AVCVModule::EndPlay(const EEndPlayReason::Type EndPlayReason) {
+	Super::EndPlay(EndPlayReason);
+  
+  int64 cableId;
+  for (auto& pair : InputActors) {
+    while (pair.Value->getCableId(cableId)) {
+      gameMode->DestroyCable(cableId);
+    }
+  }
+
+  for (auto& pair : OutputActors) {
+    while (pair.Value->getCableId(cableId)) {
+      gameMode->DestroyCable(cableId);
+    }
+  }
+}
+
 void AVCVModule::init(VCVModule vcv_module) {
   model = vcv_module; 
 
@@ -88,6 +105,10 @@ void AVCVModule::GetPortInfo(PortIdentity identity, FVector& portLocation, FVect
   }
   portLocation = port->GetActorLocation();
   portForwardVector = port->GetActorForwardVector();
+}
+
+int64 AVCVModule::GetId() {
+  return model.id;
 }
 
 void AVCVModule::GetSlugs(FString& PluginSlug, FString& Slug) {

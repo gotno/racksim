@@ -160,12 +160,22 @@ void AOSCController::SendParamUpdate(int64 moduleId, int paramId, float value) {
 }
 
 void AOSCController::CreateModule(FString pluginSlug, FString moduleSlug) {
-  UE_LOG(LogTemp, Warning, TEXT("Sending AddModule %s:%s"), *pluginSlug, *moduleSlug);
+  UE_LOG(LogTemp, Warning, TEXT("Sending /create/module %s:%s"), *pluginSlug, *moduleSlug);
   FOSCAddress address = UOSCManager::ConvertStringToOSCAddress(FString(TEXT("/create/module")));
   FOSCMessage message;
   UOSCManager::SetOSCMessageAddress(message, address);
   UOSCManager::AddString(message, pluginSlug);
   UOSCManager::AddString(message, moduleSlug);
+
+  OSCClient->SendOSCMessage(message);
+}
+
+void AOSCController::DestroyModule(int64 moduleId) {
+  UE_LOG(LogTemp, Warning, TEXT("Sending /destroy/module %lld"), moduleId);
+  FOSCAddress address = UOSCManager::ConvertStringToOSCAddress(FString(TEXT("/destroy/module")));
+  FOSCMessage message;
+  UOSCManager::SetOSCMessageAddress(message, address);
+  UOSCManager::AddInt64(message, moduleId);
 
   OSCClient->SendOSCMessage(message);
 }

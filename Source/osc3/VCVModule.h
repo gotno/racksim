@@ -21,12 +21,14 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 public:	
 	virtual void Tick(float DeltaTime) override;
 
   void init(VCVModule model);
   
+  int64 GetId();
   void GetPortInfo(PortIdentity identity, FVector& portLocation, FVector& portForwardVector);
   void AttachCable(const PortIdentity& identity, int64_t cableId);
   void DetachCable(const PortIdentity& identity, int64_t cableId);
