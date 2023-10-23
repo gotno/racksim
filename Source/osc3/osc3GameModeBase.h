@@ -64,9 +64,6 @@ private:
 
   Aosc3PlayerController* PlayerController;
   AVRAvatar* PlayerPawn;
-  
-  float spawnXPositionCursor{0.f};
-  float spawnYPositionCursor{150.f};
 
   void ProcessSpawnCableQueue();
   TArray<VCVCable> cableQueue;

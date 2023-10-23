@@ -38,24 +38,19 @@ void Aosc3GameModeBase::Tick(float DeltaTime) {
 void Aosc3GameModeBase::SpawnModule(VCVModule module) {
   if (ModuleActors.Contains(module.id)) return;
 
-  spawnXPositionCursor += 1 + module.box.size.x / 2;
-
-  if (spawnXPositionCursor > 30) {
-    spawnXPositionCursor = 0.f;
-    spawnYPositionCursor += 1 + module.box.size.y;
-  }
+  FVector position = FVector(0, module.box.pos.x, -module.box.pos.y + 140);
+  position.Y += module.box.size.x / 2;
+  position.Z += module.box.size.y / 2;
 
   AVCVModule* a_module =
     GetWorld()->SpawnActor<AVCVModule>(
       AVCVModule::StaticClass(),
-      FVector(0, spawnXPositionCursor, spawnYPositionCursor),
+      position,
       FRotator(0, 0, 0)
     );
  
   ModuleActors.Add(module.id, a_module);
   a_module->init(module);
-
-  spawnXPositionCursor += module.box.size.x / 2;
 
   ProcessSpawnCableQueue();
 }
