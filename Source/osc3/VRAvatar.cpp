@@ -81,18 +81,18 @@ void AVRAvatar::PawnClientRestart() {
 void AVRAvatar::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
   
-  FVector vrRootLocation = VRRoot->GetComponentLocation();
-  vrRootLocation.Z = 10.f;
-  FVector cameraLocation = Camera->GetComponentLocation();
-  cameraLocation.Z = 10.f;
-  DrawDebugSphere(GetWorld(), vrRootLocation, 5.f, 32, FColor::Red);
-  DrawDebugSphere(GetWorld(), cameraLocation, 10.f, 32, FColor::Blue);
-  DrawDebugSphere(GetWorld(), GetActorLocation(), 5.f, 32, FColor::Green);
+  // FVector vrRootLocation = VRRoot->GetComponentLocation();
+  // vrRootLocation.Z = 10.f;
+  // FVector cameraLocation = Camera->GetComponentLocation();
+  // cameraLocation.Z = 10.f;
+  // DrawDebugSphere(GetWorld(), vrRootLocation, 5.f, 32, FColor::Red);
+  // DrawDebugSphere(GetWorld(), cameraLocation, 10.f, 32, FColor::Blue);
+  // DrawDebugSphere(GetWorld(), GetActorLocation(), 5.f, 32, FColor::Green);
 
-  DrawDebugSphere(GetWorld(), FVector(200.f, 200.f, 10.f), 5.f, 32, FColor::Magenta);
-  DrawDebugSphere(GetWorld(), FVector(-200.f, 200.f, 10.f), 5.f, 32, FColor::Magenta);
-  DrawDebugSphere(GetWorld(), FVector(-200.f, -200.f, 10.f), 5.f, 32, FColor::Magenta);
-  DrawDebugSphere(GetWorld(), FVector(200.f, -200.f, 10.f), 5.f, 32, FColor::Magenta);
+  // DrawDebugSphere(GetWorld(), FVector(200.f, 200.f, 10.f), 5.f, 32, FColor::Magenta);
+  // DrawDebugSphere(GetWorld(), FVector(-200.f, 200.f, 10.f), 5.f, 32, FColor::Magenta);
+  // DrawDebugSphere(GetWorld(), FVector(-200.f, -200.f, 10.f), 5.f, 32, FColor::Magenta);
+  // DrawDebugSphere(GetWorld(), FVector(200.f, -200.f, 10.f), 5.f, 32, FColor::Magenta);
 }
 
 void AVRAvatar::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
