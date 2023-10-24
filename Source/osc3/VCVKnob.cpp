@@ -106,7 +106,16 @@ void AVCVKnob::engage(float ControllerRoll) {
 void AVCVKnob::alter(float ControllerRoll) {
   Super::alter(ControllerRoll);
 
-  float deltaRoll = (ControllerRoll - LastControllerRoll) * alterRatio;
+  float deltaRoll = ControllerRoll - LastControllerRoll;
+  // TODO: magic number?
+  // limiting max roll per tick fixes jump from min to max or max to min
+  if (FMath::Abs(deltaRoll) > 30) {
+    LastControllerRoll = ControllerRoll;
+    return;
+  }
+  deltaRoll *= alterRatio;
+
+  // TODO: user override of smoothing constant
   deltaRoll =
     FMath::WeightedMovingAverage(deltaRoll, LastDeltaRoll, 0.2f);
   LastDeltaRoll = deltaRoll;
