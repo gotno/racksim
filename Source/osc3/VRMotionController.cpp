@@ -43,8 +43,6 @@ void AVRMotionController::BeginPlay() {
 
   GrabSphere->OnComponentBeginOverlap.AddDynamic(this, &AVRMotionController::HandleGrabberBeginOverlap);
   GrabSphere->OnComponentEndOverlap.AddDynamic(this, &AVRMotionController::HandleGrabberEndOverlap);
-
-  GrabSphere->AddLocalOffset(MotionController->GetUpVector() * GrabSphereUpOffset);
   GrabSphere->ComponentTags.Add(TAG_GRABBER);
 
   InteractCapsule->SetWorldRotation(FRotator(-90.f + InteractCapsuleAngleOffset, 0.f, 0.f));
@@ -60,6 +58,18 @@ void AVRMotionController::BeginPlay() {
   SetTooltipVisibility(false);
   TooltipWidget = Cast<UTooltip>(TooltipWidgetComponent->GetUserWidgetObject());
 }
+
+void AVRMotionController::SetTrackingSource(EControllerHand Hand) {
+  MotionController->SetTrackingSource(Hand);
+
+  HandName = Hand == EControllerHand::Left ? "left" : "right";
+  
+  if (Hand == EControllerHand::Left) {
+    GrabSphereOffset.Y = -GrabSphereOffset.Y;
+  }
+  GrabSphere->AddLocalOffset(GrabSphereOffset);
+}
+
 
 void AVRMotionController::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);

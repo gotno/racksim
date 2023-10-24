@@ -40,11 +40,7 @@ protected:
 public:	
 	virtual void Tick(float DeltaTime) override;
 
-  void SetTrackingSource(EControllerHand Hand) {
-    MotionController->SetTrackingSource(Hand);
-
-    HandName = Hand == EControllerHand::Left ? "left" : "right";
-  }
+  void SetTrackingSource(EControllerHand Hand);
 
   AActor* GetActorToGrab() { return ActorToGrab; }
   AActor* GetParamActorToInteract() { return ParamActorToInteract; }
@@ -80,9 +76,9 @@ private:
   UPROPERTY(VisibleAnywhere)
   USphereComponent* GrabSphere;
   UPROPERTY(EditDefaultsOnly, Category="Interaction")
-  float GrabSphereRadius{2.f};
+  float GrabSphereRadius{0.5f};
   UPROPERTY(EditDefaultsOnly, Category="Interaction")
-  float GrabSphereUpOffset{-2.f};
+  FVector GrabSphereOffset{0.f, -2.f, -2.f};
 
   UPROPERTY(VisibleAnywhere)
   UCapsuleComponent* InteractCapsule;
