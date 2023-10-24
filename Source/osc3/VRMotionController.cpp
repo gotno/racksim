@@ -309,6 +309,7 @@ void AVRMotionController::HandleGrabberBeginOverlap(UPrimitiveComponent* Overlap
 void AVRMotionController::StartGrab() {
   UE_LOG(LogTemp, Display, TEXT("%s start grab"), *HandName);
   bIsGrabbing = true;
+  SetTooltipVisibility(false);
   PlayerController->PlayHapticEffect(HapticEffects.Bump, MotionController->GetTrackingSource());
 }
 
