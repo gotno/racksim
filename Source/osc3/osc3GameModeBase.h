@@ -5,6 +5,8 @@
 #include "OSCController.h"
 #include "DefinitivePainter/Public/SVG/Importer/DPSVGImporter.h"
 
+#include "VCVLibrary.h"
+
 #include "GameFramework/GameMode.h"
 #include "osc3GameModeBase.generated.h"
 
@@ -15,6 +17,7 @@ class AVRAvatar;
 class AVCVCable;
 class AVCVModule;
 class AVCVPort;
+class ALibrary;
 class AWidgetSurrogate;
 class Aosc3PlayerController;
 class UDPSVGAsset;
@@ -58,6 +61,8 @@ public:
   void RegisterSVG(FString filepath, Vec2 size);
   void RegisterTexture(FString filepath, UTexture2D* texture);
   UTexture2D* GetTexture(FString filepath);
+  
+  void SpawnLibrary(VCVLibrary& library);
 private:
   UPROPERTY()
   AOSCController* OSCctrl;
@@ -72,6 +77,8 @@ private:
   TMap<int64, AVCVModule*> ModuleActors;
   UPROPERTY()
   TMap<int64, AVCVCable*> CableActors;
+  UPROPERTY()
+  ALibrary* LibraryActor;
 
   FDPSVGImporter SVGImporter;
   UPROPERTY()

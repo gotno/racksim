@@ -7,6 +7,7 @@
 #include "OSCServer.h"
 
 #include "VCV.h"
+#include "VCVLibrary.h"
 
 #include "OSCController.generated.h"
 
@@ -81,6 +82,8 @@ private:
   void AddLibraryModuleTag(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port);
   UFUNCTION()
   void AddLibraryTag(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port);
+  UFUNCTION()
+  void LibrarySyncComplete(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port);
 
   // UFUNCTION()
   // void TestBundle(const FOSCBundle& InBundle, const FString& InIPAddress, int32 InPort);

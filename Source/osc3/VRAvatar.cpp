@@ -159,6 +159,34 @@ void AVRAvatar::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
   // general
   // quit
   Input->BindAction(BaseActions.Quit, ETriggerEvent::Completed, this, &AVRAvatar::Quit);
+
+  // widget left click
+  Input->BindAction(WidgetManipulationActions.WidgetLeftClickLeft, ETriggerEvent::Started, this, &AVRAvatar::HandleStartWidgetLeftClick, EControllerHand::Left);
+  Input->BindAction(WidgetManipulationActions.WidgetLeftClickRight, ETriggerEvent::Started, this, &AVRAvatar::HandleStartWidgetLeftClick, EControllerHand::Right);
+  Input->BindAction(WidgetManipulationActions.WidgetLeftClickLeft, ETriggerEvent::Completed, this, &AVRAvatar::HandleCompleteWidgetLeftClick, EControllerHand::Left);
+  Input->BindAction(WidgetManipulationActions.WidgetLeftClickRight, ETriggerEvent::Completed, this, &AVRAvatar::HandleCompleteWidgetLeftClick, EControllerHand::Right);
+
+  // widget scroll
+  Input->BindAction(WidgetManipulationActions.WidgetScrollLeft, ETriggerEvent::Triggered, this, &AVRAvatar::HandleWidgetScroll, EControllerHand::Left);
+  Input->BindAction(WidgetManipulationActions.WidgetScrollRight, ETriggerEvent::Triggered, this, &AVRAvatar::HandleWidgetScroll, EControllerHand::Right);
+}
+
+void AVRAvatar::SetControllerWidgetInteracting(EControllerHand Hand, bool bInteracting) {
+  if (Hand == EControllerHand::Left && bLeftHandWorldManipulationActive) return;
+  if (Hand == EControllerHand::Right && bRightHandWorldManipulationActive) return;
+
+  UInputMappingContext* widgetManipulationMappingContext = 
+    Hand == EControllerHand::Left
+      ? InputMappingContexts.WidgetManipulationLeft
+      : InputMappingContexts.WidgetManipulationRight;
+
+  // UE_LOG(LogTemp, Warning, TEXT("setting widget interacting mapping %d"), bInteracting);
+
+  if (bInteracting) {
+    InputSubsystem->AddMappingContext(widgetManipulationMappingContext, 2);
+  } else {
+    InputSubsystem->RemoveMappingContext(widgetManipulationMappingContext);
+  }
 }
 
 void AVRAvatar::SetControllerGrabbing(EControllerHand Hand, bool bGrabbing) {
@@ -170,10 +198,10 @@ void AVRAvatar::SetControllerGrabbing(EControllerHand Hand, bool bGrabbing) {
       ? InputMappingContexts.ModuleManipulationLeft
       : InputMappingContexts.ModuleManipulationRight;
 
-  UE_LOG(LogTemp, Warning, TEXT("setting module grabbing mapping %d"), bGrabbing);
+  // UE_LOG(LogTemp, Warning, TEXT("setting module grabbing mapping %d"), bGrabbing);
 
   if (bGrabbing) {
-    InputSubsystem->AddMappingContext(moduleManipulationMappingContext, 2);
+    InputSubsystem->AddMappingContext(moduleManipulationMappingContext, 3);
   } else {
     InputSubsystem->RemoveMappingContext(moduleManipulationMappingContext);
   }
@@ -188,10 +216,10 @@ void AVRAvatar::SetControllerParamOrPortInteracting(EControllerHand Hand, bool b
       ? InputMappingContexts.ParamInteractionLeft
       : InputMappingContexts.ParamInteractionRight;
   
-  UE_LOG(LogTemp, Warning, TEXT("setting param interacting mapping %d"), bInteracting);
+  // UE_LOG(LogTemp, Warning, TEXT("setting param interacting mapping %d"), bInteracting);
 
   if (bInteracting) {
-    InputSubsystem->AddMappingContext(paramInteractingMappingContext, 3);
+    InputSubsystem->AddMappingContext(paramInteractingMappingContext, 4);
   } else {
     InputSubsystem->RemoveMappingContext(paramInteractingMappingContext);
   }
@@ -200,7 +228,6 @@ void AVRAvatar::SetControllerParamOrPortInteracting(EControllerHand Hand, bool b
 void AVRAvatar::LogInput(const FInputActionValue& _Value, FString msg) {
   UE_LOG(LogTemp, Warning, TEXT("input: %s"), *msg);
 }
-
 
 void AVRAvatar::SetWorldManipulationActive(EControllerHand Hand, bool Active) {
   if (Hand == EControllerHand::Left) {
@@ -562,6 +589,27 @@ void AVRAvatar::Quit(const FInputActionValue& _Value) {
     EQuitPreference::Quit,
     false
   );
+}
+
+void AVRAvatar::HandleStartWidgetLeftClick(const FInputActionValue& _Value, EControllerHand Hand) {
+  AVRMotionController* controller = 
+    Hand == EControllerHand::Left ? LeftController : RightController;
+  
+  controller->StartWidgetLeftClick();
+}
+
+void AVRAvatar::HandleCompleteWidgetLeftClick(const FInputActionValue& _Value, EControllerHand Hand) {
+  AVRMotionController* controller = 
+    Hand == EControllerHand::Left ? LeftController : RightController;
+
+  controller->EndWidgetLeftClick();
+}
+
+void AVRAvatar::HandleWidgetScroll(const FInputActionValue& Value, EControllerHand Hand) {
+  AVRMotionController* controller = 
+    Hand == EControllerHand::Left ? LeftController : RightController;
+
+  controller->WidgetScroll(Value.Get<float>());
 }
 
 // get the position+rotation for spawning a WidgetSurrogate in the camera's view

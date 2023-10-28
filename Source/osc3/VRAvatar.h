@@ -23,6 +23,21 @@ struct FBaseActions {
 };
 
 USTRUCT()
+struct FWidgetManipulationActions {
+	GENERATED_BODY()
+
+  UPROPERTY(EditDefaultsOnly)
+  UInputAction* WidgetLeftClickLeft;
+  UPROPERTY(EditDefaultsOnly)
+  UInputAction* WidgetLeftClickRight;
+
+  UPROPERTY(EditDefaultsOnly)
+  UInputAction* WidgetScrollLeft;
+  UPROPERTY(EditDefaultsOnly)
+  UInputAction* WidgetScrollRight;
+};
+
+USTRUCT()
 struct FWorldManipulationActions {
 	GENERATED_BODY()
 
@@ -83,6 +98,11 @@ struct FInputMappingContexts {
   UInputMappingContext* Base;
 
   UPROPERTY(EditDefaultsOnly)
+  UInputMappingContext* WidgetManipulationLeft;
+  UPROPERTY(EditDefaultsOnly)
+  UInputMappingContext* WidgetManipulationRight;
+
+  UPROPERTY(EditDefaultsOnly)
   UInputMappingContext* ModuleManipulationLeft;
   UPROPERTY(EditDefaultsOnly)
   UInputMappingContext* ModuleManipulationRight;
@@ -118,6 +138,8 @@ public:
   UPROPERTY(EditAnywhere, Category="Input")
   FBaseActions BaseActions;
   UPROPERTY(EditAnywhere, Category="Input")
+  FWidgetManipulationActions WidgetManipulationActions;
+  UPROPERTY(EditAnywhere, Category="Input")
   FWorldManipulationActions WorldManipulationActions;
   UPROPERTY(EditAnywhere, Category="Input")
   FModuleManipulationActions ModuleManipulationActions;
@@ -129,6 +151,7 @@ public:
 
   UEnhancedInputLocalPlayerSubsystem* InputSubsystem;
   
+  void SetControllerWidgetInteracting(EControllerHand Hand, bool bInteracting);
   void SetControllerGrabbing(EControllerHand Hand, bool bGrabbing);
   void SetControllerParamOrPortInteracting(EControllerHand Hand, bool bInteracting);
   
@@ -212,4 +235,7 @@ private:
 
   // general controls
   void Quit(const FInputActionValue& _Value);
+  void HandleStartWidgetLeftClick(const FInputActionValue& _Value, EControllerHand Hand);
+  void HandleCompleteWidgetLeftClick(const FInputActionValue& _Value, EControllerHand Hand);
+  void HandleWidgetScroll(const FInputActionValue& _Value, EControllerHand Hand);
 };

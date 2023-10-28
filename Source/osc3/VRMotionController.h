@@ -18,6 +18,7 @@ class USphereComponent;
 class UCapsuleComponent;
 class UPrimitiveComponent;
 class UWidgetComponent;
+class UWidgetInteractionComponent;
 
 USTRUCT()
 struct FHapticEffects {
@@ -42,17 +43,24 @@ public:
 
   void SetTrackingSource(EControllerHand Hand);
 
+
   AActor* GetActorToGrab() { return ActorToGrab; }
+  void StartGrab();
+  void EndGrab();
+
   AActor* GetParamActorToInteract() { return ParamActorToInteract; }
+  void StartParamInteract();
+  void EndParamInteract();
+
   AVCVPort* GetPortActorToInteract() { return OriginPortActor; }
   AVCVPort* GetDestinationPortActor() { return DestinationPortActor; }
   AVCVCable* GetHeldCable() { return HeldCable; }
-  void StartGrab();
-  void EndGrab();
-  void StartParamInteract();
-  void EndParamInteract();
   void StartPortInteract();
   void EndPortInteract();
+
+  void StartWidgetLeftClick();
+  void EndWidgetLeftClick();
+  void WidgetScroll(float ScrollDelta);
 
   void RefreshTooltip();
 
@@ -66,12 +74,15 @@ private:
 
   FString HandName;
 
+  UPROPERTY(VisibleAnywhere)
+  UMotionControllerComponent* MotionController;
+  
+  UPROPERTY(VisibleAnywhere)
+  UWidgetInteractionComponent* WidgetInteractionComponent;
+
   UPROPERTY(EditDefaultsOnly)
   UWidgetComponent* TooltipWidgetComponent;
   UTooltip* TooltipWidget;
-
-  UPROPERTY(VisibleAnywhere)
-  UMotionControllerComponent* MotionController;
   
   UPROPERTY(VisibleAnywhere)
   USphereComponent* GrabSphere;
@@ -118,4 +129,6 @@ private:
   AVCVPort* OriginPortActor;
   AVCVPort* DestinationPortActor;
   AVCVCable* HeldCable;
+
+  bool bIsWidgetInteracting{false};
 };

@@ -8,6 +8,7 @@
 #include "VCVModule.h"
 #include "VCVCable.h"
 #include "VCVParam.h"
+#include "Library.h"
 #include "WidgetSurrogate.h"
 
 #include "Engine/Texture2D.h"
@@ -223,4 +224,19 @@ void Aosc3GameModeBase::RegisterTexture(FString filepath, UTexture2D* texture) {
 UTexture2D* Aosc3GameModeBase::GetTexture(FString filepath) {
   if (!SVGTextures.Contains(filepath)) return nullptr;
   return SVGTextures[filepath];
+}
+
+void Aosc3GameModeBase::SpawnLibrary(VCVLibrary& vcv_library) {
+  FActorSpawnParameters spawnParams;
+  spawnParams.Owner = this;
+
+  LibraryActor = GetWorld()->SpawnActor<ALibrary>(
+      ALibrary::StaticClass(),
+      FVector(0, 0, 100.f),
+      FRotator(0, 180.f, 0),
+      spawnParams
+    );
+  LibraryActor->Init(vcv_library);
+  // LibraryActor->SetActorScale3D(FVector(0.04f, 0.04f, 0.04f));
+  LibraryActor->SetActorScale3D(FVector(0.1f, 0.1f, 0.1f));
 }

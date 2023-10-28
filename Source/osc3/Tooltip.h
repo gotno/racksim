@@ -16,7 +16,7 @@ protected:
 	UPROPERTY(BlueprintReadOnly, meta=(BindWidget))
 	UTextBlock* LineOne;
 
-	UPROPERTY(BlueprintReadOnly, meta=(BindWidgetOptional))
+	UPROPERTY(BlueprintReadOnly, meta=(BindWidget))
 	UTextBlock* LineTwo;
 
 public:

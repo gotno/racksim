@@ -13,6 +13,7 @@
 #include "Components/SphereComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/WidgetComponent.h"
+#include "Components/WidgetInteractionComponent.h"
 #include "DrawDebugHelpers.h"
 
 #include "Kismet/GameplayStatics.h"
@@ -33,6 +34,14 @@ AVRMotionController::AVRMotionController() {
 
   TooltipWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("Tooltip"));
   TooltipWidgetComponent->SetupAttachment(MotionController);
+  
+  WidgetInteractionComponent = CreateDefaultSubobject<UWidgetInteractionComponent>(TEXT("WidgetInteractionComponent"));
+  WidgetInteractionComponent->SetupAttachment(MotionController);
+  WidgetInteractionComponent->VirtualUserIndex = 0;
+
+  WidgetInteractionComponent->bShowDebug = true;
+  WidgetInteractionComponent->DebugLineThickness = 0.1f;
+  WidgetInteractionComponent->DebugSphereLineThickness = 0.1f;
 }
 
 void AVRMotionController::BeginPlay() {
@@ -63,13 +72,13 @@ void AVRMotionController::SetTrackingSource(EControllerHand Hand) {
   MotionController->SetTrackingSource(Hand);
 
   HandName = Hand == EControllerHand::Left ? "left" : "right";
+  WidgetInteractionComponent->PointerIndex = Hand == EControllerHand::Left ? 1 : 0; 
   
   if (Hand == EControllerHand::Left) {
     GrabSphereOffset.Y = -GrabSphereOffset.Y;
   }
   GrabSphere->AddLocalOffset(GrabSphereOffset);
 }
-
 
 void AVRMotionController::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
@@ -90,10 +99,23 @@ void AVRMotionController::Tick(float DeltaTime) {
     FColor::Blue
   );
 
-  // Tooltip->SetWorldLocation(MotionController->GetComponentLocation() + MotionController->GetUpVector() * 5.f);
   TooltipWidgetComponent->SetWorldRotation(
     Avatar->GetLookAtCameraRotation(TooltipWidgetComponent->GetComponentLocation())
   );
+
+  if (WidgetInteractionComponent->IsOverInteractableWidget() && !bIsWidgetInteracting) {
+    Avatar->SetControllerWidgetInteracting(
+      MotionController->GetTrackingSource(),
+      true
+    );
+    bIsWidgetInteracting = true;
+  } else if (!WidgetInteractionComponent->IsOverInteractableWidget() && bIsWidgetInteracting) {
+    Avatar->SetControllerWidgetInteracting(
+      MotionController->GetTrackingSource(),
+      false
+    );
+    bIsWidgetInteracting = false;
+  }
 }
 
 void AVRMotionController::LogOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherCompomponent, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
@@ -358,6 +380,18 @@ void AVRMotionController::HandleGrabberEndOverlap(UPrimitiveComponent* Overlappe
       false
     );
   }
+}
+
+void AVRMotionController::StartWidgetLeftClick() {
+  WidgetInteractionComponent->PressPointerKey(EKeys::LeftMouseButton);
+}
+
+void AVRMotionController::WidgetScroll(float ScrollDelta) {
+  WidgetInteractionComponent->ScrollWheel(ScrollDelta);
+}
+
+void AVRMotionController::EndWidgetLeftClick() {
+  WidgetInteractionComponent->ReleasePointerKey(EKeys::LeftMouseButton);
 }
 
 void AVRMotionController::SetTooltipVisibility(bool bVisible) {
