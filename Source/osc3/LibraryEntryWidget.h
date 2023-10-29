@@ -25,7 +25,7 @@ protected:
 	UButton* Button;
 private:
   UFUNCTION()
-  void PrintSlug();
+  void RequestModuleSpawn();
 
   FString PluginSlug, ModuleSlug;
 };

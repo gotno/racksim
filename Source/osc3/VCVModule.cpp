@@ -45,6 +45,9 @@ AVCVModule::AVCVModule() {
 
 void AVCVModule::BeginPlay() {
 	Super::BeginPlay();
+  
+  // hide module until init'd
+  SetHidden(true);
 
   if (BaseMaterialInterface) {
     BaseMaterialInstance = UMaterialInstanceDynamic::Create(BaseMaterialInterface, this);
@@ -96,6 +99,7 @@ void AVCVModule::init(VCVModule vcv_module) {
   StaticMeshComponent->SetWorldScale3D(FVector(RENDER_SCALE, model.box.size.x, model.box.size.y));
   spawnComponents();
   SetActorRotation(FRotator(0.f, 0.f, 0.f));
+  SetHidden(false);
 }
 
 FString AVCVModule::getBrand() {

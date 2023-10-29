@@ -68,11 +68,11 @@ AVCVCable* Aosc3GameModeBase::SpawnCable(VCVCable cable) {
   a_cable->init(cable);
   
   PortIdentity inputIdentity = cable.getIdentity(PortType::Input);
-  if (!inputIdentity.isNull())
+  if (!inputIdentity.isNull() && ModuleActors.Contains(inputIdentity.moduleId))
     ModuleActors[inputIdentity.moduleId]->AttachCable(inputIdentity, cable.id);
 
   PortIdentity outputIdentity = cable.getIdentity(PortType::Output);
-  if (!outputIdentity.isNull())
+  if (!outputIdentity.isNull() && ModuleActors.Contains(outputIdentity.moduleId))
     ModuleActors[outputIdentity.moduleId]->AttachCable(outputIdentity, cable.id);
 
   return a_cable;
@@ -151,6 +151,10 @@ void Aosc3GameModeBase::DuplicateModule(AVCVModule* Module) {
   FString pluginSlug, moduleSlug;
   Module->GetSlugs(pluginSlug, moduleSlug);
   OSCctrl->CreateModule(pluginSlug, moduleSlug);
+}
+
+void Aosc3GameModeBase::RequestModuleSpawn(FString PluginSlug, FString ModuleSlug) {
+  OSCctrl->CreateModule(PluginSlug, ModuleSlug);
 }
 
 void Aosc3GameModeBase::DestroyModule(AVCVModule* Module) {

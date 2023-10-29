@@ -250,7 +250,7 @@ void AVRMotionController::StartPortInteract() {
     RefreshTooltip();
   } else {
     UE_LOG(LogTemp, Warning, TEXT("spawning new cable"));
-    VCVCable cable(-1);
+    VCVCable cable;
     cable.setIdentity(OriginPortActor->getIdentity());
     HeldCable = GameMode->SpawnCable(cable);
   }

@@ -131,6 +131,33 @@ struct VCVPort {
   VCVPort(int32 _id, PortType _type, int64_t _moduleId) : id(_id), type(_type), moduleId(_moduleId) {}
 };
 
+struct VCVCable {
+  int64_t id = -1;
+  TMap<PortType, PortIdentity> portIdentities = {
+    { PortType::Input, PortIdentity(PortType::Input) },
+    { PortType::Output, PortIdentity(PortType::Output) }
+  };
+  
+  void setIdentity(PortIdentity identity) {
+    portIdentities[identity.type] = identity;
+  }
+
+  PortIdentity getIdentity(PortType type) {
+    return portIdentities[type];
+  }
+
+  void nullifyIdentity(PortType type) {
+    portIdentities[type].nullify();
+  }
+  
+  bool operator==(const VCVCable& other) {
+    return id == other.id;
+  }
+  
+  VCVCable() {}
+  VCVCable(int64_t _id) : id(_id) {}
+};
+
 struct VCVDisplay {
   Rect box;
   
@@ -158,31 +185,4 @@ struct VCVModule {
 	VCVModule() {}
   VCVModule(int64_t moduleId, FString moduleBrand, FString moduleName, FString modelDescription, Rect panelBox, FString svgPath)
     : id(moduleId), brand(moduleBrand), name(moduleName), description(modelDescription), box(panelBox), panelSvgPath(svgPath) {}
-};
-
-struct VCVCable {
-  int64_t id = -1;
-  TMap<PortType, PortIdentity> portIdentities = {
-    { PortType::Input, PortIdentity(PortType::Input) },
-    { PortType::Output, PortIdentity(PortType::Output) }
-  };
-  
-  void setIdentity(PortIdentity identity) {
-    portIdentities[identity.type] = identity;
-  }
-
-  PortIdentity getIdentity(PortType type) {
-    return portIdentities[type];
-  }
-
-  void nullifyIdentity(PortType type) {
-    portIdentities[type].nullify();
-  }
-  
-  bool operator==(const VCVCable& other) {
-    return id == other.id;
-  }
-  
-  VCVCable() {}
-  VCVCable(int64_t _id) : id(_id) {}
 };

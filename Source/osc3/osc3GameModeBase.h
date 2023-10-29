@@ -57,6 +57,7 @@ public:
   void SendParamUpdate(int64_t moduleId, int32 paramId, float value);
   void DuplicateModule(AVCVModule* Module);
   void DestroyModule(AVCVModule* Module);
+  void RequestModuleSpawn(FString PluginSlug, FString ModuleSlug);
   
   void RegisterSVG(FString filepath, Vec2 size);
   void RegisterTexture(FString filepath, UTexture2D* texture);
