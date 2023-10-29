@@ -241,6 +241,4 @@ void Aosc3GameModeBase::SpawnLibrary(VCVLibrary& vcv_library) {
       spawnParams
     );
   LibraryActor->Init(vcv_library);
-  // LibraryActor->SetActorScale3D(FVector(0.04f, 0.04f, 0.04f));
-  LibraryActor->SetActorScale3D(FVector(0.1f, 0.1f, 0.1f));
 }

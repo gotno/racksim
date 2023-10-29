@@ -37,5 +37,8 @@ private:
   
   TArray<ULibraryEntry*> GenerateEntries();
   
+  void SetScale();
+  float DesiredWidth{10.f};
+  
   VCVLibrary Model;
 };

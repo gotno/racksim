@@ -25,7 +25,6 @@ ALibrary::ALibrary() {
 
 void ALibrary::BeginPlay() {
 	Super::BeginPlay();
-	
   LibraryWidget = Cast<ULibraryWidget>(LibraryWidgetComponent->GetUserWidgetObject());
 }
 
@@ -35,7 +34,15 @@ void ALibrary::Tick(float DeltaTime) {
 
 void ALibrary::Init(VCVLibrary vcv_library) {
   Model = vcv_library;
+  SetScale();
   LibraryWidget->SetListItems(GenerateEntries());
+}
+
+void ALibrary::SetScale() {
+  FVector _origin, extent;
+  GetActorBounds(false, _origin, extent);
+  float scale = DesiredWidth / extent.Y;
+  SetActorScale3D(FVector(1.f, scale, scale));
 }
 
 TArray<ULibraryEntry*> ALibrary::GenerateEntries() {
