@@ -2,15 +2,6 @@
 
 #include "Components/TextBlock.h"
 
-void UTooltip::SetLineOne(FString NewLineOne) {
-  LineOne->SetText(FText::FromString(NewLineOne));
-  LineOne->SetVisibility(ESlateVisibility::Collapsed);
-}
-
-void UTooltip::SetLineTwo(FString NewLineTwo) {
-  LineTwo->SetText(FText::FromString(NewLineTwo));
-}
-
 void UTooltip::SetText(FString InLineOne, FString InLineTwo, bool bEmphasis, bool bSubtitle) {
   if (InLineTwo.IsEmpty()) {
     LineTwo->SetVisibility(ESlateVisibility::Collapsed);
