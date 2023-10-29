@@ -2,16 +2,15 @@
 
 #include "CoreMinimal.h"
 
-#include "OSCController.h"
 #include "DefinitivePainter/Public/SVG/Importer/DPSVGImporter.h"
 
+#include "VCV.h"
 #include "VCVLibrary.h"
 
 #include "GameFramework/GameMode.h"
 #include "osc3GameModeBase.generated.h"
 
-struct VCVModule;
-struct VCVCable;
+class AOSCController;
 class AAvatar;
 class AVRAvatar;
 class AVCVCable;

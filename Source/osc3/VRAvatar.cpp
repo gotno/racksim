@@ -615,10 +615,8 @@ void AVRAvatar::HandleWidgetScroll(const FInputActionValue& Value, EControllerHa
 // get the position+rotation for spawning a WidgetSurrogate in the camera's view
 // so it is invisible (facing away) but renders immediately
 void AVRAvatar::GetRenderablePosition(FVector& location, FRotator& rotation) {
-  // location = Camera->GetComponentLocation() + Camera->GetForwardVector() * 10.f;
-  // rotation = Camera->GetForwardVector().Rotation();
-  location = GetActorLocation() + GetActorForwardVector() * 10.f;
-  rotation = GetActorForwardVector().Rotation();
+  location = Camera->GetComponentLocation() + Camera->GetForwardVector() * 10.f;
+  rotation = Camera->GetForwardVector().Rotation();
 }
 
 FRotator AVRAvatar::GetLookAtCameraRotation(FVector FromPosition) {

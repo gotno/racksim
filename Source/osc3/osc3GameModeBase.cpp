@@ -1,9 +1,8 @@
 #include "osc3GameModeBase.h"
 #include "osc3PlayerController.h"
-#include "Avatar.h"
+#include "OSCController.h"
 #include "VRAvatar.h"
 
-#include "VCV.h"
 #include "VCVOverrides.h"
 #include "VCVModule.h"
 #include "VCVCable.h"
@@ -25,7 +24,15 @@ void Aosc3GameModeBase::BeginPlay() {
 	Super::BeginPlay();
 
   OSCctrl->Init();
-  OSCctrl->NotifyResync();
+
+  FTimerHandle resyncHandle;
+  GetWorld()->GetTimerManager().SetTimer(
+    resyncHandle,
+    OSCctrl,
+    &AOSCController::NotifyResync,
+    1.f, // seconds, apparently
+    false
+  );
 
   PlayerController = Cast<Aosc3PlayerController>(UGameplayStatics::GetPlayerController(this, 0));
   PlayerPawn = Cast<AVRAvatar>(UGameplayStatics::GetPlayerPawn(this, 0));
