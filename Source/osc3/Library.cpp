@@ -13,8 +13,21 @@ ALibrary::ALibrary() {
   RootSceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootSceneComponent"));
   SetRootComponent(RootSceneComponent);
 
+  StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Static Mesh"));
+  StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+  StaticMeshComponent->SetupAttachment(GetRootComponent());
+  
+  static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshBody(TEXT("/Script/Engine.StaticMesh'/Game/meshes/unit_widget_base.unit_widget_base'"));
+  
+  if (MeshBody.Object) StaticMeshComponent->SetStaticMesh(MeshBody.Object);
+
+  static ConstructorHelpers::FObjectFinder<UMaterial> BaseMaterial(TEXT("/Script/Engine.Material'/Game/meshes/faced/generic_base.generic_base'"));
+  if (BaseMaterial.Object) {
+    BaseMaterialInterface = Cast<UMaterial>(BaseMaterial.Object);
+  }
+
   LibraryWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("LibraryWidget"));
-  LibraryWidgetComponent->SetupAttachment(GetRootComponent());
+  LibraryWidgetComponent->SetupAttachment(StaticMeshComponent);
   LibraryWidgetComponent->SetWindowFocusable(false);
 
   static ConstructorHelpers::FClassFinder<ULibraryWidget> libraryWidgetObject(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/widgets/BP_LibraryWidget.BP_LibraryWidget_C'"));
@@ -25,6 +38,12 @@ ALibrary::ALibrary() {
 
 void ALibrary::BeginPlay() {
 	Super::BeginPlay();
+
+  if (BaseMaterialInterface) {
+    BaseMaterialInstance = UMaterialInstanceDynamic::Create(BaseMaterialInterface, this);
+    StaticMeshComponent->SetMaterial(0, BaseMaterialInstance);
+  }
+
   LibraryWidget = Cast<ULibraryWidget>(LibraryWidgetComponent->GetUserWidgetObject());
 }
 
@@ -39,10 +58,18 @@ void ALibrary::Init(VCVLibrary vcv_library) {
 }
 
 void ALibrary::SetScale() {
+  // get initial actor bounds, which will be the rendered widget size
   FVector _origin, extent;
   GetActorBounds(false, _origin, extent);
-  float scale = DesiredWidth / extent.Y;
-  SetActorScale3D(FVector(1.f, scale, scale));
+  float scale = DesiredWidth / (extent.Y * 2);
+
+  // scale the base mesh to desired
+  float baseWidth = DesiredWidth + (BasePadding * 2);
+  StaticMeshComponent->SetWorldScale3D(FVector(1, baseWidth, baseWidth));
+
+  // scale the widget component based on initial bounds
+  LibraryWidgetComponent->SetWorldScale3D(FVector(1.f, scale, scale));
+  LibraryWidgetComponent->AddLocalOffset(FVector(0.1f, 0.f, 0.f));
 }
 
 TArray<ULibraryEntry*> ALibrary::GenerateEntries() {

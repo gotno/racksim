@@ -7,7 +7,6 @@
 
 #include "Library.generated.h"
 
-class USceneComponent;
 class UWidgetComponent;
 class ULibraryWidget;
 class ULibraryEntryWidget;
@@ -30,6 +29,16 @@ public:
 private:
   UPROPERTY(VisibleAnywhere)
   USceneComponent* RootSceneComponent;
+
+  UPROPERTY(VisibleAnywhere)
+  UStaticMeshComponent* StaticMeshComponent;
+  UPROPERTY()
+  UStaticMesh* StaticMesh;
+
+  UPROPERTY()
+  UMaterialInstanceDynamic* BaseMaterialInstance;
+  UPROPERTY()
+  UMaterialInterface* BaseMaterialInterface;
   
   UPROPERTY(EditDefaultsOnly)
   UWidgetComponent* LibraryWidgetComponent;
@@ -38,7 +47,8 @@ private:
   TArray<ULibraryEntry*> GenerateEntries();
   
   void SetScale();
-  float DesiredWidth{10.f};
+  float DesiredWidth{20.f};
+  float BasePadding{0.4f};
   
   VCVLibrary Model;
 };
