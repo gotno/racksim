@@ -183,6 +183,7 @@ void Aosc3GameModeBase::UpdateParamDisplayValue(int64_t moduleId, int32 paramId,
 }
 
 void Aosc3GameModeBase::GetPortInfo(PortIdentity identity, FVector& portLocation, FVector& portForwardVector) {
+  if (!ModuleActors.Contains(identity.moduleId)) return;
   AVCVModule* module = ModuleActors[identity.moduleId];
   module->GetPortInfo(identity, portLocation, portForwardVector);
 }
