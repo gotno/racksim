@@ -12,6 +12,8 @@
 #include "VCVKnob.h"
 #include "VCVPort.h"
 #include "VCVCable.h"
+#include "Library.h"
+#include "Grabbable.h"
 
 #include "VRMotionController.h"
 #include "MotionControllerComponent.h"
@@ -447,13 +449,13 @@ void AVRAvatar::HandleStartGrab(const FInputActionValue& _Value, EControllerHand
   AVRMotionController* controller = 
     Hand == EControllerHand::Left ? LeftController : RightController;
   
-  AVCVModule* grabbedModule = Cast<AVCVModule>(controller->GetActorToGrab());
+  AActor* grabbedActor = controller->GetActorToGrab();
 
   UE_LOG(LogTemp, Warning, TEXT("%s hand grab start"), *FString(Hand == EControllerHand::Left ? "left" : "right"));
-  if (grabbedModule) {
-    UE_LOG(LogTemp, Warning, TEXT("  grabbing %s"), *grabbedModule->GetActorNameOrLabel());
+  if (grabbedActor && Cast<IGrabbable>(grabbedActor)) {
+    UE_LOG(LogTemp, Warning, TEXT("  grabbing %s"), *grabbedActor->GetActorNameOrLabel());
     controller->StartGrab();
-    grabbedModule->EngageGrab(controller->GetActorLocation(), controller->GetActorRotation());
+    Cast<IGrabbable>(grabbedActor)->EngageGrab(controller->GetActorLocation(), controller->GetActorRotation());
   }
 }
 
@@ -461,10 +463,10 @@ void AVRAvatar::HandleGrab(const FInputActionValue& _Value, EControllerHand Hand
   AVRMotionController* controller = 
     Hand == EControllerHand::Left ? LeftController : RightController;
 
-  AVCVModule* grabbedModule = Cast<AVCVModule>(controller->GetActorToGrab());
+  AActor* grabbedActor = controller->GetActorToGrab();
 
-  if (grabbedModule) {
-    grabbedModule->AlterGrab(controller->GetActorLocation(), controller->GetActorRotation());
+  if (grabbedActor && Cast<IGrabbable>(grabbedActor)) {
+    Cast<IGrabbable>(grabbedActor)->AlterGrab(controller->GetActorLocation(), controller->GetActorRotation());
   }
 }
 
@@ -472,12 +474,12 @@ void AVRAvatar::HandleCompleteGrab(const FInputActionValue& _Value, EControllerH
   AVRMotionController* controller = 
     Hand == EControllerHand::Left ? LeftController : RightController;
   
-  AVCVModule* grabbedModule = Cast<AVCVModule>(controller->GetActorToGrab());
+  AActor* grabbedActor = controller->GetActorToGrab();
 
   UE_LOG(LogTemp, Warning, TEXT("%s hand grab complete"), *FString(Hand == EControllerHand::Left ? "left" : "right"));
-  if (grabbedModule) {
-    UE_LOG(LogTemp, Warning, TEXT("  releasing %s"), *grabbedModule->GetActorNameOrLabel());
-    grabbedModule->ReleaseGrab();
+  if (grabbedActor && Cast<IGrabbable>(grabbedActor)) {
+    UE_LOG(LogTemp, Warning, TEXT("  releasing %s"), *grabbedActor->GetActorNameOrLabel());
+    Cast<IGrabbable>(grabbedActor)->ReleaseGrab();
     controller->EndGrab();
   }
 }

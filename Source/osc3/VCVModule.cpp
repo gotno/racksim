@@ -267,15 +267,13 @@ void AVCVModule::spawnComponents() {
 }
 
 void AVCVModule::SetHighlighted(bool bHighlighted) {
-  float highlightGlowIntensity = 0.1f;
-
   BaseMaterialInstance->SetScalarParameterValue(
     FName("glow_intensity"),
-    bHighlighted ? highlightGlowIntensity : 0.f
+    bHighlighted ? HighlightGlowIntensity : 0.f
   );
   FaceMaterialInstance->SetScalarParameterValue(
     FName("glow_intensity"),
-    bHighlighted ? highlightGlowIntensity : 0.f
+    bHighlighted ? HighlightGlowIntensity : 0.f
   );
 }
 

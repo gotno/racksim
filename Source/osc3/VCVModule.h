@@ -1,6 +1,7 @@
 #pragma once
 
 #include "VCV.h"
+#include "Grabbable.h"
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
@@ -13,7 +14,7 @@ class AVCVPort;
 class AVCVParam;
 
 UCLASS()
-class OSC3_API AVCVModule : public AActor {
+class OSC3_API AVCVModule : public AActor, public IGrabbable {
 	GENERATED_BODY()
 	
 public:	
@@ -47,10 +48,10 @@ public:
 
   FString getBrand();
 
-  void EngageGrab(FVector GrabbedLocation, FRotator GrabbedRotation);
-  void AlterGrab(FVector GrabbedLocation, FRotator GrabbedRotation);
-  void ReleaseGrab();
-  void SetHighlighted(bool bHighlighted);
+  void EngageGrab(FVector GrabbedLocation, FRotator GrabbedRotation) override;
+  void AlterGrab(FVector GrabbedLocation, FRotator GrabbedRotation) override;
+  void ReleaseGrab() override;
+  void SetHighlighted(bool bHighlighted) override;
   
 private:
   UPROPERTY(VisibleAnywhere)
@@ -77,12 +78,6 @@ private:
   VCVModule model;
   
   Aosc3GameModeBase* gameMode;
-
-  bool bGrabEngaged{false};
-  FVector GrabOffset;
-  FVector LastGrabbedLocation;
-  FRotator LastGrabbedRotation;
-  FVector LastLocationDelta;
 
   TMap<int, AVCVParam*> ParamActors;
   TMap<int, AVCVPort*> InputActors;

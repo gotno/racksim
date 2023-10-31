@@ -9,6 +9,7 @@
 #include "VCVPort.h"
 #include "VRAvatar.h"
 #include "Tooltip.h"
+#include "Grabbable.h"
 
 #include "Components/SphereComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -41,7 +42,7 @@ AVRMotionController::AVRMotionController() {
 
   WidgetInteractionComponent->bShowDebug = true;
   WidgetInteractionComponent->DebugLineThickness = 0.1f;
-  WidgetInteractionComponent->DebugSphereLineThickness = 0.1f;
+  WidgetInteractionComponent->DebugSphereLineThickness = 0.f;
 }
 
 void AVRMotionController::BeginPlay() {
@@ -326,11 +327,11 @@ void AVRMotionController::HandleInteractorEndOverlap(UPrimitiveComponent* Overla
 void AVRMotionController::HandleGrabberBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult) {
   if (bIsGrabbing || bIsParamInteracting) return;
 
-  if (OtherActor->ActorHasTag(TAG_GRABBABLE)) {
+  if (OtherActor->ActorHasTag(TAG_GRABBABLE) && Cast<IGrabbable>(OtherActor)) {
     UE_LOG(LogTemp, Display, TEXT("%s set ActorToGrab %s"), *HandName, *OtherActor->GetActorNameOrLabel());
 
     ActorToGrab = OtherActor;
-    Cast<AVCVModule>(ActorToGrab)->SetHighlighted(true);
+    Cast<IGrabbable>(OtherActor)->SetHighlighted(true);
     Avatar->SetControllerGrabbing(
       MotionController->GetTrackingSource(),
       true
@@ -360,13 +361,13 @@ void AVRMotionController::EndGrab() {
       false
     );
   } else {
-    Cast<AVCVModule>(ActorToGrab)->SetHighlighted(true);
+    Cast<IGrabbable>(ActorToGrab)->SetHighlighted(true);
   }
 }
 
 void AVRMotionController::HandleGrabberEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex) {
-  if (OtherActor->ActorHasTag(TAG_GRABBABLE))
-    Cast<AVCVModule>(OtherActor)->SetHighlighted(false);
+  if (OtherActor->ActorHasTag(TAG_GRABBABLE) && Cast<IGrabbable>(OtherActor))
+    Cast<IGrabbable>(OtherActor)->SetHighlighted(false);
   if (bIsGrabbing || bIsParamInteracting) return;
 
   TSet<AActor*> overlappingActors;

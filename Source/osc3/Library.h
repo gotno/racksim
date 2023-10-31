@@ -1,10 +1,10 @@
 #pragma once
 
+#include "VCVLibrary.h"
+#include "Grabbable.h"
+
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-
-#include "VCVLibrary.h"
-
 #include "Library.generated.h"
 
 class UWidgetComponent;
@@ -13,7 +13,7 @@ class ULibraryEntryWidget;
 class ULibraryEntry;
 
 UCLASS()
-class OSC3_API ALibrary : public AActor {
+class OSC3_API ALibrary : public AActor, public IGrabbable {
 	GENERATED_BODY()
 	
 public:	
@@ -25,6 +25,11 @@ protected:
 public:	
 	virtual void Tick(float DeltaTime) override;
   void Init(VCVLibrary model);
+
+  void EngageGrab(FVector GrabbedLocation, FRotator GrabbedRotation) override;
+  void AlterGrab(FVector GrabbedLocation, FRotator GrabbedRotation) override;
+  void ReleaseGrab() override;
+  void SetHighlighted(bool bHighlighted) override;
 
 private:
   UPROPERTY(VisibleAnywhere)

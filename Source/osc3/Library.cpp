@@ -1,11 +1,13 @@
 #include "Library.h"
 
+#include "osc3.h"
 #include "LibraryWidget.h"
 #include "LibraryEntry.h"
 
 #include "Components/PrimitiveComponent.h"
 #include "Components/WidgetComponent.h"
 #include "UObject/ConstructorHelpers.h"
+#include "Kismet/KismetMathLibrary.h"
 
 ALibrary::ALibrary() {
 	PrimaryActorTick.bCanEverTick = true;
@@ -45,6 +47,9 @@ void ALibrary::BeginPlay() {
   }
 
   LibraryWidget = Cast<ULibraryWidget>(LibraryWidgetComponent->GetUserWidgetObject());
+
+  Tags.Add(TAG_INTERACTABLE);
+  Tags.Add(TAG_GRABBABLE);
 }
 
 void ALibrary::Tick(float DeltaTime) {
@@ -94,4 +99,50 @@ TArray<ULibraryEntry*> ALibrary::GenerateEntries() {
     }
   }
   return entries;
+}
+
+void ALibrary::SetHighlighted(bool bHighlighted) {
+  BaseMaterialInstance->SetScalarParameterValue(
+    FName("glow_intensity"),
+    bHighlighted ? HighlightGlowIntensity : 0.f
+  );
+}
+
+void ALibrary::EngageGrab(FVector GrabbedLocation, FRotator GrabbedRotation) {
+  // UE_LOG(LogTemp, Warning, TEXT("%s: grab engage"), *GetActorNameOrLabel());
+  bGrabEngaged = true;
+  GrabOffset = GrabbedLocation - GetActorLocation();
+  StaticMeshComponent->AddWorldOffset(-GrabOffset);
+
+  LastGrabbedRotation = GrabbedRotation;
+  LastGrabbedLocation = GrabbedLocation - GrabOffset;
+  LastLocationDelta = FVector(0.f, 0.f, 0.f);
+  SetHighlighted(false);
+}
+
+void ALibrary::AlterGrab(FVector GrabbedLocation, FRotator GrabbedRotation) {
+  FQuat qFrom = LastGrabbedRotation.Quaternion();
+  FQuat qTo =  GrabbedRotation.Quaternion();
+  FQuat qDelta = qTo * qFrom.Inverse();
+  
+  FVector locationDelta = GrabbedLocation - LastGrabbedLocation;
+  locationDelta = UKismetMathLibrary::WeightedMovingAverage_FVector(
+    locationDelta,
+    LastLocationDelta,
+    0.4f
+  );
+  LastLocationDelta = locationDelta;
+
+  AddActorWorldOffset(locationDelta);
+  AddActorWorldRotation(qDelta);
+
+  LastGrabbedLocation = GrabbedLocation;
+  LastGrabbedRotation = GrabbedRotation;
+}
+
+void ALibrary::ReleaseGrab() {
+  // UE_LOG(LogTemp, Warning, TEXT("%s: grab release"), *GetActorNameOrLabel());
+  bGrabEngaged = false;
+  StaticMeshComponent->AddWorldOffset(GrabOffset);
+  AddActorWorldOffset(-GrabOffset);
 }
