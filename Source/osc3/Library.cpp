@@ -1,6 +1,5 @@
 #include "Library.h"
 
-#include "osc3.h"
 #include "LibraryWidget.h"
 #include "LibraryEntry.h"
 
@@ -18,15 +17,28 @@ ALibrary::ALibrary() {
   StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Static Mesh"));
   StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
   StaticMeshComponent->SetupAttachment(GetRootComponent());
+  StaticMeshComponent->SetRenderInDepthPass(true);
+  StaticMeshComponent->SetRenderCustomDepth(true);
+  StaticMeshComponent->SetCustomDepthStencilValue(2);
+
+  OutlineMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Outline Mesh"));
+  OutlineMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+  OutlineMeshComponent->SetupAttachment(StaticMeshComponent);
+  OutlineMeshComponent->SetVisibility(false);
+  OutlineMeshComponent->SetWorldScale3D(FVector(1.1f, 1.1f, 1.1f));
   
   static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshBody(TEXT("/Script/Engine.StaticMesh'/Game/meshes/unit_widget_base.unit_widget_base'"));
   
-  if (MeshBody.Object) StaticMeshComponent->SetStaticMesh(MeshBody.Object);
+  if (MeshBody.Object) {
+    StaticMeshComponent->SetStaticMesh(MeshBody.Object);
+    OutlineMeshComponent->SetStaticMesh(MeshBody.Object);
+  }
 
   static ConstructorHelpers::FObjectFinder<UMaterial> BaseMaterial(TEXT("/Script/Engine.Material'/Game/meshes/faced/generic_base.generic_base'"));
-  if (BaseMaterial.Object) {
-    BaseMaterialInterface = Cast<UMaterial>(BaseMaterial.Object);
-  }
+  if (BaseMaterial.Object) BaseMaterialInterface = Cast<UMaterial>(BaseMaterial.Object);
+
+  static ConstructorHelpers::FObjectFinder<UMaterial> OutlineMaterial(TEXT("/Script/Engine.Material'/Game/materials/looman_outlines/M_LocalOutlines.M_LocalOutlines'"));
+  if (OutlineMaterial.Object) OutlineMaterialInterface = Cast<UMaterial>(OutlineMaterial.Object);
 
   LibraryWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("LibraryWidget"));
   LibraryWidgetComponent->SetupAttachment(StaticMeshComponent);
@@ -44,6 +56,11 @@ void ALibrary::BeginPlay() {
   if (BaseMaterialInterface) {
     BaseMaterialInstance = UMaterialInstanceDynamic::Create(BaseMaterialInterface, this);
     StaticMeshComponent->SetMaterial(0, BaseMaterialInstance);
+  }
+
+  if (OutlineMaterialInterface) {
+    OutlineMaterialInstance = UMaterialInstanceDynamic::Create(OutlineMaterialInterface, this);
+    OutlineMeshComponent->SetMaterial(0, OutlineMaterialInstance);
   }
 
   LibraryWidget = Cast<ULibraryWidget>(LibraryWidgetComponent->GetUserWidgetObject());
@@ -70,7 +87,7 @@ void ALibrary::SetScale() {
 
   // scale the base mesh to desired
   float baseWidth = DesiredWidth + (BasePadding * 2);
-  StaticMeshComponent->SetWorldScale3D(FVector(1, baseWidth, baseWidth));
+  StaticMeshComponent->SetWorldScale3D(FVector(RENDER_SCALE * MODULE_DEPTH, baseWidth, baseWidth));
 
   // scale the widget component based on initial bounds
   LibraryWidgetComponent->SetWorldScale3D(FVector(1.f, scale, scale));
@@ -101,11 +118,9 @@ TArray<ULibraryEntry*> ALibrary::GenerateEntries() {
   return entries;
 }
 
-void ALibrary::SetHighlighted(bool bHighlighted) {
-  BaseMaterialInstance->SetScalarParameterValue(
-    FName("glow_intensity"),
-    bHighlighted ? HighlightGlowIntensity : 0.f
-  );
+void ALibrary::SetHighlighted(bool bHighlighted, FLinearColor HighlightColor) {
+  OutlineMeshComponent->SetVisibility(bHighlighted);
+  OutlineMaterialInstance->SetVectorParameterValue(FName("Color"), HighlightColor);
 }
 
 void ALibrary::EngageGrab(FVector GrabbedLocation, FRotator GrabbedRotation) {

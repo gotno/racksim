@@ -1,6 +1,5 @@
 #include "VCVModule.h"
 
-#include "osc3.h"
 #include "osc3GameModeBase.h"
 #include "VCV.h"
 #include "VCVOverrides.h"
@@ -27,20 +26,30 @@ AVCVModule::AVCVModule() {
   StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Static Mesh"));
   StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
   StaticMeshComponent->SetupAttachment(GetRootComponent());
+  StaticMeshComponent->SetRenderInDepthPass(true);
+  StaticMeshComponent->SetRenderCustomDepth(true);
+  StaticMeshComponent->SetCustomDepthStencilValue(2);
+
+  OutlineMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Outline Mesh"));
+  OutlineMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+  OutlineMeshComponent->SetupAttachment(StaticMeshComponent);
+  OutlineMeshComponent->SetVisibility(false);
+  OutlineMeshComponent->SetWorldScale3D(FVector(1.1f, 1.1f, 1.1f));
   
   static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshBody(TEXT("/Script/Engine.StaticMesh'/Game/meshes/faced/unit_module_faced.unit_module_faced'"));
-  
   if (MeshBody.Object) StaticMeshComponent->SetStaticMesh(MeshBody.Object);
 
+  static ConstructorHelpers::FObjectFinder<UStaticMesh> OutlineMeshBody(TEXT("/Script/Engine.StaticMesh'/Game/meshes/unit_module.unit_module'"));
+  if (OutlineMeshBody.Object) OutlineMeshComponent->SetStaticMesh(OutlineMeshBody.Object);
+
   static ConstructorHelpers::FObjectFinder<UMaterial> BaseMaterial(TEXT("/Script/Engine.Material'/Game/meshes/faced/generic_base.generic_base'"));
-  if (BaseMaterial.Object) {
-    BaseMaterialInterface = Cast<UMaterial>(BaseMaterial.Object);
-  }
+  if (BaseMaterial.Object) BaseMaterialInterface = Cast<UMaterial>(BaseMaterial.Object);
 
   static ConstructorHelpers::FObjectFinder<UMaterial> FaceMaterial(TEXT("/Script/Engine.Material'/Game/meshes/faced/texture_face_bg.texture_face_bg'"));
-  if (FaceMaterial.Object) {
-    FaceMaterialInterface = Cast<UMaterial>(FaceMaterial.Object);
-  }
+  if (FaceMaterial.Object) FaceMaterialInterface = Cast<UMaterial>(FaceMaterial.Object);
+
+  static ConstructorHelpers::FObjectFinder<UMaterial> OutlineMaterial(TEXT("/Script/Engine.Material'/Game/materials/looman_outlines/M_LocalOutlines.M_LocalOutlines'"));
+  if (OutlineMaterial.Object) OutlineMaterialInterface = Cast<UMaterial>(OutlineMaterial.Object);
 }
 
 void AVCVModule::BeginPlay() {
@@ -58,7 +67,12 @@ void AVCVModule::BeginPlay() {
     FaceMaterialInstance = UMaterialInstanceDynamic::Create(FaceMaterialInterface, this);
     StaticMeshComponent->SetMaterial(1, FaceMaterialInstance);
   }
-  
+
+  if (OutlineMaterialInterface) {
+    OutlineMaterialInstance = UMaterialInstanceDynamic::Create(OutlineMaterialInterface, this);
+    OutlineMeshComponent->SetMaterial(0, OutlineMaterialInstance);
+  }
+
   gameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(this));
   
   Tags.Add(TAG_INTERACTABLE);
@@ -96,7 +110,7 @@ void AVCVModule::init(VCVModule vcv_module) {
   FaceMaterialInstance->SetScalarParameterValue(FName("uscale"), overrides.getUVOverride(model.brand).X);
   FaceMaterialInstance->SetScalarParameterValue(FName("vscale"), overrides.getUVOverride(model.brand).Y);
 
-  StaticMeshComponent->SetWorldScale3D(FVector(RENDER_SCALE, model.box.size.x, model.box.size.y));
+  StaticMeshComponent->SetWorldScale3D(FVector(RENDER_SCALE * MODULE_DEPTH, model.box.size.x, model.box.size.y));
   spawnComponents();
   SetActorRotation(FRotator(0.f, 0.f, 0.f));
   SetHidden(false);
@@ -266,15 +280,9 @@ void AVCVModule::spawnComponents() {
   }
 }
 
-void AVCVModule::SetHighlighted(bool bHighlighted) {
-  BaseMaterialInstance->SetScalarParameterValue(
-    FName("glow_intensity"),
-    bHighlighted ? HighlightGlowIntensity : 0.f
-  );
-  FaceMaterialInstance->SetScalarParameterValue(
-    FName("glow_intensity"),
-    bHighlighted ? HighlightGlowIntensity : 0.f
-  );
+void AVCVModule::SetHighlighted(bool bHighlighted, FLinearColor HighlightColor) {
+  OutlineMeshComponent->SetVisibility(bHighlighted);
+  OutlineMaterialInstance->SetVectorParameterValue(FName("Color"), HighlightColor);
 }
 
 void AVCVModule::EngageGrab(FVector GrabbedLocation, FRotator GrabbedRotation) {

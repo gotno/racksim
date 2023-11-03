@@ -3,6 +3,8 @@
 #include "CoreMinimal.h"
 
 #define RENDER_SCALE 2.f
+#define MODULE_DEPTH 2.f
+#define OUTLINE_COLOR FLinearColor(1.f, 1.f, 0.f)
 
 #define LIGHT_OBJECT ECC_GameTraceChannel1
 #define PARAM_OBJECT ECC_GameTraceChannel2

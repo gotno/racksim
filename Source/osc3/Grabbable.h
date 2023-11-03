@@ -1,5 +1,7 @@
 #pragma once
 
+#include "osc3.h"
+
 #include "CoreMinimal.h"
 #include "UObject/Interface.h"
 #include "Grabbable.generated.h"
@@ -16,7 +18,8 @@ public:
   virtual void EngageGrab(FVector GrabbedLocation, FRotator GrabbedRotation);
   virtual void AlterGrab(FVector GrabbedLocation, FRotator GrabbedRotation);
   virtual void ReleaseGrab();
-  virtual void SetHighlighted(bool bHighlighted);
+  virtual void SetHighlighted(bool bHighlighted, FLinearColor OutlineColor = OUTLINE_COLOR);
+
 
   bool bGrabEngaged{false};
 

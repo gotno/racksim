@@ -1,5 +1,6 @@
 #pragma once
 
+#include "osc3.h"
 #include "VCV.h"
 #include "Grabbable.h"
 
@@ -51,15 +52,15 @@ public:
   void EngageGrab(FVector GrabbedLocation, FRotator GrabbedRotation) override;
   void AlterGrab(FVector GrabbedLocation, FRotator GrabbedRotation) override;
   void ReleaseGrab() override;
-  void SetHighlighted(bool bHighlighted) override;
+  void SetHighlighted(bool bHighlighted, FLinearColor OutlineColor = OUTLINE_COLOR) override;
   
 private:
   UPROPERTY(VisibleAnywhere)
   USceneComponent* RootSceneComponent;
   UPROPERTY(VisibleAnywhere)
   UStaticMeshComponent* StaticMeshComponent;
-  UPROPERTY()
-  UStaticMesh* StaticMesh;
+  UPROPERTY(VisibleAnywhere)
+  UStaticMeshComponent* OutlineMeshComponent;
 
   UPROPERTY()
   UMaterialInstanceDynamic* BaseMaterialInstance;
@@ -69,6 +70,10 @@ private:
   UMaterialInstanceDynamic* FaceMaterialInstance;
   UPROPERTY()
   UMaterialInterface* FaceMaterialInterface;
+  UPROPERTY()
+  UMaterialInstanceDynamic* OutlineMaterialInstance;
+  UPROPERTY()
+  UMaterialInterface* OutlineMaterialInterface;
 
   UPROPERTY()
   UTexture2D* texture;
