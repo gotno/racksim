@@ -35,6 +35,7 @@ AVCVModule::AVCVModule() {
   OutlineMeshComponent->SetupAttachment(StaticMeshComponent);
   OutlineMeshComponent->SetVisibility(false);
   OutlineMeshComponent->SetWorldScale3D(FVector(1.1f, 1.1f, 1.1f));
+  OutlineMeshComponent->AddLocalOffset(FVector(-0.05f, 0.f, 0.f));
   
   static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshBody(TEXT("/Script/Engine.StaticMesh'/Game/meshes/faced/unit_module_faced.unit_module_faced'"));
   if (MeshBody.Object) StaticMeshComponent->SetStaticMesh(MeshBody.Object);
