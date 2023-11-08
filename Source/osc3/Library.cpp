@@ -116,6 +116,15 @@ TArray<ULibraryEntry*> ALibrary::GenerateEntries() {
       entries.Add(entry);
     }
   }
+
+  entries.Sort([](const ULibraryEntry& a, const ULibraryEntry& b) {
+    if (a.PluginSlug < b.PluginSlug) return true;
+    if (a.PluginSlug > b.PluginSlug) return false;
+    if (a.ModuleName < b.ModuleName) return true;
+    if (a.ModuleName > b.ModuleName) return false;
+    return false;
+  });
+
   return entries;
 }
 
