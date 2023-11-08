@@ -45,7 +45,8 @@ ALibrary::ALibrary() {
   LibraryWidgetComponent->SetupAttachment(StaticMeshComponent);
   LibraryWidgetComponent->SetWindowFocusable(false);
 
-  static ConstructorHelpers::FClassFinder<ULibraryWidget> libraryWidgetObject(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/widgets/BP_LibraryWidget.BP_LibraryWidget_C'"));
+  // static ConstructorHelpers::FClassFinder<ULibraryWidget> libraryWidgetObject(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/widgets/BP_LibraryWidget.BP_LibraryWidget_C'"));
+  static ConstructorHelpers::FClassFinder<ULibraryWidget> libraryWidgetObject(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/widgets/BP_LibraryWidget_retry.BP_LibraryWidget_retry_C'"));
   if (libraryWidgetObject.Succeeded()) {
     LibraryWidgetComponent->SetWidgetClass(libraryWidgetObject.Class);
   }
@@ -107,12 +108,26 @@ TArray<ULibraryEntry*> ALibrary::GenerateEntries() {
 
       entry->PluginName = pluginInfo.Name;
       entry->PluginSlug = pluginInfo.Slug;
-      entry->ModuleName = moduleInfo.Name;
       entry->ModuleDescription = moduleInfo.Description;
       entry->ModuleSlug = moduleInfo.Slug;
-      for (int& tagId : moduleInfo.Tags) {
-        if (Model.TagNames.Contains(tagId)) entry->Tags.Add(Model.TagNames[tagId]);
+      
+      // over-the-top special handling for Audible Instruments
+      // (module slug is og mutable instruments name)
+      if (pluginInfo.Slug.Equals(FString("AudibleInstruments"))) {
+        FString name = moduleInfo.Name;
+        name.Append(" (").Append(moduleInfo.Slug).Append(")");
+        entry->ModuleName = name;
+      } else {
+        entry->ModuleName = moduleInfo.Name;
       }
+      
+      TArray<FString> tagNames;
+      for (int& tagId : moduleInfo.Tags) {
+        if (Model.TagNames.Contains(tagId)) tagNames.Add(Model.TagNames[tagId]);
+      }
+      tagNames.Sort();
+      entry->Tags = FString::Join(tagNames, _T(", "));
+
       entries.Add(entry);
     }
   }

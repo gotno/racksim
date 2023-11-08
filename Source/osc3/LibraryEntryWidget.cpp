@@ -19,16 +19,10 @@ void ULibraryEntryWidget::NativeConstruct() {
 
 void ULibraryEntryWidget::NativeOnListItemObjectSet(UObject* ListItemObject) {
 	ULibraryEntry* entry = Cast<ULibraryEntry>(ListItemObject);
+
 	PluginName->SetText(FText::FromString(entry->PluginName));
-  
-  // over-the-top special handling for og mutable instruments names
-  if (entry->PluginSlug.Equals(FString("AudibleInstruments"))) {
-    FString name = entry->ModuleName;
-    name.Append(" (").Append(entry->ModuleSlug).Append(")");
-    ModuleName->SetText(FText::FromString(name));
-  } else {
-    ModuleName->SetText(FText::FromString(entry->ModuleName));
-  }
+  ModuleName->SetText(FText::FromString(entry->ModuleName));
+  Tags->SetText(FText::FromString(entry->Tags));
 
   PluginSlug = entry->PluginSlug;
   ModuleSlug = entry->ModuleSlug;

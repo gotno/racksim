@@ -14,5 +14,5 @@ public:
   FString ModuleName;
   FString ModuleSlug;
   FString ModuleDescription;
-  TArray<FString> Tags;
+  FString Tags;
 };

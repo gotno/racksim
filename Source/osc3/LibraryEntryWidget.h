@@ -21,6 +21,8 @@ protected:
 	UTextBlock* PluginName;
   UPROPERTY(meta = (BindWidget))
 	UTextBlock* ModuleName;
+  UPROPERTY(meta = (BindWidget))
+	UTextBlock* Tags;
 
   UPROPERTY(meta = (BindWidget))
 	UButton* Button;
