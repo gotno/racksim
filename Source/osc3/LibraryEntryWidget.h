@@ -5,6 +5,7 @@
 #include "Blueprint/IUserObjectListEntry.h"
 #include "LibraryEntryWidget.generated.h"
 
+class Aosc3GameModeBase;
 class UTextBlock;
 class UButton;
 
@@ -28,4 +29,6 @@ private:
   void RequestModuleSpawn();
 
   FString PluginSlug, ModuleSlug;
+  
+  Aosc3GameModeBase* GameMode;
 };

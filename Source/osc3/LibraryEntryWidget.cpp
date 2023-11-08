@@ -12,22 +12,30 @@
 void ULibraryEntryWidget::NativeConstruct() {
   Super::NativeConstruct();
 
+  GameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(this));
+
   Button->OnPressed.AddDynamic(this, &ULibraryEntryWidget::RequestModuleSpawn);
 }
 
 void ULibraryEntryWidget::NativeOnListItemObjectSet(UObject* ListItemObject) {
 	ULibraryEntry* entry = Cast<ULibraryEntry>(ListItemObject);
 	PluginName->SetText(FText::FromString(entry->PluginName));
-	ModuleName->SetText(FText::FromString(entry->ModuleName));
+  
+  // over-the-top special handling for og mutable instruments names
+  if (entry->PluginSlug.Equals(FString("AudibleInstruments"))) {
+    FString name = entry->ModuleName;
+    name.Append(" (").Append(entry->ModuleSlug).Append(")");
+    ModuleName->SetText(FText::FromString(name));
+  } else {
+    ModuleName->SetText(FText::FromString(entry->ModuleName));
+  }
+
   PluginSlug = entry->PluginSlug;
   ModuleSlug = entry->ModuleSlug;
 }
 
 void ULibraryEntryWidget::RequestModuleSpawn() {
-  UE_LOG(LogTemp, Warning, TEXT("requesting spawn- %s:%s"), *PluginSlug, *ModuleSlug);
+  // UE_LOG(LogTemp, Warning, TEXT("requesting spawn- %s:%s"), *PluginSlug, *ModuleSlug);
 
-  Aosc3GameModeBase* gm = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(this));
-  if (gm) {
-    gm->RequestModuleSpawn(PluginSlug, ModuleSlug);
-  }
+  if (GameMode) GameMode->RequestModuleSpawn(PluginSlug, ModuleSlug);
 }
