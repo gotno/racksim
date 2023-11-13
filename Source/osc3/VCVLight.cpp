@@ -91,10 +91,10 @@ void AVCVLight::init(VCVLight* vcv_light) {
 void AVCVLight::HandleBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
   if (bHandledOverlap) return;
 
-  AVCVModule* ownerModule = Cast<AVCVModule>(GetOwner())
-    ? Cast<AVCVModule>(GetOwner())
-    : Cast<AVCVModule>(GetOwner()->GetOwner());
+  AVCVModule* ownerModule = Cast<AVCVModule>(GetOwner());
+  ownerModule = ownerModule ? ownerModule : Cast<AVCVModule>(GetOwner()->GetOwner());
   if (ownerModule != OtherActor->GetOwner()) return;
+  // UE_LOG(LogTemp, Warning, TEXT("handling overlap of %s:%s/%s"), *ownerModule->getBrand(), *GetActorNameOrLabel(), *OtherActor->GetActorNameOrLabel());
 
   FVector _, otherActorExtent;
   OtherActor->GetActorBounds(false, _, otherActorExtent);
