@@ -91,11 +91,11 @@ void Aosc3GameModeBase::DestroyCable(int64_t cableId) {
   VCVCable cable = CableActors[cableId]->getModel();
 
   PortIdentity inputIdentity = cable.getIdentity(PortType::Input);
-  if (!inputIdentity.isNull())
+  if (!inputIdentity.isNull() && ModuleActors.Contains(inputIdentity.moduleId))
     ModuleActors[inputIdentity.moduleId]->DetachCable(inputIdentity, cable.id);
 
   PortIdentity outputIdentity = cable.getIdentity(PortType::Output);
-  if (!outputIdentity.isNull())
+  if (!outputIdentity.isNull() && ModuleActors.Contains(outputIdentity.moduleId))
     ModuleActors[outputIdentity.moduleId]->DetachCable(outputIdentity, cable.id);
 
   CableActors[cableId]->Destroy();
