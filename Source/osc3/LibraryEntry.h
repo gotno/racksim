@@ -15,4 +15,5 @@ public:
   FString ModuleSlug;
   FString ModuleDescription;
   FString Tags;
+  bool bFavorite{false};
 };

@@ -2,6 +2,7 @@
 
 #include "LibraryWidget.h"
 #include "LibraryEntry.h"
+#include "ui/BasicListEntryData.h"
 
 #include "Components/PrimitiveComponent.h"
 #include "Components/WidgetComponent.h"
@@ -45,8 +46,7 @@ ALibrary::ALibrary() {
   LibraryWidgetComponent->SetupAttachment(StaticMeshComponent);
   LibraryWidgetComponent->SetWindowFocusable(false);
 
-  // static ConstructorHelpers::FClassFinder<ULibraryWidget> libraryWidgetObject(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/widgets/BP_LibraryWidget.BP_LibraryWidget_C'"));
-  static ConstructorHelpers::FClassFinder<ULibraryWidget> libraryWidgetObject(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/widgets/BP_LibraryWidget_retry.BP_LibraryWidget_retry_C'"));
+  static ConstructorHelpers::FClassFinder<ULibraryWidget> libraryWidgetObject(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/widgets/BP_LibraryWidget.BP_LibraryWidget_C'"));
   if (libraryWidgetObject.Succeeded()) {
     LibraryWidgetComponent->SetWidgetClass(libraryWidgetObject.Class);
   }
@@ -78,7 +78,21 @@ void ALibrary::Tick(float DeltaTime) {
 void ALibrary::Init(VCVLibrary vcv_library) {
   Model = vcv_library;
   SetScale();
-  LibraryWidget->SetListItems(GenerateEntries());
+  RefreshLibraryList();
+  RefreshBrandFilterList();
+  RefreshTagsFilterList();
+}
+
+void ALibrary::RefreshLibraryList() {
+  LibraryWidget->SetLibraryListItems(GenerateLibraryEntries());
+}
+
+void ALibrary::RefreshBrandFilterList() {
+  LibraryWidget->SetBrandFilterListItems(GenerateBrandFilterEntries());
+}
+
+void ALibrary::RefreshTagsFilterList() {
+  LibraryWidget->SetTagsFilterListItems(GenerateTagsFilterEntries());
 }
 
 void ALibrary::SetScale() {
@@ -96,13 +110,25 @@ void ALibrary::SetScale() {
   LibraryWidgetComponent->AddLocalOffset(FVector(0.1f, 0.f, 0.f));
 }
 
-TArray<ULibraryEntry*> ALibrary::GenerateEntries() {
+TArray<ULibraryEntry*> ALibrary::GenerateLibraryEntries() {
   TArray<ULibraryEntry*> entries;
   
   for (auto& pluginPair : Model.Plugins) {
     VCVPluginInfo& pluginInfo = pluginPair.Value;
+    
+    if (!BrandFilter.IsEmpty() && !BrandFilter.Equals(pluginInfo.Name)) continue;
+
     for (auto& modulePair : pluginInfo.Modules) {
       VCVModuleInfo& moduleInfo = modulePair.Value;
+
+      if (bFavoritesFilterActive && !moduleInfo.bFavorite) continue;
+      if (!TagFilters.IsEmpty()) {
+        bool moduleMatchesTags{true};
+        for (int& tagId : TagFilters) {
+          moduleMatchesTags = moduleMatchesTags && moduleInfo.Tags.Contains(tagId); 
+        }
+        if (!moduleMatchesTags) continue;
+      }
 
       ULibraryEntry* entry = NewObject<ULibraryEntry>(this);
 
@@ -110,16 +136,8 @@ TArray<ULibraryEntry*> ALibrary::GenerateEntries() {
       entry->PluginSlug = pluginInfo.Slug;
       entry->ModuleDescription = moduleInfo.Description;
       entry->ModuleSlug = moduleInfo.Slug;
-      
-      // over-the-top special handling for Audible Instruments
-      // (module slug is og mutable instruments name)
-      if (pluginInfo.Slug.Equals(FString("AudibleInstruments"))) {
-        FString name = moduleInfo.Name;
-        name.Append(" (").Append(moduleInfo.Slug).Append(")");
-        entry->ModuleName = name;
-      } else {
-        entry->ModuleName = moduleInfo.Name;
-      }
+      entry->ModuleName = moduleInfo.Name;
+      entry->bFavorite = moduleInfo.bFavorite;
       
       TArray<FString> tagNames;
       for (int& tagId : moduleInfo.Tags) {
@@ -133,14 +151,148 @@ TArray<ULibraryEntry*> ALibrary::GenerateEntries() {
   }
 
   entries.Sort([](const ULibraryEntry& a, const ULibraryEntry& b) {
-    if (a.PluginSlug < b.PluginSlug) return true;
-    if (a.PluginSlug > b.PluginSlug) return false;
+    if (a.PluginName < b.PluginName) return true;
+    if (a.PluginName > b.PluginName) return false;
     if (a.ModuleName < b.ModuleName) return true;
     if (a.ModuleName > b.ModuleName) return false;
     return false;
   });
 
   return entries;
+}
+
+TArray<UBasicListEntryData*> ALibrary::GenerateBrandFilterEntries() {
+  TArray<UBasicListEntryData*> brandFilterEntries;
+  TArray<FString> addedBrands;
+
+  for (auto& pluginPair : Model.Plugins) {
+    VCVPluginInfo& pluginInfo = pluginPair.Value;
+
+    // VCV has two sets of plugins (core, fundamental) under one name
+    if (addedBrands.Contains(pluginInfo.Name)) continue;
+    addedBrands.Add(pluginInfo.Name);
+    
+    UBasicListEntryData* entry = NewObject<UBasicListEntryData>(this);
+
+    entry->Label = pluginInfo.Name;
+    entry->StringValue = pluginInfo.Name;
+    entry->Type = BasicListEntryType::BRAND_FILTER;
+
+    if (BrandFilter.Equals(entry->StringValue)) entry->bSelected = true;
+
+    brandFilterEntries.Add(entry);
+  }
+
+  brandFilterEntries.Sort([](const UBasicListEntryData& a, const UBasicListEntryData& b) {
+    if (a.Label < b.Label) return true;
+    return false;
+  });
+  
+  return brandFilterEntries;
+}
+
+TArray<UBasicListEntryData*> ALibrary::GenerateTagsFilterEntries() {
+  TArray<UBasicListEntryData*> tagsFilterEntries;
+
+  for (auto& tagPair : Model.TagNames) {
+    FString& tagName = tagPair.Value;
+    int& tagIndex = tagPair.Key;
+
+    UBasicListEntryData* entry = NewObject<UBasicListEntryData>(this);
+    entry->Label = tagName;
+    entry->IntValue = tagIndex;
+    entry->Type = BasicListEntryType::TAGS_FILTER;
+
+    if (TagFilters.Contains(entry->IntValue)) entry->bSelected = true;
+
+    tagsFilterEntries.Add(entry);
+  }
+
+  tagsFilterEntries.Sort([](const UBasicListEntryData& a, const UBasicListEntryData& b) {
+    if (a.Label < b.Label) return true;
+    return false;
+  });
+  
+  return tagsFilterEntries;
+}
+
+void ALibrary::AddFilter(UBasicListEntryData* BasicListEntryData) {
+  switch (BasicListEntryData->Type) {
+    case BasicListEntryType::BRAND_FILTER:
+      BrandFilter = BasicListEntryData->StringValue;
+      LibraryWidget->SetBrandFilterButtonLabel(BrandFilter, true);
+      RefreshBrandFilterList();
+      RefreshLibraryList();
+      break;
+    case BasicListEntryType::TAGS_FILTER:
+      TagFilters.Add(BasicListEntryData->IntValue);
+      {
+        TArray<FString> tagNames;
+        for (int& tagId : TagFilters) {
+          if (Model.TagNames.Contains(tagId)) tagNames.Add(Model.TagNames[tagId]);
+        }
+        tagNames.Sort();
+        LibraryWidget->SetTagsFilterButtonLabel(FString::Join(tagNames, _T(", ")), true);
+      }
+
+      RefreshTagsFilterList();
+      RefreshLibraryList();
+      break;
+    default:
+      break;
+  }
+}
+
+void ALibrary::RemoveFilter(UBasicListEntryData* BasicListEntryData) {
+  switch (BasicListEntryData->Type) {
+    case BasicListEntryType::BRAND_FILTER:
+      BrandFilter.Empty();
+      LibraryWidget->SetBrandFilterButtonLabel(FString("All Brands"), false);
+      RefreshBrandFilterList();
+      RefreshLibraryList();
+      break;
+    case BasicListEntryType::TAGS_FILTER:
+      TagFilters.Remove(BasicListEntryData->IntValue);
+      if (TagFilters.IsEmpty()) {
+        LibraryWidget->SetTagsFilterButtonLabel(FString("All Tags"), false);
+      } else {
+        TArray<FString> tagNames;
+        for (int& tagId : TagFilters) {
+          if (Model.TagNames.Contains(tagId)) tagNames.Add(Model.TagNames[tagId]);
+        }
+        tagNames.Sort();
+        LibraryWidget->SetTagsFilterButtonLabel(FString::Join(tagNames, _T(", ")), true);
+      }
+      RefreshTagsFilterList();
+      RefreshLibraryList();
+      break;
+    default:
+      break;
+  }
+}
+
+void ALibrary::SetFavoritesFilterActive(bool bActive) {
+  bFavoritesFilterActive = bActive;
+  RefreshLibraryList();
+}
+
+void ALibrary::SetModuleFavorite(FString PluginSlug, FString ModuleSlug, bool bFavorite) {
+  Model.Plugins[PluginSlug].Modules[ModuleSlug].bFavorite = bFavorite;
+  RefreshLibraryList();
+}
+
+void ALibrary::ClearBrandFilter() {
+  BrandFilter.Empty();
+  LibraryWidget->SetBrandFilterButtonLabel(FString("All Brands"), false);
+  RefreshBrandFilterList();
+  RefreshLibraryList();
+}
+
+void ALibrary::ClearTagsFilter() {
+  TagFilters.Empty();
+  LibraryWidget->SetTagsFilterButtonLabel(FString("All Tags"), false);
+  RefreshTagsFilterList();
+  RefreshLibraryList();
 }
 
 void ALibrary::SetHighlighted(bool bHighlighted, FLinearColor HighlightColor) {

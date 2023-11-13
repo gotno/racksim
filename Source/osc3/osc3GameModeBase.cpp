@@ -164,6 +164,11 @@ void Aosc3GameModeBase::RequestModuleSpawn(FString PluginSlug, FString ModuleSlu
   OSCctrl->CreateModule(PluginSlug, ModuleSlug);
 }
 
+void Aosc3GameModeBase::SetModuleFavorite(FString PluginSlug, FString ModuleSlug, bool bFavorite) {
+  OSCctrl->SetModuleFavorite(PluginSlug, ModuleSlug, bFavorite);
+  LibraryActor->SetModuleFavorite(PluginSlug, ModuleSlug, bFavorite);
+}
+
 void Aosc3GameModeBase::DestroyModule(AVCVModule* Module) {
   ModuleActors[Module->GetId()]->Destroy();
   ModuleActors.Remove(Module->GetId());
@@ -249,4 +254,9 @@ void Aosc3GameModeBase::SpawnLibrary(VCVLibrary& vcv_library) {
       spawnParams
     );
   LibraryActor->Init(vcv_library);
+}
+
+ALibrary* Aosc3GameModeBase::GetLibrary() {
+  if (LibraryActor) return LibraryActor;
+  return nullptr;
 }

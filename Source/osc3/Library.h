@@ -12,6 +12,7 @@ class UWidgetComponent;
 class ULibraryWidget;
 class ULibraryEntryWidget;
 class ULibraryEntry;
+class UBasicListEntryData;
 
 UCLASS()
 class OSC3_API ALibrary : public AActor, public IGrabbable {
@@ -31,6 +32,16 @@ public:
   void AlterGrab(FVector GrabbedLocation, FRotator GrabbedRotation) override;
   void ReleaseGrab() override;
   void SetHighlighted(bool bHighlighted, FLinearColor OutlineColor = OUTLINE_COLOR) override;
+  
+  void RefreshLibraryList();
+  void RefreshBrandFilterList();
+  void RefreshTagsFilterList();
+  void AddFilter(UBasicListEntryData* BasicListEntryData);
+  void RemoveFilter(UBasicListEntryData* BasicListEntryData);
+  void SetFavoritesFilterActive(bool bActive);
+  void SetModuleFavorite(FString PluginSlug, FString ModuleSlug, bool bFavorite);
+  void ClearBrandFilter();
+  void ClearTagsFilter();
 
 private:
   UPROPERTY(VisibleAnywhere)
@@ -53,10 +64,15 @@ private:
   UWidgetComponent* LibraryWidgetComponent;
   ULibraryWidget* LibraryWidget;
   
-  TArray<ULibraryEntry*> GenerateEntries();
+  TArray<ULibraryEntry*> GenerateLibraryEntries();
+  TArray<UBasicListEntryData*> GenerateBrandFilterEntries();
+  TArray<UBasicListEntryData*> GenerateTagsFilterEntries();
+  FString BrandFilter;
+  TSet<int> TagFilters;
+  bool bFavoritesFilterActive;
   
   void SetScale();
-  float DesiredWidth{20.f};
+  float DesiredWidth{28.f};
   float BasePadding{0.4f};
   
   VCVLibrary Model;

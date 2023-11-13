@@ -32,6 +32,8 @@ public:
   UFUNCTION()
   void CreateModule(FString pluginSlug, FString moduleSlug);
   UFUNCTION()
+  void SetModuleFavorite(FString pluginSlug, FString moduleSlug, bool bFavorite);
+  UFUNCTION()
   void DestroyModule(int64 moduleId);
   UFUNCTION()
   void CreateCable(int64 inputModuleId, int64 ouputModuleId, int inputPortId, int outputPortId);

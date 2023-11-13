@@ -14,7 +14,10 @@ void ULibraryEntryWidget::NativeConstruct() {
 
   GameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(this));
 
-  Button->OnPressed.AddDynamic(this, &ULibraryEntryWidget::RequestModuleSpawn);
+  Button->OnReleased.AddDynamic(this, &ULibraryEntryWidget::RequestModuleSpawn);
+  FavoriteToggleButton->OnHovered.AddDynamic(this, &ULibraryEntryWidget::HandleFavoriteHover);
+  FavoriteToggleButton->OnUnhovered.AddDynamic(this, &ULibraryEntryWidget::HandleFavoriteUnhover);
+  FavoriteToggleButton->OnReleased.AddDynamic(this, &ULibraryEntryWidget::HandleFavoriteClick);
 }
 
 void ULibraryEntryWidget::NativeOnListItemObjectSet(UObject* ListItemObject) {
@@ -26,10 +29,28 @@ void ULibraryEntryWidget::NativeOnListItemObjectSet(UObject* ListItemObject) {
 
   PluginSlug = entry->PluginSlug;
   ModuleSlug = entry->ModuleSlug;
+  bFavorite = entry->bFavorite;
+
+  FavoriteToggleButtonLabel->SetText(
+    bFavorite
+      ? FText::FromString(FString(TEXT("★")))
+      : FText::FromString(FString(TEXT("☆")))
+  );
 }
 
 void ULibraryEntryWidget::RequestModuleSpawn() {
   // UE_LOG(LogTemp, Warning, TEXT("requesting spawn- %s:%s"), *PluginSlug, *ModuleSlug);
-
   if (GameMode) GameMode->RequestModuleSpawn(PluginSlug, ModuleSlug);
+}
+
+void ULibraryEntryWidget::HandleFavoriteClick() {
+  GameMode->SetModuleFavorite(PluginSlug, ModuleSlug, !bFavorite);
+}
+
+void ULibraryEntryWidget::HandleFavoriteHover() {
+  FavoriteToggleButtonLabel->SetColorAndOpacity(HoverColor);
+}
+
+void ULibraryEntryWidget::HandleFavoriteUnhover() {
+  FavoriteToggleButtonLabel->SetColorAndOpacity(DefaultColor);
 }

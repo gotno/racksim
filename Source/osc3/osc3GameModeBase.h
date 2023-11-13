@@ -57,12 +57,14 @@ public:
   void DuplicateModule(AVCVModule* Module);
   void DestroyModule(AVCVModule* Module);
   void RequestModuleSpawn(FString PluginSlug, FString ModuleSlug);
+  void SetModuleFavorite(FString PluginSlug, FString ModuleSlug, bool bFavorite);
   
   void RegisterSVG(FString filepath, Vec2 size);
   void RegisterTexture(FString filepath, UTexture2D* texture);
   UTexture2D* GetTexture(FString filepath);
   
   void SpawnLibrary(VCVLibrary& library);
+  ALibrary* GetLibrary();
 private:
   UPROPERTY()
   AOSCController* OSCctrl;
@@ -78,7 +80,7 @@ private:
   UPROPERTY()
   TMap<int64, AVCVCable*> CableActors;
   UPROPERTY()
-  ALibrary* LibraryActor;
+  ALibrary* LibraryActor{nullptr};
 
   FDPSVGImporter SVGImporter;
   UPROPERTY()

@@ -26,11 +26,28 @@ protected:
 
   UPROPERTY(meta = (BindWidget))
 	UButton* Button;
+
+  UPROPERTY(meta = (BindWidget))
+	UButton* FavoriteToggleButton;
+  UPROPERTY(meta = (BindWidget))
+	UTextBlock* FavoriteToggleButtonLabel;
 private:
   UFUNCTION()
   void RequestModuleSpawn();
+  UFUNCTION()
+  void HandleFavoriteHover();
+  UFUNCTION()
+  void HandleFavoriteUnhover();
+  UFUNCTION()
+  void HandleFavoriteClick();
+  // UFUNCTION()
+  // void SetFavorite(bool inFavorite);
 
   FString PluginSlug, ModuleSlug;
+  bool bFavorite{false};
+  
+  FSlateColor HoverColor{FLinearColor(1.f, 0.09375f, 0.156451f)};
+  FSlateColor DefaultColor{FLinearColor(1.f, 1.f, 1.f)};
   
   Aosc3GameModeBase* GameMode;
 };
