@@ -6,6 +6,12 @@
 
 struct Vec2 {
   float x, y;
+  
+  Vec2& operator*=(const int& operand) {
+    x *= operand;
+    y *= operand;
+    return *this;
+  }
 
   Vec2() : x(0.f), y(0.f) {};
   Vec2(float _x, float _y) : x(_x), y(_y) {};
@@ -22,10 +28,17 @@ struct Rect {
   FVector location() {
     return FVector(0, pos.x, pos.y);
   }
+
+  Rect operator*=(const int& operand) {
+    size *= operand;
+    pos *= operand;
+    return *this;
+  }
   
   Rect() {}
   Rect(Vec2 _pos, Vec2 _size) : pos(_pos), size(_size) {}
 };
+
 
 enum LightShape {
   Round,

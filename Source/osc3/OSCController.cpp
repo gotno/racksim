@@ -1,5 +1,6 @@
-// Assertion failed: !"Unimplemented function called" [File:D:\build\++UE5\Sync\Engine\Plugins\Runtime\OSC\Source\OSC\Private\OSCMessagePacket.cpp] [Line: 180]
 #include "OSCController.h"
+
+#include "osc3.h"
 #include "osc3GameModeBase.h"
 
 #include "Kismet/GameplayStatics.h"
@@ -111,6 +112,7 @@ void AOSCController::AddModule(const FOSCAddress& AddressPattern, const FOSCMess
   UOSCManager::GetFloat(message, 7, box.pos.y);
   UOSCManager::GetFloat(message, 8, box.size.x);
   UOSCManager::GetFloat(message, 9, box.size.y);
+  box *= RENDER_SCALE;
   
   FString panelSvgPath;
   UOSCManager::GetString(message, 10, panelSvgPath);
@@ -252,6 +254,7 @@ void AOSCController::AddParam(const FOSCAddress& AddressPattern, const FOSCMessa
   UOSCManager::GetFloat(message, 6, param.box.pos.y);
   UOSCManager::GetFloat(message, 7, param.box.size.x);
   UOSCManager::GetFloat(message, 8, param.box.size.y);
+  param.box *= RENDER_SCALE;
 
   UOSCManager::GetFloat(message, 9, param.minValue);
   UOSCManager::GetFloat(message, 10, param.maxValue);
@@ -267,12 +270,15 @@ void AOSCController::AddParam(const FOSCAddress& AddressPattern, const FOSCMessa
 
   UOSCManager::GetFloat(message, 16, param.minHandlePos.x);
   UOSCManager::GetFloat(message, 17, param.minHandlePos.y);
+  param.minHandlePos *= RENDER_SCALE;
   UOSCManager::GetFloat(message, 18, param.maxHandlePos.x);
   UOSCManager::GetFloat(message, 19, param.maxHandlePos.y);
+  param.maxHandlePos *= RENDER_SCALE;
   UOSCManager::GetFloat(message, 20, param.handleBox.pos.x);
   UOSCManager::GetFloat(message, 21, param.handleBox.pos.y);
   UOSCManager::GetFloat(message, 22, param.handleBox.size.x);
   UOSCManager::GetFloat(message, 23, param.handleBox.size.y);
+  param.handleBox *= RENDER_SCALE;
 
   UOSCManager::GetBool(message, 24, param.horizontal);
 
@@ -320,6 +326,7 @@ void AOSCController::AddInput(const FOSCAddress& AddressPattern, const FOSCMessa
   UOSCManager::GetFloat(message, 5, input.box.pos.y);
   UOSCManager::GetFloat(message, 6, input.box.size.x);
   UOSCManager::GetFloat(message, 7, input.box.size.y);
+  input.box *= RENDER_SCALE;
 
   UOSCManager::GetString(message, 8, input.svgPath);
 
@@ -346,6 +353,7 @@ void AOSCController::AddOutput(const FOSCAddress& AddressPattern, const FOSCMess
   UOSCManager::GetFloat(message, 5, output.box.pos.y);
   UOSCManager::GetFloat(message, 6, output.box.size.x);
   UOSCManager::GetFloat(message, 7, output.box.size.y);
+  output.box *= RENDER_SCALE;
 
   UOSCManager::GetString(message, 8, output.svgPath);
 
@@ -365,6 +373,7 @@ void AOSCController::AddDisplay(const FOSCAddress& AddressPattern, const FOSCMes
   UOSCManager::GetFloat(message, 2, displayBox.pos.y);
   UOSCManager::GetFloat(message, 3, displayBox.size.x);
   UOSCManager::GetFloat(message, 4, displayBox.size.y);
+  displayBox *= RENDER_SCALE;
   
   Modules[moduleId].Displays.emplace_back(displayBox);
 
@@ -403,6 +412,7 @@ void AOSCController::AddLight(const FOSCAddress& AddressPattern, const FOSCMessa
   UOSCManager::GetFloat(message, 4, light.box.pos.y);
   UOSCManager::GetFloat(message, 5, light.box.size.x);
   UOSCManager::GetFloat(message, 6, light.box.size.y);
+  light.box *= RENDER_SCALE;
 
   {
     float rgba_r, rgba_g, rgba_b, rgba_a;
