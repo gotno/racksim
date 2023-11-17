@@ -77,8 +77,10 @@ void AVCVButton::init(VCVParam* vcv_param) {
 void AVCVButton::engage() {
   Super::engage();
   setValue(model->value == model->minValue ? model->maxValue : model->minValue);
-  if (model->value < frames.Num())
-    FaceMaterialInstance->SetTextureParameterValue(FName("texture"), frames[model->value]);
+  FaceMaterialInstance->SetTextureParameterValue(
+    FName("texture"),
+    model->value == model->minValue ? frames[0] : frames[frames.Num() - 1]
+  );
 }
 
 void AVCVButton::release() {
