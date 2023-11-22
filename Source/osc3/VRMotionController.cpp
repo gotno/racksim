@@ -115,9 +115,10 @@ void AVRMotionController::Tick(float DeltaTime) {
     FColor::Blue
   );
 
-  TooltipWidgetComponent->SetWorldRotation(
-    Avatar->GetLookAtCameraRotation(TooltipWidgetComponent->GetComponentLocation())
-  );
+  if (TooltipWidgetComponent->IsVisible())
+    TooltipWidgetComponent->SetWorldRotation(
+      Avatar->GetLookAtCameraRotation(TooltipWidgetComponent->GetComponentLocation())
+    );
 
   if (WidgetInteractionComponent->IsOverInteractableWidget() && !bIsWidgetInteracting) {
     Avatar->SetControllerWidgetInteracting(
