@@ -556,10 +556,9 @@ void AVRAvatar::HandleParamEngage(const FInputActionValue& _Value, EControllerHa
       GameMode->GetPortInfo(destinationPort->getIdentity(), location, direction);
       heldCable->setHangingLocation(location, direction);
     } else {
-      heldCable->setHangingLocation(
-        controller->GetActorLocation() + controller->GetActorForwardVector() * 5.f,
-        -controller->GetActorForwardVector()
-      );
+      FVector location, direction;
+      controller->GetHeldCableEndInfo(location, direction);
+      heldCable->setHangingLocation(location, direction);
     }
   }
 }

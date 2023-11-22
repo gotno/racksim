@@ -58,6 +58,7 @@ public:
   AVCVCable* GetHeldCable() { return HeldCable; }
   void StartPortInteract();
   void EndPortInteract();
+  void GetHeldCableEndInfo(FVector& Location, FVector& ForwardVector);
 
   void StartWidgetLeftClick();
   void EndWidgetLeftClick();

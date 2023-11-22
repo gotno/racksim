@@ -416,3 +416,11 @@ void AVRMotionController::SetTooltipVisibility(bool bVisible) {
   TooltipWidgetComponent->SetVisibility(bVisible, true);
   if (bVisible) RefreshTooltip();
 }
+
+void AVRMotionController::GetHeldCableEndInfo(FVector& Location, FVector& ForwardVector) {
+  Location =
+    InteractCapsuleRoot->GetComponentLocation()
+      + InteractCapsule->GetUpVector()
+      * InteractCapsule->GetUnscaledCapsuleHalfHeight_WithoutHemisphere() * 2;
+  ForwardVector = InteractCapsule->GetUpVector();
+}
