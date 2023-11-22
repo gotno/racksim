@@ -14,6 +14,7 @@ class AVCVCable;
 class AVCVPort;
 class UTooltip;
 
+class USceneComponent;
 class USphereComponent;
 class UCapsuleComponent;
 class UPrimitiveComponent;
@@ -92,15 +93,17 @@ private:
   FVector GrabSphereOffset{0.f, -2.f, -2.f};
 
   UPROPERTY(VisibleAnywhere)
+  USceneComponent* InteractCapsuleRoot;
+  UPROPERTY(VisibleAnywhere)
   UCapsuleComponent* InteractCapsule;
   UPROPERTY(EditDefaultsOnly, Category="Interaction")
   float InteractCapsuleRadius{0.2f};
   UPROPERTY(EditDefaultsOnly, Category="Interaction")
-  float InteractCapsuleHalfHeight{3.f};
+  float InteractCapsuleHalfHeight{2.f};
   UPROPERTY(EditDefaultsOnly, Category="Interaction")
-  float InteractCapsuleForwardOffset{1.f};
+  FVector InteractCapsuleOffset{0.f, 0.f, 0.f};
   UPROPERTY(EditDefaultsOnly, Category="Interaction")
-  float InteractCapsuleAngleOffset{0.f};
+  FRotator InteractCapsuleRotation{0.f, -90.f, 0.f};
   
   UFUNCTION()
   void LogOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);

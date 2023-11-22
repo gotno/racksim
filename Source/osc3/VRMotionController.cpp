@@ -29,8 +29,10 @@ AVRMotionController::AVRMotionController() {
   GrabSphere->InitSphereRadius(GrabSphereRadius);
   GrabSphere->SetupAttachment(MotionController);
   
+  InteractCapsuleRoot = CreateDefaultSubobject<USceneComponent>(TEXT("InteractCapsuleRoot"));
+  InteractCapsuleRoot->SetupAttachment(MotionController);
+
   InteractCapsule = CreateDefaultSubobject<UCapsuleComponent>(TEXT("InteractCapsule"));
-  InteractCapsule->SetupAttachment(MotionController);
   InteractCapsule->InitCapsuleSize(InteractCapsuleRadius, InteractCapsuleHalfHeight);
 
   TooltipWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("Tooltip"));
@@ -55,8 +57,11 @@ void AVRMotionController::BeginPlay() {
   GrabSphere->OnComponentEndOverlap.AddDynamic(this, &AVRMotionController::HandleGrabberEndOverlap);
   GrabSphere->ComponentTags.Add(TAG_GRABBER);
 
-  InteractCapsule->SetWorldRotation(FRotator(-90.f + InteractCapsuleAngleOffset, 0.f, 0.f));
-  InteractCapsule->AddLocalOffset(FVector(0.f, 0.f, InteractCapsuleHalfHeight + InteractCapsuleForwardOffset));
+  InteractCapsule->AddLocalOffset(InteractCapsule->GetUnscaledCapsuleHalfHeight_WithoutHemisphere() * InteractCapsule->GetUpVector());
+  InteractCapsule->AttachToComponent(InteractCapsuleRoot, FAttachmentTransformRules::KeepRelativeTransform);
+  InteractCapsuleRoot->AddLocalOffset(InteractCapsuleOffset);
+  InteractCapsuleRoot->SetWorldRotation(InteractCapsuleRotation);
+
   InteractCapsule->SetCollisionObjectType(INTERACTOR_OBJECT);
 
   InteractCapsule->OnComponentBeginOverlap.AddDynamic(this, &AVRMotionController::HandleInteractorBeginOverlap);
@@ -84,12 +89,22 @@ void AVRMotionController::SetTrackingSource(EControllerHand Hand) {
 void AVRMotionController::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 
+  // grab sphere
   DrawDebugSphere(
     GetWorld(),
     GrabSphere->GetComponentLocation(),
     GrabSphere->GetUnscaledSphereRadius(),
     16,
     FColor::Blue
+  );
+
+  // interact capsule
+  DrawDebugSphere(
+    GetWorld(),
+    InteractCapsuleRoot->GetComponentLocation(),
+    InteractCapsule->GetUnscaledCapsuleRadius(),
+    16,
+    FColor::Green
   );
   DrawDebugCapsule(
     GetWorld(),
