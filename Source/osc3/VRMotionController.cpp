@@ -42,9 +42,8 @@ AVRMotionController::AVRMotionController() {
   WidgetInteractionComponent->SetupAttachment(MotionController);
   WidgetInteractionComponent->VirtualUserIndex = 0;
 
-  WidgetInteractionComponent->bShowDebug = true;
-  WidgetInteractionComponent->DebugLineThickness = 0.1f;
-  WidgetInteractionComponent->DebugSphereLineThickness = 0.f;
+  WidgetInteractionComponent->bShowDebug = false;
+  WidgetInteractionComponent->InteractionDistance = 40.f;
 }
 
 void AVRMotionController::BeginPlay() {
@@ -121,17 +120,27 @@ void AVRMotionController::Tick(float DeltaTime) {
     );
 
   if (WidgetInteractionComponent->IsOverInteractableWidget() && !bIsWidgetInteracting) {
-    Avatar->SetControllerWidgetInteracting(
-      MotionController->GetTrackingSource(),
-      true
-    );
     bIsWidgetInteracting = true;
-  } else if (!WidgetInteractionComponent->IsOverInteractableWidget() && bIsWidgetInteracting) {
     Avatar->SetControllerWidgetInteracting(
       MotionController->GetTrackingSource(),
-      false
+      bIsWidgetInteracting
     );
+  } else if (!WidgetInteractionComponent->IsOverInteractableWidget() && bIsWidgetInteracting) {
     bIsWidgetInteracting = false;
+    Avatar->SetControllerWidgetInteracting(
+      MotionController->GetTrackingSource(),
+      bIsWidgetInteracting
+    );
+  }
+
+  if (WidgetInteractionComponent->IsOverInteractableWidget()) {
+    FHitResult widgetHit = WidgetInteractionComponent->GetLastHitResult();
+    DrawDebugLine(
+      GetWorld(),
+      GetActorLocation() + GetActorForwardVector() * 5.f,
+      GetActorLocation() + GetActorForwardVector() * (widgetHit.Distance - 0.4f),
+      FColor::Green
+    );
   }
 }
 
