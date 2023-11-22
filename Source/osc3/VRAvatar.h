@@ -180,7 +180,7 @@ private:
   // world manipulation
   bool bLeftHandWorldManipulationActive{false};
   bool bRightHandWorldManipulationActive{false};
-  void SetWorldManipulationActive(EControllerHand Hand, bool Active);
+  void SetWorldManipulationActive(EControllerHand Hand, bool bActive);
 
   FVector LastLeftHandLocation{FVector::ZeroVector};
   FVector LastRightHandLocation{FVector::ZeroVector};

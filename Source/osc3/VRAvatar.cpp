@@ -231,11 +231,11 @@ void AVRAvatar::LogInput(const FInputActionValue& _Value, FString msg) {
   UE_LOG(LogTemp, Warning, TEXT("input: %s"), *msg);
 }
 
-void AVRAvatar::SetWorldManipulationActive(EControllerHand Hand, bool Active) {
+void AVRAvatar::SetWorldManipulationActive(EControllerHand Hand, bool bActive) {
   if (Hand == EControllerHand::Left) {
-    bLeftHandWorldManipulationActive = Active;
+    bLeftHandWorldManipulationActive = bActive;
   } else {
-    bRightHandWorldManipulationActive = Active;
+    bRightHandWorldManipulationActive = bActive;
   }
 }
 
