@@ -69,6 +69,9 @@ void AVRMotionController::BeginPlay() {
   PlayerController = UGameplayStatics::GetPlayerController(this, 0);
 
   TooltipWidgetComponent->SetWorldScale3D(FVector(0.04f, 0.04f, 0.04f));
+  TooltipWidgetComponent->SetWorldRotation(
+    Avatar->GetLookAtCameraRotation(TooltipWidgetComponent->GetComponentLocation())
+  );
   SetTooltipVisibility(false);
   TooltipWidget = Cast<UTooltip>(TooltipWidgetComponent->GetUserWidgetObject());
 }
