@@ -63,7 +63,8 @@ public:
   void RegisterTexture(FString filepath, UTexture2D* texture);
   UTexture2D* GetTexture(FString filepath);
   
-  void SpawnLibrary(VCVLibrary& library);
+  void SpawnLibrary();
+  void UpdateLibrary(VCVLibrary& library);
   ALibrary* GetLibrary();
 private:
   UPROPERTY()

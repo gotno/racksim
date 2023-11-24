@@ -19,6 +19,7 @@ struct VCVPluginInfo {
   FString Slug;
   
   TMap<FString, VCVModuleInfo> Modules;
+  TSet<int> ModuleTags;
   
   VCVPluginInfo() {} 
   VCVPluginInfo(FString _name, FString _slug) : Name(_name), Slug(_slug) {} 

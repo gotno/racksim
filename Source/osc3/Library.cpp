@@ -69,15 +69,20 @@ void ALibrary::BeginPlay() {
 
   Tags.Add(TAG_INTERACTABLE);
   Tags.Add(TAG_GRABBABLE);
+
+  SetScale();
 }
 
 void ALibrary::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 }
 
-void ALibrary::Init(VCVLibrary vcv_library) {
-  Model = vcv_library;
-  SetScale();
+void ALibrary::Update(VCVLibrary& Library) {
+  Model = Library;
+  Refresh();
+}
+
+void ALibrary::Refresh() {
   RefreshLibraryList();
   RefreshBrandFilterList();
   RefreshTagsFilterList();

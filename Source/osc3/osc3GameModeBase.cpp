@@ -36,6 +36,8 @@ void Aosc3GameModeBase::BeginPlay() {
 
   PlayerController = Cast<Aosc3PlayerController>(UGameplayStatics::GetPlayerController(this, 0));
   PlayerPawn = Cast<AVRAvatar>(UGameplayStatics::GetPlayerPawn(this, 0));
+  
+  SpawnLibrary();
 }
 
 void Aosc3GameModeBase::Tick(float DeltaTime) {
@@ -243,20 +245,24 @@ UTexture2D* Aosc3GameModeBase::GetTexture(FString filepath) {
   return SVGTextures[filepath];
 }
 
-void Aosc3GameModeBase::SpawnLibrary(VCVLibrary& vcv_library) {
+void Aosc3GameModeBase::SpawnLibrary() {
   FActorSpawnParameters spawnParams;
   spawnParams.Owner = this;
 
-  LibraryActor = GetWorld()->SpawnActor<ALibrary>(
+  LibraryActor =
+    GetWorld()->SpawnActor<ALibrary>(
       ALibrary::StaticClass(),
       FVector(0, 0, 100.f),
       FRotator(0, 180.f, 0),
       spawnParams
     );
-  LibraryActor->Init(vcv_library);
 }
 
 ALibrary* Aosc3GameModeBase::GetLibrary() {
   if (LibraryActor) return LibraryActor;
   return nullptr;
+}
+
+void Aosc3GameModeBase::UpdateLibrary(VCVLibrary& Library) {
+  LibraryActor->Update(Library);
 }
