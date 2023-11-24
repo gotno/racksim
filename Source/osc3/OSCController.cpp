@@ -303,8 +303,6 @@ void AOSCController::AddParam(const FOSCAddress& AddressPattern, const FOSCMessa
 
   UOSCManager::GetString(message, 33, param.svgPaths[4]);
   gameMode->RegisterSVG(param.svgPaths[4], param.box.size);
-
-  NotifyReceived("param", moduleId, paramId);
 }
 
 void AOSCController::AddInput(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port) {
@@ -330,8 +328,6 @@ void AOSCController::AddInput(const FOSCAddress& AddressPattern, const FOSCMessa
   UOSCManager::GetString(message, 8, input.svgPath);
 
   gameMode->RegisterSVG(input.svgPath, input.box.size);
-
-  NotifyReceived("input", moduleId, inputId);
 }
 
 void AOSCController::AddOutput(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port) {
@@ -357,8 +353,6 @@ void AOSCController::AddOutput(const FOSCAddress& AddressPattern, const FOSCMess
   UOSCManager::GetString(message, 8, output.svgPath);
 
   gameMode->RegisterSVG(output.svgPath, output.box.size);
-
-  NotifyReceived("output", moduleId, outputId);
 }
 
 void AOSCController::AddDisplay(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port) {
@@ -375,8 +369,6 @@ void AOSCController::AddDisplay(const FOSCAddress& AddressPattern, const FOSCMes
   displayBox *= RENDER_SCALE;
   
   Modules[moduleId].Displays.emplace_back(displayBox);
-
-  NotifyReceived("display", moduleId);
 }
 
 void AOSCController::AddLight(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port) {
@@ -438,8 +430,6 @@ void AOSCController::AddLight(const FOSCAddress& AddressPattern, const FOSCMessa
   gameMode->RegisterSVG(light.svgPath, light.box.size);
   
   UOSCManager::GetBool(message, 17, light.visible);
-
-  NotifyReceived("module_light", moduleId, lightId);
 }
 
 void AOSCController::AddCable(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port) {
