@@ -172,6 +172,8 @@ void Aosc3GameModeBase::SetModuleFavorite(FString PluginSlug, FString ModuleSlug
 }
 
 void Aosc3GameModeBase::DestroyModule(AVCVModule* Module) {
+  if (!ModuleActors.Contains(Module->GetId())) return;
+
   ModuleActors[Module->GetId()]->Destroy();
   ModuleActors.Remove(Module->GetId());
   OSCctrl->DestroyModule(Module->GetId());
