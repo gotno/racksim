@@ -2,6 +2,14 @@
 #include "Internationalization/Regex.h"
 
 struct VCVOverrides {
+  bool getBodyColor(FString Brand, FLinearColor& BodyColor) {
+    if (BodyColors.Contains(Brand)) {
+      BodyColor = BodyColors[Brand];
+      return true;
+    }
+    return false;
+  }
+
   FLinearColor getMatchingColor(FString brand, FString svgPath = TEXT("")) {
     FString filename = getFilename(svgPath);
 
@@ -33,6 +41,8 @@ struct VCVOverrides {
   }
   
   VCVOverrides() {
+    BodyColors.Add("alef's bits", FLinearColor(1.f, 1.f, 1.f));
+
     brandColors.Add("default", FLinearColor(0.902f, 0.902f, 0.902f));
     brandColors.Add("Befaco", FLinearColor(0.09f, 0.09f, 0.09f));
     brandColors.Add("Instruō", FLinearColor(0.118f, 0.118f, 0.118f));
@@ -65,9 +75,10 @@ private:
   TMap<FString, VectorMap> scaleMultipliers;
 
   typedef TMap<FString, FLinearColor> ColorMap;
-  TMap<FString, FLinearColor> brandColors;
-  TMap<FString, ColorMap> brandSvgColors;
+  ColorMap brandColors;
+  ColorMap BodyColors;
   ColorMap svgColors;
+  TMap<FString, ColorMap> brandSvgColors;
   
   FString getFilename(FString& filepath) {
     // ugh, https://stackoverflow.com/questions/58872769/regex-to-get-filename-with-or-without-extension-from-a-path

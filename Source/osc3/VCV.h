@@ -185,6 +185,7 @@ struct VCVModule {
   FString description;
   Rect box;
   FString panelSvgPath;
+  FLinearColor bodyColor;
 
   FString slug;
   FString pluginSlug;

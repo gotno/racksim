@@ -115,6 +115,11 @@ void AOSCController::AddModule(const FOSCAddress& AddressPattern, const FOSCMess
   
   FString panelSvgPath;
   UOSCManager::GetString(message, 10, panelSvgPath);
+
+  float bodyColor_r, bodyColor_g, bodyColor_b;
+  UOSCManager::GetFloat(message, 11, bodyColor_r);
+  UOSCManager::GetFloat(message, 12, bodyColor_g);
+  UOSCManager::GetFloat(message, 13, bodyColor_b);
   
   Modules.Add(moduleId, VCVModule(
       moduleId,
@@ -124,9 +129,12 @@ void AOSCController::AddModule(const FOSCAddress& AddressPattern, const FOSCMess
       box,
       panelSvgPath
   ));
+
   
   Modules[moduleId].slug = slug;
   Modules[moduleId].pluginSlug = pluginSlug;
+  Modules[moduleId].bodyColor =
+    FLinearColor(bodyColor_r, bodyColor_g, bodyColor_b, 1.f);
 
   gameMode->RegisterSVG(panelSvgPath, box.size);
 
