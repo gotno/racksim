@@ -110,7 +110,6 @@ void AVCVModule::init(VCVModule vcv_module) {
 
   FLinearColor bodyColor;
   if (!overrides.getBodyColor(model.brand, bodyColor)) bodyColor = model.bodyColor;
-  UE_LOG(LogTemp, Warning, TEXT("%s:%s body color %s"), *model.brand, *model.name, *bodyColor.ToString());
 
   BaseMaterialInstance->SetVectorParameterValue(FName("color"), bodyColor);
   FaceMaterialInstance->SetVectorParameterValue(FName("background_color"), bodyColor);

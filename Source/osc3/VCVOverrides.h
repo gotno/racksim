@@ -41,7 +41,7 @@ struct VCVOverrides {
   }
   
   VCVOverrides() {
-    BodyColors.Add("alef's bits", FLinearColor(1.f, 1.f, 1.f));
+    BodyColors.Add("Slime Child Audio", FLinearColor(0.3726f, 0.3176f, 0.4078f));
 
     brandColors.Add("default", FLinearColor(0.902f, 0.902f, 0.902f));
     brandColors.Add("Befaco", FLinearColor(0.09f, 0.09f, 0.09f));
