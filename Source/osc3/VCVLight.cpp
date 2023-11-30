@@ -35,11 +35,6 @@ AVCVLight::AVCVLight() {
   if (BaseMaterial.Object) {
     BaseMaterialInterface = Cast<UMaterial>(BaseMaterial.Object);
   }
-
-  static ConstructorHelpers::FObjectFinder<UMaterial> FaceMaterial(FaceMaterialReference);
-  if (FaceMaterial.Object) {
-    FaceMaterialInterface = Cast<UMaterial>(FaceMaterial.Object);
-  }
   
   SetActorEnableCollision(true);
 }
@@ -51,26 +46,22 @@ void AVCVLight::BeginPlay() {
     BaseMaterialInstance = UMaterialInstanceDynamic::Create(BaseMaterialInterface, this);
     BaseMeshComponent->SetMaterial(0, BaseMaterialInstance);
   }
-
-  if (FaceMaterialInterface) {
-    FaceMaterialInstance = UMaterialInstanceDynamic::Create(FaceMaterialInterface, this);
-    BaseMeshComponent->SetMaterial(1, FaceMaterialInstance);
-  }
   
   gameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(this));
 }
 
 void AVCVLight::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
-
-  if (!texture && !model->svgPath.IsEmpty()) {
-    texture = gameMode->GetTexture(model->svgPath);
-    if (texture) FaceMaterialInstance->SetTextureParameterValue(FName("texture"), texture);
-  }
 }
 
 void AVCVLight::init(VCVLight* vcv_light) {
   model = vcv_light;
+  
+  if (model->shape == LightShape::Round) {
+    BaseMeshComponent->SetStaticMesh(circleMesh);
+  } else {
+    BaseMeshComponent->SetStaticMesh(rectangleMesh);
+  }
 
   SetColor(model->bgColor);
   SetEmissiveColor(model->color);
@@ -78,12 +69,6 @@ void AVCVLight::init(VCVLight* vcv_light) {
 
   SetHidden(!model->visible);
   SetActorEnableCollision(model->visible);
-  
-  if (model->shape == LightShape::Round) {
-    BaseMeshComponent->SetStaticMesh(circleMesh);
-  } else {
-    BaseMeshComponent->SetStaticMesh(rectangleMesh);
-  }
   
   SetActorScale3D(FVector(0.01f, model->box.size.x, model->box.size.y));
 }
@@ -105,18 +90,13 @@ void AVCVLight::HandleBeginOverlap(UPrimitiveComponent* OverlappedComponent, AAc
 
 void AVCVLight::SetColor(FLinearColor color) {
   BaseMaterialInstance->SetVectorParameterValue(TEXT("color"), color);
-  FaceMaterialInstance->SetVectorParameterValue(TEXT("color"), color);
 }
 
 void AVCVLight::SetEmissiveColor(FLinearColor color) {
   if (color.A == 0.f) color = FLinearColor(0.f, 0.f, 0.f, 0.f);
   BaseMaterialInstance->SetVectorParameterValue(TEXT("emissive_color"), color);
-  FaceMaterialInstance->SetVectorParameterValue(TEXT("emissive_color"), color);
 }
 
 void AVCVLight::SetEmissiveIntensity(float intensity) {
   BaseMaterialInstance->SetScalarParameterValue(TEXT("emissive_intensity"), intensity);
-  FaceMaterialInstance->SetScalarParameterValue(TEXT("emissive_intensity"), intensity);
-  BaseMaterialInstance->SetScalarParameterValue(TEXT("transparency"), intensity);
-  FaceMaterialInstance->SetScalarParameterValue(TEXT("transparency"), intensity);
 }

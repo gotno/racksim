@@ -434,10 +434,7 @@ void AOSCController::AddLight(const FOSCAddress& AddressPattern, const FOSCMessa
   UOSCManager::GetInt32(message, 15, shape);
   light.shape = static_cast<LightShape>(shape);
 
-  UOSCManager::GetString(message, 16, light.svgPath);
-  gameMode->RegisterSVG(light.svgPath, light.box.size);
-  
-  UOSCManager::GetBool(message, 17, light.visible);
+  UOSCManager::GetBool(message, 16, light.visible);
 }
 
 void AOSCController::AddCable(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port) {

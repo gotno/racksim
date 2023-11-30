@@ -32,19 +32,14 @@ private:
   UStaticMesh* circleMesh;
   UPROPERTY()
   UStaticMesh* rectangleMesh;
-  TCHAR* CircleMeshReference = TEXT("/Script/Engine.StaticMesh'/Game/meshes/faced/unit_led_round_faced.unit_led_round_faced'");
-  TCHAR* RectangleMeshReference = TEXT("/Script/Engine.StaticMesh'/Game/meshes/faced/unit_led_rect_faced.unit_led_rect_faced'");
+  TCHAR* CircleMeshReference = TEXT("/Script/Engine.StaticMesh'/Game/meshes/unit_led_round_lens.unit_led_round_lens'");
+  TCHAR* RectangleMeshReference = TEXT("/Script/Engine.StaticMesh'/Game/meshes/unit_led_rectangle.unit_led_rectangle'");
 
   UPROPERTY()
   UMaterialInstanceDynamic* BaseMaterialInstance;
   UPROPERTY()
-  UMaterialInstanceDynamic* FaceMaterialInstance;
-  UPROPERTY()
   UMaterialInterface* BaseMaterialInterface;
-  UPROPERTY()
-  UMaterialInterface* FaceMaterialInterface;
-  TCHAR* BaseMaterialReference = TEXT("/Script/Engine.Material'/Game/materials/led.led'");
-  TCHAR* FaceMaterialReference = TEXT("/Script/Engine.Material'/Game/meshes/faced/led_svg.led_svg'");
+  TCHAR* BaseMaterialReference = TEXT("/Script/Engine.Material'/Game/materials/transparent_led.transparent_led'");
 
   UFUNCTION()
   void HandleBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
