@@ -79,11 +79,11 @@ void AVCVLight::HandleBeginOverlap(UPrimitiveComponent* OverlappedComponent, AAc
   AVCVModule* ownerModule = Cast<AVCVModule>(GetOwner());
   ownerModule = ownerModule ? ownerModule : Cast<AVCVModule>(GetOwner()->GetOwner());
   if (ownerModule != OtherActor->GetOwner()) return;
-  // UE_LOG(LogTemp, Warning, TEXT("handling overlap of %s:%s/%s"), *ownerModule->getBrand(), *GetActorNameOrLabel(), *OtherActor->GetActorNameOrLabel());
 
   FVector _, otherActorExtent;
   OtherActor->GetActorBounds(false, _, otherActorExtent);
-  AddActorLocalOffset(FVector(-otherActorExtent.X, 0.f, 0.f));
+  float delta = -otherActorExtent.X * 2;
+  SetActorLocation(GetActorLocation() + GetActorForwardVector() * delta);
 
   bHandledOverlap = true;
 }
