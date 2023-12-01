@@ -291,25 +291,24 @@ void AOSCController::AddParam(const FOSCAddress& AddressPattern, const FOSCMessa
 
   UOSCManager::GetFloat(message, 25, param.speed);
 
-  UOSCManager::GetBool(message, 26, param.latch);
-  UOSCManager::GetBool(message, 27, param.momentary);
-  UOSCManager::GetBool(message, 28, param.visible);
+  UOSCManager::GetBool(message, 26, param.momentary);
+  UOSCManager::GetBool(message, 27, param.visible);
 
   param.svgPaths.SetNum(5);
 
-  UOSCManager::GetString(message, 29, param.svgPaths[0]);
+  UOSCManager::GetString(message, 28, param.svgPaths[0]);
   gameMode->RegisterSVG(param.svgPaths[0], param.box.size);
 
-  UOSCManager::GetString(message, 30, param.svgPaths[1]);
+  UOSCManager::GetString(message, 29, param.svgPaths[1]);
   gameMode->RegisterSVG(param.svgPaths[1], param.box.size);
 
-  UOSCManager::GetString(message, 31, param.svgPaths[2]);
+  UOSCManager::GetString(message, 30, param.svgPaths[2]);
   gameMode->RegisterSVG(param.svgPaths[2], param.box.size);
 
-  UOSCManager::GetString(message, 32, param.svgPaths[3]);
+  UOSCManager::GetString(message, 31, param.svgPaths[3]);
   gameMode->RegisterSVG(param.svgPaths[3], param.box.size);
 
-  UOSCManager::GetString(message, 33, param.svgPaths[4]);
+  UOSCManager::GetString(message, 32, param.svgPaths[4]);
   gameMode->RegisterSVG(param.svgPaths[4], param.box.size);
 }
 

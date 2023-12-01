@@ -88,8 +88,7 @@ struct VCVParam {
   bool horizontal;
   float speed;
   
-  // Switch
-  bool latch;
+  // Switch/Button
   bool momentary;
 
   TMap<int32, VCVLight> Lights;
