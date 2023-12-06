@@ -94,6 +94,7 @@ struct VCVParam {
   TMap<int32, VCVLight> Lights;
   
   TArray<FString> svgPaths;
+  FLinearColor bodyColor;
   
   // internal operations, not useful?
   // float displayBase;
@@ -132,6 +133,7 @@ struct VCVPort {
   FString description;
   Rect box;
   FString svgPath;
+  FLinearColor bodyColor;
 
   PortIdentity getIdentity() {
     return PortIdentity(type, moduleId, id);

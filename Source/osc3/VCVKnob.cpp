@@ -67,12 +67,10 @@ void AVCVKnob::init(VCVParam* vcv_param) {
   updateRotation(getRotationFromValue());
 
   VCVOverrides overrides;
-
   FVector scaleMultiplier = overrides.getScaleMultiplier(getModuleBrand(), model->svgPaths[1]);
   SetActorScale3D(GetActorScale3D() * scaleMultiplier);
 
-  FLinearColor knobColor = overrides.getMatchingColor(getModuleBrand(), model->svgPaths[1]);
-  BaseMaterialInstance->SetVectorParameterValue(FName("color"), knobColor);
+  BaseMaterialInstance->SetVectorParameterValue(FName("color"), model->bodyColor);
 }
 
 void AVCVKnob::updateRotation(FRotator newRotation) {

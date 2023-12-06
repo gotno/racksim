@@ -115,11 +115,7 @@ void AOSCController::AddModule(const FOSCAddress& AddressPattern, const FOSCMess
   
   FString panelSvgPath;
   UOSCManager::GetString(message, 10, panelSvgPath);
-
-  float bodyColor_r, bodyColor_g, bodyColor_b;
-  UOSCManager::GetFloat(message, 11, bodyColor_r);
-  UOSCManager::GetFloat(message, 12, bodyColor_g);
-  UOSCManager::GetFloat(message, 13, bodyColor_b);
+  gameMode->RegisterSVG(panelSvgPath, box.size);
   
   Modules.Add(moduleId, VCVModule(
       moduleId,
@@ -130,13 +126,12 @@ void AOSCController::AddModule(const FOSCAddress& AddressPattern, const FOSCMess
       panelSvgPath
   ));
 
+  UOSCManager::GetFloat(message, 11, Modules[moduleId].bodyColor.R);
+  UOSCManager::GetFloat(message, 12, Modules[moduleId].bodyColor.G);
+  UOSCManager::GetFloat(message, 13, Modules[moduleId].bodyColor.B);
   
   Modules[moduleId].slug = slug;
   Modules[moduleId].pluginSlug = pluginSlug;
-  Modules[moduleId].bodyColor =
-    FLinearColor(bodyColor_r, bodyColor_g, bodyColor_b, 1.f);
-
-  gameMode->RegisterSVG(panelSvgPath, box.size);
 
   NotifyReceived("module", moduleId);
 }
@@ -310,6 +305,10 @@ void AOSCController::AddParam(const FOSCAddress& AddressPattern, const FOSCMessa
 
   UOSCManager::GetString(message, 32, param.svgPaths[4]);
   gameMode->RegisterSVG(param.svgPaths[4], param.box.size);
+
+  UOSCManager::GetFloat(message, 33, param.bodyColor.R);
+  UOSCManager::GetFloat(message, 34, param.bodyColor.G);
+  UOSCManager::GetFloat(message, 35, param.bodyColor.B);
 }
 
 void AOSCController::AddInput(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port) {
@@ -335,6 +334,10 @@ void AOSCController::AddInput(const FOSCAddress& AddressPattern, const FOSCMessa
   UOSCManager::GetString(message, 8, input.svgPath);
 
   gameMode->RegisterSVG(input.svgPath, input.box.size);
+
+  UOSCManager::GetFloat(message, 9, input.bodyColor.R);
+  UOSCManager::GetFloat(message, 10, input.bodyColor.G);
+  UOSCManager::GetFloat(message, 11, input.bodyColor.B);
 }
 
 void AOSCController::AddOutput(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port) {
@@ -360,6 +363,10 @@ void AOSCController::AddOutput(const FOSCAddress& AddressPattern, const FOSCMess
   UOSCManager::GetString(message, 8, output.svgPath);
 
   gameMode->RegisterSVG(output.svgPath, output.box.size);
+
+  UOSCManager::GetFloat(message, 9, output.bodyColor.R);
+  UOSCManager::GetFloat(message, 10, output.bodyColor.G);
+  UOSCManager::GetFloat(message, 11, output.bodyColor.B);
 }
 
 void AOSCController::AddDisplay(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port) {

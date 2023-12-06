@@ -43,7 +43,6 @@ void AVCVButton::BeginPlay() {
   if (BaseMaterialInterface) {
     BaseMaterialInstance = UMaterialInstanceDynamic::Create(BaseMaterialInterface, this);
     MeshComponent->SetMaterial(0, BaseMaterialInstance);
-    BaseMaterialInstance->SetVectorParameterValue(TEXT("Color"), FColor(181, 170, 169, 255));
   }
   if (FaceMaterialInterface) {
     FaceMaterialInstance = UMaterialInstanceDynamic::Create(FaceMaterialInterface, this);
@@ -72,6 +71,8 @@ void AVCVButton::init(VCVParam* vcv_param) {
   frames.Init(nullptr, vcv_param->svgPaths.Num());
 
   spawnLights(MeshComponent);
+  BaseMaterialInstance->SetVectorParameterValue(TEXT("color"), model->bodyColor);
+  FaceMaterialInstance->SetVectorParameterValue(TEXT("background_color"), model->bodyColor);
 }
 
 void AVCVButton::engage() {

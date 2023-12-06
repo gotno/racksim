@@ -21,12 +21,12 @@ AVCVPort::AVCVPort() {
   static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshBody(TEXT("/Script/Engine.StaticMesh'/Game/meshes/faced/unit_port_faced.unit_port_faced'"));
   if (MeshBody.Object) StaticMeshComponent->SetStaticMesh(MeshBody.Object);
 
-  static ConstructorHelpers::FObjectFinder<UMaterial> BaseMaterial(TEXT("/Script/Engine.Material'/Game/materials/generic_color.generic_color'"));
+  static ConstructorHelpers::FObjectFinder<UMaterial> BaseMaterial(TEXT("/Script/Engine.Material'/Game/meshes/faced/generic_base.generic_base'"));
   if (BaseMaterial.Object) {
     BaseMaterialInterface = Cast<UMaterial>(BaseMaterial.Object);
   }
 
-  static ConstructorHelpers::FObjectFinder<UMaterial> FaceMaterial(TEXT("/Script/Engine.Material'/Game/meshes/faced/texture_face.texture_face'"));
+  static ConstructorHelpers::FObjectFinder<UMaterial> FaceMaterial(TEXT("/Script/Engine.Material'/Game/meshes/faced/texture_face_bg.texture_face_bg'"));
   if (FaceMaterial.Object) {
     FaceMaterialInterface = Cast<UMaterial>(FaceMaterial.Object);
   }
@@ -63,14 +63,8 @@ void AVCVPort::init(VCVPort* vcv_port) {
   model = vcv_port;
   StaticMeshComponent->SetWorldScale3D(FVector(RENDER_SCALE, model->box.size.x, model->box.size.y));
   
-  VCVOverrides overrides;
-  BaseMaterialInstance->SetVectorParameterValue(
-    FName("color"),
-    overrides.getMatchingColor(
-      getModuleBrand(),
-      model->svgPath
-    )
-  );
+  BaseMaterialInstance->SetVectorParameterValue(FName("color"), model->bodyColor);
+  FaceMaterialInstance->SetVectorParameterValue(FName("background_color"), model->bodyColor);
 }
 
 FString AVCVPort::getModuleBrand() {
