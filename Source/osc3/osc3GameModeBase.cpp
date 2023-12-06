@@ -120,7 +120,7 @@ void Aosc3GameModeBase::ProcessSpawnCableQueue() {
       SpawnCable(cable);
       spawnedCables.Push(cable);
     } else {
-      UE_LOG(LogTemp, Warning, TEXT("awaiting modules %lld:%lld for cable %lld"), inputModuleId, outputModuleId, cable.id);
+      // UE_LOG(LogTemp, Warning, TEXT("awaiting modules %lld:%lld for cable %lld"), inputModuleId, outputModuleId, cable.id);
     }
   }
 
@@ -210,7 +210,7 @@ void Aosc3GameModeBase::RegisterSVG(FString filepath, Vec2 size) {
   if (filepath.Compare(FString("")) == 0) return;
   if (SVGAssets.Contains(filepath)) return;
 
-  // UE_LOG(LogTemp, Warning, TEXT("importing svg %s"), *filepath);
+  UE_LOG(LogTemp, Warning, TEXT("importing svg %s"), *filepath);
 
   UDPSVGAsset* svgAsset = NewObject<UDPSVGAsset>(this, UDPSVGAsset::StaticClass());
   SVGImporter.PerformImport(filepath, svgAsset);
