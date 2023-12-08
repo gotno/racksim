@@ -70,7 +70,7 @@ void AVCVLight::init(VCVLight* vcv_light) {
   SetHidden(!model->visible);
   SetActorEnableCollision(model->visible);
   
-  SetActorScale3D(FVector(0.01f, model->box.size.x, model->box.size.y));
+  SetActorScale3D(FVector(1.f, model->box.size.x, model->box.size.y));
 }
 
 void AVCVLight::HandleBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
