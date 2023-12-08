@@ -419,22 +419,15 @@ void AOSCController::AddLight(const FOSCAddress& AddressPattern, const FOSCMessa
   UOSCManager::GetFloat(message, 6, light.box.size.y);
   light.box *= RENDER_SCALE;
 
-  {
-    float rgba_r, rgba_g, rgba_b, rgba_a;
-    UOSCManager::GetFloat(message, 7, rgba_r);
-    UOSCManager::GetFloat(message, 8, rgba_g);
-    UOSCManager::GetFloat(message, 9, rgba_b);
-    UOSCManager::GetFloat(message, 10, rgba_a);
-    light.color = FLinearColor(rgba_r, rgba_g, rgba_b, rgba_a);
-  }
-  {
-    float rgba_r, rgba_g, rgba_b, rgba_a;
-    UOSCManager::GetFloat(message, 11, rgba_r);
-    UOSCManager::GetFloat(message, 12, rgba_g);
-    UOSCManager::GetFloat(message, 13, rgba_b);
-    UOSCManager::GetFloat(message, 14, rgba_a);
-    light.bgColor = FLinearColor(rgba_r, rgba_g, rgba_b, rgba_a);
-  }
+  UOSCManager::GetFloat(message, 7, light.color.R);
+  UOSCManager::GetFloat(message, 8, light.color.G);
+  UOSCManager::GetFloat(message, 9, light.color.B);
+  UOSCManager::GetFloat(message, 10, light.color.A);
+
+  UOSCManager::GetFloat(message, 11, light.bgColor.R);
+  UOSCManager::GetFloat(message, 12, light.bgColor.G);
+  UOSCManager::GetFloat(message, 13, light.bgColor.B);
+  UOSCManager::GetFloat(message, 14, light.bgColor.A);
 
   int32 shape;
   UOSCManager::GetInt32(message, 15, shape);
@@ -472,13 +465,13 @@ void AOSCController::UpdateLight(const FOSCAddress& AddressPattern, const FOSCMe
   int32 lightId;
   UOSCManager::GetInt32(message, 1, lightId);
   
-  float r, g, b, a;
-  UOSCManager::GetFloat(message, 2, r);
-  UOSCManager::GetFloat(message, 3, g);
-  UOSCManager::GetFloat(message, 4, b);
-  UOSCManager::GetFloat(message, 5, a);
+  FLinearColor color;
+  UOSCManager::GetFloat(message, 2, color.R);
+  UOSCManager::GetFloat(message, 3, color.G);
+  UOSCManager::GetFloat(message, 4, color.B);
+  UOSCManager::GetFloat(message, 5, color.A);
 
-  gameMode->UpdateLight(moduleId, lightId, FLinearColor(r, g, b, a));
+  gameMode->UpdateLight(moduleId, lightId, color);
 }
 
 void AOSCController::SyncParam(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port) {
