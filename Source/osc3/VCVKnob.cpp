@@ -75,15 +75,15 @@ void AVCVKnob::init(VCVParam* vcv_param) {
 
 void AVCVKnob::updateRotation(FRotator newRotation) {
   FaceMaterialInstance->SetScalarParameterValue(FName("rotation"), -newRotation.Roll);
-  SetActorRotation(newRotation);
+  BaseMeshComponent->SetRelativeRotation(newRotation);
 }
 
 FRotator AVCVKnob::getRotationFromValue() {
   float valuePercent = (model->value - model->minValue) / (model->maxValue - model->minValue);
   float valueAngle = model->minAngle + valuePercent * (model->maxAngle - model->minAngle);
 
-  FRotator actorRotation = GetActorRotation();
-  return FRotator(actorRotation.Pitch, actorRotation.Yaw, valueAngle);
+  FRotator knobRotation = BaseMeshComponent->GetRelativeRotation();
+  return FRotator(knobRotation.Pitch, knobRotation.Yaw, valueAngle);
 }
 
 float AVCVKnob::getValueFromRotation() {
@@ -97,7 +97,7 @@ float AVCVKnob::getValueFromRotation() {
 
 void AVCVKnob::engage(float ControllerRoll) {
   Super::engage(ControllerRoll);
-  shadowRotation = GetActorRotation();
+  shadowRotation = BaseMeshComponent->GetRelativeRotation();
   LastControllerRoll = ControllerRoll;
 }
 
@@ -118,11 +118,12 @@ void AVCVKnob::alter(float ControllerRoll) {
     FMath::WeightedMovingAverage(deltaRoll, LastDeltaRoll, 0.2f);
   LastDeltaRoll = deltaRoll;
 
-  FRotator actorRotation = GetActorRotation();
-  shadowRotation.Pitch = actorRotation.Pitch;
-  shadowRotation.Yaw = actorRotation.Yaw;
+  FRotator knobRotation = BaseMeshComponent->GetRelativeRotation();
+  shadowRotation.Pitch = knobRotation.Pitch;
+  shadowRotation.Yaw = knobRotation.Yaw;
   shadowRotation.Roll =
     FMath::Clamp(shadowRotation.Roll + deltaRoll, model->minAngle, model->maxAngle);
+
 
   setValue(getValueFromRotation());
   updateRotation(model->snap ? getRotationFromValue() : shadowRotation);
