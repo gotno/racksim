@@ -64,6 +64,9 @@ void AVCVKnob::Tick(float DeltaTime) {
 
 void AVCVKnob::init(VCVParam* vcv_param) {
 	Super::init(vcv_param);
+
+  gap = (180 - FMath::Abs(model->maxAngle)) + (180 - FMath::Abs(model->minAngle));
+
   updateRotation(getRotationFromValue());
 
   VCVOverrides overrides;
@@ -105,9 +108,8 @@ void AVCVKnob::alter(float ControllerRoll) {
   Super::alter(ControllerRoll);
 
   float deltaRoll = ControllerRoll - LastControllerRoll;
-  // TODO: magic number?
-  // limiting max roll per tick fixes jump from min to max or max to min
-  if (FMath::Abs(deltaRoll) > 30) {
+  if (FMath::Abs(deltaRoll) > gap) {
+    // prevent jump from min to max or max to min
     LastControllerRoll = ControllerRoll;
     return;
   }

@@ -61,6 +61,9 @@ private:
   FRotator shadowRotation;
   float LastControllerRoll;
   float LastDeltaRoll;
+  
+  // gap between min and max position outside of knob range
+  float gap{0};
 
 public:
   void engage(float ControllerRoll) override;
