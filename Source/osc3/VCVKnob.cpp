@@ -107,17 +107,16 @@ void AVCVKnob::engage(float ControllerRoll) {
 void AVCVKnob::alter(float ControllerRoll) {
   Super::alter(ControllerRoll);
 
-  float deltaRoll = ControllerRoll - LastControllerRoll;
-  if (FMath::Abs(deltaRoll) > gap) {
+  float deltaControllerRoll = ControllerRoll - LastControllerRoll;
+  if (FMath::Abs(deltaControllerRoll) > gap) {
     // prevent jump from min to max or max to min
     LastControllerRoll = ControllerRoll;
     return;
   }
-  deltaRoll *= alterRatio;
 
-  // TODO: user override of smoothing constant
+  float deltaRoll = deltaControllerRoll * alterRatio;
   deltaRoll =
-    FMath::WeightedMovingAverage(deltaRoll, LastDeltaRoll, 0.2f);
+    FMath::WeightedMovingAverage(deltaRoll, LastDeltaRoll, MovingAverageWeight);
   LastDeltaRoll = deltaRoll;
 
   FRotator knobRotation = BaseMeshComponent->GetRelativeRotation();
