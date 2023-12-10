@@ -88,6 +88,11 @@ struct FParamInteractionActions {
   UInputAction* ParamEngageLeft;
   UPROPERTY(EditDefaultsOnly)
   UInputAction* ParamEngageRight;
+
+  UPROPERTY(EditDefaultsOnly)
+  UInputAction* ParamResetLeft;
+  UPROPERTY(EditDefaultsOnly)
+  UInputAction* ParamResetRight;
 };
 
 USTRUCT()
@@ -211,7 +216,6 @@ private:
   UPROPERTY(EditDefaultsOnly, Category="Input")
   float TranslateWorldScale{1.f};
 
-  bool bLeftHandRotoTranslateActive{false};
   void HandleStartRotoTranslateWorld(const FInputActionValue& _Value);
   void HandleRotoTranslateWorld(const FInputActionValue& _Value);
   void HandleCompleteRotoTranslateWorld(const FInputActionValue& _Value);
@@ -230,6 +234,7 @@ private:
   void HandleCompleteParamEngage(const FInputActionValue& _Value, EControllerHand Hand);
   AVCVCable* LeftHandControlledCable;
   AVCVCable* RightHandControlledCable;
+  void HandleParamReset(const FInputActionValue& _Value, EControllerHand Hand);
 
   void LogInput(const FInputActionValue& _Value, FString msg);
 

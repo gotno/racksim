@@ -138,6 +138,7 @@ void AVCVSlider::engage(FVector ControllerPosition) {
 
 void AVCVSlider::alter(FVector ControllerPosition) {
   Super::alter(ControllerPosition);
+  if (!engaged) return;
 
   SliderDirectionVector =
     model->horizontal
@@ -177,5 +178,19 @@ void AVCVSlider::release() {
 
   lastValue = model->value;
   lastAlterAmount = 0.f;
+  ShadowOffset = WorldOffset;
+}
+
+void AVCVSlider::resetValue() {
+  Super::resetValue();
+
+  SliderDirectionVector =
+    model->horizontal
+      ? HandleMeshComponent->GetRightVector()
+      : HandleMeshComponent->GetUpVector();
+
+  FVector zeroPosition = HandleMeshComponent->GetComponentLocation() - SliderDirectionVector * WorldOffset;
+  WorldOffset = getOffsetFromValue();
+  HandleMeshComponent->SetWorldLocation(zeroPosition + SliderDirectionVector * WorldOffset);
   ShadowOffset = WorldOffset;
 }

@@ -90,3 +90,8 @@ void AVCVSwitch::setFrame() {
   if (frame >= 0 && frame < frames.Num())
     FaceMaterialInstance->SetTextureParameterValue(FName("texture"), frames[frame]);
 }
+
+void AVCVSwitch::resetValue() {
+  Super::resetValue();
+  setFrame();
+}

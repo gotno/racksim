@@ -82,9 +82,9 @@ private:
 
   float getOffsetFromValue();
   float getValueFromOffset();
-
 public:
   void engage(FVector ControllerPosition) override;
   void alter(FVector ControllerPosition) override;
   void release() override;
+  void resetValue() override;
 };

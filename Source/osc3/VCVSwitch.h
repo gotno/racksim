@@ -51,4 +51,5 @@ public:
   int getFrameFromValue();
   // virtual void alter(float amount);
   // virtual void release();
+  virtual void resetValue();
 };

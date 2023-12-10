@@ -102,3 +102,8 @@ void AVCVParam::release() {
   // UE_LOG(LogTemp, Warning, TEXT("param release"));
   engaged = false;
 }
+
+void AVCVParam::resetValue() {
+  // UE_LOG(LogTemp, Warning, TEXT("param reset"));
+  if (model) setValue(model->defaultValue);
+}

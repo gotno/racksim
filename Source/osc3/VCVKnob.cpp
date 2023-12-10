@@ -106,6 +106,7 @@ void AVCVKnob::engage(float ControllerRoll) {
 
 void AVCVKnob::alter(float ControllerRoll) {
   Super::alter(ControllerRoll);
+  if (!engaged) return;
 
   float deltaControllerRoll = ControllerRoll - LastControllerRoll;
   if (FMath::Abs(deltaControllerRoll) > gap) {
@@ -134,4 +135,9 @@ void AVCVKnob::alter(float ControllerRoll) {
 
 void AVCVKnob::release() {
   Super::release();
+}
+
+void AVCVKnob::resetValue() {
+  Super::resetValue();
+  updateRotation(getRotationFromValue());
 }

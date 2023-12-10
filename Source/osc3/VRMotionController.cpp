@@ -268,17 +268,17 @@ void AVRMotionController::EndParamInteract() {
 }
 
 void AVRMotionController::StartPortInteract() {
-  UE_LOG(LogTemp, Display, TEXT("%s start port interact"), *HandName);
+  // UE_LOG(LogTemp, Display, TEXT("%s start port interact"), *HandName);
   bIsPortInteracting = true;
 
   int64_t cableId;
   if (OriginPortActor->getCableId(cableId)) {
     HeldCable = GameMode->DetachCable(cableId, OriginPortActor->getIdentity());
-    UE_LOG(LogTemp, Warning, TEXT("got cable %lld"), cableId);
+    // UE_LOG(LogTemp, Warning, TEXT("got cable %lld"), cableId);
     OriginPortActor = GameMode->GetPortActor(HeldCable->getConnectedPortIdentity());
     RefreshTooltip();
   } else {
-    UE_LOG(LogTemp, Warning, TEXT("spawning new cable"));
+    // UE_LOG(LogTemp, Warning, TEXT("spawning new cable"));
     VCVCable cable;
     cable.setIdentity(OriginPortActor->getIdentity());
     HeldCable = GameMode->SpawnCable(cable);
@@ -286,7 +286,7 @@ void AVRMotionController::StartPortInteract() {
 }
 
 void AVRMotionController::EndPortInteract() {
-  UE_LOG(LogTemp, Display, TEXT("%s end port interact"), *HandName);
+  // UE_LOG(LogTemp, Display, TEXT("%s end port interact"), *HandName);
 
   if (DestinationPortActor && DestinationPortActor->canConnect(HeldCable->getHangingType())) {
     GameMode->AttachCable(HeldCable->getId(), DestinationPortActor->getIdentity());
@@ -342,7 +342,7 @@ void AVRMotionController::HandleInteractorEndOverlap(UPrimitiveComponent* Overla
     overlappingActors.Contains(OriginPortActor) ||
     overlappingActors.Contains(DestinationPortActor);
   if (wasInteracting && !stillInteracting) {
-    UE_LOG(LogTemp, Display, TEXT("%s end param/port interact"), *HandName);
+    // UE_LOG(LogTemp, Display, TEXT("%s end param/port interact"), *HandName);
     Avatar->SetControllerParamOrPortInteracting(
       MotionController->GetTrackingSource(),
       false
@@ -356,7 +356,7 @@ void AVRMotionController::HandleGrabberBeginOverlap(UPrimitiveComponent* Overlap
   if (bIsGrabbing || bIsParamInteracting) return;
 
   if (OtherActor->ActorHasTag(TAG_GRABBABLE) && Cast<IGrabbable>(OtherActor)) {
-    UE_LOG(LogTemp, Display, TEXT("%s set ActorToGrab %s"), *HandName, *OtherActor->GetActorNameOrLabel());
+    // UE_LOG(LogTemp, Display, TEXT("%s set ActorToGrab %s"), *HandName, *OtherActor->GetActorNameOrLabel());
 
     ActorToGrab = OtherActor;
     Cast<IGrabbable>(OtherActor)->SetHighlighted(true);
@@ -368,14 +368,14 @@ void AVRMotionController::HandleGrabberBeginOverlap(UPrimitiveComponent* Overlap
 }
 
 void AVRMotionController::StartGrab() {
-  UE_LOG(LogTemp, Display, TEXT("%s start grab"), *HandName);
+  // UE_LOG(LogTemp, Display, TEXT("%s start grab"), *HandName);
   bIsGrabbing = true;
   SetTooltipVisibility(false);
   PlayerController->PlayHapticEffect(HapticEffects.Bump, MotionController->GetTrackingSource());
 }
 
 void AVRMotionController::EndGrab() {
-  UE_LOG(LogTemp, Display, TEXT("%s end grab"), *HandName);
+  // UE_LOG(LogTemp, Display, TEXT("%s end grab"), *HandName);
 
   bIsGrabbing = false;
 
@@ -402,7 +402,7 @@ void AVRMotionController::HandleGrabberEndOverlap(UPrimitiveComponent* Overlappe
   GrabSphere->GetOverlappingActors(overlappingActors);
 
   if (OtherActor->ActorHasTag(TAG_GRABBABLE) && !overlappingActors.Contains(ActorToGrab)) {
-    UE_LOG(LogTemp, Display, TEXT("%s end overlap"), *HandName);
+    // UE_LOG(LogTemp, Display, TEXT("%s end overlap"), *HandName);
     ActorToGrab = nullptr;
     Avatar->SetControllerGrabbing(
       MotionController->GetTrackingSource(),

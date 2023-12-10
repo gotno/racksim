@@ -70,4 +70,5 @@ public:
   void engage(float ControllerRoll) override;
   void alter(float ControllerRoll) override;
   void release() override;
+  void resetValue() override;
 };

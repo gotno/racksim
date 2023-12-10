@@ -158,6 +158,10 @@ void AVRAvatar::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
   Input->BindAction(ParamInteractionActions.ParamEngageLeft, ETriggerEvent::Completed, this, &AVRAvatar::HandleCompleteParamEngage, EControllerHand::Left);
   Input->BindAction(ParamInteractionActions.ParamEngageRight, ETriggerEvent::Completed, this, &AVRAvatar::HandleCompleteParamEngage, EControllerHand::Right);
 
+  // reset
+  Input->BindAction(ParamInteractionActions.ParamResetLeft, ETriggerEvent::Started, this, &AVRAvatar::HandleParamReset, EControllerHand::Left);
+  Input->BindAction(ParamInteractionActions.ParamResetRight, ETriggerEvent::Started, this, &AVRAvatar::HandleParamReset, EControllerHand::Right);
+
   // general
   // quit
   Input->BindAction(BaseActions.Quit, ETriggerEvent::Completed, this, &AVRAvatar::Quit);
@@ -394,16 +398,14 @@ void AVRAvatar::HandleTranslateWorld(const FInputActionValue& _Value, EControlle
 }
 
 void AVRAvatar::HandleStartRotoTranslateWorld(const FInputActionValue& _Value) {
-  // bLeftHandRotoTranslateActive = true;
-
-  UE_LOG(LogTemp, Warning, TEXT("start roto-translate"));
+  // UE_LOG(LogTemp, Warning, TEXT("start roto-translate"));
   SetWorldManipulationActive(EControllerHand::Left, true);
   SetWorldManipulationActive(EControllerHand::Right, true);
   LastLeftHandLocation = LeftController->GetActorLocation();
   LastRightHandLocation = RightController->GetActorLocation();
 }
 void AVRAvatar::HandleCompleteRotoTranslateWorld(const FInputActionValue& _Value) {
-  UE_LOG(LogTemp, Warning, TEXT("complete roto-translate"));
+  // UE_LOG(LogTemp, Warning, TEXT("complete roto-translate"));
   SetWorldManipulationActive(EControllerHand::Left, false);
   SetWorldManipulationActive(EControllerHand::Right, false);
   LastTranslateWorldDelta = FVector::ZeroVector;
@@ -566,13 +568,11 @@ void AVRAvatar::HandleParamEngage(const FInputActionValue& _Value, EControllerHa
 void AVRAvatar::HandleCompleteParamEngage(const FInputActionValue& _Value, EControllerHand Hand) {
   AVRMotionController* controller = 
     Hand == EControllerHand::Left ? LeftController : RightController;
-  
-  UE_LOG(LogTemp, Warning, TEXT("%s hand param engage complete"), *FString(Hand == EControllerHand::Left ? "left" : "right"));
+  // UE_LOG(LogTemp, Warning, TEXT("%s hand param engage complete"), *FString(Hand == EControllerHand::Left ? "left" : "right"));
 
   AVCVParam* interactingParam = Cast<AVCVParam>(controller->GetParamActorToInteract());
   if (interactingParam) {
-    UE_LOG(LogTemp, Warning, TEXT("  releasing %s"), *interactingParam->GetActorNameOrLabel());
-
+    // UE_LOG(LogTemp, Warning, TEXT("  releasing %s"), *interactingParam->GetActorNameOrLabel());
     controller->EndParamInteract();
     interactingParam->release();
   }
@@ -580,6 +580,20 @@ void AVRAvatar::HandleCompleteParamEngage(const FInputActionValue& _Value, ECont
   AVCVCable* heldCable = controller->GetHeldCable();
   if (heldCable) {
     controller->EndPortInteract();
+  }
+}
+
+void AVRAvatar::HandleParamReset(const FInputActionValue& _Value, EControllerHand Hand) {
+  AVRMotionController* controller = 
+    Hand == EControllerHand::Left ? LeftController : RightController;
+  // UE_LOG(LogTemp, Warning, TEXT("%s hand param reset"), *FString(Hand == EControllerHand::Left ? "left" : "right"));
+
+  AVCVParam* interactingParam = Cast<AVCVParam>(controller->GetParamActorToInteract());
+  if (interactingParam) {
+    // UE_LOG(LogTemp, Warning, TEXT("  resetting %s"), *interactingParam->GetActorNameOrLabel());
+    interactingParam->release();
+    interactingParam->resetValue();
+    controller->EndParamInteract();
   }
 }
 

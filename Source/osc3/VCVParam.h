@@ -15,11 +15,11 @@ protected:
 	virtual void BeginPlay() override;
   virtual void spawnLights(USceneComponent* attachTo);
   FString getModuleBrand();
+  bool engaged{false};
   
 private:
   class AVCVModule* owner;
   
-  bool engaged = false;
   float alterRatio = 1.f;
 
   mutable FCriticalSection DataGuard;
@@ -39,6 +39,7 @@ public:
   virtual void alter(float amount);
   virtual void alter(FVector _location);
   virtual void release();
+  virtual void resetValue();
   
   void GetTooltipText(FString& Label, FString& DisplayValue);
 };
