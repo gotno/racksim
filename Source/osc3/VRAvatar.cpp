@@ -163,6 +163,8 @@ void AVRAvatar::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
   Input->BindAction(ParamInteractionActions.ParamResetRight, ETriggerEvent::Started, this, &AVRAvatar::HandleParamReset, EControllerHand::Right);
 
   // general
+  // request screenshot
+  Input->BindAction(BaseActions.RequestScreenshot, ETriggerEvent::Completed, this, &AVRAvatar::RequestScreenshot);
   // quit
   Input->BindAction(BaseActions.Quit, ETriggerEvent::Completed, this, &AVRAvatar::Quit);
 
@@ -595,6 +597,19 @@ void AVRAvatar::HandleParamReset(const FInputActionValue& _Value, EControllerHan
     interactingParam->resetValue();
     controller->EndParamInteract();
   }
+}
+
+void AVRAvatar::RequestScreenshot(const FInputActionValue& _Value) {
+  // Generate a filename based on the current date
+  const FDateTime Now = FDateTime::Now();
+  // store screenshot in Project directory next to main UProject/EXE based on the build type
+#if WITH_EDITOR
+  const FString ImageDirectory = FString::Printf(TEXT("%s/%s"), *FPaths::ProjectDir(), TEXT("Screenshots"));
+#else
+  const FString ImageDirectory = FString::Printf(TEXT("%s/../%s"), *FPaths::ProjectDir(), TEXT("Screenshots"));
+#endif
+  const FString ImageFilename = FString::Printf(TEXT("%s/VCVRVRScreenshot_%d%02d%02d_%02d%02d%02d_%03d.png"), *ImageDirectory, Now.GetYear(), Now.GetMonth(), Now.GetDay(), Now.GetHour(), Now.GetMinute(), Now.GetSecond(), Now.GetMillisecond());
+  FScreenshotRequest::RequestScreenshot(ImageFilename, false, false);
 }
 
 void AVRAvatar::Quit(const FInputActionValue& _Value) {

@@ -19,6 +19,9 @@ struct FBaseActions {
 	GENERATED_BODY()
 
   UPROPERTY(EditDefaultsOnly)
+  UInputAction* RequestScreenshot;
+
+  UPROPERTY(EditDefaultsOnly)
   UInputAction* Quit;
 };
 
@@ -239,7 +242,10 @@ private:
   void LogInput(const FInputActionValue& _Value, FString msg);
 
   // general controls
+  void RequestScreenshot(const FInputActionValue& _Value);
   void Quit(const FInputActionValue& _Value);
+  
+  // widget controls
   void HandleStartWidgetLeftClick(const FInputActionValue& _Value, EControllerHand Hand);
   void HandleCompleteWidgetLeftClick(const FInputActionValue& _Value, EControllerHand Hand);
   void HandleWidgetScroll(const FInputActionValue& _Value, EControllerHand Hand);
