@@ -64,17 +64,16 @@ private:
 
   Aosc3GameModeBase* gameMode;
   
-  float lastAlterAmount = 0.f;
-  float lastValue;
+  float LastValue;
   float AlterRatio = 0.8f;
   
   FVector LastControllerPosition;
   float LastPositionDelta{0.f};
-  
-  // unit vector direction to move, updated every `engage`
-  FVector SliderDirectionVector;
+
+  // unit vector direction to move
+  FVector GetSliderDirectionVector();
   // max move distance
-  float minMaxOffsetDelta;
+  float MaxOffset;
   // offset to track dragged position vs snap position
   float ShadowOffset;
   // actual offset from zero in world
