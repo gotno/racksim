@@ -39,6 +39,8 @@ public:
   AVCVPort* GetPortActor(PortIdentity identity);
   void GetSlugs(FString& PluginSlug, FString& Slug);
 
+  void ToggleContextMenu();
+
   UPROPERTY()
   TMap<int32, AVCVLight*> LightActors;
   UPROPERTY()

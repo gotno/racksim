@@ -330,6 +330,10 @@ void AVCVModule::ReleaseGrab() {
   AddActorWorldOffset(-GrabOffset);
 }
 
+void AVCVModule::ToggleContextMenu() {
+  UE_LOG(LogTemp, Warning, TEXT("%s:%s ToggleContextMenu"), *ModuleBrand, *ModuleName);
+}
+
 void AVCVModule::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
   
