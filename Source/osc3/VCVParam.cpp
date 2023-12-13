@@ -31,7 +31,7 @@ void AVCVParam::init(VCVParam* vcv_param) {
 }
 
 FString AVCVParam::getModuleBrand() {
-  return owner->getBrand();
+  return owner->ModuleBrand;
 }
 
 void AVCVParam::GetTooltipText(FString& Label, FString& DisplayValue) {

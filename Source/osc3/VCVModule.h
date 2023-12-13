@@ -47,7 +47,9 @@ public:
   void registerParamLight(int64_t lightId, AVCVLight* lightActor);
   void paramUpdated(int32 paramId, float value);
 
-  FString getBrand();
+  int64_t ModuleID;
+  FString ModuleBrand;
+  FString ModuleName;
 
   void EngageGrab(FVector GrabbedLocation, FRotator GrabbedRotation) override;
   void AlterGrab(FVector GrabbedLocation, FRotator GrabbedRotation) override;

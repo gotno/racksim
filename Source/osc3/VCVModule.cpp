@@ -105,6 +105,9 @@ void AVCVModule::EndPlay(const EEndPlayReason::Type EndPlayReason) {
 
 void AVCVModule::init(VCVModule vcv_module) {
   model = vcv_module; 
+  ModuleID = model.id;
+  ModuleBrand = model.brand;
+  ModuleName = model.name;
 
   VCVOverrides overrides;
 
@@ -121,10 +124,6 @@ void AVCVModule::init(VCVModule vcv_module) {
   spawnComponents();
   SetActorRotation(FRotator(0.f, 0.f, 0.f));
   SetHidden(false);
-}
-
-FString AVCVModule::getBrand() {
-  return model.brand;
 }
 
 void AVCVModule::GetPortInfo(PortIdentity identity, FVector& portLocation, FVector& portForwardVector) {

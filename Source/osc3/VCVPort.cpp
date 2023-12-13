@@ -67,10 +67,6 @@ void AVCVPort::init(VCVPort* vcv_port) {
   FaceMaterialInstance->SetVectorParameterValue(FName("background_color"), model->bodyColor);
 }
 
-FString AVCVPort::getModuleBrand() {
-  return Cast<AVCVModule>(GetOwner())->getBrand();
-}
-
 void AVCVPort::addCableId(int64_t cableId) {
   cableIds.Push(cableId);
 }
