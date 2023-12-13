@@ -52,6 +52,13 @@ private:
   UPROPERTY(VisibleAnywhere)
   UStaticMeshComponent* OutlineMeshComponent;
 
+  UPROPERTY(VisibleAnywhere)
+  UStaticMeshComponent* PreviewPlaneComponent;
+  UPROPERTY()
+  UMaterialInstanceDynamic* PreviewMaterialInstance;
+  UPROPERTY()
+  UMaterialInterface* PreviewMaterialInterface;
+
   UPROPERTY()
   UMaterialInstanceDynamic* BaseMaterialInstance;
   UPROPERTY()

@@ -30,17 +30,24 @@ ALibrary::ALibrary() {
   OutlineMeshComponent->AddLocalOffset(FVector(-0.05f, 0.f, 0.f));
   
   static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshBody(TEXT("/Script/Engine.StaticMesh'/Game/meshes/unit_widget_base.unit_widget_base'"));
-  
   if (MeshBody.Object) {
     StaticMeshComponent->SetStaticMesh(MeshBody.Object);
     OutlineMeshComponent->SetStaticMesh(MeshBody.Object);
   }
-
   static ConstructorHelpers::FObjectFinder<UMaterial> BaseMaterial(TEXT("/Script/Engine.Material'/Game/meshes/faced/generic_base.generic_base'"));
   if (BaseMaterial.Object) BaseMaterialInterface = Cast<UMaterial>(BaseMaterial.Object);
-
   static ConstructorHelpers::FObjectFinder<UMaterial> OutlineMaterial(TEXT("/Script/Engine.Material'/Game/materials/looman_outlines/M_LocalOutlines.M_LocalOutlines'"));
   if (OutlineMaterial.Object) OutlineMaterialInterface = Cast<UMaterial>(OutlineMaterial.Object);
+
+  PreviewPlaneComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Preview Plane"));
+  PreviewPlaneComponent->SetupAttachment(GetRootComponent());
+  PreviewPlaneComponent->SetVisibility(false);
+  static ConstructorHelpers::FObjectFinder<UStaticMesh> UnitPlane(TEXT("/Script/Engine.StaticMesh'/Game/meshes/unit_plane.unit_plane'"));
+  if (UnitPlane.Object) {
+    PreviewPlaneComponent->SetStaticMesh(UnitPlane.Object);
+  }
+  static ConstructorHelpers::FObjectFinder<UMaterial> PreviewMaterial(TEXT("/Script/Engine.Material'/Game/meshes/faced/texture_face.texture_face'"));
+  if (PreviewMaterial.Object) PreviewMaterialInterface = Cast<UMaterial>(PreviewMaterial.Object);
 
   LibraryWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("LibraryWidget"));
   LibraryWidgetComponent->SetupAttachment(StaticMeshComponent);
@@ -63,6 +70,11 @@ void ALibrary::BeginPlay() {
   if (OutlineMaterialInterface) {
     OutlineMaterialInstance = UMaterialInstanceDynamic::Create(OutlineMaterialInterface, this);
     OutlineMeshComponent->SetMaterial(0, OutlineMaterialInstance);
+  }
+
+  if (PreviewMaterialInterface) {
+    PreviewMaterialInstance = UMaterialInstanceDynamic::Create(PreviewMaterialInterface, this);
+    PreviewPlaneComponent->SetMaterial(0, PreviewMaterialInstance);
   }
 
   LibraryWidget = Cast<ULibraryWidget>(LibraryWidgetComponent->GetUserWidgetObject());
