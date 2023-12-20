@@ -122,13 +122,13 @@ void AVRMotionController::Tick(float DeltaTime) {
       Avatar->GetLookAtCameraRotation(TooltipWidgetComponent->GetComponentLocation())
     );
 
-  if (WidgetInteractionComponent->IsOverInteractableWidget() && !bIsWidgetInteracting) {
+  if (WidgetInteractionComponent->IsOverHitTestVisibleWidget() && !bIsWidgetInteracting) {
     bIsWidgetInteracting = true;
     Avatar->SetControllerWidgetInteracting(
       MotionController->GetTrackingSource(),
       bIsWidgetInteracting
     );
-  } else if (!WidgetInteractionComponent->IsOverInteractableWidget() && bIsWidgetInteracting) {
+  } else if (!WidgetInteractionComponent->IsOverHitTestVisibleWidget() && bIsWidgetInteracting) {
     bIsWidgetInteracting = false;
     Avatar->SetControllerWidgetInteracting(
       MotionController->GetTrackingSource(),
@@ -136,7 +136,7 @@ void AVRMotionController::Tick(float DeltaTime) {
     );
   }
 
-  if (WidgetInteractionComponent->IsOverInteractableWidget()) {
+  if (WidgetInteractionComponent->IsOverHitTestVisibleWidget()) {
     FHitResult widgetHit = WidgetInteractionComponent->GetLastHitResult();
     DrawDebugLine(
       GetWorld(),
