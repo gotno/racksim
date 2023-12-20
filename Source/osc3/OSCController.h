@@ -40,6 +40,8 @@ public:
   UFUNCTION()
   void DestroyCable(int64 cableId);
 
+  void RequestMenu(const VCVMenu& Menu) const;
+
 private:
   UPROPERTY()
   class Aosc3GameModeBase* gameMode;
@@ -84,6 +86,11 @@ private:
   void AddLibraryModuleTag(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port);
   UFUNCTION()
   void AddLibraryTag(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port);
+
+  UFUNCTION()
+  void AddContextMenuItem(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port);
+  UFUNCTION()
+  void MenuSynced(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port);
 
   // UFUNCTION()
   // void TestBundle(const FOSCBundle& InBundle, const FString& InIPAddress, int32 InPort);

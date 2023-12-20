@@ -38,6 +38,9 @@ void AOSCController::Init() {
   AddRoute("/library/module_tag/add/*", FName(TEXT("AddLibraryModuleTag")));
   AddRoute("/library/tag/add/*", FName(TEXT("AddLibraryTag")));
 
+  AddRoute("/menu/item/add/*", FName(TEXT("AddContextMenuItem")));
+  AddRoute("/menu/synced/*", FName(TEXT("MenuSynced")));
+
   // OSCServer->OnOscBundleReceived.AddDynamic(this, &AOSCController::TestBundle);
   // OSCServer->OnOscMessageReceived.AddDynamic(this, &AOSCController::TestMessage);
 
@@ -222,6 +225,65 @@ void AOSCController::DestroyCable(int64 cableId) {
   
   OSCClient->SendOSCMessage(message);
 }
+
+void AOSCController::RequestMenu(const VCVMenu& Menu) const {
+  UE_LOG(LogTemp, Warning, TEXT("Sending /get_menu %lld"), Menu.moduleId);
+  FOSCAddress address = UOSCManager::ConvertStringToOSCAddress(FString(TEXT("/get_menu")));
+  FOSCMessage message;
+  UOSCManager::SetOSCMessageAddress(message, address);
+
+  UOSCManager::AddInt64(message, Menu.moduleId);
+  UOSCManager::AddInt32(message, Menu.id);
+  UOSCManager::AddInt32(message, Menu.parentMenuId);
+  UOSCManager::AddInt32(message, Menu.parentItemIndex);
+
+  OSCClient->SendOSCMessage(message);
+}
+
+void AOSCController::AddContextMenuItem(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port) {
+  // UE_LOG(LogTemp, Warning, TEXT("AddContextMenuItem"));
+
+  int64_t moduleId;
+  if (ModuleGuard(message, moduleId)) return;
+  
+  int menuId;
+  UOSCManager::GetInt32(message, 1, menuId);
+
+  int itemIndex;
+  UOSCManager::GetInt32(message, 2, itemIndex);
+  
+  VCVMenuItem menuItem(moduleId, menuId, itemIndex);
+
+  int32 type;
+  UOSCManager::GetInt32(message, 3, type);
+  menuItem.type = static_cast<VCVMenuItemType>(type);
+
+  UOSCManager::GetString(message, 4, menuItem.text);
+  UOSCManager::GetBool(message, 5, menuItem.checked);
+  UOSCManager::GetBool(message, 6, menuItem.disabled);
+  UOSCManager::GetFloat(message, 7, menuItem.rangeValue);
+  UOSCManager::GetFloat(message, 8, menuItem.minRangeValue);
+  UOSCManager::GetFloat(message, 9, menuItem.maxRangeValue);
+  UOSCManager::GetFloat(message, 10, menuItem.defaultRangeValue);
+  UOSCManager::GetString(message, 11, menuItem.rangeDisplayValue);
+  
+  gameMode->UpdateModuleMenuItem(menuItem);
+}
+
+void AOSCController::MenuSynced(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port) {
+  // UE_LOG(LogTemp, Warning, TEXT("MenuSynced"));
+
+  int64_t moduleId;
+  if (ModuleGuard(message, moduleId)) return;
+  
+  int menuId;
+  UOSCManager::GetInt32(message, 1, menuId);
+  
+  VCVMenu menu(moduleId, menuId);
+
+  gameMode->ModuleMenuSynced(menu);
+}
+
 
 bool AOSCController::ModuleGuard(const FOSCMessage &message, int64_t &moduleId) {
   UOSCManager::GetInt64(message, 0, moduleId);

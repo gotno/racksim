@@ -22,12 +22,6 @@ void UBasicListEntryWidget::NativeOnListItemObjectSet(UObject* ListItemObject) {
 
   Label->SetText(FText::FromString(EntryData->Label));
   SetSelected(EntryData->bSelected);
-	// PluginName->SetText(FText::FromString(entry->PluginName));
-  // ModuleName->SetText(FText::FromString(entry->ModuleName));
-  // Tags->SetText(FText::FromString(entry->Tags));
-
-  // PluginSlug = entry->PluginSlug;
-  // ModuleSlug = entry->ModuleSlug;
 }
 
 void UBasicListEntryWidget::SetSelected(bool inSelected) {

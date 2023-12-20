@@ -179,6 +179,10 @@ void Aosc3GameModeBase::DestroyModule(AVCVModule* Module) {
   OSCctrl->DestroyModule(Module->GetId());
 }
 
+void Aosc3GameModeBase::RequestMenu(const VCVMenu& Menu) const {
+  OSCctrl->RequestMenu(Menu);
+}
+
 void Aosc3GameModeBase::UpdateLight(int64_t moduleId, int32 lightId, FLinearColor color) {
   if (ModuleActors.Contains(moduleId)) {
     ModuleActors[moduleId]->UpdateLight(lightId, color);
@@ -189,6 +193,16 @@ void Aosc3GameModeBase::UpdateParamDisplayValue(int64_t moduleId, int32 paramId,
   if (ModuleActors.Contains(moduleId)) {
     ModuleActors[moduleId]->GetParamActor(paramId)->UpdateDisplayValue(displayValue);
   }
+}
+
+void Aosc3GameModeBase::UpdateModuleMenuItem(VCVMenuItem& MenuItem) {
+  if (!ModuleActors.Contains(MenuItem.moduleId)) return;
+  ModuleActors[MenuItem.moduleId]->AddMenuItem(MenuItem);
+}
+
+void Aosc3GameModeBase::ModuleMenuSynced(VCVMenu& Menu) {
+  if (!ModuleActors.Contains(Menu.moduleId)) return;
+  ModuleActors[Menu.moduleId]->MenuSynced(Menu);
 }
 
 void Aosc3GameModeBase::GetPortInfo(PortIdentity identity, FVector& portLocation, FVector& portForwardVector) {

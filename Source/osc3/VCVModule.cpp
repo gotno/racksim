@@ -10,12 +10,15 @@
 #include "VCVSlider.h"
 #include "VCVPort.h"
 #include "VCVDisplay.h"
+#include "ui/ContextMenu.h"
+#include "ui/ContextMenuEntryData.h"
 
 #include "Engine/Texture2D.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Components/PrimitiveComponent.h"
+#include "Components/WidgetComponent.h"
 
 AVCVModule::AVCVModule() {
 	PrimaryActorTick.bCanEverTick = true;
@@ -51,6 +54,15 @@ AVCVModule::AVCVModule() {
 
   static ConstructorHelpers::FObjectFinder<UMaterial> OutlineMaterial(TEXT("/Script/Engine.Material'/Game/materials/looman_outlines/M_LocalOutlines.M_LocalOutlines'"));
   if (OutlineMaterial.Object) OutlineMaterialInterface = Cast<UMaterial>(OutlineMaterial.Object);
+  
+  ContextMenuWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("ContextMenuWidget"));
+  ContextMenuWidgetComponent->SetWindowFocusable(false);
+
+  static ConstructorHelpers::FClassFinder<UContextMenu>
+    contextMenuWidgetObject(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/widgets/BP_ContextMenu.BP_ContextMenu_C'"));
+  if (contextMenuWidgetObject.Succeeded()) {
+    ContextMenuWidgetComponent->SetWidgetClass(contextMenuWidgetObject.Class);
+  }
 }
 
 void AVCVModule::BeginPlay() {
@@ -73,6 +85,10 @@ void AVCVModule::BeginPlay() {
     OutlineMaterialInstance = UMaterialInstanceDynamic::Create(OutlineMaterialInterface, this);
     OutlineMeshComponent->SetMaterial(0, OutlineMaterialInstance);
   }
+  
+  ContextMenuWidget = Cast<UContextMenu>(ContextMenuWidgetComponent->GetUserWidgetObject());
+  ContextMenuWidgetComponent->SetWorldRotation(FRotator(0.f, 180.f, 0.f));
+  ContextMenuWidgetComponent->SetVisibility(false);
 
   gameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(this));
   
@@ -105,9 +121,8 @@ void AVCVModule::EndPlay(const EEndPlayReason::Type EndPlayReason) {
 
 void AVCVModule::init(VCVModule vcv_module) {
   model = vcv_module; 
-  ModuleID = model.id;
-  ModuleBrand = model.brand;
-  ModuleName = model.name;
+  Brand = model.brand;
+  Name = model.name;
 
   VCVOverrides overrides;
 
@@ -122,8 +137,31 @@ void AVCVModule::init(VCVModule vcv_module) {
 
   StaticMeshComponent->SetWorldScale3D(FVector(RENDER_SCALE * MODULE_DEPTH, model.box.size.x, model.box.size.y));
   spawnComponents();
-  SetActorRotation(FRotator(0.f, 0.f, 0.f));
   SetHidden(false);
+  
+  SetupContextMenuWidget();
+
+  SetActorRotation(FRotator(0.f, 0.f, 0.f));
+}
+
+void AVCVModule::SetupContextMenuWidget() {
+  FVector2D drawSize(300.f, 700.f);
+  float desiredContextMenuHeight = model.box.size.y - 2 * RENDER_SCALE;
+  float scale = desiredContextMenuHeight / drawSize.Y;
+
+  ContextMenuWidgetComponent->SetDrawSize(drawSize);
+  ContextMenuWidgetComponent->SetWorldScale3D(FVector(1.f, scale, scale));
+
+  float halfModuleWidth = model.box.size.x * 0.5f;
+  float halfMenuWidth = scale * drawSize.X * 0.5f;
+  float rightOffset = halfModuleWidth + halfMenuWidth;
+  ContextMenuWidgetComponent->SetWorldLocation(
+    GetActorLocation()
+    + (GetActorRightVector() * rightOffset)
+    + (GetActorForwardVector() * -1.f)
+  );
+
+  ContextMenuWidgetComponent->AttachToComponent(StaticMeshComponent, FAttachmentTransformRules::KeepWorldTransform);
 }
 
 void AVCVModule::GetPortInfo(PortIdentity identity, FVector& portLocation, FVector& portForwardVector) {
@@ -331,7 +369,79 @@ void AVCVModule::ReleaseGrab() {
 }
 
 void AVCVModule::ToggleContextMenu() {
-  UE_LOG(LogTemp, Warning, TEXT("%s:%s ToggleContextMenu"), *ModuleBrand, *ModuleName);
+  if (ContextMenuWidgetComponent->IsVisible()) {
+    ContextMenuWidgetComponent->SetVisibility(false);
+    return;
+  }
+
+  // (re)create the base menu struct
+  ContextMenus.Add(0, VCVMenu(model.id, 0));
+
+  gameMode->RequestMenu(ContextMenus[0]);
+  ContextMenuWidgetComponent->SetVisibility(true);
+}
+
+void AVCVModule::AddMenuItem(VCVMenuItem& MenuItem) {
+  ContextMenus[MenuItem.menuId].MenuItems.Add(MenuItem.index, MenuItem);
+}
+
+void AVCVModule::MenuSynced(VCVMenu& Menu) {
+  ContextMenus[Menu.id].MenuItems.KeySort([](int A, int B) { return A < B; });
+  PrintMenu(ContextMenus[Menu.id]);
+
+  TArray<UContextMenuEntryData*> entries;
+
+  for (auto& pair : ContextMenus[Menu.id].MenuItems) {
+    VCVMenuItem& menuItem = pair.Value;
+    VCVMenuItemType divider = VCVMenuItemType::DIVIDER;
+    if (menuItem.type == divider) continue;
+
+    UContextMenuEntryData* entry = NewObject<UContextMenuEntryData>(this);
+    entry->MenuItem = menuItem;
+
+    int& index = pair.Key;
+    if (ContextMenus[Menu.id].MenuItems.Contains(index - 1)) 
+      if (ContextMenus[Menu.id].MenuItems[index - 1].type == divider) 
+        entry->dividerPrev = true;
+    if (ContextMenus[Menu.id].MenuItems.Contains(index + 1)) 
+      if (ContextMenus[Menu.id].MenuItems[index + 1].type == divider) 
+        entry->dividerNext = true;
+
+    entries.Add(entry);
+  }
+
+  ContextMenuWidget->SetListItems(entries);
+}
+
+void AVCVModule::PrintMenu(VCVMenu& Menu) {
+  for (auto& pair : Menu.MenuItems) {
+    VCVMenuItem& menuItem = pair.Value;
+
+    switch (menuItem.type) {
+      case VCVMenuItemType::LABEL:
+        UE_LOG(LogTemp, Display, TEXT("%s:%s menu %d- %d [%s]"), *Brand, *Name, menuItem.menuId, menuItem.index, *menuItem.text);
+        break;
+      case VCVMenuItemType::ACTION:
+        if (menuItem.checked) {
+          UE_LOG(LogTemp, Display, TEXT("%s:%s menu %d- %d B:%s\t[x]"), *Brand, *Name, menuItem.menuId, menuItem.index, *menuItem.text);
+        } else {
+          UE_LOG(LogTemp, Display, TEXT("%s:%s menu %d- %d A:%s"), *Brand, *Name, menuItem.menuId, menuItem.index, *menuItem.text);
+        }
+        break;
+      case VCVMenuItemType::SUBMENU:
+        UE_LOG(LogTemp, Display, TEXT("%s:%s menu %d- %d %s\t->"), *Brand, *Name, menuItem.menuId, menuItem.index, *menuItem.text);
+        break;
+      case VCVMenuItemType::DIVIDER:
+        UE_LOG(LogTemp, Display, TEXT("%s:%s menu %d- %d --------------------"), *Brand, *Name, menuItem.menuId, menuItem.index);
+        break;
+      case VCVMenuItemType::RANGE:
+        UE_LOG(LogTemp, Display, TEXT("%s:%s menu %d- %d %s: %s"), *Brand, *Name, menuItem.menuId, menuItem.index, *menuItem.text, *menuItem.rangeDisplayValue);
+        break;
+      default:
+        UE_LOG(LogTemp, Display, TEXT("%s:%s menu %d- %d ???"), *Brand, *Name, menuItem.menuId, menuItem.index);
+        break;
+    }
+  }
 }
 
 void AVCVModule::Tick(float DeltaTime) {

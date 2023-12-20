@@ -150,8 +150,8 @@ void AVRAvatar::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
   Input->BindAction(ModuleManipulationActions.DestroyModuleRight, ETriggerEvent::Started, this, &AVRAvatar::HandleDestroyModule, EControllerHand::Right);
 
   // open module context menu
-  Input->BindAction(ModuleManipulationActions.ModuleContextMenuLeft, ETriggerEvent::Started, this, &AVRAvatar::HandleToggleContextMenu, EControllerHand::Left);
-  Input->BindAction(ModuleManipulationActions.ModuleContextMenuRight, ETriggerEvent::Started, this, &AVRAvatar::HandleToggleContextMenu, EControllerHand::Right);
+  Input->BindAction(ModuleManipulationActions.ModuleContextMenuLeft, ETriggerEvent::Completed, this, &AVRAvatar::HandleToggleContextMenu, EControllerHand::Left);
+  Input->BindAction(ModuleManipulationActions.ModuleContextMenuRight, ETriggerEvent::Completed, this, &AVRAvatar::HandleToggleContextMenu, EControllerHand::Right);
 
   // param interaction
   // engage

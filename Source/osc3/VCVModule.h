@@ -13,6 +13,8 @@ class Aosc3GameModeBase;
 class AVCVLight;
 class AVCVPort;
 class AVCVParam;
+class UContextMenu;
+class UWidgetComponent;
 
 UCLASS()
 class OSC3_API AVCVModule : public AActor, public IGrabbable {
@@ -40,6 +42,9 @@ public:
   void GetSlugs(FString& PluginSlug, FString& Slug);
 
   void ToggleContextMenu();
+  void AddMenuItem(VCVMenuItem& MenuItem);
+  void MenuSynced(VCVMenu& Menu);
+  void PrintMenu(VCVMenu& Menu);
 
   UPROPERTY()
   TMap<int32, AVCVLight*> LightActors;
@@ -49,9 +54,8 @@ public:
   void registerParamLight(int64_t lightId, AVCVLight* lightActor);
   void paramUpdated(int32 paramId, float value);
 
-  int64_t ModuleID;
-  FString ModuleBrand;
-  FString ModuleName;
+  FString Brand;
+  FString Name;
 
   void EngageGrab(FVector GrabbedLocation, FRotator GrabbedRotation) override;
   void AlterGrab(FVector GrabbedLocation, FRotator GrabbedRotation) override;
@@ -81,6 +85,10 @@ private:
 
   UPROPERTY()
   UTexture2D* texture;
+  
+  UWidgetComponent* ContextMenuWidgetComponent;
+  UContextMenu* ContextMenuWidget;
+  void SetupContextMenuWidget();
 
   void spawnComponents();
 
@@ -91,4 +99,6 @@ private:
   TMap<int, AVCVParam*> ParamActors;
   TMap<int, AVCVPort*> InputActors;
   TMap<int, AVCVPort*> OutputActors;
+  
+  ModuleMenuMap ContextMenus;
 };

@@ -52,12 +52,15 @@ public:
 
   void UpdateLight(int64_t moduleId, int32 lightId, FLinearColor color);
   void UpdateParamDisplayValue(int64_t moduleId, int32 paramId, FString displayValue);
+  void UpdateModuleMenuItem(VCVMenuItem& MenuItem);
+  void ModuleMenuSynced(VCVMenu& Menu);
 
   void SendParamUpdate(int64_t moduleId, int32 paramId, float value);
   void DuplicateModule(AVCVModule* Module);
   void DestroyModule(AVCVModule* Module);
   void RequestModuleSpawn(FString PluginSlug, FString ModuleSlug);
   void SetModuleFavorite(FString PluginSlug, FString ModuleSlug, bool bFavorite);
+  void RequestMenu(const VCVMenu& Menu) const;
   
   void RegisterSVG(FString filepath, Vec2 size);
   void RegisterTexture(FString filepath, UTexture2D* texture);
