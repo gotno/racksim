@@ -617,6 +617,8 @@ void AVRAvatar::HandleParamReset(const FInputActionValue& _Value, EControllerHan
 }
 
 void AVRAvatar::RequestScreenshot(const FInputActionValue& _Value) {
+  if (bLeftHandWorldManipulationActive || bRightHandWorldManipulationActive) return;
+
   // Generate a filename based on the current date
   const FDateTime Now = FDateTime::Now();
   // store screenshot in Project directory next to main UProject/EXE based on the build type
