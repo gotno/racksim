@@ -44,6 +44,8 @@ public:
   void ToggleContextMenu();
   void AddMenuItem(VCVMenuItem& MenuItem);
   void MenuSynced(VCVMenu& Menu);
+  void MakeMenu(int ParentMenuId = -1, int ParentItemIndex = -1);
+  void ShowMenu(int MenuId);
   void PrintMenu(VCVMenu& Menu);
 
   UPROPERTY()
@@ -100,5 +102,5 @@ private:
   TMap<int, AVCVPort*> InputActors;
   TMap<int, AVCVPort*> OutputActors;
   
-  ModuleMenuMap ContextMenus;
+  TArray<VCVMenu> ContextMenus;
 };

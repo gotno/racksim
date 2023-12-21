@@ -3,9 +3,13 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "Blueprint/IUserObjectListEntry.h"
+
+#include "VCV.h"
+
 #include "ContextMenuEntry.generated.h"
 
 class Aosc3GameModeBase;
+class AVCVModule;
 class UButton;
 class UTextBlock;
 class UBorder;
@@ -39,7 +43,20 @@ protected:
   UPROPERTY(meta = (BindWidget))
 	UBorder* Range;
 
+  UPROPERTY(meta = (BindWidget))
+	UBorder* BackContainer;
+  UPROPERTY(meta = (BindWidget))
+	UButton* BackButton;
+
   
 private:
   Aosc3GameModeBase* GameMode;
+  VCVMenuItem MenuItem;
+  AVCVModule* Module;
+  
+  // for type: BACK
+  int ParentMenuId;
+  
+  UFUNCTION()
+  void HandleClick();
 };

@@ -371,14 +371,61 @@ void AVCVModule::ReleaseGrab() {
 void AVCVModule::ToggleContextMenu() {
   if (ContextMenuWidgetComponent->IsVisible()) {
     ContextMenuWidgetComponent->SetVisibility(false);
+    ContextMenus.Empty();
     return;
   }
 
   // (re)create the base menu struct
-  ContextMenus.Add(0, VCVMenu(model.id, 0));
+  MakeMenu();
 
-  gameMode->RequestMenu(ContextMenus[0]);
   ContextMenuWidgetComponent->SetVisibility(true);
+}
+
+void AVCVModule::MakeMenu(int ParentMenuId, int ParentItemIndex) {
+  int menuId = ContextMenus.Num();
+  VCVMenu menu(model.id, menuId);
+
+  menu.parentMenuId = ParentMenuId;
+  menu.parentItemIndex = ParentItemIndex;
+
+  ContextMenus.Push(menu);
+  gameMode->RequestMenu(ContextMenus[menuId]);
+}
+
+void AVCVModule::ShowMenu(int MenuId) {
+  PrintMenu(ContextMenus[MenuId]);
+
+  TArray<UContextMenuEntryData*> entries;
+
+  // add back button to submenus
+  if (MenuId != 0) {
+    UContextMenuEntryData* backButtonEntry =
+      NewObject<UContextMenuEntryData>(this);
+    backButtonEntry->MenuItem.type = VCVMenuItemType::BACK;
+    backButtonEntry->Module = this;
+    backButtonEntry->ParentMenuId = ContextMenus[MenuId].parentMenuId;
+    backButtonEntry->DividerNext = true;
+    entries.Add(backButtonEntry);
+  }
+
+  for (auto& pair : ContextMenus[MenuId].MenuItems) {
+    VCVMenuItem& menuItem = pair.Value;
+    VCVMenuItemType divider = VCVMenuItemType::DIVIDER;
+    if (menuItem.type == divider) continue;
+
+    UContextMenuEntryData* entry = NewObject<UContextMenuEntryData>(this);
+    entry->MenuItem = menuItem;
+    entry->Module = this;
+
+    int& index = pair.Key;
+    if (ContextMenus[MenuId].MenuItems.Contains(index + 1)) 
+      if (ContextMenus[MenuId].MenuItems[index + 1].type == divider) 
+        entry->DividerNext = true;
+
+    entries.Add(entry);
+  }
+
+  ContextMenuWidget->SetListItems(entries);
 }
 
 void AVCVModule::AddMenuItem(VCVMenuItem& MenuItem) {
@@ -387,30 +434,7 @@ void AVCVModule::AddMenuItem(VCVMenuItem& MenuItem) {
 
 void AVCVModule::MenuSynced(VCVMenu& Menu) {
   ContextMenus[Menu.id].MenuItems.KeySort([](int A, int B) { return A < B; });
-  PrintMenu(ContextMenus[Menu.id]);
-
-  TArray<UContextMenuEntryData*> entries;
-
-  for (auto& pair : ContextMenus[Menu.id].MenuItems) {
-    VCVMenuItem& menuItem = pair.Value;
-    VCVMenuItemType divider = VCVMenuItemType::DIVIDER;
-    if (menuItem.type == divider) continue;
-
-    UContextMenuEntryData* entry = NewObject<UContextMenuEntryData>(this);
-    entry->MenuItem = menuItem;
-
-    int& index = pair.Key;
-    if (ContextMenus[Menu.id].MenuItems.Contains(index - 1)) 
-      if (ContextMenus[Menu.id].MenuItems[index - 1].type == divider) 
-        entry->dividerPrev = true;
-    if (ContextMenus[Menu.id].MenuItems.Contains(index + 1)) 
-      if (ContextMenus[Menu.id].MenuItems[index + 1].type == divider) 
-        entry->dividerNext = true;
-
-    entries.Add(entry);
-  }
-
-  ContextMenuWidget->SetListItems(entries);
+  ShowMenu(Menu.id);
 }
 
 void AVCVModule::PrintMenu(VCVMenu& Menu) {

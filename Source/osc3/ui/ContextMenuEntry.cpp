@@ -2,9 +2,11 @@
 
 #include "osc3GameModeBase.h"
 #include "ui/ContextMenuEntryData.h"
+#include "VCVModule.h"
 
 #include "Components/Border.h"
 #include "Components/TextBlock.h"
+#include "Components/CanvasPanelSlot.h"
 #include "Components/Button.h"
 #include "Kismet/GameplayStatics.h"
 
@@ -12,55 +14,88 @@ void UContextMenuEntry::NativeConstruct() {
   Super::NativeConstruct();
 
   GameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(this));
+  
+  ActionButton->OnReleased.AddDynamic(this, &UContextMenuEntry::HandleClick);
+  BackButton->OnReleased.AddDynamic(this, &UContextMenuEntry::HandleClick);
 }
 
 void UContextMenuEntry::NativeOnListItemObjectSet(UObject* ListItemObject) {
 	UContextMenuEntryData* entry = Cast<UContextMenuEntryData>(ListItemObject);
-  VCVMenuItem& menuItem = entry->MenuItem;
+  MenuItem = entry->MenuItem;
+  Module = entry->Module;
+  ParentMenuId = entry->ParentMenuId;
   
   ActionContainer->SetVisibility(ESlateVisibility::Hidden);
-  SubmenuIndicator->SetVisibility(ESlateVisibility::Hidden);
-  SelectedIndicator->SetVisibility(ESlateVisibility::Hidden);
+
+  UCanvasPanelSlot* actionTextSlot = Cast<UCanvasPanelSlot>(ActionButtonText->Slot);
+  FMargin actionTextOffsets = actionTextSlot->GetOffsets();
+  actionTextOffsets.Right = 0.f;
+  actionTextSlot->SetOffsets(actionTextOffsets);
+
+  SubmenuIndicator->SetVisibility(ESlateVisibility::Collapsed);
+  SelectedIndicator->SetVisibility(ESlateVisibility::Collapsed);
 
   LabelContainer->SetVisibility(ESlateVisibility::Hidden);
 
   Range->SetVisibility(ESlateVisibility::Hidden);
+
+  BackContainer->SetVisibility(ESlateVisibility::Hidden);
   
   UBorder* Container{nullptr};
   
-  switch (menuItem.type) {
+  switch (MenuItem.type) {
     case VCVMenuItemType::ACTION:
       Container = ActionContainer;
-      ActionButtonText->SetText(FText::FromString(menuItem.text));
-      if (menuItem.checked) SelectedIndicator->SetVisibility(ESlateVisibility::Visible);
+      ActionButtonText->SetText(FText::FromString(MenuItem.text));
+
+      if (MenuItem.checked) {
+        SelectedIndicator->SetVisibility(ESlateVisibility::Visible);
+
+        actionTextOffsets.Right = 24.f;
+        actionTextSlot->SetOffsets(actionTextOffsets);
+      }
       break;
     case VCVMenuItemType::SUBMENU:
       Container = ActionContainer;
-      ActionButtonText->SetText(FText::FromString(menuItem.text));
+      ActionButtonText->SetText(FText::FromString(MenuItem.text));
       SubmenuIndicator->SetVisibility(ESlateVisibility::Visible);
+
+      actionTextOffsets.Right = 24.f;
+      actionTextSlot->SetOffsets(actionTextOffsets);
       break;
     case VCVMenuItemType::LABEL:
       Container = LabelContainer;
-      LabelText->SetText(FText::FromString(menuItem.text));
+      LabelText->SetText(FText::FromString(MenuItem.text));
       break;
     case VCVMenuItemType::RANGE:
       Container = Range;
-      // Range->SetVisibility(ESlateVisibility::Visible);
+      break;
+    case VCVMenuItemType::BACK:
+      Container = BackContainer;
       break;
     default:
       break;
   }
 
-  // TEMP
-  if (!Container) return;
-
+  float bottomMargin{entry->DividerNext ? 2.f : 0.f};
+  Container->SetPadding(FMargin( 0.f, 0.f, 0.f, bottomMargin));
   Container->SetVisibility(ESlateVisibility::Visible);
-  Container->SetPadding(
-    FMargin(
-      0.f,
-      entry->dividerPrev ? 2.f : 0.f,
-      0.f,
-      entry->dividerNext ? 2.f : 0.f
-    )
-  );
+}
+
+void UContextMenuEntry::HandleClick() {
+  switch (MenuItem.type) {
+    case VCVMenuItemType::ACTION:
+      UE_LOG(LogTemp, Warning, TEXT("clicked on action %s, skipping"), *MenuItem.text);
+      break;
+    case VCVMenuItemType::SUBMENU:
+      UE_LOG(LogTemp, Warning, TEXT("clicked on submenu %s, requesting"), *MenuItem.text);
+      Module->MakeMenu(MenuItem.menuId, MenuItem.index);
+      break;
+    case VCVMenuItemType::BACK:
+      UE_LOG(LogTemp, Warning, TEXT("clicked on back button"));
+      Module->ShowMenu(ParentMenuId);
+      break;
+    default:
+      break;
+  }
 }

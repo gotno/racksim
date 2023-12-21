@@ -7,10 +7,16 @@
 
 #include "ContextMenuEntryData.generated.h"
 
+class AVCVModule;
+
 UCLASS()
 class OSC3_API UContextMenuEntryData : public UObject {
 	GENERATED_BODY()
 public:
+  AVCVModule* Module;
   VCVMenuItem MenuItem;
-  bool dividerPrev{false}, dividerNext{false};
+  bool DividerNext{false};
+  
+  // for type: BACK
+  int ParentMenuId;
 };

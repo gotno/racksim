@@ -206,7 +206,8 @@ enum VCVMenuItemType {
   ACTION,
   SUBMENU,
   RANGE,
-  DIVIDER
+  DIVIDER,
+  BACK // always last
 };
 
 struct VCVMenuItem {
