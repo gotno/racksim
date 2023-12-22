@@ -6,6 +6,7 @@
 
 #include "Components/Border.h"
 #include "Components/TextBlock.h"
+#include "CommonTextBlock.h"
 #include "Components/CanvasPanelSlot.h"
 #include "Components/Button.h"
 #include "Kismet/GameplayStatics.h"

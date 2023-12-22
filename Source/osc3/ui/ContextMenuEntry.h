@@ -12,6 +12,7 @@ class Aosc3GameModeBase;
 class AVCVModule;
 class UButton;
 class UTextBlock;
+class UCommonTextBlock;
 class UBorder;
 
 UCLASS()
@@ -27,7 +28,7 @@ protected:
   UPROPERTY(meta = (BindWidget))
 	UButton* ActionButton;
   UPROPERTY(meta = (BindWidget))
-	UTextBlock* ActionButtonText;
+	UCommonTextBlock* ActionButtonText;
   UPROPERTY(meta = (BindWidget))
 	UTextBlock* SelectedIndicator;
   UPROPERTY(meta = (BindWidget))
@@ -38,7 +39,7 @@ protected:
   UPROPERTY(meta = (BindWidget))
 	UButton* Label;
   UPROPERTY(meta = (BindWidget))
-	UTextBlock* LabelText;
+	UCommonTextBlock* LabelText;
 
   UPROPERTY(meta = (BindWidget))
 	UBorder* Range;
