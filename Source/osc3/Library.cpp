@@ -58,7 +58,7 @@ void ALibrary::BeginPlay() {
   if (BaseMaterialInterface) {
     BaseMaterialInstance = UMaterialInstanceDynamic::Create(BaseMaterialInterface, this);
     StaticMeshComponent->SetMaterial(0, BaseMaterialInstance);
-    BaseMaterialInstance->SetVectorParameterValue(TEXT("Color"), FLinearColor::White);
+    BaseMaterialInstance->SetVectorParameterValue(TEXT("Color"), FLinearColor::Black);
   }
 
   if (OutlineMaterialInterface) {
