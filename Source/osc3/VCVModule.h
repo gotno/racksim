@@ -45,8 +45,8 @@ public:
   void AddMenuItem(VCVMenuItem& MenuItem);
   void MenuSynced(VCVMenu& Menu);
   void MakeMenu(int ParentMenuId = -1, int ParentItemIndex = -1);
-  void ShowMenu(int MenuId);
-  void PrintMenu(VCVMenu& Menu);
+  void RequestMenu(int MenuId);
+  void CloseMenu();
 
   UPROPERTY()
   TMap<int32, AVCVLight*> LightActors;
@@ -91,6 +91,7 @@ private:
   UWidgetComponent* ContextMenuWidgetComponent;
   UContextMenu* ContextMenuWidget;
   void SetupContextMenuWidget();
+  void SetMenu(int MenuId);
 
   void spawnComponents();
 

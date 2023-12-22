@@ -240,6 +240,19 @@ void AOSCController::RequestMenu(const VCVMenu& Menu) const {
   OSCClient->SendOSCMessage(message);
 }
 
+void AOSCController::ClickMenuItem(const int64_t& ModuleId, const int& MenuId, const int& MenuItemIndex) const {
+  UE_LOG(LogTemp, Warning, TEXT("Sending /click_menu_item %lld"), ModuleId);
+  FOSCAddress address = UOSCManager::ConvertStringToOSCAddress(FString(TEXT("/click_menu_item")));
+  FOSCMessage message;
+  UOSCManager::SetOSCMessageAddress(message, address);
+
+  UOSCManager::AddInt64(message, ModuleId);
+  UOSCManager::AddInt32(message, MenuId);
+  UOSCManager::AddInt32(message, MenuItemIndex);
+
+  OSCClient->SendOSCMessage(message);
+}
+
 void AOSCController::AddContextMenuItem(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port) {
   // UE_LOG(LogTemp, Warning, TEXT("AddContextMenuItem"));
 

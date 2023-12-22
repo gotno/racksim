@@ -370,8 +370,7 @@ void AVCVModule::ReleaseGrab() {
 
 void AVCVModule::ToggleContextMenu() {
   if (ContextMenuWidgetComponent->IsVisible()) {
-    ContextMenuWidgetComponent->SetVisibility(false);
-    ContextMenus.Empty();
+    CloseMenu();
     return;
   }
 
@@ -392,21 +391,22 @@ void AVCVModule::MakeMenu(int ParentMenuId, int ParentItemIndex) {
   gameMode->RequestMenu(ContextMenus[menuId]);
 }
 
-void AVCVModule::ShowMenu(int MenuId) {
-  PrintMenu(ContextMenus[MenuId]);
+void AVCVModule::RequestMenu(int MenuId) {
+  gameMode->RequestMenu(ContextMenus[MenuId]);
+}
 
+void AVCVModule::SetMenu(int MenuId) {
   TArray<UContextMenuEntryData*> entries;
 
-  // add back button to submenus
-  if (MenuId != 0) {
-    UContextMenuEntryData* backButtonEntry =
-      NewObject<UContextMenuEntryData>(this);
-    backButtonEntry->MenuItem.type = VCVMenuItemType::BACK;
-    backButtonEntry->Module = this;
-    backButtonEntry->ParentMenuId = ContextMenus[MenuId].parentMenuId;
-    backButtonEntry->DividerNext = true;
-    entries.Add(backButtonEntry);
-  }
+  // add close/back button
+  UContextMenuEntryData* backButtonEntry =
+    NewObject<UContextMenuEntryData>(this);
+  backButtonEntry->MenuItem.type = VCVMenuItemType::BACK;
+  backButtonEntry->MenuItem.text = MenuId == 0 ? FString("Close") : FString("Back");
+  backButtonEntry->Module = this;
+  backButtonEntry->ParentMenuId = ContextMenus[MenuId].parentMenuId;
+  backButtonEntry->DividerNext = true;
+  entries.Add(backButtonEntry);
 
   for (auto& pair : ContextMenus[MenuId].MenuItems) {
     VCVMenuItem& menuItem = pair.Value;
@@ -428,44 +428,18 @@ void AVCVModule::ShowMenu(int MenuId) {
   ContextMenuWidget->SetListItems(entries);
 }
 
+void AVCVModule::CloseMenu() {
+  ContextMenuWidgetComponent->SetVisibility(false);
+  ContextMenus.Empty();
+}
+
 void AVCVModule::AddMenuItem(VCVMenuItem& MenuItem) {
   ContextMenus[MenuItem.menuId].MenuItems.Add(MenuItem.index, MenuItem);
 }
 
 void AVCVModule::MenuSynced(VCVMenu& Menu) {
   ContextMenus[Menu.id].MenuItems.KeySort([](int A, int B) { return A < B; });
-  ShowMenu(Menu.id);
-}
-
-void AVCVModule::PrintMenu(VCVMenu& Menu) {
-  for (auto& pair : Menu.MenuItems) {
-    VCVMenuItem& menuItem = pair.Value;
-
-    switch (menuItem.type) {
-      case VCVMenuItemType::LABEL:
-        UE_LOG(LogTemp, Display, TEXT("%s:%s menu %d- %d [%s]"), *Brand, *Name, menuItem.menuId, menuItem.index, *menuItem.text);
-        break;
-      case VCVMenuItemType::ACTION:
-        if (menuItem.checked) {
-          UE_LOG(LogTemp, Display, TEXT("%s:%s menu %d- %d B:%s\t[x]"), *Brand, *Name, menuItem.menuId, menuItem.index, *menuItem.text);
-        } else {
-          UE_LOG(LogTemp, Display, TEXT("%s:%s menu %d- %d A:%s"), *Brand, *Name, menuItem.menuId, menuItem.index, *menuItem.text);
-        }
-        break;
-      case VCVMenuItemType::SUBMENU:
-        UE_LOG(LogTemp, Display, TEXT("%s:%s menu %d- %d %s\t->"), *Brand, *Name, menuItem.menuId, menuItem.index, *menuItem.text);
-        break;
-      case VCVMenuItemType::DIVIDER:
-        UE_LOG(LogTemp, Display, TEXT("%s:%s menu %d- %d --------------------"), *Brand, *Name, menuItem.menuId, menuItem.index);
-        break;
-      case VCVMenuItemType::RANGE:
-        UE_LOG(LogTemp, Display, TEXT("%s:%s menu %d- %d %s: %s"), *Brand, *Name, menuItem.menuId, menuItem.index, *menuItem.text, *menuItem.rangeDisplayValue);
-        break;
-      default:
-        UE_LOG(LogTemp, Display, TEXT("%s:%s menu %d- %d ???"), *Brand, *Name, menuItem.menuId, menuItem.index);
-        break;
-    }
-  }
+  SetMenu(Menu.id);
 }
 
 void AVCVModule::Tick(float DeltaTime) {

@@ -183,6 +183,10 @@ void Aosc3GameModeBase::RequestMenu(const VCVMenu& Menu) const {
   OSCctrl->RequestMenu(Menu);
 }
 
+void Aosc3GameModeBase::ClickMenuItem(const int64_t& ModuleId, const int& MenuId, const int& MenuItemIndex) const {
+  OSCctrl->ClickMenuItem(ModuleId, MenuId, MenuItemIndex);
+}
+
 void Aosc3GameModeBase::UpdateLight(int64_t moduleId, int32 lightId, FLinearColor color) {
   if (ModuleActors.Contains(moduleId)) {
     ModuleActors[moduleId]->UpdateLight(lightId, color);

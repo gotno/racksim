@@ -47,6 +47,8 @@ protected:
 	UBorder* BackContainer;
   UPROPERTY(meta = (BindWidget))
 	UButton* BackButton;
+  UPROPERTY(meta = (BindWidget))
+	UTextBlock* BackButtonText;
 
   
 private:
@@ -56,6 +58,8 @@ private:
   
   // for type: BACK
   int ParentMenuId;
+  
+  float ActionIndicatorsMargin{24.f};
   
   UFUNCTION()
   void HandleClick();

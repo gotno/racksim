@@ -27,10 +27,14 @@ void UContextMenuEntry::NativeOnListItemObjectSet(UObject* ListItemObject) {
   
   ActionContainer->SetVisibility(ESlateVisibility::Hidden);
 
+  // set up offsets to make space for submenu/bool indicators
   UCanvasPanelSlot* actionTextSlot = Cast<UCanvasPanelSlot>(ActionButtonText->Slot);
   FMargin actionTextOffsets = actionTextSlot->GetOffsets();
+  // set default
   actionTextOffsets.Right = 0.f;
   actionTextSlot->SetOffsets(actionTextOffsets);
+  // set up for later
+  actionTextOffsets.Right = ActionIndicatorsMargin;
 
   SubmenuIndicator->SetVisibility(ESlateVisibility::Collapsed);
   SelectedIndicator->SetVisibility(ESlateVisibility::Collapsed);
@@ -47,11 +51,10 @@ void UContextMenuEntry::NativeOnListItemObjectSet(UObject* ListItemObject) {
     case VCVMenuItemType::ACTION:
       Container = ActionContainer;
       ActionButtonText->SetText(FText::FromString(MenuItem.text));
+      ActionButton->SetIsEnabled(!MenuItem.disabled);
 
       if (MenuItem.checked) {
         SelectedIndicator->SetVisibility(ESlateVisibility::Visible);
-
-        actionTextOffsets.Right = 24.f;
         actionTextSlot->SetOffsets(actionTextOffsets);
       }
       break;
@@ -59,8 +62,6 @@ void UContextMenuEntry::NativeOnListItemObjectSet(UObject* ListItemObject) {
       Container = ActionContainer;
       ActionButtonText->SetText(FText::FromString(MenuItem.text));
       SubmenuIndicator->SetVisibility(ESlateVisibility::Visible);
-
-      actionTextOffsets.Right = 24.f;
       actionTextSlot->SetOffsets(actionTextOffsets);
       break;
     case VCVMenuItemType::LABEL:
@@ -72,6 +73,7 @@ void UContextMenuEntry::NativeOnListItemObjectSet(UObject* ListItemObject) {
       break;
     case VCVMenuItemType::BACK:
       Container = BackContainer;
+      BackButtonText->SetText(FText::FromString(MenuItem.text));
       break;
     default:
       break;
@@ -85,15 +87,17 @@ void UContextMenuEntry::NativeOnListItemObjectSet(UObject* ListItemObject) {
 void UContextMenuEntry::HandleClick() {
   switch (MenuItem.type) {
     case VCVMenuItemType::ACTION:
-      UE_LOG(LogTemp, Warning, TEXT("clicked on action %s, skipping"), *MenuItem.text);
+      GameMode->ClickMenuItem(MenuItem.moduleId, MenuItem.menuId, MenuItem.index);
       break;
     case VCVMenuItemType::SUBMENU:
-      UE_LOG(LogTemp, Warning, TEXT("clicked on submenu %s, requesting"), *MenuItem.text);
       Module->MakeMenu(MenuItem.menuId, MenuItem.index);
       break;
     case VCVMenuItemType::BACK:
-      UE_LOG(LogTemp, Warning, TEXT("clicked on back button"));
-      Module->ShowMenu(ParentMenuId);
+      if (ParentMenuId == -1) {
+        Module->CloseMenu();
+      } else {
+        Module->RequestMenu(ParentMenuId);
+      }
       break;
     default:
       break;
