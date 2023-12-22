@@ -46,8 +46,8 @@ private:
   FString PluginSlug, ModuleSlug;
   bool bFavorite{false};
   
-  FSlateColor HoverColor{FLinearColor(1.f, 0.09375f, 0.156451f)};
-  FSlateColor DefaultColor{FLinearColor(1.f, 1.f, 1.f)};
+  FSlateColor HoverColor{FLinearColor(0.40625f, 0.217116f, 0.282548f)};
+  FSlateColor DefaultColor{FLinearColor(0.083333f, 0.083333f, 0.083333f)};
   
   Aosc3GameModeBase* GameMode;
 };
