@@ -382,6 +382,15 @@ void AVCVModule::ToggleContextMenu() {
 }
 
 void AVCVModule::MakeMenu(int ParentMenuId, int ParentItemIndex) {
+  int foundMenuIndex = ContextMenus.IndexOfByPredicate([&](const VCVMenu& menu) {
+    return menu.parentMenuId == ParentMenuId && menu.parentItemIndex == ParentItemIndex;
+  });
+
+  if (foundMenuIndex != INDEX_NONE) {
+    RequestMenu(foundMenuIndex);
+    return;
+  }
+
   int menuId = ContextMenus.Num();
   VCVMenu menu(model.id, menuId);
 
