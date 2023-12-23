@@ -92,6 +92,7 @@ private:
   UContextMenu* ContextMenuWidget;
   void SetupContextMenuWidget();
   void SetMenu(int MenuId);
+  FString MakeMenuBreadcrumbs(int MenuId);
 
   void spawnComponents();
 

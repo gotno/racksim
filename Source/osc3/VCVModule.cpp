@@ -19,6 +19,7 @@
 #include "UObject/ConstructorHelpers.h"
 #include "Components/PrimitiveComponent.h"
 #include "Components/WidgetComponent.h"
+#include "Algo/Reverse.h"
 
 AVCVModule::AVCVModule() {
 	PrimaryActorTick.bCanEverTick = true;
@@ -388,11 +389,28 @@ void AVCVModule::MakeMenu(int ParentMenuId, int ParentItemIndex) {
   menu.parentItemIndex = ParentItemIndex;
 
   ContextMenus.Push(menu);
-  gameMode->RequestMenu(ContextMenus[menuId]);
+  RequestMenu(menuId);
 }
 
 void AVCVModule::RequestMenu(int MenuId) {
   gameMode->RequestMenu(ContextMenus[MenuId]);
+}
+
+FString AVCVModule::MakeMenuBreadcrumbs(int MenuId) {
+  TArray<FString> crumbs;
+
+  int currentId = MenuId;
+  while (currentId > 0) {
+    int parentMenuId = ContextMenus[currentId].parentMenuId;
+    int parentItemIndex = ContextMenus[currentId].parentItemIndex;
+
+    crumbs.Push(ContextMenus[parentMenuId].MenuItems[parentItemIndex].text);
+
+    currentId = parentMenuId;
+  }
+
+  Algo::Reverse(crumbs);
+  return FString::Join(crumbs, _T(" > "));
 }
 
 void AVCVModule::SetMenu(int MenuId) {
@@ -407,6 +425,19 @@ void AVCVModule::SetMenu(int MenuId) {
   backButtonEntry->ParentMenuId = ContextMenus[MenuId].parentMenuId;
   backButtonEntry->DividerNext = true;
   entries.Add(backButtonEntry);
+
+  // add breadcrumbs label for submenus
+  if (MenuId != 0) {
+    int parentMenuId = ContextMenus[MenuId].parentMenuId;
+    int parentItemIndex = ContextMenus[MenuId].parentItemIndex;
+
+    UContextMenuEntryData* crumbsLabelEntry =
+      NewObject<UContextMenuEntryData>(this);
+    crumbsLabelEntry->MenuItem.type = VCVMenuItemType::LABEL;
+    crumbsLabelEntry->MenuItem.text = MakeMenuBreadcrumbs(MenuId);
+    crumbsLabelEntry->DividerNext = true;
+    entries.Add(crumbsLabelEntry);
+  }
 
   for (auto& pair : ContextMenus[MenuId].MenuItems) {
     VCVMenuItem& menuItem = pair.Value;
