@@ -207,7 +207,8 @@ enum VCVMenuItemType {
   SUBMENU,
   RANGE,
   DIVIDER,
-  BACK // always last
+  // the following are specific to the unreal side and should stay last
+  BACK
 };
 
 struct VCVMenuItem {
