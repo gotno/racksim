@@ -1,14 +1,16 @@
 #include "ui/ContextMenuEntry.h"
 
 #include "osc3GameModeBase.h"
-#include "ui/ContextMenuEntryData.h"
 #include "VCVModule.h"
+#include "ui/ContextMenuEntryData.h"
 
-#include "Components/Border.h"
-#include "Components/TextBlock.h"
 #include "CommonTextBlock.h"
-#include "Components/CanvasPanelSlot.h"
+#include "Components/TextBlock.h"
 #include "Components/Button.h"
+#include "Components/Slider.h"
+#include "Components/Border.h"
+#include "Components/CanvasPanelSlot.h"
+
 #include "Kismet/GameplayStatics.h"
 
 void UContextMenuEntry::NativeConstruct() {
@@ -18,6 +20,8 @@ void UContextMenuEntry::NativeConstruct() {
   
   ActionButton->OnReleased.AddDynamic(this, &UContextMenuEntry::HandleClick);
   BackButton->OnReleased.AddDynamic(this, &UContextMenuEntry::HandleClick);
+  Slider->OnValueChanged.AddDynamic(this, &UContextMenuEntry::HandleSliderChange);
+  Slider->OnMouseCaptureEnd.AddDynamic(this, &UContextMenuEntry::HandleSliderRelease);
 }
 
 void UContextMenuEntry::NativeOnListItemObjectSet(UObject* ListItemObject) {
@@ -71,6 +75,10 @@ void UContextMenuEntry::NativeOnListItemObjectSet(UObject* ListItemObject) {
       break;
     case VCVMenuItemType::RANGE:
       Container = Range;
+      Slider->SetMinValue(MenuItem.quantityMinValue);
+      Slider->SetMaxValue(MenuItem.quantityMaxValue);
+      Slider->SetValue(MenuItem.quantityValue);
+      SliderText->SetText(FText::FromString(MenuItem.text));
       break;
     case VCVMenuItemType::BACK:
       Container = BackContainer;
@@ -88,7 +96,7 @@ void UContextMenuEntry::NativeOnListItemObjectSet(UObject* ListItemObject) {
 void UContextMenuEntry::HandleClick() {
   switch (MenuItem.type) {
     case VCVMenuItemType::ACTION:
-      GameMode->ClickMenuItem(MenuItem.moduleId, MenuItem.menuId, MenuItem.index);
+      GameMode->ClickMenuItem(MenuItem);
       break;
     case VCVMenuItemType::SUBMENU:
       Module->MakeMenu(MenuItem.menuId, MenuItem.index);
@@ -103,4 +111,18 @@ void UContextMenuEntry::HandleClick() {
     default:
       break;
   }
+}
+
+void UContextMenuEntry::HandleSliderChange(float Value) {
+  FString label("");
+  if (!MenuItem.quantityLabel.IsEmpty()) {
+    label.Append(MenuItem.quantityLabel).Append(FString(": "));
+  }
+  label.Append(FString::SanitizeFloat(Value)).Append(MenuItem.quantityUnit);
+  SliderText->SetText(FText::FromString(label));
+}
+
+void UContextMenuEntry::HandleSliderRelease() {
+  // send quantity update
+  GameMode->UpdateMenuItemQuantity(MenuItem, Slider->GetValue());
 }

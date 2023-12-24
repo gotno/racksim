@@ -183,8 +183,12 @@ void Aosc3GameModeBase::RequestMenu(const VCVMenu& Menu) const {
   OSCctrl->RequestMenu(Menu);
 }
 
-void Aosc3GameModeBase::ClickMenuItem(const int64_t& ModuleId, const int& MenuId, const int& MenuItemIndex) const {
-  OSCctrl->ClickMenuItem(ModuleId, MenuId, MenuItemIndex);
+void Aosc3GameModeBase::ClickMenuItem(const VCVMenuItem& MenuItem) const {
+  OSCctrl->ClickMenuItem(MenuItem);
+}
+
+void Aosc3GameModeBase::UpdateMenuItemQuantity(const VCVMenuItem& MenuItem, const float& Value) const {
+  OSCctrl->UpdateMenuItemQuantity(MenuItem, Value);
 }
 
 void Aosc3GameModeBase::UpdateLight(int64_t moduleId, int32 lightId, FLinearColor color) {

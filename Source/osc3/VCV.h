@@ -219,9 +219,11 @@ struct VCVMenuItem {
   FString text;
   bool checked{false};
   bool disabled{false};
-  float rangeValue{0.f};
-  float minRangeValue{0.f}, maxRangeValue{1.f}, defaultRangeValue{0.f};
-  FString rangeDisplayValue;
+
+  float quantityValue{0.f},
+    quantityMinValue{0.f}, quantityMaxValue{1.f}, quantityDefaultValue{0.f};
+  FString quantityLabel{""},
+    quantityUnit{""};
   
   VCVMenuItem() {}
   VCVMenuItem(int64_t _moduleId, int _menuId, int _index)

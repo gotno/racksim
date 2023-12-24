@@ -14,6 +14,7 @@ class UButton;
 class UTextBlock;
 class UCommonTextBlock;
 class UBorder;
+class USlider;
 
 UCLASS()
 class OSC3_API UContextMenuEntry : public UUserWidget, public IUserObjectListEntry {
@@ -43,6 +44,10 @@ protected:
 
   UPROPERTY(meta = (BindWidget))
 	UBorder* Range;
+  UPROPERTY(meta = (BindWidget))
+	USlider* Slider;
+  UPROPERTY(meta = (BindWidget))
+	UTextBlock* SliderText;
 
   UPROPERTY(meta = (BindWidget))
 	UBorder* BackContainer;
@@ -50,8 +55,6 @@ protected:
 	UButton* BackButton;
   UPROPERTY(meta = (BindWidget))
 	UTextBlock* BackButtonText;
-
-  
 private:
   Aosc3GameModeBase* GameMode;
   VCVMenuItem MenuItem;
@@ -64,4 +67,8 @@ private:
   
   UFUNCTION()
   void HandleClick();
+  UFUNCTION()
+  void HandleSliderChange(float Value);
+  UFUNCTION()
+  void HandleSliderRelease();
 };

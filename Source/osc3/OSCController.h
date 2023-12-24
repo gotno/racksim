@@ -41,7 +41,8 @@ public:
   void DestroyCable(int64 cableId);
 
   void RequestMenu(const VCVMenu& Menu) const;
-  void ClickMenuItem(const int64_t& ModuleId, const int& MenuId, const int& MenuItemIndex) const;
+  void ClickMenuItem(const VCVMenuItem& MenuItem) const;
+  void UpdateMenuItemQuantity(const VCVMenuItem& MenuItem, const float& Value) const;
 
 private:
   UPROPERTY()

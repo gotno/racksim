@@ -240,15 +240,29 @@ void AOSCController::RequestMenu(const VCVMenu& Menu) const {
   OSCClient->SendOSCMessage(message);
 }
 
-void AOSCController::ClickMenuItem(const int64_t& ModuleId, const int& MenuId, const int& MenuItemIndex) const {
-  UE_LOG(LogTemp, Warning, TEXT("Sending /click_menu_item %lld"), ModuleId);
+void AOSCController::ClickMenuItem(const VCVMenuItem& MenuItem) const {
+  UE_LOG(LogTemp, Warning, TEXT("Sending /click_menu_item %lld"), MenuItem.moduleId);
   FOSCAddress address = UOSCManager::ConvertStringToOSCAddress(FString(TEXT("/click_menu_item")));
   FOSCMessage message;
   UOSCManager::SetOSCMessageAddress(message, address);
 
-  UOSCManager::AddInt64(message, ModuleId);
-  UOSCManager::AddInt32(message, MenuId);
-  UOSCManager::AddInt32(message, MenuItemIndex);
+  UOSCManager::AddInt64(message, MenuItem.moduleId);
+  UOSCManager::AddInt32(message, MenuItem.menuId);
+  UOSCManager::AddInt32(message, MenuItem.index);
+
+  OSCClient->SendOSCMessage(message);
+}
+
+void AOSCController::UpdateMenuItemQuantity(const VCVMenuItem& MenuItem, const float& Value) const {
+  UE_LOG(LogTemp, Warning, TEXT("Sending /update_menu_item_quantity %lld"), MenuItem.moduleId);
+  FOSCAddress address = UOSCManager::ConvertStringToOSCAddress(FString(TEXT("/update_menu_item_quantity")));
+  FOSCMessage message;
+  UOSCManager::SetOSCMessageAddress(message, address);
+
+  UOSCManager::AddInt64(message, MenuItem.moduleId);
+  UOSCManager::AddInt32(message, MenuItem.menuId);
+  UOSCManager::AddInt32(message, MenuItem.index);
+  UOSCManager::AddFloat(message, Value);
 
   OSCClient->SendOSCMessage(message);
 }
@@ -274,11 +288,12 @@ void AOSCController::AddContextMenuItem(const FOSCAddress& AddressPattern, const
   UOSCManager::GetString(message, 4, menuItem.text);
   UOSCManager::GetBool(message, 5, menuItem.checked);
   UOSCManager::GetBool(message, 6, menuItem.disabled);
-  UOSCManager::GetFloat(message, 7, menuItem.rangeValue);
-  UOSCManager::GetFloat(message, 8, menuItem.minRangeValue);
-  UOSCManager::GetFloat(message, 9, menuItem.maxRangeValue);
-  UOSCManager::GetFloat(message, 10, menuItem.defaultRangeValue);
-  UOSCManager::GetString(message, 11, menuItem.rangeDisplayValue);
+  UOSCManager::GetFloat(message, 7, menuItem.quantityValue);
+  UOSCManager::GetFloat(message, 8, menuItem.quantityMinValue);
+  UOSCManager::GetFloat(message, 9, menuItem.quantityMaxValue);
+  UOSCManager::GetFloat(message, 10, menuItem.quantityDefaultValue);
+  UOSCManager::GetString(message, 11, menuItem.quantityLabel);
+  UOSCManager::GetString(message, 12, menuItem.quantityUnit);
   
   gameMode->UpdateModuleMenuItem(menuItem);
 }
