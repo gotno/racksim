@@ -166,6 +166,10 @@ void Aosc3GameModeBase::RequestModuleSpawn(FString PluginSlug, FString ModuleSlu
   OSCctrl->CreateModule(PluginSlug, ModuleSlug);
 }
 
+void Aosc3GameModeBase::RequestModuleDiff(const int64_t& ModuleId) const {
+  OSCctrl->SendModuleDiffRequest(ModuleId);
+};
+
 void Aosc3GameModeBase::SetModuleFavorite(FString PluginSlug, FString ModuleSlug, bool bFavorite) {
   OSCctrl->SetModuleFavorite(PluginSlug, ModuleSlug, bFavorite);
   LibraryActor->SetModuleFavorite(PluginSlug, ModuleSlug, bFavorite);
@@ -192,15 +196,13 @@ void Aosc3GameModeBase::UpdateMenuItemQuantity(const VCVMenuItem& MenuItem, cons
 }
 
 void Aosc3GameModeBase::UpdateLight(int64_t moduleId, int32 lightId, FLinearColor color) {
-  if (ModuleActors.Contains(moduleId)) {
-    ModuleActors[moduleId]->UpdateLight(lightId, color);
-  }
+  if (!ModuleActors.Contains(moduleId)) return;
+  ModuleActors[moduleId]->UpdateLight(lightId, color);
 }
 
-void Aosc3GameModeBase::UpdateParamDisplayValue(int64_t moduleId, int32 paramId, FString displayValue) {
-  if (ModuleActors.Contains(moduleId)) {
-    ModuleActors[moduleId]->GetParamActor(paramId)->UpdateDisplayValue(displayValue);
-  }
+void Aosc3GameModeBase::UpdateParam(int64_t moduleId, VCVParam& param) {
+  if (!ModuleActors.Contains(moduleId)) return;
+  ModuleActors[moduleId]->GetParamActor(param.id)->Update(param);
 }
 
 void Aosc3GameModeBase::UpdateModuleMenuItem(VCVMenuItem& MenuItem) {

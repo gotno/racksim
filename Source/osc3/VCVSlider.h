@@ -86,4 +86,6 @@ public:
   void alter(FVector ControllerPosition) override;
   void release() override;
   void resetValue() override;
+
+  void Update(VCVParam& Param) override;
 };

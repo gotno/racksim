@@ -95,3 +95,8 @@ void AVCVSwitch::resetValue() {
   Super::resetValue();
   setFrame();
 }
+
+void AVCVSwitch::Update(VCVParam& Param) {
+  Super::Update(Param);
+  setFrame();
+}

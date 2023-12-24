@@ -52,4 +52,6 @@ public:
   // virtual void alter(float amount);
   // virtual void release();
   virtual void resetValue();
+
+  void Update(VCVParam& Param) override;
 };

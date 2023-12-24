@@ -43,6 +43,7 @@ public:
   void RequestMenu(const VCVMenu& Menu) const;
   void ClickMenuItem(const VCVMenuItem& MenuItem) const;
   void UpdateMenuItemQuantity(const VCVMenuItem& MenuItem, const float& Value) const;
+  void SendModuleDiffRequest(const int64_t& ModuleId) const;
 
 private:
   UPROPERTY()

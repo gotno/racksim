@@ -91,3 +91,12 @@ void AVCVButton::release() {
     FaceMaterialInstance->SetTextureParameterValue(FName("texture"), frames[model->value]);
   }
 }
+
+void AVCVButton::Update(VCVParam& Param) {
+  Super::Update(Param);
+
+  FaceMaterialInstance->SetTextureParameterValue(
+    FName("texture"),
+    model->value == model->minValue ? frames[0] : frames[frames.Num() - 1]
+  );
+}

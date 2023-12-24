@@ -189,3 +189,14 @@ void AVCVSlider::resetValue() {
   HandleMeshComponent->SetWorldLocation(zeroPosition + sliderDirectionVector * WorldOffset);
   ShadowOffset = WorldOffset;
 }
+
+void AVCVSlider::Update(VCVParam& Param) {
+  Super::Update(Param);
+
+  FVector sliderDirectionVector = GetSliderDirectionVector();
+  FVector zeroPosition = HandleMeshComponent->GetComponentLocation() - sliderDirectionVector * WorldOffset;
+
+  WorldOffset = getOffsetFromValue();
+  HandleMeshComponent->SetWorldLocation(zeroPosition + sliderDirectionVector * WorldOffset);
+  ShadowOffset = WorldOffset;
+}

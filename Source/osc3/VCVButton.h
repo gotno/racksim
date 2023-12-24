@@ -47,4 +47,6 @@ private:
 public:
   void engage() override;
   void release() override;
+
+  void Update(VCVParam& Param) override;
 };

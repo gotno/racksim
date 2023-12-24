@@ -2,7 +2,12 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+
+#include "VCV.h"
+
 #include "VCVParam.generated.h"
+
+class Aosc3GameModeBase;
 
 UCLASS()
 class OSC3_API AVCVParam : public AActor {
@@ -20,13 +25,16 @@ protected:
 private:
   class AVCVModule* owner;
   
-  float alterRatio = 1.f;
+  float alterRatio{1.f};
 
   mutable FCriticalSection DataGuard;
+
+  Aosc3GameModeBase* GameMode;
 public:	
 	virtual void Tick(float DeltaTime) override;
 
   virtual void init(struct VCVParam* model);
+  virtual void Update(VCVParam& param);
   VCVParam* model;
 
   void UpdateDisplayValue(const FString& DisplayValue);

@@ -51,7 +51,7 @@ public:
   void AttachCable(int64_t cableId, PortIdentity identity);
 
   void UpdateLight(int64_t moduleId, int32 lightId, FLinearColor color);
-  void UpdateParamDisplayValue(int64_t moduleId, int32 paramId, FString displayValue);
+  void UpdateParam(int64_t moduleId, VCVParam& param);
   void UpdateModuleMenuItem(VCVMenuItem& MenuItem);
   void ModuleMenuSynced(VCVMenu& Menu);
 
@@ -59,6 +59,7 @@ public:
   void DuplicateModule(AVCVModule* Module);
   void DestroyModule(AVCVModule* Module);
   void RequestModuleSpawn(FString PluginSlug, FString ModuleSlug);
+  void RequestModuleDiff(const int64_t& ModuleId) const;
   void SetModuleFavorite(FString PluginSlug, FString ModuleSlug, bool bFavorite);
   void RequestMenu(const VCVMenu& Menu) const;
   void ClickMenuItem(const VCVMenuItem& MenuItem) const;

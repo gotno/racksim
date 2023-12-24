@@ -2,7 +2,6 @@
 
 #include "osc3.h"
 #include "osc3GameModeBase.h"
-#include "VCV.h"
 #include "VCVOverrides.h"
 
 #include "engine/Texture2D.h"
@@ -139,5 +138,10 @@ void AVCVKnob::release() {
 
 void AVCVKnob::resetValue() {
   Super::resetValue();
+  updateRotation(getRotationFromValue());
+}
+
+void AVCVKnob::Update(VCVParam& param) {
+  Super::Update(param);
   updateRotation(getRotationFromValue());
 }

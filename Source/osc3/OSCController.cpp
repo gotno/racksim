@@ -205,6 +205,16 @@ void AOSCController::DestroyModule(int64 moduleId) {
   OSCClient->SendOSCMessage(message);
 }
 
+void AOSCController::SendModuleDiffRequest(const int64_t& ModuleId) const {
+  UE_LOG(LogTemp, Warning, TEXT("Sending /diff/module %lld"), ModuleId);
+  FOSCAddress address = UOSCManager::ConvertStringToOSCAddress(FString(TEXT("/diff/module")));
+  FOSCMessage message;
+  UOSCManager::SetOSCMessageAddress(message, address);
+  UOSCManager::AddInt64(message, ModuleId);
+
+  OSCClient->SendOSCMessage(message);
+};
+
 void AOSCController::CreateCable(int64 inputModuleId, int64 outputModuleId, int inputPortId, int outputPortId) {
   FOSCAddress address = UOSCManager::ConvertStringToOSCAddress(FString(TEXT("/create/cable")));
   FOSCMessage message;
@@ -569,11 +579,14 @@ void AOSCController::SyncParam(const FOSCAddress& AddressPattern, const FOSCMess
   if (ModuleGuard(message, moduleId)) return;
   
   int32 paramId;
-  FString displayValue;
   UOSCManager::GetInt32(message, 1, paramId);
-  UOSCManager::GetString(message, 2, displayValue);
+  VCVParam param(paramId);
+
+  UOSCManager::GetString(message, 2, param.displayValue);
+  UOSCManager::GetFloat(message, 3, param.value);
+  UOSCManager::GetBool(message, 4, param.visible);
   
-  gameMode->UpdateParamDisplayValue(moduleId, paramId, displayValue);
+  gameMode->UpdateParam(moduleId, param);
 }
 
 void AOSCController::AddLibraryPlugin(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port) {

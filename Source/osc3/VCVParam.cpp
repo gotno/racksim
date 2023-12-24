@@ -1,11 +1,12 @@
 #include "VCVParam.h"
 
 #include "osc3.h"
-#include "VCV.h"
+#include "osc3GameModeBase.h"
 #include "VCVModule.h"
 #include "VCVLight.h"
 
 #include "Misc/ScopeRWLock.h"
+#include "Kismet/GameplayStatics.h"
 
 AVCVParam::AVCVParam() {
 	PrimaryActorTick.bCanEverTick = true;
@@ -15,6 +16,7 @@ AVCVParam::AVCVParam() {
 
 void AVCVParam::BeginPlay() {
 	Super::BeginPlay();
+  GameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(this));
 }
 
 void AVCVParam::Tick(float DeltaTime) {
@@ -24,10 +26,16 @@ void AVCVParam::Tick(float DeltaTime) {
 void AVCVParam::init(VCVParam* vcv_param) {
   model = vcv_param; 
   owner = Cast<AVCVModule>(GetOwner());
-  SetHidden(!model->visible);
+  SetActorHiddenInGame(!model->visible);
   SetActorEnableCollision(model->visible);
   SetActorScale3D(FVector(RENDER_SCALE, model->box.size.x, model->box.size.y));
-  // UE_LOG(LogTemp, Warning, TEXT("%s: %s%s"), *(model->name), *(model->displayValue), *(model->unit));
+}
+
+void AVCVParam::Update(VCVParam& param) {
+  FScopeLock Lock(&DataGuard);
+  model->merge(param);
+  SetActorHiddenInGame(!model->visible);
+  SetActorEnableCollision(model->visible);
 }
 
 FString AVCVParam::getModuleBrand() {
@@ -38,11 +46,6 @@ void AVCVParam::GetTooltipText(FString& Label, FString& DisplayValue) {
   FScopeLock Lock(&DataGuard);
   Label = model->name;
   DisplayValue = model->displayValue;
-}
-
-void AVCVParam::UpdateDisplayValue(const FString& DisplayValue) {
-  FScopeLock Lock(&DataGuard);
-  model->displayValue = DisplayValue;
 }
 
 void AVCVParam::spawnLights(USceneComponent* attachTo) {
@@ -101,6 +104,7 @@ void AVCVParam::alter(FVector _value) {
 void AVCVParam::release() {
   // UE_LOG(LogTemp, Warning, TEXT("param release"));
   engaged = false;
+  GameMode->RequestModuleDiff(owner->GetId());
 }
 
 void AVCVParam::resetValue() {

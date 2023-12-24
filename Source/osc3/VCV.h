@@ -96,12 +96,14 @@ struct VCVParam {
   TArray<FString> svgPaths;
   FLinearColor bodyColor;
   
-  // internal operations, not useful?
-  // float displayBase;
-  // float displayMultiplier;
-  // float displayOffset;
   VCVParam() {}
   VCVParam(int32 _id) : id(_id) {}
+  
+  void merge(const VCVParam& other) {
+    value = other.value;
+    displayValue = other.displayValue;
+    visible = other.visible;
+  }
 };
 
 enum PortType {

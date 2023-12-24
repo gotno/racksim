@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "VCVParam.h"
+#include "VCV.h"
 #include "VCVKnob.generated.h"
 
 class UTexture2D;
@@ -71,4 +72,6 @@ public:
   void alter(float ControllerRoll) override;
   void release() override;
   void resetValue() override;
+
+  void Update(VCVParam& param) override;
 };
