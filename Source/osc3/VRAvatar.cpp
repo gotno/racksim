@@ -513,7 +513,7 @@ void AVRAvatar::HandleDestroyModule(const FInputActionValue& _Value, EController
 
   if (grabbedModule) {
     // UE_LOG(LogTemp, Warning, TEXT("%s destroy module %s"), Hand == EControllerHand::Left ? *FString("left") : *FString("right"), *grabbedModule->GetActorNameOrLabel());
-    GameMode->DestroyModule(grabbedModule);
+    GameMode->DestroyModule(grabbedModule->GetId());
   }
 }
 

@@ -34,7 +34,7 @@ public:
   UFUNCTION()
   void SetModuleFavorite(FString pluginSlug, FString moduleSlug, bool bFavorite);
   UFUNCTION()
-  void DestroyModule(int64 moduleId);
+  void SendDestroyModule(int64 moduleId);
   UFUNCTION()
   void CreateCable(int64 inputModuleId, int64 ouputModuleId, int inputPortId, int outputPortId);
   UFUNCTION()
@@ -62,6 +62,8 @@ private:
   void LogOSC(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port);
   UFUNCTION()
   void AddModule(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port);
+  UFUNCTION()
+  void DestroyModule(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port);
   UFUNCTION()
   void AddParam(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port);
   UFUNCTION()

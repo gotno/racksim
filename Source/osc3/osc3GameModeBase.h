@@ -57,7 +57,7 @@ public:
 
   void SendParamUpdate(int64_t moduleId, int32 paramId, float value);
   void DuplicateModule(AVCVModule* Module);
-  void DestroyModule(AVCVModule* Module);
+  void DestroyModule(int64_t ModuleId, bool bSync = true);
   void RequestModuleSpawn(FString PluginSlug, FString ModuleSlug);
   void RequestModuleDiff(const int64_t& ModuleId) const;
   void SetModuleFavorite(FString PluginSlug, FString ModuleSlug, bool bFavorite);

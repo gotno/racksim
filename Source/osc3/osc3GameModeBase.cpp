@@ -175,12 +175,13 @@ void Aosc3GameModeBase::SetModuleFavorite(FString PluginSlug, FString ModuleSlug
   LibraryActor->SetModuleFavorite(PluginSlug, ModuleSlug, bFavorite);
 }
 
-void Aosc3GameModeBase::DestroyModule(AVCVModule* Module) {
-  if (!ModuleActors.Contains(Module->GetId())) return;
+void Aosc3GameModeBase::DestroyModule(int64_t ModuleId, bool bSync) {
+  if (!ModuleActors.Contains(ModuleId)) return;
 
-  ModuleActors[Module->GetId()]->Destroy();
-  ModuleActors.Remove(Module->GetId());
-  OSCctrl->DestroyModule(Module->GetId());
+  ModuleActors[ModuleId]->Destroy();
+  ModuleActors.Remove(ModuleId);
+
+  if (bSync) OSCctrl->SendDestroyModule(ModuleId);
 }
 
 void Aosc3GameModeBase::RequestMenu(const VCVMenu& Menu) const {

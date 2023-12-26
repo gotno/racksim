@@ -20,6 +20,7 @@ void AOSCController::Init() {
   }
 
   AddRoute("/modules/add/*", FName(TEXT("AddModule")));
+  AddRoute("/modules/destroy/*", FName(TEXT("DestroyModule")));
   AddRoute("/modules/param/add/*", FName(TEXT("AddParam")));
   AddRoute("/modules/input/add/*", FName(TEXT("AddInput")));
   AddRoute("/modules/output/add/*", FName(TEXT("AddOutput")));
@@ -139,6 +140,15 @@ void AOSCController::AddModule(const FOSCAddress& AddressPattern, const FOSCMess
   NotifyReceived("module", moduleId);
 }
 
+void AOSCController::DestroyModule(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port) {
+  int64 moduleId;
+  UOSCManager::GetInt64(message, 0, moduleId);
+
+  UE_LOG(LogTemp, Warning, TEXT("DestroyModule %lld"), moduleId);
+
+  gameMode->DestroyModule(moduleId, false);
+}
+
 void AOSCController::NotifyReceived(FString type, int64 outerId, int innerId) {
   // UE_LOG(LogTemp, Warning, TEXT("Sending NotifyReceived %s %lld:%d"), *type, outerId, innerId);
   FOSCAddress address = UOSCManager::ConvertStringToOSCAddress(FString(TEXT("/rx/")) + type);
@@ -195,7 +205,7 @@ void AOSCController::SetModuleFavorite(FString pluginSlug, FString moduleSlug, b
   OSCClient->SendOSCMessage(message);
 }
 
-void AOSCController::DestroyModule(int64 moduleId) {
+void AOSCController::SendDestroyModule(int64 moduleId) {
   UE_LOG(LogTemp, Warning, TEXT("Sending /destroy/module %lld"), moduleId);
   FOSCAddress address = UOSCManager::ConvertStringToOSCAddress(FString(TEXT("/destroy/module")));
   FOSCMessage message;
