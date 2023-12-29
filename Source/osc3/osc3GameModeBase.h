@@ -46,9 +46,11 @@ public:
   );
   AVCVPort* GetPortActor(PortIdentity identity);
   AVCVCable* SpawnCable(VCVCable cable);
-  void DestroyCable(int64_t cableId);
+  void DestroyCableActor(int64_t cableId);
+  void DestroyCableActor(AVCVCable* Cable);
   AVCVCable* DetachCable(int64_t cableId, PortIdentity identity);
   void AttachCable(int64_t cableId, PortIdentity identity);
+  void AttachCable(AVCVCable* Cable, PortIdentity Identity);
 
   void UpdateLight(int64_t moduleId, int32 lightId, FLinearColor color);
   void UpdateParam(int64_t moduleId, VCVParam& param);
@@ -88,6 +90,9 @@ private:
   TMap<int64, AVCVCable*> CableActors;
   UPROPERTY()
   ALibrary* LibraryActor{nullptr};
+  
+  typedef TTuple<int64_t, int, int64_t, int> TempCableId;
+  TMap<TempCableId, AVCVCable*> TempCableActors;
 
   FDPSVGImporter SVGImporter;
   UPROPERTY()

@@ -1,30 +1,113 @@
 #include "VCVCable.h"
 
 #include "osc3.h"
-#include "VCV.h"
 #include "osc3GameModeBase.h"
+#include "VCV.h"
+
+#include "CableComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Math/UnrealMathUtility.h"
 
 AVCVCable::AVCVCable() {
 	PrimaryActorTick.bCanEverTick = true;
 
-  USceneComponent* root = CreateDefaultSubobject<USceneComponent>(TEXT("root"));
-  SetRootComponent(root);
+  RootSceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root Scene"));
+  SetRootComponent(RootSceneComponent);
+
+  InputMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Input Mesh"));
+  InputMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+  InputMeshComponent->SetMobility(EComponentMobility::Movable);
+
+  OutputMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Output Mesh"));
+  OutputMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+  OutputMeshComponent->SetMobility(EComponentMobility::Movable);
+
+  static ConstructorHelpers::FObjectFinder<UStaticMesh> JackBody(JackMeshReference);
+  if (JackBody.Object) {
+    InputMeshComponent->SetStaticMesh(JackBody.Object);
+    OutputMeshComponent->SetStaticMesh(JackBody.Object);
+
+    FVector scale{RENDER_SCALE * 0.8};
+    InputMeshComponent->SetWorldScale3D(scale);
+    OutputMeshComponent->SetWorldScale3D(scale);
+  }
+
+  static ConstructorHelpers::FObjectFinder<UMaterial> BaseMaterial(BaseMaterialReference);
+  if (BaseMaterial.Object) BaseMaterialInterface = Cast<UMaterial>(BaseMaterial.Object);
+  
+  CableComponent = CreateDefaultSubobject<UCableComponent>(TEXT("Cable Component"));
+  CableComponent->bSkipCableUpdateWhenNotOwnerRecentlyRendered = true;
+  CableComponent->SetupAttachment(InputMeshComponent, TEXT("wire"));
+  CableComponent->SetAttachEndToComponent(OutputMeshComponent, TEXT("wire"));
+  CableComponent->EndLocation = FVector(0.f);
+  CableComponent->CableWidth = 0.3f;
+  CableComponent->bAttachStart = true;
+  CableComponent->bAttachEnd = true;
+  CableComponent->SetEnableGravity(false);
+  CableComponent->CableForce = FVector(0.f, 0.f, 0.f);
+  CableComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+  CableComponent->bEnableStiffness = false;
+  CableComponent->NumSegments = 16;
+  CableComponent->NumSides = 8;
+  CableComponent->SolverIterations = 16;
+  CableComponent->CableLength = 20.f;
+}
+
+void AVCVCable::SetAlive(bool inAlive) {
+  bAlive = inAlive;
+
+  if (bAlive) {
+    CableComponent->SetComponentTickEnabled(true);
+  } else {
+    CableComponent->SetComponentTickEnabled(false);
+  }
+}
+
+void AVCVCable::Sleep() {
+  SetAlive(false);
+}
+
+void AVCVCable::Wake() {
+  SetAlive(true);
 }
 
 void AVCVCable::BeginPlay() {
 	Super::BeginPlay();
+
+  cableColor = cableColors[FMath::RandRange(0, cableColors.Num() - 1)];
+
+  if (BaseMaterialInterface) {
+    BaseMaterialInstance = UMaterialInstanceDynamic::Create(BaseMaterialInterface, this);
+
+    InputMeshComponent->SetMaterial(0, BaseMaterialInstance);
+    OutputMeshComponent->SetMaterial(0, BaseMaterialInstance);
+    CableComponent->SetMaterial(0, BaseMaterialInstance);
+
+    BaseMaterialInstance->SetVectorParameterValue(FName("Color"), cableColor);
+  }
+
+  FTimerHandle sleepHandle;
+  GetWorld()->GetTimerManager().SetTimer(
+    sleepHandle,
+    this,
+    &AVCVCable::Sleep,
+    0.01f, // seconds, apparently
+    false
+  );
+  
 }
 
 void AVCVCable::init(VCVCable vcv_cable) {
   model = vcv_cable; 
+  draw();
   // UE_LOG(LogTemp, Warning, TEXT("cable model %lld: %lld:%lld"), model.id, model.inputModuleId, model.outputModuleId);
 }
 
 void AVCVCable::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
-  draw();
+  // if (bAlive)
+    draw();
 }
 
 void AVCVCable::disconnectFrom(PortIdentity identity) {
@@ -52,6 +135,10 @@ PortIdentity AVCVCable::getConnectedPortIdentity() {
   return model.portIdentities[PortType::Input];
 }
 
+void AVCVCable::setId(int64_t& inId) {
+  model.id = inId;
+}
+
 int64_t AVCVCable::getId() {
   return model.id;
 }
@@ -66,11 +153,9 @@ void AVCVCable::draw() {
   FVector inputLocation, outputLocation, inputForwardVector, outputForwardVector;
 
   if (model.portIdentities[PortType::Input].isNull()) {
-    // UE_LOG(LogTemp, Warning, TEXT("input is nullified"));
     inputLocation = hangingLocation;
     inputForwardVector = hangingForwardVector;
   } else {
-    // UE_LOG(LogTemp, Warning, TEXT("input not nullified"));
     gameMode->GetPortInfo(
       model.portIdentities[PortType::Input],
       inputLocation,
@@ -78,11 +163,9 @@ void AVCVCable::draw() {
     );
   }
   if (model.portIdentities[PortType::Output].isNull()) {
-    // UE_LOG(LogTemp, Warning, TEXT("output is nullified"));
     outputLocation = hangingLocation;
     outputForwardVector = hangingForwardVector;
   } else {
-    // UE_LOG(LogTemp, Warning, TEXT("output not nullified"));
     gameMode->GetPortInfo(
       model.portIdentities[PortType::Output],
       outputLocation,
@@ -90,54 +173,11 @@ void AVCVCable::draw() {
     );
   }
 
-  FTransform inputTransform, outputTransform;
-  inputTransform.SetIdentity();
-  outputTransform.SetIdentity();
-
-  FVector inputTranslation = inputLocation + (inputForwardVector * plugOffset);
-  FVector outputTranslation = outputLocation + (outputForwardVector * plugOffset);
-  FVector directionUnitVector =
-    UKismetMathLibrary::GetDirectionUnitVector(inputTranslation, outputTranslation);
-
-  inputTransform.SetTranslation(inputTranslation);
-  inputTransform.SetRotation(inputForwardVector.Rotation().Quaternion());
-  outputTransform.SetTranslation(outputTranslation);
-  outputTransform.SetRotation(outputForwardVector.Rotation().Quaternion());
-
-  if (model.id == -1) cableColor = FColor::White;
-
-  DrawDebugCircle(
-    GetWorld(),
-    inputTransform.ToMatrixNoScale(),
-    plugRadius * RENDER_SCALE,
-    64,
-    cableColor,
-    false,
-    -1.f,
-    0,
-    lineWeight,
-    false
-  );
-  DrawDebugLine(
-    GetWorld(),
-    inputTranslation + directionUnitVector * (plugRadius * RENDER_SCALE),
-    outputTranslation + -directionUnitVector * (plugRadius * RENDER_SCALE),
-    cableColor,
-    false,
-    -1.f,
-    0,
-    lineWeight
-  );
-  DrawDebugCircle(
-    GetWorld(),
-    outputTransform.ToMatrixNoScale(),
-    plugRadius * RENDER_SCALE,
-    64,
-    cableColor,
-    false,
-    -1.f,
-    0,
-    lineWeight,
-    false
-  );
+  float distanceBetweenEnds = FVector::Distance(inputLocation, outputLocation);
+  CableComponent->CableLength = distanceBetweenEnds * 1.2;
+  CableComponent->CableForce = (inputForwardVector + outputForwardVector) * 0.5f * -1000.f;
+  InputMeshComponent->SetWorldLocation(inputLocation);
+  InputMeshComponent->SetWorldRotation(inputForwardVector.Rotation());
+  OutputMeshComponent->SetWorldLocation(outputLocation);
+  OutputMeshComponent->SetWorldRotation(outputForwardVector.Rotation());
 }

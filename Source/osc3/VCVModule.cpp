@@ -103,13 +103,13 @@ void AVCVModule::EndPlay(const EEndPlayReason::Type EndPlayReason) {
   int64 cableId;
   for (auto& pair : InputActors) {
     while (pair.Value->getCableId(cableId)) {
-      gameMode->DestroyCable(cableId);
+      gameMode->DestroyCableActor(cableId);
     }
   }
 
   for (auto& pair : OutputActors) {
     while (pair.Value->getCableId(cableId)) {
-      gameMode->DestroyCable(cableId);
+      gameMode->DestroyCableActor(cableId);
     }
   }
 

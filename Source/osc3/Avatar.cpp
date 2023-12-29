@@ -190,10 +190,10 @@ void AAvatar::release() {
       if (port && port->canConnect(controlledCable->getHangingType())) {
         gameMode->AttachCable(controlledCable->getId(), port->getIdentity());
       } else {
-        gameMode->DestroyCable(controlledCable->getId());
+        gameMode->DestroyCableActor(controlledCable->getId());
       }
     } else {
-      gameMode->DestroyCable(controlledCable->getId());
+      gameMode->DestroyCableActor(controlledCable->getId());
     }
     controlledCable = nullptr;
   }

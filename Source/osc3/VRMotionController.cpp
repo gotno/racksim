@@ -289,9 +289,9 @@ void AVRMotionController::EndPortInteract() {
   // UE_LOG(LogTemp, Display, TEXT("%s end port interact"), *HandName);
 
   if (DestinationPortActor && DestinationPortActor->canConnect(HeldCable->getHangingType())) {
-    GameMode->AttachCable(HeldCable->getId(), DestinationPortActor->getIdentity());
+    GameMode->AttachCable(HeldCable, DestinationPortActor->getIdentity());
   } else {
-    GameMode->DestroyCable(HeldCable->getId());
+    GameMode->DestroyCableActor(HeldCable);
   }
 
   bIsPortInteracting = false;

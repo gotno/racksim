@@ -65,6 +65,58 @@ void Aosc3GameModeBase::SpawnModule(VCVModule module) {
   ProcessSpawnCableQueue();
 }
 
+void Aosc3GameModeBase::QueueCableSpawn(VCVCable cable) {
+  cableQueue.Push(cable);
+  ProcessSpawnCableQueue();
+}
+
+void Aosc3GameModeBase::ProcessSpawnCableQueue() {
+  TArray<VCVCable> spawnedCables;
+
+  UE_LOG(LogTemp, Warning, TEXT("AAA processing spawn cable queue"));
+  for (VCVCable cable : cableQueue) {
+    int64_t inputModuleId = cable.getIdentity(PortType::Input).moduleId;
+    int inputPortId = cable.getIdentity(PortType::Input).portId;
+    int64_t outputModuleId = cable.getIdentity(PortType::Output).moduleId;
+    int outputPortId = cable.getIdentity(PortType::Output).portId;
+
+    TempCableId tempId{
+      inputModuleId,
+      inputPortId,
+      outputModuleId,
+      outputPortId
+    };
+
+    if (TempCableActors.Contains(tempId)) {
+      UE_LOG(LogTemp, Warning, TEXT("AAA cable was temporary"));
+      AVCVCable* a_cable = TempCableActors[tempId]; 
+      a_cable->setId(cable.id);
+      CableActors.Add(cable.id, a_cable);
+      TempCableActors.Remove(tempId);
+      spawnedCables.Push(cable);
+      
+      PortIdentity inputIdentity = cable.getIdentity(PortType::Input);
+      if (ModuleActors.Contains(inputIdentity.moduleId))
+        ModuleActors[inputIdentity.moduleId]->AttachCable(inputIdentity, cable.id);
+
+      PortIdentity outputIdentity = cable.getIdentity(PortType::Output);
+      if (ModuleActors.Contains(outputIdentity.moduleId))
+        ModuleActors[outputIdentity.moduleId]->AttachCable(outputIdentity, cable.id);
+    } else if (ModuleActors.Contains(inputModuleId) && ModuleActors.Contains(outputModuleId)) {
+      UE_LOG(LogTemp, Warning, TEXT("AAA cable is new"));
+      SpawnCable(cable);
+      spawnedCables.Push(cable);
+    } else {
+      UE_LOG(LogTemp, Warning, TEXT("AAA awaiting modules %lld:%lld for cable %lld"), inputModuleId, outputModuleId, cable.id);
+    }
+  }
+
+  for (VCVCable cable : spawnedCables) {
+    cableQueue.RemoveSwap(cable);
+  }
+  spawnedCables.Empty();
+}
+
 AVCVCable* Aosc3GameModeBase::SpawnCable(VCVCable cable) {
   AVCVCable* a_cable =
     GetWorld()->SpawnActor<AVCVCable>(
@@ -73,7 +125,7 @@ AVCVCable* Aosc3GameModeBase::SpawnCable(VCVCable cable) {
       FRotator(0, 0, 0)
     );
   
-  CableActors.Add(cable.id, a_cable);
+  if (cable.id != -1) CableActors.Add(cable.id, a_cable);
   a_cable->init(cable);
   
   PortIdentity inputIdentity = cable.getIdentity(PortType::Input);
@@ -87,55 +139,28 @@ AVCVCable* Aosc3GameModeBase::SpawnCable(VCVCable cable) {
   return a_cable;
 }
 
-void Aosc3GameModeBase::DestroyCable(int64_t cableId) {
-  if (!CableActors.Contains(cableId)) return;
+void Aosc3GameModeBase::AttachCable(AVCVCable* Cable, PortIdentity Identity) {
+  Cable->connectTo(Identity);
 
-  VCVCable cable = CableActors[cableId]->getModel();
+  VCVCable vcv_cable = Cable->getModel();
 
-  PortIdentity inputIdentity = cable.getIdentity(PortType::Input);
-  if (!inputIdentity.isNull() && ModuleActors.Contains(inputIdentity.moduleId))
-    ModuleActors[inputIdentity.moduleId]->DetachCable(inputIdentity, cable.id);
+  PortIdentity inputIdentity = vcv_cable.getIdentity(PortType::Input);
+  PortIdentity outputIdentity = vcv_cable.getIdentity(PortType::Output);
 
-  PortIdentity outputIdentity = cable.getIdentity(PortType::Output);
-  if (!outputIdentity.isNull() && ModuleActors.Contains(outputIdentity.moduleId))
-    ModuleActors[outputIdentity.moduleId]->DetachCable(outputIdentity, cable.id);
-
-  CableActors[cableId]->Destroy();
-  CableActors.Remove(cableId);
-}
-
-void Aosc3GameModeBase::QueueCableSpawn(VCVCable cable) {
-  cableQueue.Push(cable);
-  ProcessSpawnCableQueue();
-}
-
-void Aosc3GameModeBase::ProcessSpawnCableQueue() {
-  TArray<VCVCable> spawnedCables;
-
-  for (VCVCable cable : cableQueue) {
-    int64_t inputModuleId = cable.getIdentity(PortType::Input).moduleId;
-    int64_t outputModuleId = cable.getIdentity(PortType::Output).moduleId;
-
-    if (ModuleActors.Contains(inputModuleId) && ModuleActors.Contains(outputModuleId)) {
-      SpawnCable(cable);
-      spawnedCables.Push(cable);
-    } else {
-      // UE_LOG(LogTemp, Warning, TEXT("awaiting modules %lld:%lld for cable %lld"), inputModuleId, outputModuleId, cable.id);
-    }
-  }
-
-  for (VCVCable cable : spawnedCables) {
-    cableQueue.RemoveSwap(cable);
-  }
-  spawnedCables.Empty();
-}
-
-AVCVCable* Aosc3GameModeBase::DetachCable(int64_t cableId, PortIdentity identity) {
-  OSCctrl->DestroyCable(cableId);
-  AVCVCable* cable = CableActors[cableId];
-  cable->disconnectFrom(identity);
+  OSCctrl->CreateCable(
+    inputIdentity.moduleId,
+    outputIdentity.moduleId,
+    inputIdentity.portId,
+    outputIdentity.portId
+  );
   
-  return cable;
+  TempCableId tempId{
+    inputIdentity.moduleId,
+    inputIdentity.portId,
+    outputIdentity.moduleId,
+    outputIdentity.portId
+  };
+  TempCableActors.Add(tempId, Cable);
 }
 
 void Aosc3GameModeBase::AttachCable(int64_t cableId, PortIdentity identity) {
@@ -153,7 +178,54 @@ void Aosc3GameModeBase::AttachCable(int64_t cableId, PortIdentity identity) {
     outputIdentity.portId
   );
 
-  DestroyCable(cable.id);
+  DestroyCableActor(cable.id);
+}
+
+AVCVCable* Aosc3GameModeBase::DetachCable(int64_t cableId, PortIdentity identity) {
+  OSCctrl->DestroyCable(cableId);
+
+  if (CableActors.Contains(cableId)) {
+    AVCVCable* cable = CableActors[cableId];
+    cable->disconnectFrom(identity);
+    return cable;
+  }
+  
+  UE_LOG(LogTemp, Warning, TEXT("AAA cannot detach cable id %lld"), cableId);
+  return nullptr;
+  // CableActors.Remove(cableId);
+}
+
+void Aosc3GameModeBase::DestroyCableActor(AVCVCable* Cable) {
+  VCVCable vcv_cable = Cable->getModel();
+
+  PortIdentity inputIdentity = vcv_cable.getIdentity(PortType::Input);
+  if (!inputIdentity.isNull() && ModuleActors.Contains(inputIdentity.moduleId))
+    ModuleActors[inputIdentity.moduleId]->DetachCable(inputIdentity, vcv_cable.id);
+
+  PortIdentity outputIdentity = vcv_cable.getIdentity(PortType::Output);
+  if (!outputIdentity.isNull() && ModuleActors.Contains(outputIdentity.moduleId))
+    ModuleActors[outputIdentity.moduleId]->DetachCable(outputIdentity, vcv_cable.id);
+
+  CableActors.Remove(Cable->getId());
+
+  Cable->Destroy();
+}
+
+void Aosc3GameModeBase::DestroyCableActor(int64_t cableId) {
+  if (!CableActors.Contains(cableId)) return;
+
+  VCVCable cable = CableActors[cableId]->getModel();
+
+  PortIdentity inputIdentity = cable.getIdentity(PortType::Input);
+  if (!inputIdentity.isNull() && ModuleActors.Contains(inputIdentity.moduleId))
+    ModuleActors[inputIdentity.moduleId]->DetachCable(inputIdentity, cable.id);
+
+  PortIdentity outputIdentity = cable.getIdentity(PortType::Output);
+  if (!outputIdentity.isNull() && ModuleActors.Contains(outputIdentity.moduleId))
+    ModuleActors[outputIdentity.moduleId]->DetachCable(outputIdentity, cable.id);
+
+  CableActors[cableId]->Destroy();
+  CableActors.Remove(cableId);
 }
 
 void Aosc3GameModeBase::DuplicateModule(AVCVModule* Module) {
