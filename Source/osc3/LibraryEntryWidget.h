@@ -7,6 +7,7 @@
 
 class Aosc3GameModeBase;
 class UTextBlock;
+class UCommonTextBlock;
 class UButton;
 
 UCLASS()
@@ -18,30 +19,34 @@ protected:
   virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override;
 
   UPROPERTY(meta = (BindWidget))
-	UTextBlock* PluginName;
+  UTextBlock* PluginName;
   UPROPERTY(meta = (BindWidget))
-	UTextBlock* ModuleName;
+  UTextBlock* ModuleName;
   UPROPERTY(meta = (BindWidget))
-	UTextBlock* Tags;
+  UTextBlock* TagsText;
+  UPROPERTY(meta = (BindWidget))
+  UCommonTextBlock* DescriptionText;
 
   UPROPERTY(meta = (BindWidget))
-	UButton* Button;
+  UButton* Button;
 
   UPROPERTY(meta = (BindWidget))
-	UButton* FavoriteToggleButton;
+  UButton* FavoriteToggleButton;
   UPROPERTY(meta = (BindWidget))
-	UTextBlock* FavoriteToggleButtonLabel;
+  UTextBlock* FavoriteToggleButtonLabel;
 private:
   UFUNCTION()
   void RequestModuleSpawn();
+  UFUNCTION()
+  void HandleButtonHover();
+  UFUNCTION()
+  void HandleButtonUnhover();
   UFUNCTION()
   void HandleFavoriteHover();
   UFUNCTION()
   void HandleFavoriteUnhover();
   UFUNCTION()
   void HandleFavoriteClick();
-  // UFUNCTION()
-  // void SetFavorite(bool inFavorite);
 
   FString PluginSlug, ModuleSlug;
   bool bFavorite{false};
