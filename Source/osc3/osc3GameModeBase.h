@@ -5,7 +5,6 @@
 #include "DefinitivePainter/Public/SVG/Importer/DPSVGImporter.h"
 
 #include "VCV.h"
-#include "VCVLibrary.h"
 
 #include "GameFramework/GameMode.h"
 #include "osc3GameModeBase.generated.h"
@@ -72,7 +71,7 @@ public:
   UTexture2D* GetTexture(FString filepath);
   
   void SpawnLibrary();
-  void UpdateLibrary(VCVLibrary& library);
+  void SetLibraryJsonPath(FString& Path);
   ALibrary* GetLibrary();
 private:
   UPROPERTY()

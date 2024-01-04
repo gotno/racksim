@@ -7,7 +7,6 @@
 #include "OSCServer.h"
 
 #include "VCV.h"
-#include "VCVLibrary.h"
 
 #include "OSCController.generated.h"
 
@@ -84,13 +83,7 @@ private:
   void SyncParam(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port);
 
   UFUNCTION()
-  void AddLibraryPlugin(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port);
-  UFUNCTION()
-  void AddLibraryModule(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port);
-  UFUNCTION()
-  void AddLibraryModuleTag(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port);
-  UFUNCTION()
-  void AddLibraryTag(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port);
+  void SetLibraryJsonPath(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port);
 
   UFUNCTION()
   void AddContextMenuItem(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port);
@@ -109,5 +102,4 @@ private:
 
   TMap<int64, VCVModule> Modules;
   TMap<int64, VCVCable> Cables;
-  VCVLibrary Library;
 };

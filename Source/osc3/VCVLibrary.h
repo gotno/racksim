@@ -8,10 +8,7 @@ struct VCVModuleInfo {
   TArray<int> Tags;
   
   VCVModuleInfo() {}
-  VCVModuleInfo(FString _name, FString _slug)
-    : Name(_name), Slug(_slug) {}
-  VCVModuleInfo(FString _name, FString _slug, FString _description, bool _favorite)
-    : Name(_name), Slug(_slug), Description(_description), bFavorite(_favorite) {}
+  VCVModuleInfo(FString _slug) : Slug(_slug) {}
 };
 
 struct VCVPluginInfo {
@@ -22,7 +19,7 @@ struct VCVPluginInfo {
   TSet<int> ModuleTags;
   
   VCVPluginInfo() {} 
-  VCVPluginInfo(FString _name, FString _slug) : Name(_name), Slug(_slug) {} 
+  VCVPluginInfo(FString _slug) : Slug(_slug) {} 
 };
 
 struct VCVLibrary {

@@ -34,10 +34,7 @@ void AOSCController::Init() {
 
   AddRoute("/param/sync/*", FName(TEXT("SyncParam")));
   
-  AddRoute("/library/plugin/add/*", FName(TEXT("AddLibraryPlugin")));
-  AddRoute("/library/module/add/*", FName(TEXT("AddLibraryModule")));
-  AddRoute("/library/module_tag/add/*", FName(TEXT("AddLibraryModuleTag")));
-  AddRoute("/library/tag/add/*", FName(TEXT("AddLibraryTag")));
+  AddRoute("/library/json_path/*", FName(TEXT("SetLibraryJsonPath")));
 
   AddRoute("/menu/item/add/*", FName(TEXT("AddContextMenuItem")));
   AddRoute("/menu/synced/*", FName(TEXT("MenuSynced")));
@@ -599,56 +596,12 @@ void AOSCController::SyncParam(const FOSCAddress& AddressPattern, const FOSCMess
   gameMode->UpdateParam(moduleId, param);
 }
 
-void AOSCController::AddLibraryPlugin(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port) {
-  FString name, slug;
-  UOSCManager::GetString(message, 0, name);
-  UOSCManager::GetString(message, 1, slug);
-  
-  Library.Plugins.Add(slug, VCVPluginInfo(name, slug));
-  // UE_LOG(LogTemp, Warning, TEXT("added library plugin %s:%s"), *name, *slug);
-}
+void AOSCController::SetLibraryJsonPath(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port) {
+  FString path;
+  UOSCManager::GetString(message, 0, path);
 
-void AOSCController::AddLibraryModule(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port) {
-  FString pluginSlug, name, slug, description;
-  bool favorite;
-  UOSCManager::GetString(message, 0, pluginSlug);
-  UOSCManager::GetString(message, 1, name);
-  UOSCManager::GetString(message, 2, slug);
-  UOSCManager::GetString(message, 3, description);
-  UOSCManager::GetBool(message, 4, favorite);
-
-  Library.Plugins[pluginSlug].Modules.Add(slug, VCVModuleInfo(name, slug, description, favorite));
-  
-  gameMode->UpdateLibrary(Library);
-  // UE_LOG(LogTemp, Warning, TEXT("  added library module %s:%s (%s)"), *name, *slug, *description);
-}
-
-void AOSCController::AddLibraryModuleTag(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port) {
-  FString pluginSlug, moduleSlug;
-  int32 tagId;
-
-  UOSCManager::GetString(message, 0, pluginSlug);
-  UOSCManager::GetString(message, 1, moduleSlug);
-  UOSCManager::GetInt32(message, 2, tagId);
-  
-  Library.Plugins[pluginSlug].Modules[moduleSlug].Tags.Add(tagId);
-  Library.Plugins[pluginSlug].ModuleTags.Add(tagId);
-
-  gameMode->UpdateLibrary(Library);
-  // UE_LOG(LogTemp, Warning, TEXT("    added module tag %d"), tagId);
-}
-
-void AOSCController::AddLibraryTag(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port) {
-  int32 tagId;
-  FString tagName;
-
-  UOSCManager::GetInt32(message, 0, tagId);
-  UOSCManager::GetString(message, 1, tagName);
-  
-  Library.TagNames.Add(tagId, tagName);
-
-  gameMode->UpdateLibrary(Library);
-  // UE_LOG(LogTemp, Warning, TEXT("added library tag %d:%s"), tagId, *tagName);
+  // UE_LOG(LogTemp, Warning, TEXT("library json path is %s"), *path);
+  gameMode->SetLibraryJsonPath(path);
 }
 
 // void AOSCController::PrintVCVModule(VCVModule vcv_module) {

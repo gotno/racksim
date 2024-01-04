@@ -362,6 +362,6 @@ ALibrary* Aosc3GameModeBase::GetLibrary() {
   return nullptr;
 }
 
-void Aosc3GameModeBase::UpdateLibrary(VCVLibrary& Library) {
-  LibraryActor->Update(Library);
+void Aosc3GameModeBase::SetLibraryJsonPath(FString& Path) {
+  LibraryActor->SetJsonPath(Path);
 }

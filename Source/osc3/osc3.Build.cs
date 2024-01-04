@@ -8,6 +8,6 @@ public class osc3 : ModuleRules
 	
     PublicIncludePaths.AddRange(new string[] { "osc3" });
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "OSC", "UMG", "DefinitivePainter",  "HeadMountedDisplay", "EnhancedInput", "CableComponent" });
-		PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore", "UMG", "DefinitivePainter" });
+		PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore", "UMG", "DefinitivePainter", "Json", "JsonUtilities" });
 	}
 }

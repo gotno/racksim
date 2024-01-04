@@ -8,6 +8,7 @@
 #include "Components/WidgetComponent.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Json.h"
 
 ALibrary::ALibrary() {
 	PrimaryActorTick.bCanEverTick = true;
@@ -78,9 +79,55 @@ void ALibrary::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 }
 
-void ALibrary::Update(VCVLibrary& Library) {
-  Model = Library;
-  Refresh();
+void ALibrary::SetJsonPath(FString& JsonPath) {
+  FString JsonStr;
+	if (FFileHelper::LoadFileToString(JsonStr, *JsonPath)) {
+    ParseLibraryJson(JsonStr);
+    Refresh();
+
+    IFileManager& FileManager = IFileManager::Get();
+    FileManager.Delete(*JsonPath);
+  } else {
+    UE_LOG(LogTemp, Warning, TEXT("Unable to load library json file"));
+  }
+}
+
+void ALibrary::ParseLibraryJson(FString& JsonStr) {
+  TSharedRef<TJsonReader<TCHAR>> JsonReader = TJsonReaderFactory<TCHAR>::Create(*JsonStr);
+  TSharedPtr<FJsonValue> OutJson;
+
+  if (FJsonSerializer::Deserialize(JsonReader, OutJson)) {
+    TSharedPtr<FJsonObject> rootJ = OutJson->AsObject();
+    TSharedPtr<FJsonObject> pluginsJ = rootJ->GetObjectField(FString("plugins"));
+    for (auto& pluginPair : pluginsJ->Values) {
+      // UE_LOG(LogTemp, Warning, TEXT("ParseLibraryJson\tplugin: %s"), *pluginPair.Key);
+      TSharedPtr<FJsonObject> pluginJ = pluginPair.Value->AsObject();
+
+      VCVPluginInfo& plugin = Model.Plugins.Emplace(pluginPair.Key, pluginPair.Key);
+      plugin.Name = pluginJ->GetStringField(FString("name"));
+        
+      for (auto& modulePair : pluginJ->GetObjectField("modules")->Values) {
+        // UE_LOG(LogTemp, Warning, TEXT("ParseLibraryJson\t  module: %s"), *modulePair.Key);
+        TSharedPtr<FJsonObject> moduleJ = modulePair.Value->AsObject();
+
+        VCVModuleInfo& module = plugin.Modules.Emplace(modulePair.Key, modulePair.Key);
+        module.Name = moduleJ->GetStringField(FString("name")); 
+        module.Description = moduleJ->GetStringField(FString("description")); 
+        module.bFavorite = moduleJ->GetBoolField(FString("bFavorite")); 
+        for (auto& tagId : moduleJ->GetArrayField(FString("tagIds")))
+          module.Tags.Add(tagId->AsNumber());
+      }
+    }
+
+    TSharedPtr<FJsonObject> tagNamesJ = rootJ->GetObjectField(FString("tagNames"));
+    for (auto& tagNamePair : tagNamesJ->Values) {
+      // UE_LOG(LogTemp, Warning, TEXT("ParseLibraryJson\ttagName: %d- %s"), FCString::Atoi(*tagNamePair.Key), *tagNamePair.Value->AsString());
+      Model.TagNames.Add(FCString::Atoi(*tagNamePair.Key), tagNamePair.Value->AsString());
+    }
+    
+  } else {
+    UE_LOG(LogTemp, Warning, TEXT("trouble deserializing library json"));
+  }
 }
 
 void ALibrary::Refresh() {

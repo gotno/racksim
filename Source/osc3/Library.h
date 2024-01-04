@@ -26,8 +26,6 @@ protected:
 
 public:	
 	virtual void Tick(float DeltaTime) override;
-
-  void Update(VCVLibrary& Library);
   
   void Refresh();
   void RefreshLibraryList();
@@ -44,6 +42,8 @@ public:
   void AlterGrab(FVector GrabbedLocation, FRotator GrabbedRotation) override;
   void ReleaseGrab() override;
   void SetHighlighted(bool bHighlighted, FLinearColor OutlineColor = OUTLINE_COLOR) override;
+
+  void SetJsonPath(FString& JsonPath);
 private:
   UPROPERTY(VisibleAnywhere)
   USceneComponent* RootSceneComponent;
@@ -65,6 +65,9 @@ private:
   UWidgetComponent* LibraryWidgetComponent;
   ULibraryWidget* LibraryWidget;
   
+  void ParseLibraryJson(FString& JsonStr);
+  VCVLibrary Model;
+
   TArray<ULibraryEntry*> GenerateLibraryEntries();
   TArray<UBasicListEntryData*> GenerateBrandFilterEntries();
   TArray<UBasicListEntryData*> GenerateTagsFilterEntries();
@@ -75,6 +78,4 @@ private:
   void SetScale();
   float DesiredWidth{28.f};
   float BasePadding{0.4f};
-  
-  VCVLibrary Model;
 };
