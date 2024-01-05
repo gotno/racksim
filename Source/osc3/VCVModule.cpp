@@ -146,7 +146,7 @@ void AVCVModule::init(VCVModule vcv_module) {
 }
 
 void AVCVModule::SetupContextMenuWidget() {
-  FVector2D drawSize(300.f, 700.f);
+  FVector2D drawSize(350.f, 700.f);
   float desiredContextMenuHeight = model.box.size.y - 2 * RENDER_SCALE;
   float scale = desiredContextMenuHeight / drawSize.Y;
 
