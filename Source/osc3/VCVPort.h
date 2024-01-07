@@ -1,5 +1,6 @@
 #pragma once
 
+#include "osc3.h"
 #include "VCV.h"
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
@@ -28,10 +29,14 @@ public:
   bool getCableId(int64_t& cableId);
   void removeCableId(int64_t cableId);
   PortIdentity getIdentity();
-  bool canConnect(PortType type);
+  bool CanConnect(PortType Type);
   bool hasCables();
 
   void GetTooltipText(FString& Name, FString& Description);
+
+  PortType Type;
+  void AddCable(AVCVCable* Cable);
+  void RemoveCable(AVCVCable* Cable);
 private:
   UPROPERTY(VisibleAnywhere)
   UStaticMeshComponent* StaticMeshComponent;
@@ -54,6 +59,9 @@ private:
 
   VCVPort* model;
   TArray<int64_t> cableIds;
+
+  UPROPERTY()
+  TArray<AVCVCable*> Cables;
   
   UPROPERTY()
   TArray<AVCVCable*> AttachedCableActors;

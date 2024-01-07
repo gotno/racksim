@@ -235,7 +235,7 @@ void AVRMotionController::HandleInteractorBeginOverlap(UPrimitiveComponent* Over
       OriginPortActor = Cast<AVCVPort>(OtherActor);
       ParamActorToInteract = nullptr;
       PlayerController->PlayHapticEffect(HapticEffects.Bump, MotionController->GetTrackingSource());
-    } else if (HeldCable && Cast<AVCVPort>(OtherActor)->canConnect(HeldCable->getHangingType())) {
+    } else if (HeldCable && Cast<AVCVPort>(OtherActor)->CanConnect(HeldCable->GetHangingType())) {
       DestinationPortActor = Cast<AVCVPort>(OtherActor);
       PlayerController->PlayHapticEffect(HapticEffects.Bump, MotionController->GetTrackingSource());
     }
@@ -271,27 +271,30 @@ void AVRMotionController::StartPortInteract() {
   // UE_LOG(LogTemp, Display, TEXT("%s start port interact"), *HandName);
   bIsPortInteracting = true;
 
-  int64_t cableId;
-  if (OriginPortActor->getCableId(cableId)) {
-    HeldCable = GameMode->DetachCable(cableId, OriginPortActor->getIdentity());
-    // UE_LOG(LogTemp, Warning, TEXT("got cable %lld"), cableId);
-    OriginPortActor = GameMode->GetPortActor(HeldCable->getConnectedPortIdentity());
-    RefreshTooltip();
-  } else {
-    // UE_LOG(LogTemp, Warning, TEXT("spawning new cable"));
-    VCVCable cable;
-    cable.setIdentity(OriginPortActor->getIdentity());
-    HeldCable = GameMode->SpawnCable(cable);
-  }
+  /* int64_t cableId; */
+  /* if (OriginPortActor->getCableId(cableId)) { */
+  /*   HeldCable = GameMode->DetachCable(cableId, OriginPortActor->getIdentity()); */
+  /*   // UE_LOG(LogTemp, Warning, TEXT("got cable %lld"), cableId); */
+  /*   OriginPortActor = GameMode->GetPortActor(HeldCable->getConnectedPortIdentity()); */
+  /*   RefreshTooltip(); */
+  /* } else { */
+  /*   // UE_LOG(LogTemp, Warning, TEXT("spawning new cable")); */
+  /*   VCVCable cable; */
+  /*   cable.setIdentity(OriginPortActor->getIdentity()); */
+  /*   HeldCable = GameMode->SpawnCable(cable); */
+  HeldCable = GameMode->SpawnCable(OriginPortActor);
+  /* } */
 }
 
 void AVRMotionController::EndPortInteract() {
   // UE_LOG(LogTemp, Display, TEXT("%s end port interact"), *HandName);
 
-  if (DestinationPortActor && DestinationPortActor->canConnect(HeldCable->getHangingType())) {
-    GameMode->AttachCable(HeldCable, DestinationPortActor->getIdentity());
+  if (DestinationPortActor && DestinationPortActor->CanConnect(HeldCable->GetHangingType())) {
+    HeldCable->SetPort(DestinationPortActor);
+    // THIS THIS THIS
+    /* GameMode->AttachCable(HeldCable, DestinationPortActor->getIdentity()); */
   } else {
-    GameMode->DestroyCableActor(HeldCable);
+    /* GameMode->DestroyCableActor(HeldCable); */
   }
 
   bIsPortInteracting = false;

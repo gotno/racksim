@@ -1,6 +1,5 @@
 #include "VCVCable.h"
 
-#include "osc3.h"
 // #include "osc3GameModeBase.h"
 // #include "VCV.h"
 
@@ -97,8 +96,24 @@ void AVCVCable::BeginPlay() {
   // );
 }
 
-void AVCVCable::SetPort(AVCVPort* Port) {
+void AVCVCable::UnsetPort(PortType Type) {
+  Ports[Type]->RemoveCable(this);
+  Ports.Remove(Type);
+  // HandlePortChange();
+}
 
+void AVCVCable::SetPort(AVCVPort* Port) {
+  Ports.Add(Port->Type, Port);
+  Port->AddCable(this);
+  // HandlePortChange();
+}
+
+void AVCVCable::HandlePortChange() {
+  /* if (IsComplete() && !id somehow) { */
+  /*   request persist */
+  /* } else if (id somehow && !IsComplete()) { */
+  /*   request destroy */
+  /* } */
 }
 
 // void AVCVCable::init(VCVCable vcv_cable) {
@@ -126,10 +141,12 @@ void AVCVCable::Tick(float DeltaTime) {
 //   hangingForwardVector = _hangingForwardVector;
 // }
 
-// PortType AVCVCable::getHangingType() {
-//   if (model.portIdentities[PortType::Input].isNull()) return PortType::Input;
-//   return PortType::Output;
-// }
+PortType AVCVCable::GetHangingType() {
+  checkf(!IsComplete(), TEXT("cable IsComplete and has no hanging type"));
+
+  if (Ports.Contains(PortType::Input) return PortType::Output;
+  return PortType::Input;
+}
 
 // PortIdentity AVCVCable::getConnectedPortIdentity() {
 //   if (model.portIdentities[PortType::Input].isNull()) return model.portIdentities[PortType::Output];

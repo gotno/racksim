@@ -1,9 +1,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
 
 // #include "VCV.h"
+#include "osc3.h"
 
 #include "VCVCable.generated.h"
 
@@ -34,13 +34,14 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
   void SetPort(AVCVPort* Port);
+  void UnsetPort(PortType Type);
 
   // void draw();
   // void init(VCVCable model);
   // void disconnectFrom(PortIdentity identity);
   // void connectTo(PortIdentity identity);
   // void setHangingLocation(FVector hangingLocation, FVector hangingForwardVector);
-  // PortType getHangingType();
+  PortType GetHangingType();
   // PortIdentity getConnectedPortIdentity();
   // void setId(int64_t& inId);
   // int64_t getId();
@@ -95,9 +96,11 @@ private:
   // AVCVPort* OutputPortActor;
   // AVCVModule* OutputModuleActor;
   
-  // bool IsComplete() {
-  //   return InputPortActor && OutputPortActor;
-  // }
+  bool IsComplete() {
+    return Ports.Contains(PortType::Input) && Ports.Contains(PortType::Output);
+  }
+
+  void HandlePortChange();
   
   // // allowed to exist even if incomplete (hanging end is floating, not held)
   // bool Latched{false};

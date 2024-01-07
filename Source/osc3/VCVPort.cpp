@@ -14,7 +14,6 @@
 AVCVPort::AVCVPort() {
 	PrimaryActorTick.bCanEverTick = true;
 
-
   StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Static Mesh"));
   RootComponent = StaticMeshComponent;
   
@@ -61,6 +60,9 @@ void AVCVPort::Tick(float DeltaTime) {
 
 void AVCVPort::init(VCVPort* vcv_port) {
   model = vcv_port;
+
+  Type = vcv_port.type;
+
   StaticMeshComponent->SetWorldScale3D(FVector(RENDER_SCALE, model->box.size.x, model->box.size.y));
   
   BaseMaterialInstance->SetVectorParameterValue(FName("color"), model->bodyColor);
@@ -81,14 +83,28 @@ bool AVCVPort::getCableId(int64_t& cableId) {
   return true;
 }
 
-bool AVCVPort::canConnect(PortType type) {
-  if (type != model->type) return false;
-  if (model->type == PortType::Input && hasCables()) return false;
+bool AVCVPort::CanConnect(PortType inType) {
+  if (inType != Type) return false;
+  if (Type == PortType::Input && Cables.Num() > 0) return false;
   return true;
 }
 
-bool AVCVPort::hasCables() {
-  return cableIds.Num() > 0;
+void AVCVPort::AddCable(AVCVCable* Cable) {
+  checkf(
+    Type == PortType::Output || Cables.Num() == 0,
+    TEXT("attempting to add more than one cable to an Input")
+  );
+
+  Cables.Add(Cable);
+}
+
+void AVCVPort::RemoveCable(AVCVCable* Cable) {
+  checkf(
+    Cables.Num() > 0,
+    TEXT("attempting to remove a cable from an empty port")
+  );
+
+  Cables.Remove(Cable);
 }
 
 PortIdentity AVCVPort::getIdentity() {
@@ -101,6 +117,6 @@ void AVCVPort::GetTooltipText(FString& Name, FString& Description) {
     Name = FString("#");
     Name.AppendInt(model->id + 1);
   }
-  Name.Append(model->type == PortType::Input ? " input" : " output");
+  Name.Append(Type == PortType::Input ? " input" : " output");
   Description = model->description;
 }
