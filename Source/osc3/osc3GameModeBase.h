@@ -45,6 +45,7 @@ public:
   );
   AVCVPort* GetPortActor(PortIdentity identity);
   AVCVCable* SpawnCable(VCVCable cable);
+  AVCVCable* SpawnCable(AVCVPort* Port);
   void DestroyCableActor(int64_t cableId);
   void DestroyCableActor(AVCVCable* Cable);
   AVCVCable* DetachCable(int64_t cableId, PortIdentity identity);

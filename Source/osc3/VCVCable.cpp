@@ -1,13 +1,13 @@
 #include "VCVCable.h"
 
 #include "osc3.h"
-#include "osc3GameModeBase.h"
-#include "VCV.h"
+// #include "osc3GameModeBase.h"
+// #include "VCV.h"
 
-#include "CableComponent.h"
-#include "Kismet/GameplayStatics.h"
-#include "Kismet/KismetMathLibrary.h"
-#include "Math/UnrealMathUtility.h"
+// #include "CableComponent.h"
+// #include "Kismet/GameplayStatics.h"
+// #include "Kismet/KismetMathLibrary.h"
+// #include "Math/UnrealMathUtility.h"
 
 AVCVCable::AVCVCable() {
 	PrimaryActorTick.bCanEverTick = true;
@@ -16,12 +16,12 @@ AVCVCable::AVCVCable() {
   SetRootComponent(RootSceneComponent);
 
   InputMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Input Mesh"));
-  InputMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-  InputMeshComponent->SetMobility(EComponentMobility::Movable);
+  // InputMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+  // InputMeshComponent->SetMobility(EComponentMobility::Movable);
 
   OutputMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Output Mesh"));
-  OutputMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-  OutputMeshComponent->SetMobility(EComponentMobility::Movable);
+  // OutputMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+  // OutputMeshComponent->SetMobility(EComponentMobility::Movable);
 
   static ConstructorHelpers::FObjectFinder<UStaticMesh> JackBody(JackMeshReference);
   if (JackBody.Object) {
@@ -36,41 +36,41 @@ AVCVCable::AVCVCable() {
   static ConstructorHelpers::FObjectFinder<UMaterial> BaseMaterial(BaseMaterialReference);
   if (BaseMaterial.Object) BaseMaterialInterface = Cast<UMaterial>(BaseMaterial.Object);
   
-  CableComponent = CreateDefaultSubobject<UCableComponent>(TEXT("Cable Component"));
-  CableComponent->bSkipCableUpdateWhenNotOwnerRecentlyRendered = true;
-  CableComponent->SetupAttachment(InputMeshComponent, TEXT("wire"));
-  CableComponent->SetAttachEndToComponent(OutputMeshComponent, TEXT("wire"));
-  CableComponent->EndLocation = FVector(0.f);
-  CableComponent->CableWidth = 0.3f;
-  CableComponent->bAttachStart = true;
-  CableComponent->bAttachEnd = true;
-  CableComponent->SetEnableGravity(false);
-  CableComponent->CableForce = FVector(0.f, 0.f, 0.f);
-  CableComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-  CableComponent->bEnableStiffness = false;
-  CableComponent->NumSegments = 16;
-  CableComponent->NumSides = 8;
-  CableComponent->SolverIterations = 16;
-  CableComponent->CableLength = 20.f;
+  // CableComponent = CreateDefaultSubobject<UCableComponent>(TEXT("Cable Component"));
+  // CableComponent->bSkipCableUpdateWhenNotOwnerRecentlyRendered = true;
+  // CableComponent->SetupAttachment(InputMeshComponent, TEXT("wire"));
+  // CableComponent->SetAttachEndToComponent(OutputMeshComponent, TEXT("wire"));
+  // CableComponent->EndLocation = FVector(0.f);
+  // CableComponent->CableWidth = 0.3f;
+  // CableComponent->bAttachStart = true;
+  // CableComponent->bAttachEnd = true;
+  // CableComponent->SetEnableGravity(false);
+  // CableComponent->CableForce = FVector(0.f, 0.f, 0.f);
+  // CableComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+  // CableComponent->bEnableStiffness = false;
+  // CableComponent->NumSegments = 16;
+  // CableComponent->NumSides = 8;
+  // CableComponent->SolverIterations = 16;
+  // CableComponent->CableLength = 20.f;
 }
 
-void AVCVCable::SetAlive(bool inAlive) {
-  bAlive = inAlive;
+// void AVCVCable::SetAlive(bool inAlive) {
+//   bAlive = inAlive;
 
-  if (bAlive) {
-    CableComponent->SetComponentTickEnabled(true);
-  } else {
-    CableComponent->SetComponentTickEnabled(false);
-  }
-}
+//   if (bAlive) {
+//     CableComponent->SetComponentTickEnabled(true);
+//   } else {
+//     CableComponent->SetComponentTickEnabled(false);
+//   }
+// }
 
-void AVCVCable::Sleep() {
-  SetAlive(false);
-}
+// void AVCVCable::Sleep() {
+//   SetAlive(false);
+// }
 
-void AVCVCable::Wake() {
-  SetAlive(true);
-}
+// void AVCVCable::Wake() {
+//   SetAlive(true);
+// }
 
 void AVCVCable::BeginPlay() {
 	Super::BeginPlay();
@@ -82,70 +82,71 @@ void AVCVCable::BeginPlay() {
 
     InputMeshComponent->SetMaterial(0, BaseMaterialInstance);
     OutputMeshComponent->SetMaterial(0, BaseMaterialInstance);
-    CableComponent->SetMaterial(0, BaseMaterialInstance);
+    // CableComponent->SetMaterial(0, BaseMaterialInstance);
 
     BaseMaterialInstance->SetVectorParameterValue(FName("Color"), cableColor);
   }
 
-  FTimerHandle sleepHandle;
-  GetWorld()->GetTimerManager().SetTimer(
-    sleepHandle,
-    this,
-    &AVCVCable::Sleep,
-    0.01f, // seconds, apparently
-    false
-  );
-  
+  // FTimerHandle sleepHandle;
+  // GetWorld()->GetTimerManager().SetTimer(
+  //   sleepHandle,
+  //   this,
+  //   &AVCVCable::Sleep,
+  //   0.01f, // seconds, apparently
+  //   false
+  // );
 }
 
-void AVCVCable::init(VCVCable vcv_cable) {
-  model = vcv_cable; 
-  draw();
-  // UE_LOG(LogTemp, Warning, TEXT("cable model %lld: %lld:%lld"), model.id, model.inputModuleId, model.outputModuleId);
+void AVCVCable::SetPort(AVCVPort* Port) {
+
 }
+
+// void AVCVCable::init(VCVCable vcv_cable) {
+//   model = vcv_cable; 
+//   draw();
+//   // UE_LOG(LogTemp, Warning, TEXT("cable model %lld: %lld:%lld"), model.id, model.inputModuleId, model.outputModuleId);
+// }
 
 void AVCVCable::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
-  // if (bAlive)
-    draw();
 }
 
-void AVCVCable::disconnectFrom(PortIdentity identity) {
-  model.nullifyIdentity(identity.type);
-}
+// void AVCVCable::disconnectFrom(PortIdentity identity) {
+//   model.nullifyIdentity(identity.type);
+// }
 
-void AVCVCable::connectTo(PortIdentity identity) {
-  if (model.portIdentities[identity.type].isNull()) {
-    model.portIdentities[identity.type] = identity;
-  }
-}
+// void AVCVCable::connectTo(PortIdentity identity) {
+//   if (model.portIdentities[identity.type].isNull()) {
+//     model.portIdentities[identity.type] = identity;
+//   }
+// }
 
-void AVCVCable::setHangingLocation(FVector _hangingLocation, FVector _hangingForwardVector) {
-  hangingLocation = _hangingLocation;
-  hangingForwardVector = _hangingForwardVector;
-}
+// void AVCVCable::setHangingLocation(FVector _hangingLocation, FVector _hangingForwardVector) {
+//   hangingLocation = _hangingLocation;
+//   hangingForwardVector = _hangingForwardVector;
+// }
 
-PortType AVCVCable::getHangingType() {
-  if (model.portIdentities[PortType::Input].isNull()) return PortType::Input;
-  return PortType::Output;
-}
+// PortType AVCVCable::getHangingType() {
+//   if (model.portIdentities[PortType::Input].isNull()) return PortType::Input;
+//   return PortType::Output;
+// }
 
-PortIdentity AVCVCable::getConnectedPortIdentity() {
-  if (model.portIdentities[PortType::Input].isNull()) return model.portIdentities[PortType::Output];
-  return model.portIdentities[PortType::Input];
-}
+// PortIdentity AVCVCable::getConnectedPortIdentity() {
+//   if (model.portIdentities[PortType::Input].isNull()) return model.portIdentities[PortType::Output];
+//   return model.portIdentities[PortType::Input];
+// }
 
-void AVCVCable::setId(int64_t& inId) {
-  model.id = inId;
-}
+// void AVCVCable::setId(int64_t& inId) {
+//   model.id = inId;
+// }
 
-int64_t AVCVCable::getId() {
-  return model.id;
-}
+// int64_t AVCVCable::getId() {
+//   return model.id;
+// }
 
-VCVCable AVCVCable::getModel() {
-  return model;
-}
+// VCVCable AVCVCable::getModel() {
+//   return model;
+// }
 
 void AVCVCable::draw() {
   Aosc3GameModeBase* gameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));

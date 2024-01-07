@@ -62,18 +62,17 @@ void Aosc3GameModeBase::SpawnModule(VCVModule module) {
   ModuleActors.Add(module.id, a_module);
   a_module->init(module);
 
-  ProcessSpawnCableQueue();
+  // ProcessSpawnCableQueue();
 }
 
 void Aosc3GameModeBase::QueueCableSpawn(VCVCable cable) {
   cableQueue.Push(cable);
-  ProcessSpawnCableQueue();
+  // ProcessSpawnCableQueue();
 }
 
 void Aosc3GameModeBase::ProcessSpawnCableQueue() {
   TArray<VCVCable> spawnedCables;
 
-  UE_LOG(LogTemp, Warning, TEXT("AAA processing spawn cable queue"));
   for (VCVCable cable : cableQueue) {
     int64_t inputModuleId = cable.getIdentity(PortType::Input).moduleId;
     int inputPortId = cable.getIdentity(PortType::Input).portId;
@@ -88,7 +87,6 @@ void Aosc3GameModeBase::ProcessSpawnCableQueue() {
     };
 
     if (TempCableActors.Contains(tempId)) {
-      UE_LOG(LogTemp, Warning, TEXT("AAA cable was temporary"));
       AVCVCable* a_cable = TempCableActors[tempId]; 
       a_cable->setId(cable.id);
       CableActors.Add(cable.id, a_cable);
@@ -103,7 +101,6 @@ void Aosc3GameModeBase::ProcessSpawnCableQueue() {
       if (ModuleActors.Contains(outputIdentity.moduleId))
         ModuleActors[outputIdentity.moduleId]->AttachCable(outputIdentity, cable.id);
     } else if (ModuleActors.Contains(inputModuleId) && ModuleActors.Contains(outputModuleId)) {
-      UE_LOG(LogTemp, Warning, TEXT("AAA cable is new"));
       SpawnCable(cable);
       spawnedCables.Push(cable);
     } else {
@@ -137,6 +134,17 @@ AVCVCable* Aosc3GameModeBase::SpawnCable(VCVCable cable) {
     ModuleActors[outputIdentity.moduleId]->AttachCable(outputIdentity, cable.id);
 
   return a_cable;
+}
+
+AVCVCable* Aosc3GameModeBase::SpawnCable(AVCVPort* Port) {
+  AVCVCable* a_cable =
+    GetWorld()->SpawnActor<AVCVCable>(
+      AVCVCable::StaticClass(),
+      FVector(0, 0, 0),
+      FRotator(0, 0, 0)
+    );
+  
+  a_cable->SetPort(Port);
 }
 
 void Aosc3GameModeBase::AttachCable(AVCVCable* Cable, PortIdentity Identity) {

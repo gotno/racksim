@@ -1,5 +1,6 @@
 #pragma once
 
+#include "osc3.h"
 #include "Math/Color.h"
 #include <unordered_map>
 #include <vector>
@@ -106,9 +107,9 @@ struct VCVParam {
   }
 };
 
-enum PortType {
-  Input, Output
-};
+// enum PortType {
+//   Input, Output
+// };
 struct PortIdentity {
   PortType type;
   int64_t moduleId = -1;

@@ -8,6 +8,8 @@
 class Aosc3GameModeBase;
 class UTexture2D;
 
+class AVCVCable;
+
 UCLASS()
 class OSC3_API AVCVPort : public AActor {
 	GENERATED_BODY()
@@ -52,4 +54,7 @@ private:
 
   VCVPort* model;
   TArray<int64_t> cableIds;
+  
+  UPROPERTY()
+  TArray<AVCVCable*> AttachedCableActors;
 };

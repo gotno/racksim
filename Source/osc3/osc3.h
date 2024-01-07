@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "UObject/ObjectMacros.h"
 
 #define RENDER_SCALE 2.f
 #define MODULE_DEPTH 2.f
@@ -18,3 +19,10 @@
 #define TAG_INTERACTABLE FName("interactable")
 #define TAG_INTERACTABLE_PARAM FName("interactable_param")
 #define TAG_INTERACTABLE_PORT FName("interactable_port")
+
+UENUM()
+enum class PortType : int32
+{
+    Input,
+    Output
+}; 
