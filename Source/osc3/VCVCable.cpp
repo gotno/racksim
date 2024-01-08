@@ -1,15 +1,11 @@
 #include "VCVCable.h"
 
 #include "osc3GameModeBase.h"
-// #include "VCV.h"
 #include "VCVPort.h"
 
-// #include "CableComponent.h"
+#include "CableComponent.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Kismet/GameplayStatics.h"
-#include "DrawDebugHelpers.h"
-// #include "Kismet/KismetMathLibrary.h"
-// #include "Math/UnrealMathUtility.h"
 
 AVCVCable::AVCVCable() {
 	PrimaryActorTick.bCanEverTick = true;
@@ -18,12 +14,7 @@ AVCVCable::AVCVCable() {
   SetRootComponent(RootSceneComponent);
 
   InputMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Input Mesh"));
-  // InputMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-  // InputMeshComponent->SetMobility(EComponentMobility::Movable);
-
   OutputMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Output Mesh"));
-  // OutputMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-  // OutputMeshComponent->SetMobility(EComponentMobility::Movable);
 
   static ConstructorHelpers::FObjectFinder<UStaticMesh> JackBody(JackMeshReference);
   if (JackBody.Object) {
@@ -37,42 +28,33 @@ AVCVCable::AVCVCable() {
 
   static ConstructorHelpers::FObjectFinder<UMaterial> BaseMaterial(BaseMaterialReference);
   if (BaseMaterial.Object) BaseMaterialInterface = Cast<UMaterial>(BaseMaterial.Object);
+
+  static ConstructorHelpers::FObjectFinder<UMaterial> CableMaterial(CableMaterialReference);
+  if (CableMaterial.Object) CableMaterialInterface = Cast<UMaterial>(CableMaterial.Object);
   
-  // CableComponent = CreateDefaultSubobject<UCableComponent>(TEXT("Cable Component"));
-  // CableComponent->bSkipCableUpdateWhenNotOwnerRecentlyRendered = true;
-  // CableComponent->SetupAttachment(InputMeshComponent, TEXT("wire"));
-  // CableComponent->SetAttachEndToComponent(OutputMeshComponent, TEXT("wire"));
-  // CableComponent->EndLocation = FVector(0.f);
-  // CableComponent->CableWidth = 0.3f;
-  // CableComponent->bAttachStart = true;
-  // CableComponent->bAttachEnd = true;
-  // CableComponent->SetEnableGravity(false);
-  // CableComponent->CableForce = FVector(0.f, 0.f, 0.f);
-  // CableComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-  // CableComponent->bEnableStiffness = false;
-  // CableComponent->NumSegments = 16;
-  // CableComponent->NumSides = 8;
-  // CableComponent->SolverIterations = 16;
-  // CableComponent->CableLength = 20.f;
+  CableComponent = CreateDefaultSubobject<UCableComponent>(TEXT("Cable Component"));
+  CableComponent->SetupAttachment(InputMeshComponent, TEXT("wire"));
+  CableComponent->SetAttachEndToComponent(OutputMeshComponent, TEXT("wire"));
+  CableComponent->EndLocation = FVector(0.f);
+  CableComponent->CableWidth = 0.3f;
+  CableComponent->bAttachStart = true;
+  CableComponent->bAttachEnd = true;
+  CableComponent->SetEnableGravity(false);
+  CableComponent->CableForce = FVector(0.f, 0.f, 0.f);
+  CableComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+  CableComponent->bEnableStiffness = false;
+  CableComponent->NumSegments = 32;
+  CableComponent->NumSides = 6;
+  CableComponent->SolverIterations = 16;
 }
 
-// void AVCVCable::SetAlive(bool inAlive) {
-//   bAlive = inAlive;
+void AVCVCable::Sleep() {
+  CableComponent->SetComponentTickEnabled(false);
+}
 
-//   if (bAlive) {
-//     CableComponent->SetComponentTickEnabled(true);
-//   } else {
-//     CableComponent->SetComponentTickEnabled(false);
-//   }
-// }
-
-// void AVCVCable::Sleep() {
-//   SetAlive(false);
-// }
-
-// void AVCVCable::Wake() {
-//   SetAlive(true);
-// }
+void AVCVCable::Wake() {
+  CableComponent->SetComponentTickEnabled(true);
+}
 
 void AVCVCable::BeginPlay() {
 	Super::BeginPlay();
@@ -85,19 +67,17 @@ void AVCVCable::BeginPlay() {
 
     InputMeshComponent->SetMaterial(0, BaseMaterialInstance);
     OutputMeshComponent->SetMaterial(0, BaseMaterialInstance);
-    // CableComponent->SetMaterial(0, BaseMaterialInstance);
 
     BaseMaterialInstance->SetVectorParameterValue(FName("Color"), CableColor);
   }
 
-  // FTimerHandle sleepHandle;
-  // GetWorld()->GetTimerManager().SetTimer(
-  //   sleepHandle,
-  //   this,
-  //   &AVCVCable::Sleep,
-  //   0.01f, // seconds, apparently
-  //   false
-  // );
+  if (CableMaterialInterface) {
+    CableMaterialInstance = UMaterialInstanceDynamic::Create(CableMaterialInterface, this);
+    CableComponent->SetMaterial(0, CableMaterialInstance);
+    CableMaterialInstance->SetVectorParameterValue(FName("Color"), CableColor);
+    CableMaterialInstance->SetScalarParameterValue(FName("Opacity"), CABLE_OPACITY);
+  }
+
   GameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
   Ports.Reserve(2);
 }
@@ -175,13 +155,25 @@ void AVCVCable::UpdateEndPositions() {
     ? Ports[PortType::Output]->GetActorForwardVector()
     : HangingForwardVector;
 
-  // float distanceBetweenEnds = FVector::Distance(inputLocation, outputLocation);
-  // CableComponent->CableLength = distanceBetweenEnds * 1.2;
-  // CableComponent->CableForce = (inputForwardVector + outputForwardVector) * 0.5f * -1000.f;
+  float distanceBetweenEnds = FVector::Distance(inputLocation, outputLocation);
+  CableComponent->CableLength = distanceBetweenEnds * 0.8;
+
+  // naive attempt to set cable force relative to average of cable end vectors
+  // actually working kind of ok!
+  CableComponent->CableForce = (inputForwardVector + outputForwardVector) * 0.5f * -500.f;
+
   InputMeshComponent->SetWorldLocation(inputLocation);
   InputMeshComponent->SetWorldRotation(inputForwardVector.Rotation());
   OutputMeshComponent->SetWorldLocation(outputLocation);
   OutputMeshComponent->SetWorldRotation(outputForwardVector.Rotation());
-  
-  DrawDebugLine(GetWorld(), inputLocation, outputLocation, CableColor);
+
+  GetWorld()->GetTimerManager().ClearTimer(CableSleepHandle);
+  GetWorld()->GetTimerManager().SetTimer(
+    CableSleepHandle,
+    this,
+    &AVCVCable::Sleep,
+    1.2f, // seconds, apparently
+    false
+  );
+  Wake();
 }

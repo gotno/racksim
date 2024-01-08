@@ -2,7 +2,6 @@
 
 #include "CoreMinimal.h"
 
-// #include "VCV.h"
 #include "osc3.h"
 
 #include "VCVCable.generated.h"
@@ -11,11 +10,10 @@ class USceneComponent;
 class UStaticMeshComponent;
 class UMaterialInstanceDynamic;
 class UMaterialInterface;
-// class UCableComponent;
+class UCableComponent;
 
 class Aosc3GameModeBase;
 class AVCVPort;
-// class AVCVModule;
 
 UCLASS()
 class OSC3_API AVCVCable : public AActor {
@@ -52,15 +50,20 @@ private:
   
   TCHAR* JackMeshReference = TEXT("/Script/Engine.StaticMesh'/Game/meshes/jack.jack'");
   
-  // UPROPERTY(VisibleAnywhere)
-  // UCableComponent* CableComponent;
+  UPROPERTY(VisibleAnywhere)
+  UCableComponent* CableComponent;
 
+  TCHAR* BaseMaterialReference = TEXT("/Script/Engine.Material'/Game/materials/generic_color.generic_color'");
   UPROPERTY()
   UMaterialInstanceDynamic* BaseMaterialInstance;
   UPROPERTY()
   UMaterialInterface* BaseMaterialInterface;
 
-  TCHAR* BaseMaterialReference = TEXT("/Script/Engine.Material'/Game/materials/generic_color.generic_color'");
+  TCHAR* CableMaterialReference = TEXT("/Script/Engine.Material'/Game/materials/cable.cable'");
+  UPROPERTY()
+  UMaterialInstanceDynamic* CableMaterialInstance;
+  UPROPERTY()
+  UMaterialInterface* CableMaterialInterface;
 
   FColor CableColor;
   // TODO: replace these with colors from potentially-user-overridden rack settings
@@ -72,6 +75,10 @@ private:
     FColor::FromHex(FString("#8b4ade"))
   };
   static inline int CurrentCableColorIndex{0};
+
+  FTimerHandle CableSleepHandle;
+  void Sleep();
+  void Wake();
   
   FVector HangingLocation, HangingForwardVector;
   
