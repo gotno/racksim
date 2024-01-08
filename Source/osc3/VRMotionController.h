@@ -89,7 +89,7 @@ private:
   UPROPERTY(VisibleAnywhere)
   USphereComponent* GrabSphere;
   UPROPERTY(EditDefaultsOnly, Category="Interaction")
-  float GrabSphereRadius{0.5f};
+  float GrabSphereRadius{1.f};
   UPROPERTY(EditDefaultsOnly, Category="Interaction")
   FVector GrabSphereOffset{0.f, -2.f, -2.f};
 

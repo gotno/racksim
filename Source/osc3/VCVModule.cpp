@@ -20,6 +20,7 @@
 #include "Components/PrimitiveComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Algo/Reverse.h"
+#include "PhysicsEngine/BodySetup.h"
 
 AVCVModule::AVCVModule() {
 	PrimaryActorTick.bCanEverTick = true;
@@ -38,8 +39,8 @@ AVCVModule::AVCVModule() {
   OutlineMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
   OutlineMeshComponent->SetupAttachment(StaticMeshComponent);
   OutlineMeshComponent->SetVisibility(false);
-  OutlineMeshComponent->SetWorldScale3D(FVector(1.1f, 1.1f, 1.1f));
-  OutlineMeshComponent->AddLocalOffset(FVector(-0.05f, 0.f, 0.f));
+  // OutlineMeshComponent->SetWorldScale3D(FVector(1.05f, 1.05f, 1.05f));
+  // OutlineMeshComponent->AddLocalOffset(FVector(-0.025f, 0.f, 0.f));
   
   static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshBody(TEXT("/Script/Engine.StaticMesh'/Game/meshes/faced/unit_module_faced.unit_module_faced'"));
   if (MeshBody.Object) StaticMeshComponent->SetStaticMesh(MeshBody.Object);
@@ -71,6 +72,9 @@ void AVCVModule::BeginPlay() {
   
   // hide module until init'd
   SetHidden(true);
+
+  UBodySetup* bodySetup = StaticMeshComponent->GetBodySetup();
+  if (bodySetup) bodySetup->CollisionTraceFlag = ECollisionTraceFlag::CTF_UseComplexAsSimple;
 
   if (BaseMaterialInterface) {
     BaseMaterialInstance = UMaterialInstanceDynamic::Create(BaseMaterialInterface, this);
@@ -142,6 +146,8 @@ void AVCVModule::init(VCVModule vcv_module) {
   FaceMaterialInstance->SetScalarParameterValue(FName("vscale"), overrides.getUVOverride(model.brand).Y);
 
   StaticMeshComponent->SetWorldScale3D(FVector(RENDER_SCALE * MODULE_DEPTH, model.box.size.x, model.box.size.y));
+  OutlineMeshComponent->SetWorldScale3D(FVector(RENDER_SCALE * MODULE_DEPTH + 0.2f, model.box.size.x + 0.2f, model.box.size.y + 0.2f));
+  OutlineMeshComponent->AddLocalOffset(FVector(-0.1f, 0.f, 0.f));
   spawnComponents();
   SetHidden(false);
   
