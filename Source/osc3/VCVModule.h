@@ -87,6 +87,7 @@ private:
   UPROPERTY()
   UTexture2D* texture;
   
+  // TODO: this stuff should all be its own actor
   UWidgetComponent* ContextMenuWidgetComponent;
   UContextMenu* ContextMenuWidget;
   void SetupContextMenuWidget();
