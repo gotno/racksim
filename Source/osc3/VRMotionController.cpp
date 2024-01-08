@@ -172,13 +172,13 @@ void AVRMotionController::RefreshTooltip() {
   } else if (DestinationPortActor && OriginPortActor) {
     FString fromName, _fromDescription;
     AVCVPort* fromActor = 
-        OriginPortActor->getIdentity().type == PortType::Output
+        OriginPortActor->Type == PortType::Output
           ? OriginPortActor
           : DestinationPortActor;
     fromActor->GetTooltipText(fromName, _fromDescription);
     FString toName, _toDescription;
     AVCVPort* toActor = 
-        OriginPortActor->getIdentity().type == PortType::Input
+        OriginPortActor->Type == PortType::Input
           ? OriginPortActor
           : DestinationPortActor;
     toActor->GetTooltipText(toName, _toDescription);
@@ -193,7 +193,7 @@ void AVRMotionController::RefreshTooltip() {
 
     if (bIsPortInteracting) {
       FString prefix(
-        OriginPortActor->getIdentity().type == PortType::Input
+        OriginPortActor->Type == PortType::Input
           ? "to: "
           : "from: "
       );
@@ -271,19 +271,14 @@ void AVRMotionController::StartPortInteract() {
   // UE_LOG(LogTemp, Display, TEXT("%s start port interact"), *HandName);
   bIsPortInteracting = true;
 
-  /* int64_t cableId; */
-  /* if (OriginPortActor->getCableId(cableId)) { */
-  /*   HeldCable = GameMode->DetachCable(cableId, OriginPortActor->getIdentity()); */
-  /*   // UE_LOG(LogTemp, Warning, TEXT("got cable %lld"), cableId); */
-  /*   OriginPortActor = GameMode->GetPortActor(HeldCable->getConnectedPortIdentity()); */
-  /*   RefreshTooltip(); */
-  /* } else { */
-  /*   // UE_LOG(LogTemp, Warning, TEXT("spawning new cable")); */
-  /*   VCVCable cable; */
-  /*   cable.setIdentity(OriginPortActor->getIdentity()); */
-  /*   HeldCable = GameMode->SpawnCable(cable); */
-  HeldCable = GameMode->SpawnCable(OriginPortActor);
-  /* } */
+  AVCVCable* cableOnPort = OriginPortActor->GetTopCable();
+  if (cableOnPort) {
+    HeldCable = cableOnPort;
+    HeldCable->UnsetPort(OriginPortActor->Type);
+    RefreshTooltip();
+  } else {
+    HeldCable = GameMode->SpawnCable(OriginPortActor);
+  }
 }
 
 void AVRMotionController::EndPortInteract() {
@@ -291,10 +286,8 @@ void AVRMotionController::EndPortInteract() {
 
   if (DestinationPortActor && DestinationPortActor->CanConnect(HeldCable->GetHangingType())) {
     HeldCable->SetPort(DestinationPortActor);
-    // THIS THIS THIS
-    /* GameMode->AttachCable(HeldCable, DestinationPortActor->getIdentity()); */
   } else {
-    /* GameMode->DestroyCableActor(HeldCable); */
+    GameMode->DestroyCableActor(HeldCable);
   }
 
   bIsPortInteracting = false;

@@ -572,16 +572,14 @@ void AVRAvatar::HandleParamEngage(const FInputActionValue& _Value, EControllerHa
   AVCVCable* heldCable = controller->GetHeldCable();
   if (heldCable) {
     AVCVPort* destinationPort = controller->GetDestinationPortActor();
-    heldCable->SetAlive(true);
+    FVector location, direction;
     if (destinationPort) {
-      FVector location, direction;
-      GameMode->GetPortInfo(destinationPort->getIdentity(), location, direction);
-      heldCable->setHangingLocation(location, direction);
+      location = destinationPort->GetActorLocation();
+      direction = destinationPort->GetActorForwardVector();
     } else {
-      FVector location, direction;
       controller->GetHeldCableEndInfo(location, direction);
-      heldCable->setHangingLocation(location, direction);
     }
+    heldCable->SetHangingEndLocation(location, direction);
   }
 }
 
@@ -600,7 +598,7 @@ void AVRAvatar::HandleCompleteParamEngage(const FInputActionValue& _Value, ECont
   AVCVCable* heldCable = controller->GetHeldCable();
   if (heldCable) {
     controller->EndPortInteract();
-    heldCable->SetAlive(false);
+    // heldCable->SetAlive(false);
   }
 }
 

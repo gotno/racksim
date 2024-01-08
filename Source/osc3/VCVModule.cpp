@@ -99,17 +99,20 @@ void AVCVModule::BeginPlay() {
 
 void AVCVModule::EndPlay(const EEndPlayReason::Type EndPlayReason) {
 	Super::EndPlay(EndPlayReason);
-  
-  int64 cableId;
+
   for (auto& pair : InputActors) {
-    while (pair.Value->getCableId(cableId)) {
-      gameMode->DestroyCableActor(cableId);
+    AVCVPort* port = pair.Value;
+    while (port->HasCables()) {
+      AVCVCable* cable = port->GetTopCable();
+      gameMode->DestroyCableActor(cable);
     }
   }
 
   for (auto& pair : OutputActors) {
-    while (pair.Value->getCableId(cableId)) {
-      gameMode->DestroyCableActor(cableId);
+    AVCVPort* port = pair.Value;
+    while (port->HasCables()) {
+      AVCVCable* cable = port->GetTopCable();
+      gameMode->DestroyCableActor(cable);
     }
   }
 
@@ -122,6 +125,8 @@ void AVCVModule::EndPlay(const EEndPlayReason::Type EndPlayReason) {
 
 void AVCVModule::init(VCVModule vcv_module) {
   model = vcv_module; 
+
+  Id = model.id;
   Brand = model.brand;
   Name = model.name;
 
@@ -165,17 +170,6 @@ void AVCVModule::SetupContextMenuWidget() {
   ContextMenuWidgetComponent->AttachToComponent(StaticMeshComponent, FAttachmentTransformRules::KeepWorldTransform);
 }
 
-void AVCVModule::GetPortInfo(PortIdentity identity, FVector& portLocation, FVector& portForwardVector) {
-  AVCVPort* port;
-  if (identity.type == PortType::Input) {
-    port = InputActors[identity.portId];
-  } else {
-    port = OutputActors[identity.portId];
-  }
-  portLocation = port->GetActorLocation();
-  portForwardVector = port->GetActorForwardVector();
-}
-
 int64 AVCVModule::GetId() {
   return model.id;
 }
@@ -185,25 +179,9 @@ void AVCVModule::GetSlugs(FString& PluginSlug, FString& Slug) {
   Slug = model.slug;
 }
 
-AVCVPort* AVCVModule::GetPortActor(PortIdentity identity) {
-  if (identity.type == PortType::Input) return InputActors[identity.portId];
-  return OutputActors[identity.portId];
-}
-
-void AVCVModule::AttachCable(const PortIdentity& identity, int64_t cableId) {
-  if (identity.type == PortType::Input) {
-    InputActors[identity.portId]->addCableId(cableId);
-  } else {
-    OutputActors[identity.portId]->addCableId(cableId);
-  }
-}
-
-void AVCVModule::DetachCable(const PortIdentity& identity, int64_t cableId) {
-  if (identity.type == PortType::Input) {
-    InputActors[identity.portId]->removeCableId(cableId);
-  } else {
-    OutputActors[identity.portId]->removeCableId(cableId);
-  }
+AVCVPort* AVCVModule::GetPortActor(PortType Type, int32& PortId) {
+  if (Type == PortType::Input) return InputActors[PortId];
+  return OutputActors[PortId];
 }
 
 void AVCVModule::UpdateLight(int32 lightId, FLinearColor color) {

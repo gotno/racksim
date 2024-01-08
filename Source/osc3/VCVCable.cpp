@@ -1,10 +1,12 @@
 #include "VCVCable.h"
 
-// #include "osc3GameModeBase.h"
+#include "osc3GameModeBase.h"
 // #include "VCV.h"
+#include "VCVPort.h"
 
 // #include "CableComponent.h"
-// #include "Kismet/GameplayStatics.h"
+#include "Kismet/GameplayStatics.h"
+#include "DrawDebugHelpers.h"
 // #include "Kismet/KismetMathLibrary.h"
 // #include "Math/UnrealMathUtility.h"
 
@@ -74,7 +76,8 @@ AVCVCable::AVCVCable() {
 void AVCVCable::BeginPlay() {
 	Super::BeginPlay();
 
-  cableColor = cableColors[FMath::RandRange(0, cableColors.Num() - 1)];
+  CableColor = CableColors[CurrentCableColorIndex++];
+  if (CurrentCableColorIndex > CableColors.Num() - 1) CurrentCableColorIndex = 0;
 
   if (BaseMaterialInterface) {
     BaseMaterialInstance = UMaterialInstanceDynamic::Create(BaseMaterialInterface, this);
@@ -83,7 +86,7 @@ void AVCVCable::BeginPlay() {
     OutputMeshComponent->SetMaterial(0, BaseMaterialInstance);
     // CableComponent->SetMaterial(0, BaseMaterialInstance);
 
-    BaseMaterialInstance->SetVectorParameterValue(FName("Color"), cableColor);
+    BaseMaterialInstance->SetVectorParameterValue(FName("Color"), CableColor);
   }
 
   // FTimerHandle sleepHandle;
@@ -94,108 +97,90 @@ void AVCVCable::BeginPlay() {
   //   0.01f, // seconds, apparently
   //   false
   // );
+  GameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
+  Ports.Reserve(2);
 }
 
-void AVCVCable::UnsetPort(PortType Type) {
-  Ports[Type]->RemoveCable(this);
-  Ports.Remove(Type);
-  // HandlePortChange();
+void AVCVCable::EndPlay(const EEndPlayReason::Type EndPlayReason) {
+	Super::EndPlay(EndPlayReason);
+
+  for (auto& pair : Ports) {
+    pair.Value->RemoveCable(this);
+  }
 }
 
 void AVCVCable::SetPort(AVCVPort* Port) {
   Ports.Add(Port->Type, Port);
   Port->AddCable(this);
-  // HandlePortChange();
+  HandlePortChange();
+  
+  UpdateEndPositions();
+}
+
+void AVCVCable::UnsetPort(PortType Type) {
+  Ports[Type]->RemoveCable(this);
+  Ports.Remove(Type);
+  HandlePortChange();
+  
+  UpdateEndPositions();
+}
+
+AVCVPort* AVCVCable::GetPort(PortType Type) {
+  if (Ports.Contains(Type)) return Ports[Type];
+  return nullptr;
 }
 
 void AVCVCable::HandlePortChange() {
-  /* if (IsComplete() && !id somehow) { */
-  /*   request persist */
-  /* } else if (id somehow && !IsComplete()) { */
-  /*   request destroy */
-  /* } */
+  if (IsComplete() && !IsRegistered()) {
+    GameMode->RegisterCableConnect(Ports[PortType::Input], Ports[PortType::Output]);
+    return;
+  }
+  
+  if (IsRegistered() && !IsComplete()) {
+    GameMode->RegisterCableDisconnect(this);
+    return;
+  }
 }
-
-// void AVCVCable::init(VCVCable vcv_cable) {
-//   model = vcv_cable; 
-//   draw();
-//   // UE_LOG(LogTemp, Warning, TEXT("cable model %lld: %lld:%lld"), model.id, model.inputModuleId, model.outputModuleId);
-// }
 
 void AVCVCable::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 }
 
-// void AVCVCable::disconnectFrom(PortIdentity identity) {
-//   model.nullifyIdentity(identity.type);
-// }
-
-// void AVCVCable::connectTo(PortIdentity identity) {
-//   if (model.portIdentities[identity.type].isNull()) {
-//     model.portIdentities[identity.type] = identity;
-//   }
-// }
-
-// void AVCVCable::setHangingLocation(FVector _hangingLocation, FVector _hangingForwardVector) {
-//   hangingLocation = _hangingLocation;
-//   hangingForwardVector = _hangingForwardVector;
-// }
+void AVCVCable::SetHangingEndLocation(FVector inHangingLocation, FVector inHangingForwardVector) {
+  HangingLocation = inHangingLocation;
+  HangingForwardVector = inHangingForwardVector;
+  
+  UpdateEndPositions();
+}
 
 PortType AVCVCable::GetHangingType() {
   checkf(!IsComplete(), TEXT("cable IsComplete and has no hanging type"));
 
-  if (Ports.Contains(PortType::Input) return PortType::Output;
+  if (Ports.Contains(PortType::Input)) return PortType::Output;
   return PortType::Input;
 }
 
-// PortIdentity AVCVCable::getConnectedPortIdentity() {
-//   if (model.portIdentities[PortType::Input].isNull()) return model.portIdentities[PortType::Output];
-//   return model.portIdentities[PortType::Input];
-// }
+void AVCVCable::UpdateEndPositions() {
+  FVector inputLocation = Ports.Contains(PortType::Input)
+    ? Ports[PortType::Input]->GetActorLocation()
+    : HangingLocation;
+  FVector inputForwardVector = Ports.Contains(PortType::Input)
+    ? Ports[PortType::Input]->GetActorForwardVector()
+    : HangingForwardVector;
+  FVector outputLocation = Ports.Contains(PortType::Output)
+    ? Ports[PortType::Output]->GetActorLocation()
+    : HangingLocation;
+  FVector outputForwardVector = Ports.Contains(PortType::Output)
+    ? Ports[PortType::Output]->GetActorForwardVector()
+    : HangingForwardVector;
 
-// void AVCVCable::setId(int64_t& inId) {
-//   model.id = inId;
-// }
-
-// int64_t AVCVCable::getId() {
-//   return model.id;
-// }
-
-// VCVCable AVCVCable::getModel() {
-//   return model;
-// }
-
-void AVCVCable::draw() {
-  Aosc3GameModeBase* gameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
-
-  FVector inputLocation, outputLocation, inputForwardVector, outputForwardVector;
-
-  if (model.portIdentities[PortType::Input].isNull()) {
-    inputLocation = hangingLocation;
-    inputForwardVector = hangingForwardVector;
-  } else {
-    gameMode->GetPortInfo(
-      model.portIdentities[PortType::Input],
-      inputLocation,
-      inputForwardVector
-    );
-  }
-  if (model.portIdentities[PortType::Output].isNull()) {
-    outputLocation = hangingLocation;
-    outputForwardVector = hangingForwardVector;
-  } else {
-    gameMode->GetPortInfo(
-      model.portIdentities[PortType::Output],
-      outputLocation,
-      outputForwardVector
-    );
-  }
-
-  float distanceBetweenEnds = FVector::Distance(inputLocation, outputLocation);
-  CableComponent->CableLength = distanceBetweenEnds * 1.2;
-  CableComponent->CableForce = (inputForwardVector + outputForwardVector) * 0.5f * -1000.f;
+  // float distanceBetweenEnds = FVector::Distance(inputLocation, outputLocation);
+  // CableComponent->CableLength = distanceBetweenEnds * 1.2;
+  // CableComponent->CableForce = (inputForwardVector + outputForwardVector) * 0.5f * -1000.f;
   InputMeshComponent->SetWorldLocation(inputLocation);
   InputMeshComponent->SetWorldRotation(inputForwardVector.Rotation());
   OutputMeshComponent->SetWorldLocation(outputLocation);
   OutputMeshComponent->SetWorldRotation(outputForwardVector.Rotation());
+  
+  DrawDebugLine(GetWorld(), inputLocation, outputLocation, CableColor);
 }

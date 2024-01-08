@@ -549,18 +549,17 @@ void AOSCController::AddCable(const FOSCAddress& AddressPattern, const FOSCMessa
   int64_t cableId;
   UOSCManager::GetInt64(message, 0, cableId);
   
-  Cables.Add(cableId, VCVCable(cableId));
+  VCVCable cable(cableId);
 
-  VCVCable& cable = Cables[cableId];
+  UOSCManager::GetInt64(message, 1, cable.inputModuleId);
+  UOSCManager::GetInt64(message, 2, cable.outputModuleId);
+  UOSCManager::GetInt32(message, 3, cable.inputPortId);
+  UOSCManager::GetInt32(message, 4, cable.outputPortId);
 
-  UOSCManager::GetInt64(message, 1, cable.portIdentities[PortType::Input].moduleId);
-  UOSCManager::GetInt64(message, 2, cable.portIdentities[PortType::Output].moduleId);
-  UOSCManager::GetInt32(message, 3, cable.portIdentities[PortType::Input].portId);
-  UOSCManager::GetInt32(message, 4, cable.portIdentities[PortType::Output].portId);
-
+  // TODO: why
   NotifyReceived("cable", cableId);
 
-  gameMode->QueueCableSpawn(Cables[cableId]);
+  gameMode->QueueCableSpawn(cable);
 }
 
 void AOSCController::UpdateLight(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port) {

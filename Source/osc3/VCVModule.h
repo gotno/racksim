@@ -33,13 +33,12 @@ public:
   void init(VCVModule model);
   
   int64 GetId();
-  void GetPortInfo(PortIdentity identity, FVector& portLocation, FVector& portForwardVector);
-  void AttachCable(const PortIdentity& identity, int64_t cableId);
-  void DetachCable(const PortIdentity& identity, int64_t cableId);
+  void GetSlugs(FString& PluginSlug, FString& Slug);
+  int64_t Id{-1};
+
   void UpdateLight(int32 lightId, FLinearColor color);
   AVCVParam* GetParamActor(const int& paramId) { return ParamActors[paramId]; }
-  AVCVPort* GetPortActor(PortIdentity identity);
-  void GetSlugs(FString& PluginSlug, FString& Slug);
+  AVCVPort* GetPortActor(PortType Type, int32& PortId);
 
   void ToggleContextMenu();
   void AddMenuItem(VCVMenuItem& MenuItem);

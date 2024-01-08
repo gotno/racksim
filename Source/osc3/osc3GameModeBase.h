@@ -10,7 +10,6 @@
 #include "osc3GameModeBase.generated.h"
 
 class AOSCController;
-class AAvatar;
 class AVRAvatar;
 class AVCVCable;
 class AVCVModule;
@@ -38,19 +37,11 @@ public:
   void SpawnModule(VCVModule module);
   void QueueCableSpawn(VCVCable cable);
 
-  void GetPortInfo(
-    PortIdentity identity,
-    FVector& portLocation,
-    FVector& portForwardVector
-  );
-  AVCVPort* GetPortActor(PortIdentity identity);
-  AVCVCable* SpawnCable(VCVCable cable);
   AVCVCable* SpawnCable(AVCVPort* Port);
-  void DestroyCableActor(int64_t cableId);
+  void SpawnCable(int64_t& Id, AVCVPort* InputPort, AVCVPort* OutputPort);
   void DestroyCableActor(AVCVCable* Cable);
-  AVCVCable* DetachCable(int64_t cableId, PortIdentity identity);
-  void AttachCable(int64_t cableId, PortIdentity identity);
-  void AttachCable(AVCVCable* Cable, PortIdentity Identity);
+  void RegisterCableConnect(AVCVPort* InputPort, AVCVPort* OutputPort);
+  void RegisterCableDisconnect(AVCVCable* Cable);
 
   void UpdateLight(int64_t moduleId, int32 lightId, FLinearColor color);
   void UpdateParam(int64_t moduleId, VCVParam& param);
@@ -87,12 +78,10 @@ private:
   UPROPERTY()
   TMap<int64, AVCVModule*> ModuleActors;
   UPROPERTY()
-  TMap<int64, AVCVCable*> CableActors;
+  TArray<AVCVCable*> CableActors;
   UPROPERTY()
   ALibrary* LibraryActor{nullptr};
   
-  typedef TTuple<int64_t, int, int64_t, int> TempCableId;
-  TMap<TempCableId, AVCVCable*> TempCableActors;
 
   FDPSVGImporter SVGImporter;
   UPROPERTY()

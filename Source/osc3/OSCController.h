@@ -101,5 +101,4 @@ private:
   // void PrintVCVModule(VCVModule mod);
 
   TMap<int64, VCVModule> Modules;
-  TMap<int64, VCVCable> Cables;
 };

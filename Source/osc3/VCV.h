@@ -107,27 +107,6 @@ struct VCVParam {
   }
 };
 
-// enum PortType {
-//   Input, Output
-// };
-struct PortIdentity {
-  PortType type;
-  int64_t moduleId = -1;
-  int32 portId = -1;
-  
-  void nullify() {
-    moduleId = -1;
-    portId = -1;
-  }
-
-  bool isNull() {
-    return moduleId == -1 && portId == -1;
-  }
-
-  PortIdentity() {}
-  PortIdentity(PortType _type) : type(_type) {}
-  PortIdentity(PortType _type, int64_t _moduleId, int32 _portId) : type(_type), moduleId(_moduleId), portId(_portId) {}
-};
 struct VCVPort {
   int32 id;
   PortType type;
@@ -138,33 +117,14 @@ struct VCVPort {
   FString svgPath;
   FLinearColor bodyColor;
 
-  PortIdentity getIdentity() {
-    return PortIdentity(type, moduleId, id);
-  }
-  
   VCVPort() {}
   VCVPort(int32 _id, PortType _type) : id(_id), type(_type) {}
   VCVPort(int32 _id, PortType _type, int64_t _moduleId) : id(_id), type(_type), moduleId(_moduleId) {}
 };
 
 struct VCVCable {
-  int64_t id = -1;
-  TMap<PortType, PortIdentity> portIdentities = {
-    { PortType::Input, PortIdentity(PortType::Input) },
-    { PortType::Output, PortIdentity(PortType::Output) }
-  };
-  
-  void setIdentity(PortIdentity identity) {
-    portIdentities[identity.type] = identity;
-  }
-
-  PortIdentity getIdentity(PortType type) {
-    return portIdentities[type];
-  }
-
-  void nullifyIdentity(PortType type) {
-    portIdentities[type].nullify();
-  }
+  int64_t id = -1, inputModuleId, outputModuleId;
+  int32 inputPortId, outputPortId; 
   
   bool operator==(const VCVCable& other) {
     return id == other.id;

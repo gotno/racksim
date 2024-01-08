@@ -44,7 +44,8 @@ void AVCVPort::BeginPlay() {
     StaticMeshComponent->SetMaterial(1, FaceMaterialInstance);
   }
   
-  gameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(this));
+  GameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(this));
+  Module = Cast<AVCVModule>(GetOwner());
   
   Tags.Add(TAG_INTERACTABLE_PORT);
 }
@@ -52,16 +53,17 @@ void AVCVPort::BeginPlay() {
 void AVCVPort::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
   
-  if (texture) return;
+  if (Texture) return;
   
-  texture = gameMode->GetTexture(model->svgPath);
-  if (texture) FaceMaterialInstance->SetTextureParameterValue(FName("texture"), texture);
+  Texture = GameMode->GetTexture(model->svgPath);
+  if (Texture) FaceMaterialInstance->SetTextureParameterValue(FName("texture"), Texture);
 }
 
 void AVCVPort::init(VCVPort* vcv_port) {
   model = vcv_port;
 
-  Type = vcv_port.type;
+  Id = vcv_port->id;
+  Type = vcv_port->type;
 
   StaticMeshComponent->SetWorldScale3D(FVector(RENDER_SCALE, model->box.size.x, model->box.size.y));
   
@@ -69,29 +71,24 @@ void AVCVPort::init(VCVPort* vcv_port) {
   FaceMaterialInstance->SetVectorParameterValue(FName("background_color"), model->bodyColor);
 }
 
-void AVCVPort::addCableId(int64_t cableId) {
-  cableIds.Push(cableId);
-}
-
-void AVCVPort::removeCableId(int64_t cableId) {
-  cableIds.Remove(cableId);
-}
-
-bool AVCVPort::getCableId(int64_t& cableId) {
-  if (cableIds.Num() == 0) return false;
-  cableId = cableIds.Pop();
-  return true;
-}
-
 bool AVCVPort::CanConnect(PortType inType) {
   if (inType != Type) return false;
-  if (Type == PortType::Input && Cables.Num() > 0) return false;
+  if (Type == PortType::Input && HasCables()) return false;
   return true;
+}
+
+bool AVCVPort::HasCables() {
+  return Cables.Num() > 0;
+}
+
+AVCVCable* AVCVPort::GetTopCable() {
+  if (!HasCables()) return nullptr;
+  return Cables[Cables.Num() - 1];
 }
 
 void AVCVPort::AddCable(AVCVCable* Cable) {
   checkf(
-    Type == PortType::Output || Cables.Num() == 0,
+    Type == PortType::Output || !HasCables(),
     TEXT("attempting to add more than one cable to an Input")
   );
 
@@ -100,15 +97,11 @@ void AVCVPort::AddCable(AVCVCable* Cable) {
 
 void AVCVPort::RemoveCable(AVCVCable* Cable) {
   checkf(
-    Cables.Num() > 0,
+    HasCables(),
     TEXT("attempting to remove a cable from an empty port")
   );
 
   Cables.Remove(Cable);
-}
-
-PortIdentity AVCVPort::getIdentity() {
-  return model->getIdentity();
 }
 
 void AVCVPort::GetTooltipText(FString& Name, FString& Description) {
