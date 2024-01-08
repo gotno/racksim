@@ -35,6 +35,7 @@ public:
   bool CanConnect(PortType Type);
   bool HasCables();
   AVCVCable* GetTopCable();
+  void TriggerCableUpdates();
 
   void GetTooltipText(FString& Name, FString& Description);
 private:

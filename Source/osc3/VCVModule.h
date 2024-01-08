@@ -94,6 +94,8 @@ private:
   FString MakeMenuBreadcrumbs(int MenuId);
 
   void spawnComponents();
+  
+  void TriggerCableUpdates();
 
   VCVModule model;
   

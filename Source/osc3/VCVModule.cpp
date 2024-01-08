@@ -338,6 +338,8 @@ void AVCVModule::AlterGrab(FVector GrabbedLocation, FRotator GrabbedRotation) {
 
   LastGrabbedLocation = GrabbedLocation;
   LastGrabbedRotation = GrabbedRotation;
+  
+  TriggerCableUpdates();
 }
 
 void AVCVModule::ReleaseGrab() {
@@ -345,6 +347,15 @@ void AVCVModule::ReleaseGrab() {
   bGrabEngaged = false;
   StaticMeshComponent->AddWorldOffset(GrabOffset);
   AddActorWorldOffset(-GrabOffset);
+}
+
+void AVCVModule::TriggerCableUpdates() {
+  for (auto& pair : InputActors) {
+    pair.Value->TriggerCableUpdates();
+  }
+  for (auto& pair : OutputActors) {
+    pair.Value->TriggerCableUpdates();
+  }
 }
 
 void AVCVModule::ToggleContextMenu() {

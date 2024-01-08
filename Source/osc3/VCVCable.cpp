@@ -5,6 +5,7 @@
 #include "VCVPort.h"
 
 // #include "CableComponent.h"
+#include "UObject/ConstructorHelpers.h"
 #include "Kismet/GameplayStatics.h"
 #include "DrawDebugHelpers.h"
 // #include "Kismet/KismetMathLibrary.h"

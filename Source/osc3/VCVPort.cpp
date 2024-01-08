@@ -3,11 +3,10 @@
 #include "osc3.h"
 #include "osc3GameModeBase.h"
 #include "VCV.h"
-#include "VCVOverrides.h"
 #include "VCVModule.h"
+#include "VCVCable.h"
 
 #include "engine/Texture2D.h"
-
 #include "Kismet/GameplayStatics.h"
 #include "UObject/ConstructorHelpers.h"
 
@@ -33,6 +32,9 @@ AVCVPort::AVCVPort() {
 
 void AVCVPort::BeginPlay() {
 	Super::BeginPlay();
+  
+  Module = Cast<AVCVModule>(GetOwner());
+  GameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(this));
 
   if (BaseMaterialInterface) {
     BaseMaterialInstance = UMaterialInstanceDynamic::Create(BaseMaterialInterface, this);
@@ -43,9 +45,6 @@ void AVCVPort::BeginPlay() {
     FaceMaterialInstance = UMaterialInstanceDynamic::Create(FaceMaterialInterface, this);
     StaticMeshComponent->SetMaterial(1, FaceMaterialInstance);
   }
-  
-  GameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(this));
-  Module = Cast<AVCVModule>(GetOwner());
   
   Tags.Add(TAG_INTERACTABLE_PORT);
 }
@@ -102,6 +101,12 @@ void AVCVPort::RemoveCable(AVCVCable* Cable) {
   );
 
   Cables.Remove(Cable);
+}
+
+void AVCVPort::TriggerCableUpdates() {
+  for (AVCVCable* cable : Cables) {
+    cable->UpdateEndPositions();
+  }
 }
 
 void AVCVPort::GetTooltipText(FString& Name, FString& Description) {
