@@ -10,6 +10,7 @@
 #include "Math/UnrealMathUtility.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "PhysicsEngine/BodySetup.h"
 
 AVCVKnob::AVCVKnob() {
   BaseMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Static Mesh"));
@@ -32,6 +33,9 @@ AVCVKnob::AVCVKnob() {
 
 void AVCVKnob::BeginPlay() {
 	Super::BeginPlay();
+
+  UBodySetup* bodySetup = BaseMeshComponent->GetBodySetup();
+  if (bodySetup) bodySetup->CollisionTraceFlag = ECollisionTraceFlag::CTF_UseComplexAsSimple;
 	
   if (BaseMaterialInterface) {
     BaseMaterialInstance = UMaterialInstanceDynamic::Create(BaseMaterialInterface, this);

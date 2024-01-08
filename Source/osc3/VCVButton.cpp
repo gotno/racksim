@@ -7,6 +7,7 @@
 #include "Engine/Texture2D.h"
 #include "Kismet/GameplayStatics.h"
 #include "UObject/ConstructorHelpers.h"
+#include "PhysicsEngine/BodySetup.h"
 
 AVCVButton::AVCVButton() {
   MeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Base Mesh"));
@@ -39,6 +40,9 @@ AVCVButton::AVCVButton() {
 
 void AVCVButton::BeginPlay() {
   Super::BeginPlay();
+
+  UBodySetup* bodySetup = MeshComponent->GetBodySetup();
+  if (bodySetup) bodySetup->CollisionTraceFlag = ECollisionTraceFlag::CTF_UseComplexAsSimple;
 
   if (BaseMaterialInterface) {
     BaseMaterialInstance = UMaterialInstanceDynamic::Create(BaseMaterialInterface, this);
