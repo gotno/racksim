@@ -142,7 +142,7 @@ void AVRMotionController::Tick(float DeltaTime) {
       GetWorld(),
       GetActorLocation() + GetActorForwardVector() * 5.f,
       GetActorLocation() + GetActorForwardVector() * (widgetHit.Distance - 0.4f),
-      FColor::Green
+      FColor::FromHex(TEXT("010101FF"))
     );
   }
 }
