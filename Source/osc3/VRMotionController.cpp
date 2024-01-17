@@ -8,7 +8,7 @@
 #include "VCVCable.h"
 #include "VCVPort.h"
 #include "VRAvatar.h"
-#include "Tooltip.h"
+#include "ui/Tooltip.h"
 #include "Grabbable.h"
 
 #include "Components/SphereComponent.h"
