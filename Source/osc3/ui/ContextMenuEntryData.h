@@ -3,7 +3,7 @@
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
 
-#include "VCV.h"
+#include "VCVData/VCV.h"
 
 #include "ContextMenuEntryData.generated.h"
 

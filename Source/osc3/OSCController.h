@@ -6,7 +6,7 @@
 #include "OSCClient.h"
 #include "OSCServer.h"
 
-#include "VCV.h"
+#include "VCVData/VCV.h"
 
 #include "OSCController.generated.h"
 

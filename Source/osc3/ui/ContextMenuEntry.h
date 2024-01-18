@@ -4,7 +4,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Blueprint/IUserObjectListEntry.h"
 
-#include "VCV.h"
+#include "VCVData/VCV.h"
 
 #include "ContextMenuEntry.generated.h"
 

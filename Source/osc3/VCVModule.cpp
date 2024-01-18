@@ -1,8 +1,8 @@
 #include "VCVModule.h"
 
 #include "osc3GameModeBase.h"
-#include "VCV.h"
-#include "VCVOverrides.h"
+#include "VCVData/VCV.h"
+#include "VCVData/VCVOverrides.h"
 #include "ModuleComponents/VCVLight.h"
 #include "ModuleComponents/VCVKnob.h"
 #include "ModuleComponents/VCVButton.h"

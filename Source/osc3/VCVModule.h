@@ -1,7 +1,7 @@
 #pragma once
 
 #include "osc3.h"
-#include "VCV.h"
+#include "VCVData/VCV.h"
 #include "Grabbable.h"
 
 #include "CoreMinimal.h"

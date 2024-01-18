@@ -3,7 +3,6 @@
 #include "OSCController.h"
 #include "VRAvatar.h"
 
-#include "VCVOverrides.h"
 #include "VCVModule.h"
 #include "VCVCable.h"
 #include "ModuleComponents/VCVParam.h"

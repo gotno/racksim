@@ -2,7 +2,7 @@
 
 #include "osc3.h"
 #include "osc3GameModeBase.h"
-#include "VCV.h"
+#include "VCVData/VCV.h"
 #include "VCVModule.h"
 
 #include "Engine.h"

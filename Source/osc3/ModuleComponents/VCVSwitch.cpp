@@ -1,7 +1,7 @@
 #include "ModuleComponents/VCVSwitch.h"
 
 #include "osc3.h"
-#include "VCV.h"
+#include "VCVData/VCV.h"
 #include "osc3GameModeBase.h"
 
 #include "Engine/Texture2D.h"

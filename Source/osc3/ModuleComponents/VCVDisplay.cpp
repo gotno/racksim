@@ -1,7 +1,7 @@
 #include "ModuleComponents/VCVDisplay.h"
 
 #include "osc3.h"
-#include "VCV.h"
+#include "VCVData/VCV.h"
 
 #include "UObject/ConstructorHelpers.h"
 

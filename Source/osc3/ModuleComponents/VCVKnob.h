@@ -2,7 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "ModuleComponents/VCVParam.h"
-#include "VCV.h"
+#include "VCVData/VCV.h"
 #include "VCVKnob.generated.h"
 
 class UTexture2D;

@@ -4,7 +4,7 @@
 
 #include "DefinitivePainter/Public/SVG/Importer/DPSVGImporter.h"
 
-#include "VCV.h"
+#include "VCVData/VCV.h"
 
 #include "GameFramework/GameMode.h"
 #include "osc3GameModeBase.generated.h"

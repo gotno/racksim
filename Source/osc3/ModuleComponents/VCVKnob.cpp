@@ -2,7 +2,7 @@
 
 #include "osc3.h"
 #include "osc3GameModeBase.h"
-#include "VCVOverrides.h"
+#include "VCVData/VCVOverrides.h"
 
 #include "engine/Texture2D.h"
 
