@@ -1,4 +1,4 @@
-#include "VRAvatar.h"
+#include "Player/VRAvatar.h"
 #include "Components/CapsuleComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/SceneComponent.h"
@@ -15,7 +15,7 @@
 #include "Library.h"
 #include "Grabbable.h"
 
-#include "VRMotionController.h"
+#include "Player/VRMotionController.h"
 #include "MotionControllerComponent.h"
 
 #include "HeadMountedDisplayFunctionLibrary.h"

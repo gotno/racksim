@@ -1,8 +1,8 @@
-#include "VRMotionController.h"
+#include "Player/VRMotionController.h"
 
 #include "osc3.h"
 #include "osc3GameModeBase.h"
-#include "VRAvatar.h"
+#include "Player/VRAvatar.h"
 #include "VCVData/VCV.h"
 #include "VCVModule.h"
 #include "VCVCable.h"

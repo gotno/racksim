@@ -1,7 +1,7 @@
 #include "osc3GameModeBase.h"
 #include "osc3PlayerController.h"
 #include "OSCController.h"
-#include "VRAvatar.h"
+#include "Player/VRAvatar.h"
 
 #include "VCVModule.h"
 #include "VCVCable.h"
