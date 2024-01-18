@@ -1,4 +1,4 @@
-#include "VCVKnob.h"
+#include "ModuleComponents/VCVKnob.h"
 
 #include "osc3.h"
 #include "osc3GameModeBase.h"

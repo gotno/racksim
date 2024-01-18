@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "VCVParam.h"
+#include "ModuleComponents/VCVParam.h"
 #include "VCV.h"
 #include "VCVKnob.generated.h"
 

@@ -6,8 +6,8 @@
 #include "VCVOverrides.h"
 #include "VCVModule.h"
 #include "VCVCable.h"
-#include "VCVParam.h"
-#include "VCVPort.h"
+#include "ModuleComponents/VCVParam.h"
+#include "ModuleComponents/VCVPort.h"
 #include "Library.h"
 #include "WidgetSurrogate.h"
 

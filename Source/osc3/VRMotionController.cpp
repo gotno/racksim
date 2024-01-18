@@ -2,12 +2,12 @@
 
 #include "osc3.h"
 #include "osc3GameModeBase.h"
+#include "VRAvatar.h"
 #include "VCV.h"
 #include "VCVModule.h"
-#include "VCVParam.h"
 #include "VCVCable.h"
-#include "VCVPort.h"
-#include "VRAvatar.h"
+#include "ModuleComponents/VCVParam.h"
+#include "ModuleComponents/VCVPort.h"
 #include "UI/Tooltip.h"
 #include "Grabbable.h"
 

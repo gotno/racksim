@@ -1,4 +1,4 @@
-#include "VCVLight.h"
+#include "ModuleComponents/VCVLight.h"
 
 #include "osc3.h"
 #include "osc3GameModeBase.h"

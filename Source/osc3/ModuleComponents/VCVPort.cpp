@@ -1,4 +1,4 @@
-#include "VCVPort.h"
+#include "ModuleComponents/VCVPort.h"
 
 #include "osc3.h"
 #include "osc3GameModeBase.h"

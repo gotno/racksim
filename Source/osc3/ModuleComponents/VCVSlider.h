@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "VCVParam.h"
+#include "ModuleComponents/VCVParam.h"
 #include "VCVSlider.generated.h"
 
 class Aosc3GameModeBase;

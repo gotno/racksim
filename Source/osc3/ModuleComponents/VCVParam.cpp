@@ -1,9 +1,9 @@
-#include "VCVParam.h"
+#include "ModuleComponents/VCVParam.h"
 
 #include "osc3.h"
 #include "osc3GameModeBase.h"
 #include "VCVModule.h"
-#include "VCVLight.h"
+#include "ModuleComponents/VCVLight.h"
 
 #include "Misc/ScopeRWLock.h"
 #include "Kismet/GameplayStatics.h"

@@ -1,4 +1,4 @@
-#include "VCVSlider.h"
+#include "ModuleComponents/VCVSlider.h"
 
 #include "osc3.h"
 #include "VCV.h"

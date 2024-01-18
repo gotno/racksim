@@ -1,7 +1,7 @@
 #include "VCVCable.h"
 
 #include "osc3GameModeBase.h"
-#include "VCVPort.h"
+#include "ModuleComponents/VCVPort.h"
 
 #include "CableComponent.h"
 #include "UObject/ConstructorHelpers.h"

@@ -1,4 +1,4 @@
-#include "VCVDisplay.h"
+#include "ModuleComponents/VCVDisplay.h"
 
 #include "osc3.h"
 #include "VCV.h"

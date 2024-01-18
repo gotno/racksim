@@ -1,18 +1,18 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "VCVParam.h"
-#include "VCVButton.generated.h"
+#include "ModuleComponents/VCVParam.h"
+#include "VCVSwitch.generated.h"
 
 class UTexture2D;
 class Aosc3GameModeBase;
 
 UCLASS()
-class OSC3_API AVCVButton : public AVCVParam {
+class OSC3_API AVCVSwitch : public AVCVParam {
 	GENERATED_BODY()
-    
+
 public:
-  AVCVButton();
+  AVCVSwitch();
 
 protected:
 	virtual void BeginPlay() override;
@@ -36,17 +36,22 @@ private:
   UPROPERTY()
   UMaterialInterface* FaceMaterialInterface;
 
-  TCHAR* MeshReference = TEXT("/Script/Engine.StaticMesh'/Game/meshes/faced/unit_button_faced.unit_button_faced'");
-  TCHAR* BaseMaterialReference = TEXT("/Script/Engine.Material'/Game/meshes/faced/generic_base.generic_base'");
-  TCHAR* FaceMaterialReference = TEXT("/Script/Engine.Material'/Game/meshes/faced/texture_face_bg.texture_face_bg'");
+  TCHAR* MeshReference = TEXT("/Script/Engine.StaticMesh'/Game/meshes/faced/unit_switch_faced.unit_switch_faced'");
+  TCHAR* BaseMaterialReference = TEXT("/Script/Engine.Material'/Game/materials/generic_transparent.generic_transparent'");
+  TCHAR* FaceMaterialReference = TEXT("/Script/Engine.Material'/Game/meshes/faced/texture_face.texture_face'");
   
   UPROPERTY()
   TArray<UTexture2D*> frames;
   
   Aosc3GameModeBase* gameMode;
+
 public:
-  void engage() override;
-  void release() override;
+  virtual void engage();
+  void setFrame();
+  int getFrameFromValue();
+  // virtual void alter(float amount);
+  // virtual void release();
+  virtual void resetValue();
 
   void Update(VCVParam& Param) override;
 };
