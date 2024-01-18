@@ -8,7 +8,7 @@
 #include "ModuleComponents/VCVParam.h"
 #include "ModuleComponents/VCVPort.h"
 #include "Library.h"
-#include "WidgetSurrogate.h"
+#include "SVG/WidgetSurrogate.h"
 
 #include "Engine/Texture2D.h"
 #include "DefinitivePainter/Public/SVG/DPSVGAsset.h"

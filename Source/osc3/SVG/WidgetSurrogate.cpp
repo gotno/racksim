@@ -1,7 +1,7 @@
-#include "WidgetSurrogate.h"
+#include "SVG/WidgetSurrogate.h"
 
 #include "osc3GameModeBase.h"
-#include "SVGWidget.h"
+#include "SVG/SVGWidget.h"
 
 #include "DefinitivePainter/Public/SVG/DPSVGAsset.h"
 #include "Components/WidgetComponent.h"
