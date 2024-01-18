@@ -35,22 +35,22 @@ void AWidgetSurrogate::BeginPlay() {
     WidgetComponent->SetMaterial(0, WidgetMaterialInterface);
   }
 
-  gameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(this));
+  GameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(this));
 }
 
 void AWidgetSurrogate::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
   
-  if (texture) return;
+  if (Texture) return;
 
-  texture = Cast<USVGWidget>(WidgetComponent->GetWidget())->GetTexture();
-  if (texture) gameMode->RegisterTexture(svgFilepath, texture);
+  Texture = Cast<USVGWidget>(WidgetComponent->GetWidget())->GetTexture();
+  if (Texture) GameMode->RegisterTexture(SvgFilepath, Texture);
 }
 
-void AWidgetSurrogate::SetSVG(UDPSVGAsset* svgAsset, Vec2 size, FString filepath) {
+void AWidgetSurrogate::SetSVG(UDPSVGAsset* SvgAsset, Vec2 Size, FString Filepath) {
   USVGWidget* widget = Cast<USVGWidget>(WidgetComponent->GetWidget());
-  widget->SetSVG(svgAsset);
-  svgFilepath = filepath;
+  widget->SetSVG(SvgAsset);
+  SvgFilepath = Filepath;
 
-  WidgetComponent->SetDrawSize(FVector2D(size.x, size.y) * drawSizeScale);
+  WidgetComponent->SetDrawSize(FVector2D(Size.x, Size.y) * DrawSizeScale);
 }

@@ -19,7 +19,7 @@ protected:
 
 public:
 	virtual void Tick(float DeltaTime) override;
-  void init(VCVParam* vcv_param) override;
+  void Init(VCVParam* vcv_param) override;
 
 private:
   UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
@@ -62,7 +62,7 @@ private:
   UPROPERTY()
   UTexture2D* handleTexture;
 
-  Aosc3GameModeBase* gameMode;
+  Aosc3GameModeBase* GameMode;
   
   float LastValue;
   float AlterRatio = 0.8f;
@@ -82,10 +82,10 @@ private:
   float getOffsetFromValue();
   float getValueFromOffset();
 public:
-  void engage(FVector ControllerPosition) override;
-  void alter(FVector ControllerPosition) override;
-  void release() override;
-  void resetValue() override;
+  void Engage(FVector ControllerPosition) override;
+  void Alter(FVector ControllerPosition) override;
+  void Release() override;
+  void ResetValue() override;
 
-  void Update(VCVParam& Param) override;
+  void Update(VCVParam& vcv_param) override;
 };

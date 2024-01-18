@@ -17,7 +17,7 @@ protected:
   virtual void NativeOnInitialized() override;
 
 public:
-  void SetSVG(UDPSVGAsset* svgAsset);
+  void SetSVG(UDPSVGAsset* SvgAsset);
   UTexture2D* GetTexture();
 
 private:

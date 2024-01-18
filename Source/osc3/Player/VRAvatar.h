@@ -168,7 +168,7 @@ public:
   void SetControllerGrabbing(EControllerHand Hand, bool bGrabbing);
   void SetControllerParamOrPortInteracting(EControllerHand Hand, bool bInteracting);
   
-  void GetRenderablePosition(FVector& location, FRotator& rotation);
+  void GetRenderablePosition(FVector& Location, FRotator& Rotation);
   FRotator GetLookAtCameraRotation(FVector FromLocation);
 
 private:

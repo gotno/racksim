@@ -513,7 +513,7 @@ void AVRAvatar::HandleDestroyModule(const FInputActionValue& _Value, EController
 
   if (grabbedModule) {
     // UE_LOG(LogTemp, Warning, TEXT("%s destroy module %s"), Hand == EControllerHand::Left ? *FString("left") : *FString("right"), *grabbedModule->GetActorNameOrLabel());
-    GameMode->DestroyModule(grabbedModule->GetId());
+    GameMode->DestroyModule(grabbedModule->Id);
   }
 }
 
@@ -541,11 +541,11 @@ void AVRAvatar::HandleStartParamEngage(const FInputActionValue& _Value, EControl
     controller->StartParamInteract();
 
     if (Cast<AVCVKnob>(interactingParam)) {
-      interactingParam->engage(controller->GetActorRotation().Roll);
+      interactingParam->Engage(controller->GetActorRotation().Roll);
     } else if (Cast<AVCVSlider>(interactingParam)) {
-      interactingParam->engage(controller->GetActorLocation());
+      interactingParam->Engage(controller->GetActorLocation());
     } else {
-      interactingParam->engage();
+      interactingParam->Engage();
     }
   }
 
@@ -562,9 +562,9 @@ void AVRAvatar::HandleParamEngage(const FInputActionValue& _Value, EControllerHa
   AVCVParam* interactingParam = Cast<AVCVParam>(controller->GetParamActorToInteract());
   if (interactingParam) {
     if (Cast<AVCVKnob>(interactingParam)) {
-      interactingParam->alter(controller->GetActorRotation().Roll);
+      interactingParam->Alter(controller->GetActorRotation().Roll);
     } else if (Cast<AVCVSlider>(interactingParam)) {
-      interactingParam->alter(controller->GetActorLocation());
+      interactingParam->Alter(controller->GetActorLocation());
     }
     controller->RefreshTooltip();
   }
@@ -592,7 +592,7 @@ void AVRAvatar::HandleCompleteParamEngage(const FInputActionValue& _Value, ECont
   if (interactingParam) {
     // UE_LOG(LogTemp, Warning, TEXT("  releasing %s"), *interactingParam->GetActorNameOrLabel());
     controller->EndParamInteract();
-    interactingParam->release();
+    interactingParam->Release();
   }
 
   AVCVCable* heldCable = controller->GetHeldCable();
@@ -610,8 +610,8 @@ void AVRAvatar::HandleParamReset(const FInputActionValue& _Value, EControllerHan
   AVCVParam* interactingParam = Cast<AVCVParam>(controller->GetParamActorToInteract());
   if (interactingParam) {
     // UE_LOG(LogTemp, Warning, TEXT("  resetting %s"), *interactingParam->GetActorNameOrLabel());
-    interactingParam->release();
-    interactingParam->resetValue();
+    interactingParam->Release();
+    interactingParam->ResetValue();
     controller->EndParamInteract();
   }
 }
@@ -663,9 +663,9 @@ void AVRAvatar::HandleWidgetScroll(const FInputActionValue& Value, EControllerHa
 
 // get the position+rotation for spawning a WidgetSurrogate in the camera's view
 // so it is invisible (facing away) but renders immediately
-void AVRAvatar::GetRenderablePosition(FVector& location, FRotator& rotation) {
-  location = Camera->GetComponentLocation() + Camera->GetForwardVector() * 10.f;
-  rotation = Camera->GetForwardVector().Rotation();
+void AVRAvatar::GetRenderablePosition(FVector& Location, FRotator& Rotation) {
+  Location = Camera->GetComponentLocation() + Camera->GetForwardVector() * 10.f;
+  Rotation = Camera->GetForwardVector().Rotation();
 }
 
 FRotator AVRAvatar::GetLookAtCameraRotation(FVector FromPosition) {

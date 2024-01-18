@@ -24,15 +24,11 @@ AVCVSwitch::AVCVSwitch() {
 
   // base material
   static ConstructorHelpers::FObjectFinder<UMaterial> BaseMaterial(BaseMaterialReference);
-  if (BaseMaterial.Object) {
-    BaseMaterialInterface = Cast<UMaterial>(BaseMaterial.Object);
-  }
+  if (BaseMaterial.Object) BaseMaterialInterface = Cast<UMaterial>(BaseMaterial.Object);
 
   // face material
   static ConstructorHelpers::FObjectFinder<UMaterial> FaceMaterial(FaceMaterialReference);
-  if (FaceMaterial.Object) {
-    FaceMaterialInterface = Cast<UMaterial>(FaceMaterial.Object);
-  }
+  if (FaceMaterial.Object) FaceMaterialInterface = Cast<UMaterial>(FaceMaterial.Object);
 
   SetActorEnableCollision(true);
 }
@@ -50,53 +46,53 @@ void AVCVSwitch::BeginPlay() {
     MeshComponent->SetMaterial(1, FaceMaterialInstance);
   }
 
-  gameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(this));
+  GameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(this));
 }
 
 void AVCVSwitch::Tick(float DeltaTime) {
-  for (int i = 0; i < model->svgPaths.Num(); i++) {
-    if (!frames[i]) {
-      frames[i] = gameMode->GetTexture(model->svgPaths[i]);
-      if (getFrameFromValue() == i && frames[i]) setFrame();
+  for (int i = 0; i < Model->svgPaths.Num(); i++) {
+    if (!Frames[i]) {
+      Frames[i] = GameMode->GetTexture(Model->svgPaths[i]);
+      if (GetFrameFromValue() == i && Frames[i]) SetFrame();
     }
   }
 }
 
-void AVCVSwitch::init(VCVParam* vcv_param) {
-	Super::init(vcv_param);
+void AVCVSwitch::Init(VCVParam* vcv_param) {
+	Super::Init(vcv_param);
   
   // remove empty svg paths and init frames array to same size
   vcv_param->svgPaths.Remove(FString(""));
-  frames.Init(nullptr, vcv_param->svgPaths.Num());
+  Frames.Init(nullptr, vcv_param->svgPaths.Num());
 }
 
-void AVCVSwitch::engage() {
-  Super::engage();
-  float newValue = model->value + 1;
-  if (newValue > model->maxValue) newValue = model->minValue;
-  setValue(newValue);
-  setFrame();
+void AVCVSwitch::Engage() {
+  Super::Engage();
+  float newValue = Model->value + 1;
+  if (newValue > Model->maxValue) newValue = Model->minValue;
+  SetValue(newValue);
+  SetFrame();
 }
 
 // some values don't align with frame index
 // (looking at you, instruo)
 // get the distance from min value instead
-int AVCVSwitch::getFrameFromValue() {
-  return model->value - model->minValue;
+int AVCVSwitch::GetFrameFromValue() {
+  return Model->value - Model->minValue;
 }
 
-void AVCVSwitch::setFrame() {
-  int frame = getFrameFromValue();
-  if (frame >= 0 && frame < frames.Num())
-    FaceMaterialInstance->SetTextureParameterValue(FName("texture"), frames[frame]);
+void AVCVSwitch::SetFrame() {
+  int frame = GetFrameFromValue();
+  if (frame >= 0 && frame < Frames.Num())
+    FaceMaterialInstance->SetTextureParameterValue(FName("texture"), Frames[frame]);
 }
 
-void AVCVSwitch::resetValue() {
-  Super::resetValue();
-  setFrame();
+void AVCVSwitch::ResetValue() {
+  Super::ResetValue();
+  SetFrame();
 }
 
-void AVCVSwitch::Update(VCVParam& Param) {
-  Super::Update(Param);
-  setFrame();
+void AVCVSwitch::Update(VCVParam& vcv_param) {
+  Super::Update(vcv_param);
+  SetFrame();
 }

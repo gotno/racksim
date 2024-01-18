@@ -348,9 +348,9 @@ void ALibrary::ClearTagsFilter() {
   RefreshLibraryList();
 }
 
-void ALibrary::SetHighlighted(bool bHighlighted, FLinearColor HighlightColor) {
+void ALibrary::SetHighlighted(bool bHighlighted, FLinearColor OutlineColor) {
   OutlineMeshComponent->SetVisibility(bHighlighted);
-  OutlineMaterialInstance->SetVectorParameterValue(FName("Color"), HighlightColor);
+  OutlineMaterialInstance->SetVectorParameterValue(FName("Color"), OutlineColor);
 }
 
 void ALibrary::EngageGrab(FVector GrabbedLocation, FRotator GrabbedRotation) {

@@ -33,8 +33,8 @@ void USVGWidget::NativeOnInitialized() {
   WidgetTree->RootWidget = dpCanvas;
 }
 
-void USVGWidget::SetSVG(UDPSVGAsset* svgAsset) {
-  dpSvgWidget->SVG = svgAsset;
+void USVGWidget::SetSVG(UDPSVGAsset* SvgAsset) {
+  dpSvgWidget->SVG = SvgAsset;
 }
 
 UTexture2D* USVGWidget::GetTexture() {

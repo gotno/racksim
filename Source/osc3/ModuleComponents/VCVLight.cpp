@@ -6,7 +6,6 @@
 #include "VCVModule.h"
 
 #include "Engine.h"
-#include "Engine/Texture2D.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Math/UnrealMathUtility.h"
 #include "Kismet/GameplayStatics.h"
@@ -47,30 +46,30 @@ void AVCVLight::BeginPlay() {
     BaseMeshComponent->SetMaterial(0, BaseMaterialInstance);
   }
   
-  gameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(this));
+  GameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(this));
 }
 
 void AVCVLight::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 }
 
-void AVCVLight::init(VCVLight* vcv_light) {
-  model = vcv_light;
+void AVCVLight::Init(VCVLight* vcv_light) {
+  Model = vcv_light;
   
-  if (model->shape == LightShape::Round) {
+  if (Model->shape == LightShape::Round) {
     BaseMeshComponent->SetStaticMesh(circleMesh);
   } else {
     BaseMeshComponent->SetStaticMesh(rectangleMesh);
   }
 
-  SetColor(model->bgColor);
-  SetEmissiveColor(model->color);
-  SetEmissiveIntensity(model->color.A);
+  SetColor(Model->bgColor);
+  SetEmissiveColor(Model->color);
+  SetEmissiveIntensity(Model->color.A);
 
-  SetHidden(!model->visible);
-  SetActorEnableCollision(model->visible);
+  SetHidden(!Model->visible);
+  SetActorEnableCollision(Model->visible);
   
-  SetActorScale3D(FVector(1.f, model->box.size.x, model->box.size.y));
+  SetActorScale3D(FVector(1.f, Model->box.size.x, Model->box.size.y));
 }
 
 void AVCVLight::HandleBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
@@ -88,15 +87,15 @@ void AVCVLight::HandleBeginOverlap(UPrimitiveComponent* OverlappedComponent, AAc
   bHandledOverlap = true;
 }
 
-void AVCVLight::SetColor(FLinearColor color) {
-  BaseMaterialInstance->SetVectorParameterValue(TEXT("color"), color);
+void AVCVLight::SetColor(FLinearColor Color) {
+  BaseMaterialInstance->SetVectorParameterValue(TEXT("color"), Color);
 }
 
-void AVCVLight::SetEmissiveColor(FLinearColor color) {
-  if (color.A == 0.f) color = FLinearColor(0.f, 0.f, 0.f, 0.f);
-  BaseMaterialInstance->SetVectorParameterValue(TEXT("emissive_color"), color);
+void AVCVLight::SetEmissiveColor(FLinearColor Color) {
+  if (Color.A == 0.f) Color = FLinearColor(0.f, 0.f, 0.f, 0.f);
+  BaseMaterialInstance->SetVectorParameterValue(TEXT("emissive_color"), Color);
 }
 
-void AVCVLight::SetEmissiveIntensity(float intensity) {
-  BaseMaterialInstance->SetScalarParameterValue(TEXT("emissive_intensity"), intensity);
+void AVCVLight::SetEmissiveIntensity(float Intensity) {
+  BaseMaterialInstance->SetScalarParameterValue(TEXT("emissive_intensity"), Intensity);
 }

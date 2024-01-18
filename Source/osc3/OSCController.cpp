@@ -13,7 +13,7 @@ AOSCController::AOSCController() {
 
 void AOSCController::Init() {
   if (Aosc3GameModeBase* gm = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(this))) {
-    gameMode = gm;
+    GameMode = gm;
   } else {
     UE_LOG(LogTemp, Error, TEXT("no gamemode for OSCctrl"));
     return;
@@ -80,7 +80,7 @@ void AOSCController::ModuleSyncComplete(const FOSCAddress& AddressPattern, const
 
   // UE_LOG(LogTemp, Warning, TEXT("Module Sync Complete %lld"), moduleId);
 
-  gameMode->SpawnModule(Modules[moduleId]);
+  GameMode->SpawnModule(Modules[moduleId]);
 }
 
 void AOSCController::AddModule(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port) {
@@ -116,7 +116,7 @@ void AOSCController::AddModule(const FOSCAddress& AddressPattern, const FOSCMess
   
   FString panelSvgPath;
   UOSCManager::GetString(message, 10, panelSvgPath);
-  gameMode->RegisterSVG(panelSvgPath, box.size);
+  GameMode->RegisterSVG(panelSvgPath, box.size);
   
   Modules.Add(moduleId, VCVModule(
       moduleId,
@@ -143,16 +143,16 @@ void AOSCController::DestroyModule(const FOSCAddress& AddressPattern, const FOSC
 
   UE_LOG(LogTemp, Warning, TEXT("DestroyModule %lld"), moduleId);
 
-  gameMode->DestroyModule(moduleId, false);
+  GameMode->DestroyModule(moduleId, false);
 }
 
-void AOSCController::NotifyReceived(FString type, int64 outerId, int innerId) {
-  // UE_LOG(LogTemp, Warning, TEXT("Sending NotifyReceived %s %lld:%d"), *type, outerId, innerId);
-  FOSCAddress address = UOSCManager::ConvertStringToOSCAddress(FString(TEXT("/rx/")) + type);
+void AOSCController::NotifyReceived(FString Type, int64 OuterId, int InnerId) {
+  // UE_LOG(LogTemp, Warning, TEXT("Sending NotifyReceived %s %lld:%d"), *Type, OuterId, InnerId);
+  FOSCAddress address = UOSCManager::ConvertStringToOSCAddress(FString(TEXT("/rx/")) + Type);
   FOSCMessage message;
   UOSCManager::SetOSCMessageAddress(message, address);
-  UOSCManager::AddInt64(message, outerId);
-  UOSCManager::AddInt32(message, innerId);
+  UOSCManager::AddInt64(message, OuterId);
+  UOSCManager::AddInt32(message, InnerId);
 
   OSCClient->SendOSCMessage(message);
 }
@@ -166,48 +166,46 @@ void AOSCController::NotifyResync() {
   OSCClient->SendOSCMessage(message);
 }
 
-void AOSCController::SendParamUpdate(int64 moduleId, int paramId, float value) {
-  // UE_LOG(LogTemp, Warning, TEXT("send param update %lld:%d %f (%f/%f)"), moduleId, paramId, Modules[moduleId].Params[paramId].value, Modules[moduleId].Params[paramId].minValue, Modules[moduleId].Params[paramId].maxValue);
-
+void AOSCController::SendParamUpdate(int64 ModuleId, int ParamId, float Value) {
   FOSCAddress address = UOSCManager::ConvertStringToOSCAddress(FString(TEXT("/update/param")));
   FOSCMessage message;
   UOSCManager::SetOSCMessageAddress(message, address);
-  UOSCManager::AddInt64(message, moduleId);
-  UOSCManager::AddInt32(message, paramId);
-  UOSCManager::AddFloat(message, value);
+  UOSCManager::AddInt64(message, ModuleId);
+  UOSCManager::AddInt32(message, ParamId);
+  UOSCManager::AddFloat(message, Value);
 
   OSCClient->SendOSCMessage(message);
 }
 
-void AOSCController::CreateModule(FString pluginSlug, FString moduleSlug) {
-  UE_LOG(LogTemp, Warning, TEXT("Sending /create/module %s:%s"), *pluginSlug, *moduleSlug);
+void AOSCController::CreateModule(FString PluginSlug, FString ModuleSlug) {
+  UE_LOG(LogTemp, Warning, TEXT("Sending /create/module %s:%s"), *PluginSlug, *ModuleSlug);
   FOSCAddress address = UOSCManager::ConvertStringToOSCAddress(FString(TEXT("/create/module")));
   FOSCMessage message;
   UOSCManager::SetOSCMessageAddress(message, address);
-  UOSCManager::AddString(message, pluginSlug);
-  UOSCManager::AddString(message, moduleSlug);
+  UOSCManager::AddString(message, PluginSlug);
+  UOSCManager::AddString(message, ModuleSlug);
 
   OSCClient->SendOSCMessage(message);
 }
 
-void AOSCController::SetModuleFavorite(FString pluginSlug, FString moduleSlug, bool bFavorite) {
-  UE_LOG(LogTemp, Warning, TEXT("Sending /favorite %s:%s-%d"), *pluginSlug, *moduleSlug, bFavorite);
+void AOSCController::SetModuleFavorite(FString PluginSlug, FString ModuleSlug, bool bFavorite) {
+  UE_LOG(LogTemp, Warning, TEXT("Sending /favorite %s:%s-%d"), *PluginSlug, *ModuleSlug, bFavorite);
   FOSCAddress address = UOSCManager::ConvertStringToOSCAddress(FString(TEXT("/favorite")));
   FOSCMessage message;
   UOSCManager::SetOSCMessageAddress(message, address);
-  UOSCManager::AddString(message, pluginSlug);
-  UOSCManager::AddString(message, moduleSlug);
+  UOSCManager::AddString(message, PluginSlug);
+  UOSCManager::AddString(message, ModuleSlug);
   UOSCManager::AddBool(message, bFavorite);
 
   OSCClient->SendOSCMessage(message);
 }
 
-void AOSCController::SendDestroyModule(int64 moduleId) {
-  UE_LOG(LogTemp, Warning, TEXT("Sending /destroy/module %lld"), moduleId);
+void AOSCController::SendDestroyModule(int64 ModuleId) {
+  UE_LOG(LogTemp, Warning, TEXT("Sending /destroy/module %lld"), ModuleId);
   FOSCAddress address = UOSCManager::ConvertStringToOSCAddress(FString(TEXT("/destroy/module")));
   FOSCMessage message;
   UOSCManager::SetOSCMessageAddress(message, address);
-  UOSCManager::AddInt64(message, moduleId);
+  UOSCManager::AddInt64(message, ModuleId);
 
   OSCClient->SendOSCMessage(message);
 }
@@ -222,23 +220,23 @@ void AOSCController::SendModuleDiffRequest(const int64_t& ModuleId) const {
   OSCClient->SendOSCMessage(message);
 };
 
-void AOSCController::CreateCable(int64 inputModuleId, int64 outputModuleId, int inputPortId, int outputPortId) {
+void AOSCController::CreateCable(int64 InputModuleId, int64 OutputModuleId, int InputPortId, int OutputPortId) {
   FOSCAddress address = UOSCManager::ConvertStringToOSCAddress(FString(TEXT("/create/cable")));
   FOSCMessage message;
   UOSCManager::SetOSCMessageAddress(message, address);
-  UOSCManager::AddInt64(message, inputModuleId);
-  UOSCManager::AddInt64(message, outputModuleId);
-  UOSCManager::AddInt32(message, inputPortId);
-  UOSCManager::AddInt32(message, outputPortId);
+  UOSCManager::AddInt64(message, InputModuleId);
+  UOSCManager::AddInt64(message, OutputModuleId);
+  UOSCManager::AddInt32(message, InputPortId);
+  UOSCManager::AddInt32(message, OutputPortId);
 
   OSCClient->SendOSCMessage(message);
 }
 
-void AOSCController::DestroyCable(int64 cableId) {
+void AOSCController::DestroyCable(int64 CableId) {
   FOSCAddress address = UOSCManager::ConvertStringToOSCAddress(FString(TEXT("/destroy/cable")));
   FOSCMessage message;
   UOSCManager::SetOSCMessageAddress(message, address);
-  UOSCManager::AddInt64(message, cableId);
+  UOSCManager::AddInt64(message, CableId);
   
   OSCClient->SendOSCMessage(message);
 }
@@ -312,7 +310,7 @@ void AOSCController::AddContextMenuItem(const FOSCAddress& AddressPattern, const
   UOSCManager::GetString(message, 11, menuItem.quantityLabel);
   UOSCManager::GetString(message, 12, menuItem.quantityUnit);
   
-  gameMode->UpdateModuleMenuItem(menuItem);
+  GameMode->UpdateModuleMenuItem(menuItem);
 }
 
 void AOSCController::MenuSynced(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port) {
@@ -326,15 +324,15 @@ void AOSCController::MenuSynced(const FOSCAddress& AddressPattern, const FOSCMes
   
   VCVMenu menu(moduleId, menuId);
 
-  gameMode->ModuleMenuSynced(menu);
+  GameMode->ModuleMenuSynced(menu);
 }
 
 
-bool AOSCController::ModuleGuard(const FOSCMessage &message, int64_t &moduleId) {
-  UOSCManager::GetInt64(message, 0, moduleId);
+bool AOSCController::ModuleGuard(const FOSCMessage &Message, int64_t &ModuleId) {
+  UOSCManager::GetInt64(Message, 0, ModuleId);
 
-  if (!Modules.Contains(moduleId)) {
-    UE_LOG(LogTemp, Warning, TEXT("can't find module %lld"), moduleId);
+  if (!Modules.Contains(ModuleId)) {
+    UE_LOG(LogTemp, Warning, TEXT("can't find module %lld"), ModuleId);
     return true;
   }
   
@@ -399,19 +397,19 @@ void AOSCController::AddParam(const FOSCAddress& AddressPattern, const FOSCMessa
   param.svgPaths.SetNum(5);
 
   UOSCManager::GetString(message, 28, param.svgPaths[0]);
-  gameMode->RegisterSVG(param.svgPaths[0], param.box.size);
+  GameMode->RegisterSVG(param.svgPaths[0], param.box.size);
 
   UOSCManager::GetString(message, 29, param.svgPaths[1]);
-  gameMode->RegisterSVG(param.svgPaths[1], param.box.size);
+  GameMode->RegisterSVG(param.svgPaths[1], param.box.size);
 
   UOSCManager::GetString(message, 30, param.svgPaths[2]);
-  gameMode->RegisterSVG(param.svgPaths[2], param.box.size);
+  GameMode->RegisterSVG(param.svgPaths[2], param.box.size);
 
   UOSCManager::GetString(message, 31, param.svgPaths[3]);
-  gameMode->RegisterSVG(param.svgPaths[3], param.box.size);
+  GameMode->RegisterSVG(param.svgPaths[3], param.box.size);
 
   UOSCManager::GetString(message, 32, param.svgPaths[4]);
-  gameMode->RegisterSVG(param.svgPaths[4], param.box.size);
+  GameMode->RegisterSVG(param.svgPaths[4], param.box.size);
 
   UOSCManager::GetFloat(message, 33, param.bodyColor.R);
   UOSCManager::GetFloat(message, 34, param.bodyColor.G);
@@ -429,22 +427,7 @@ void AOSCController::AddInput(const FOSCAddress& AddressPattern, const FOSCMessa
   Modules[moduleId].Inputs.Add(inputId, VCVPort(inputId, PortType::Input, moduleId));
   VCVPort& input = Modules[moduleId].Inputs[inputId];
 
-  UOSCManager::GetString(message, 2, input.name);
-  UOSCManager::GetString(message, 3, input.description);
-
-  UOSCManager::GetFloat(message, 4, input.box.pos.x);
-  UOSCManager::GetFloat(message, 5, input.box.pos.y);
-  UOSCManager::GetFloat(message, 6, input.box.size.x);
-  UOSCManager::GetFloat(message, 7, input.box.size.y);
-  input.box *= RENDER_SCALE;
-
-  UOSCManager::GetString(message, 8, input.svgPath);
-
-  gameMode->RegisterSVG(input.svgPath, input.box.size);
-
-  UOSCManager::GetFloat(message, 9, input.bodyColor.R);
-  UOSCManager::GetFloat(message, 10, input.bodyColor.G);
-  UOSCManager::GetFloat(message, 11, input.bodyColor.B);
+  AddPort(message, input);
 }
 
 void AOSCController::AddOutput(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port) {
@@ -457,23 +440,27 @@ void AOSCController::AddOutput(const FOSCAddress& AddressPattern, const FOSCMess
   UOSCManager::GetInt32(message, 1, outputId);
   Modules[moduleId].Outputs.Add(outputId, VCVPort(outputId, PortType::Output, moduleId));
   VCVPort& output = Modules[moduleId].Outputs[outputId];
+  
+  AddPort(message, output);
+}
 
-  UOSCManager::GetString(message, 2, output.name);
-  UOSCManager::GetString(message, 3, output.description);
+void AOSCController::AddPort(const FOSCMessage &Message, VCVPort& vcv_port) {
+  UOSCManager::GetString(Message, 2, vcv_port.name);
+  UOSCManager::GetString(Message, 3, vcv_port.description);
 
-  UOSCManager::GetFloat(message, 4, output.box.pos.x);
-  UOSCManager::GetFloat(message, 5, output.box.pos.y);
-  UOSCManager::GetFloat(message, 6, output.box.size.x);
-  UOSCManager::GetFloat(message, 7, output.box.size.y);
-  output.box *= RENDER_SCALE;
+  UOSCManager::GetFloat(Message, 4, vcv_port.box.pos.x);
+  UOSCManager::GetFloat(Message, 5, vcv_port.box.pos.y);
+  UOSCManager::GetFloat(Message, 6, vcv_port.box.size.x);
+  UOSCManager::GetFloat(Message, 7, vcv_port.box.size.y);
+  vcv_port.box *= RENDER_SCALE;
 
-  UOSCManager::GetString(message, 8, output.svgPath);
+  UOSCManager::GetString(Message, 8, vcv_port.svgPath);
 
-  gameMode->RegisterSVG(output.svgPath, output.box.size);
+  GameMode->RegisterSVG(vcv_port.svgPath, vcv_port.box.size);
 
-  UOSCManager::GetFloat(message, 9, output.bodyColor.R);
-  UOSCManager::GetFloat(message, 10, output.bodyColor.G);
-  UOSCManager::GetFloat(message, 11, output.bodyColor.B);
+  UOSCManager::GetFloat(Message, 9, vcv_port.bodyColor.R);
+  UOSCManager::GetFloat(Message, 10, vcv_port.bodyColor.G);
+  UOSCManager::GetFloat(Message, 11, vcv_port.bodyColor.B);
 }
 
 void AOSCController::AddDisplay(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port) {
@@ -559,7 +546,7 @@ void AOSCController::AddCable(const FOSCAddress& AddressPattern, const FOSCMessa
   // TODO: why
   NotifyReceived("cable", cableId);
 
-  gameMode->QueueCableSpawn(cable);
+  GameMode->QueueCableSpawn(cable);
 }
 
 void AOSCController::UpdateLight(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port) {
@@ -577,7 +564,7 @@ void AOSCController::UpdateLight(const FOSCAddress& AddressPattern, const FOSCMe
   UOSCManager::GetFloat(message, 4, color.B);
   UOSCManager::GetFloat(message, 5, color.A);
 
-  gameMode->UpdateLight(moduleId, lightId, color);
+  GameMode->UpdateLight(moduleId, lightId, color);
 }
 
 void AOSCController::SyncParam(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port) {
@@ -592,7 +579,7 @@ void AOSCController::SyncParam(const FOSCAddress& AddressPattern, const FOSCMess
   UOSCManager::GetFloat(message, 3, param.value);
   UOSCManager::GetBool(message, 4, param.visible);
   
-  gameMode->UpdateParam(moduleId, param);
+  GameMode->UpdateParam(moduleId, param);
 }
 
 void AOSCController::SetLibraryJsonPath(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port) {
@@ -600,7 +587,7 @@ void AOSCController::SetLibraryJsonPath(const FOSCAddress& AddressPattern, const
   UOSCManager::GetString(message, 0, path);
 
   // UE_LOG(LogTemp, Warning, TEXT("library json path is %s"), *path);
-  gameMode->SetLibraryJsonPath(path);
+  GameMode->SetLibraryJsonPath(path);
 }
 
 // void AOSCController::PrintVCVModule(VCVModule vcv_module) {

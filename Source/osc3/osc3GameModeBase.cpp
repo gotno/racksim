@@ -42,31 +42,30 @@ void Aosc3GameModeBase::BeginPlay() {
 
 void Aosc3GameModeBase::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
-  
 }
 
-void Aosc3GameModeBase::SpawnModule(VCVModule module) {
-  if (ModuleActors.Contains(module.id)) return;
+void Aosc3GameModeBase::SpawnModule(VCVModule vcv_module) {
+  if (ModuleActors.Contains(vcv_module.id)) return;
 
-  FVector position = FVector(0, module.box.pos.x, -module.box.pos.y + 140);
-  position.Y += module.box.size.x / 2;
-  position.Z += module.box.size.y / 2;
+  FVector position = FVector(0, vcv_module.box.pos.x, -vcv_module.box.pos.y + 140);
+  position.Y += vcv_module.box.size.x / 2;
+  position.Z += vcv_module.box.size.y / 2;
 
-  AVCVModule* a_module =
+  AVCVModule* module =
     GetWorld()->SpawnActor<AVCVModule>(
       AVCVModule::StaticClass(),
       position,
       FRotator(0, 0, 0)
     );
  
-  ModuleActors.Add(module.id, a_module);
-  a_module->init(module);
+  ModuleActors.Add(vcv_module.id, module);
+  module->Init(vcv_module);
 
   ProcessSpawnCableQueue();
 }
 
-void Aosc3GameModeBase::QueueCableSpawn(VCVCable cable) {
-  cableQueue.Push(cable);
+void Aosc3GameModeBase::QueueCableSpawn(VCVCable vcv_cable) {
+  cableQueue.Push(vcv_cable);
   ProcessSpawnCableQueue();
 }
 
@@ -114,6 +113,7 @@ void Aosc3GameModeBase::ProcessSpawnCableQueue() {
   }
 }
 
+// spawn unpersisted cable attached to port
 AVCVCable* Aosc3GameModeBase::SpawnCable(AVCVPort* Port) {
   AVCVCable* cable =
     GetWorld()->SpawnActor<AVCVCable>(
@@ -127,6 +127,7 @@ AVCVCable* Aosc3GameModeBase::SpawnCable(AVCVPort* Port) {
   return cable;
 }
 
+// spawn complete/persisted cable
 void Aosc3GameModeBase::SpawnCable(int64_t& Id, AVCVPort* InputPort, AVCVPort* OutputPort) {
   AVCVCable* cable = SpawnCable(InputPort);
   cable->SetId(Id);
@@ -187,14 +188,14 @@ void Aosc3GameModeBase::UpdateMenuItemQuantity(const VCVMenuItem& MenuItem, cons
   OSCctrl->UpdateMenuItemQuantity(MenuItem, Value);
 }
 
-void Aosc3GameModeBase::UpdateLight(int64_t moduleId, int32 lightId, FLinearColor color) {
-  if (!ModuleActors.Contains(moduleId)) return;
-  ModuleActors[moduleId]->UpdateLight(lightId, color);
+void Aosc3GameModeBase::UpdateLight(int64_t ModuleId, int32 LightId, FLinearColor Color) {
+  if (!ModuleActors.Contains(ModuleId)) return;
+  ModuleActors[ModuleId]->UpdateLight(LightId, Color);
 }
 
-void Aosc3GameModeBase::UpdateParam(int64_t moduleId, VCVParam& param) {
-  if (!ModuleActors.Contains(moduleId)) return;
-  ModuleActors[moduleId]->GetParamActor(param.id)->Update(param);
+void Aosc3GameModeBase::UpdateParam(int64_t ModuleId, VCVParam& Param) {
+  if (!ModuleActors.Contains(ModuleId)) return;
+  ModuleActors[ModuleId]->GetParamActor(Param.id)->Update(Param);
 }
 
 void Aosc3GameModeBase::UpdateModuleMenuItem(VCVMenuItem& MenuItem) {
@@ -207,19 +208,19 @@ void Aosc3GameModeBase::ModuleMenuSynced(VCVMenu& Menu) {
   ModuleActors[Menu.moduleId]->MenuSynced(Menu);
 }
 
-void Aosc3GameModeBase::SendParamUpdate(int64_t moduleId, int32 paramId, float value) {
-  OSCctrl->SendParamUpdate(moduleId, paramId, value);
+void Aosc3GameModeBase::SendParamUpdate(int64_t ModuleId, int32 ParamId, float Value) {
+  OSCctrl->SendParamUpdate(ModuleId, ParamId, Value);
 }
 
-void Aosc3GameModeBase::RegisterSVG(FString filepath, Vec2 size) {
-  if (filepath.Compare(FString("")) == 0) return;
-  if (SVGAssets.Contains(filepath)) return;
+void Aosc3GameModeBase::RegisterSVG(FString Filepath, Vec2 Size) {
+  if (Filepath.Compare(FString("")) == 0) return;
+  if (SVGAssets.Contains(Filepath)) return;
 
-  UE_LOG(LogTemp, Warning, TEXT("importing svg %s"), *filepath);
+  UE_LOG(LogTemp, Warning, TEXT("importing svg %s"), *Filepath);
 
   UDPSVGAsset* svgAsset = NewObject<UDPSVGAsset>(this, UDPSVGAsset::StaticClass());
-  SVGImporter.PerformImport(filepath, svgAsset);
-  SVGAssets.Add(filepath, svgAsset);
+  SVGImporter.PerformImport(Filepath, svgAsset);
+  SVGAssets.Add(Filepath, svgAsset);
   
   FVector surrogateLocation;
   FRotator surrogateRotation;
@@ -232,24 +233,24 @@ void Aosc3GameModeBase::RegisterSVG(FString filepath, Vec2 size) {
       surrogateRotation
     );
   
-  SVGWidgetSurrogates.Add(filepath, surrogate);
-  surrogate->SetSVG(svgAsset, size, filepath);
+  SVGWidgetSurrogates.Add(Filepath, surrogate);
+  surrogate->SetSVG(svgAsset, Size, Filepath);
   surrogate->SetActorScale3D(FVector(0.05f, 0.05f, 0.05f));
 }
 
-void Aosc3GameModeBase::RegisterTexture(FString filepath, UTexture2D* texture) {
-  UE_LOG(LogTemp, Warning, TEXT("registering texture %s"), *filepath);
+void Aosc3GameModeBase::RegisterTexture(FString Filepath, UTexture2D* Texture) {
+  UE_LOG(LogTemp, Warning, TEXT("registering texture %s"), *Filepath);
   
-  SVGTextures.Add(filepath, texture);
+  SVGTextures.Add(Filepath, Texture);
   // use this to short-circuit surrogate destruction to preview rendering of a given svg
-  // if (filepath.Compare(FString("C:/VCV/rack-src/rack-gotno/res/ComponentLibrary/VCVSlider.svg")) == 0) return;
-  SVGWidgetSurrogates[filepath]->Destroy();
-  SVGWidgetSurrogates.Remove(filepath);
+  // if (Filepath.Compare(FString("C:/VCV/rack-src/rack-gotno/res/ComponentLibrary/VCVSlider.svg")) == 0) return;
+  SVGWidgetSurrogates[Filepath]->Destroy();
+  SVGWidgetSurrogates.Remove(Filepath);
 }
 
-UTexture2D* Aosc3GameModeBase::GetTexture(FString filepath) {
-  if (!SVGTextures.Contains(filepath)) return nullptr;
-  return SVGTextures[filepath];
+UTexture2D* Aosc3GameModeBase::GetTexture(FString Filepath) {
+  if (!SVGTextures.Contains(Filepath)) return nullptr;
+  return SVGTextures[Filepath];
 }
 
 void Aosc3GameModeBase::SpawnLibrary() {

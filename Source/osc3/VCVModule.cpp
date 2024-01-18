@@ -95,7 +95,7 @@ void AVCVModule::BeginPlay() {
   ContextMenuWidgetComponent->SetWorldRotation(FRotator(0.f, 180.f, 0.f));
   ContextMenuWidgetComponent->SetVisibility(false);
 
-  gameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(this));
+  GameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(this));
   
   Tags.Add(TAG_INTERACTABLE);
   Tags.Add(TAG_GRABBABLE);
@@ -108,7 +108,7 @@ void AVCVModule::EndPlay(const EEndPlayReason::Type EndPlayReason) {
     AVCVPort* port = pair.Value;
     while (port->HasCables()) {
       AVCVCable* cable = port->GetTopCable();
-      gameMode->DestroyCableActor(cable);
+      GameMode->DestroyCableActor(cable);
     }
   }
 
@@ -116,7 +116,7 @@ void AVCVModule::EndPlay(const EEndPlayReason::Type EndPlayReason) {
     AVCVPort* port = pair.Value;
     while (port->HasCables()) {
       AVCVCable* cable = port->GetTopCable();
-      gameMode->DestroyCableActor(cable);
+      GameMode->DestroyCableActor(cable);
     }
   }
 
@@ -127,44 +127,43 @@ void AVCVModule::EndPlay(const EEndPlayReason::Type EndPlayReason) {
   }
 }
 
-void AVCVModule::init(VCVModule vcv_module) {
-  model = vcv_module; 
+void AVCVModule::Init(VCVModule vcv_module) {
+  Model = vcv_module; 
 
-  Id = model.id;
-  Brand = model.brand;
-  Name = model.name;
+  Id = Model.id;
+  Brand = Model.brand;
+  Name = Model.name;
 
   VCVOverrides overrides;
 
   FLinearColor bodyColor;
-  if (!overrides.getBodyColor(model.brand, bodyColor)) bodyColor = model.bodyColor;
+  if (!overrides.getBodyColor(Model.brand, bodyColor)) bodyColor = Model.bodyColor;
 
   BaseMaterialInstance->SetVectorParameterValue(FName("color"), bodyColor);
   FaceMaterialInstance->SetVectorParameterValue(FName("background_color"), bodyColor);
 
-  FaceMaterialInstance->SetScalarParameterValue(FName("uscale"), overrides.getUVOverride(model.brand).X);
-  FaceMaterialInstance->SetScalarParameterValue(FName("vscale"), overrides.getUVOverride(model.brand).Y);
+  FaceMaterialInstance->SetScalarParameterValue(FName("uscale"), overrides.getUVOverride(Model.brand).X);
+  FaceMaterialInstance->SetScalarParameterValue(FName("vscale"), overrides.getUVOverride(Model.brand).Y);
 
-  StaticMeshComponent->SetWorldScale3D(FVector(RENDER_SCALE * MODULE_DEPTH, model.box.size.x, model.box.size.y));
-  OutlineMeshComponent->SetWorldScale3D(FVector(RENDER_SCALE * MODULE_DEPTH + 0.2f, model.box.size.x + 0.2f, model.box.size.y + 0.2f));
+  StaticMeshComponent->SetWorldScale3D(FVector(RENDER_SCALE * MODULE_DEPTH, Model.box.size.x, Model.box.size.y));
+  OutlineMeshComponent->SetWorldScale3D(FVector(RENDER_SCALE * MODULE_DEPTH + 0.2f, Model.box.size.x + 0.2f, Model.box.size.y + 0.2f));
   OutlineMeshComponent->AddLocalOffset(FVector(-0.1f, 0.f, 0.f));
-  spawnComponents();
+
+  SpawnComponents();
   SetHidden(false);
   
   SetupContextMenuWidget();
-
-  SetActorRotation(FRotator(0.f, 0.f, 0.f));
 }
 
 void AVCVModule::SetupContextMenuWidget() {
   FVector2D drawSize(350.f, 700.f);
-  float desiredContextMenuHeight = model.box.size.y - 2 * RENDER_SCALE;
+  float desiredContextMenuHeight = Model.box.size.y - 2 * RENDER_SCALE;
   float scale = desiredContextMenuHeight / drawSize.Y;
 
   ContextMenuWidgetComponent->SetDrawSize(drawSize);
   ContextMenuWidgetComponent->SetWorldScale3D(FVector(1.f, scale, scale));
 
-  float halfModuleWidth = model.box.size.x * 0.5f;
+  float halfModuleWidth = Model.box.size.x * 0.5f;
   float halfMenuWidth = scale * drawSize.X * 0.5f;
   float rightOffset = halfModuleWidth + halfMenuWidth;
   ContextMenuWidgetComponent->SetWorldLocation(
@@ -176,13 +175,9 @@ void AVCVModule::SetupContextMenuWidget() {
   ContextMenuWidgetComponent->AttachToComponent(StaticMeshComponent, FAttachmentTransformRules::KeepWorldTransform);
 }
 
-int64 AVCVModule::GetId() {
-  return model.id;
-}
-
 void AVCVModule::GetSlugs(FString& PluginSlug, FString& Slug) {
-  PluginSlug = model.pluginSlug;
-  Slug = model.slug;
+  PluginSlug = Model.pluginSlug;
+  Slug = Model.slug;
 }
 
 AVCVPort* AVCVModule::GetPortActor(PortType Type, int32& PortId) {
@@ -190,29 +185,33 @@ AVCVPort* AVCVModule::GetPortActor(PortType Type, int32& PortId) {
   return OutputActors[PortId];
 }
 
-void AVCVModule::UpdateLight(int32 lightId, FLinearColor color) {
-  if (LightActors.Contains(lightId)) {
-    LightActors[lightId]->SetEmissiveColor(color);
-    LightActors[lightId]-> SetEmissiveIntensity(color.A);
-  } else if (ParamLightActors.Contains(lightId)) {
-    ParamLightActors[lightId]->SetEmissiveColor(color);
-    ParamLightActors[lightId]-> SetEmissiveIntensity(color.A);
+void AVCVModule::UpdateLight(int32 LightId, FLinearColor Color) {
+  AVCVLight* light{nullptr};
+  if (LightActors.Contains(LightId)) {
+    light = LightActors[LightId];
+  } else if (ParamLightActors.Contains(LightId)) {
+    light = ParamLightActors[LightId];
+  }
+
+  if (light) {
+    light->SetEmissiveColor(Color);
+    light->SetEmissiveIntensity(Color.A);
   }
 }
-void AVCVModule::registerParamLight(int64_t lightId, AVCVLight* lightActor) {
-  ParamLightActors.Add(lightId, lightActor);
+void AVCVModule::RegisterParamLight(int64_t LightId, AVCVLight* LightActor) {
+  ParamLightActors.Add(LightId, LightActor);
 }
 
-void AVCVModule::paramUpdated(int32 paramId, float value) {
-  if (!gameMode) return;
-  gameMode->SendParamUpdate(model.id, paramId, value);
+void AVCVModule::ParamUpdated(int32 ParamId, float Value) {
+  if (!GameMode) return;
+  GameMode->SendParamUpdate(Model.id, ParamId, Value);
 }
 
-void AVCVModule::spawnComponents() {
+void AVCVModule::SpawnComponents() {
   FActorSpawnParameters spawnParams;
   spawnParams.Owner = this;
 
-  for (TPair<int32, VCVParam>& param_kvp : model.Params) {
+  for (TPair<int32, VCVParam>& param_kvp : Model.Params) {
     VCVParam& param = param_kvp.Value;
     AVCVParam* aParam = nullptr;
 
@@ -248,14 +247,14 @@ void AVCVModule::spawnComponents() {
 
     if (aParam) {
       aParam->AttachToComponent(StaticMeshComponent, FAttachmentTransformRules::KeepWorldTransform);
-      aParam->init(&param);
+      aParam->Init(&param);
       ParamActors.Add(param.id, aParam);
     } else {
-      UE_LOG(LogTemp, Warning, TEXT("param actor init failure! %d:%d"), model.id, param.id);
+      UE_LOG(LogTemp, Warning, TEXT("param actor init failure! %d:%d"), Model.id, param.id);
     }
   }
 
-  for (TPair<int32, VCVPort>& port_kvp : model.Inputs) {
+  for (TPair<int32, VCVPort>& port_kvp : Model.Inputs) {
     VCVPort& port = port_kvp.Value;
 
     AVCVPort* a_port = GetWorld()->SpawnActor<AVCVPort>(
@@ -265,11 +264,11 @@ void AVCVModule::spawnComponents() {
       spawnParams
     );
     a_port->AttachToComponent(StaticMeshComponent, FAttachmentTransformRules::KeepWorldTransform);
-    a_port->init(&port);
+    a_port->Init(&port);
     InputActors.Add(port.id, a_port);
   }
 
-  for (TPair<int32, VCVPort>& port_kvp : model.Outputs) {
+  for (TPair<int32, VCVPort>& port_kvp : Model.Outputs) {
     VCVPort& port = port_kvp.Value;
 
     AVCVPort* a_port = GetWorld()->SpawnActor<AVCVPort>(
@@ -279,11 +278,11 @@ void AVCVModule::spawnComponents() {
       spawnParams
     );
     a_port->AttachToComponent(StaticMeshComponent, FAttachmentTransformRules::KeepWorldTransform);
-    a_port->init(&port);
+    a_port->Init(&port);
     OutputActors.Add(port.id, a_port);
   }
 
-  for (TPair<int32, VCVLight>& light_kvp : model.Lights) {
+  for (TPair<int32, VCVLight>& light_kvp : Model.Lights) {
     VCVLight& light = light_kvp.Value;
 
     AVCVLight* a_light = GetWorld()->SpawnActor<AVCVLight>(
@@ -293,11 +292,11 @@ void AVCVModule::spawnComponents() {
       spawnParams
     );
     a_light->AttachToComponent(StaticMeshComponent, FAttachmentTransformRules::KeepWorldTransform);
-    a_light->init(&light);
+    a_light->Init(&light);
     LightActors.Add(light.id, a_light);
   }
 
-  for (VCVDisplay& display : model.Displays) {
+  for (VCVDisplay& display : Model.Displays) {
     AVCVDisplay* a_display = GetWorld()->SpawnActor<AVCVDisplay>(
       AVCVDisplay::StaticClass(),
       GetActorLocation() + display.box.location(),
@@ -305,7 +304,7 @@ void AVCVModule::spawnComponents() {
       spawnParams
     );
     a_display->AttachToComponent(StaticMeshComponent, FAttachmentTransformRules::KeepWorldTransform);
-    a_display->init(&display);
+    a_display->Init(&display);
   }
 }
 
@@ -387,7 +386,7 @@ void AVCVModule::MakeMenu(int ParentMenuId, int ParentItemIndex) {
   }
 
   int menuId = ContextMenus.Num();
-  VCVMenu menu(model.id, menuId);
+  VCVMenu menu(Model.id, menuId);
 
   menu.parentMenuId = ParentMenuId;
   menu.parentItemIndex = ParentItemIndex;
@@ -397,7 +396,7 @@ void AVCVModule::MakeMenu(int ParentMenuId, int ParentItemIndex) {
 }
 
 void AVCVModule::RequestMenu(int MenuId) {
-  gameMode->RequestMenu(ContextMenus[MenuId]);
+  GameMode->RequestMenu(ContextMenus[MenuId]);
 }
 
 FString AVCVModule::MakeMenuBreadcrumbs(int MenuId) {
@@ -480,8 +479,8 @@ void AVCVModule::MenuSynced(VCVMenu& Menu) {
 void AVCVModule::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
   
-  if (texture) return;
+  if (Texture) return;
 
-  texture = gameMode->GetTexture(model.panelSvgPath);
-  if (texture) FaceMaterialInstance->SetTextureParameterValue(FName("texture"), texture);
+  Texture = GameMode->GetTexture(Model.panelSvgPath);
+  if (Texture) FaceMaterialInstance->SetTextureParameterValue(FName("texture"), Texture);
 }

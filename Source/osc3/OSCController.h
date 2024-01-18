@@ -27,17 +27,17 @@ public:
   void NotifyResync();
 
   UFUNCTION()
-  void SendParamUpdate(int64 moduleId, int paramId, float value);
+  void SendParamUpdate(int64 ModuleId, int ParamId, float Value);
   UFUNCTION()
-  void CreateModule(FString pluginSlug, FString moduleSlug);
+  void CreateModule(FString PluginSlug, FString ModuleSlug);
   UFUNCTION()
-  void SetModuleFavorite(FString pluginSlug, FString moduleSlug, bool bFavorite);
+  void SetModuleFavorite(FString PluginSlug, FString ModuleSlug, bool bFavorite);
   UFUNCTION()
-  void SendDestroyModule(int64 moduleId);
+  void SendDestroyModule(int64 ModuleId);
   UFUNCTION()
-  void CreateCable(int64 inputModuleId, int64 ouputModuleId, int inputPortId, int outputPortId);
+  void CreateCable(int64 InputModuleId, int64 OuputModuleId, int InputPortId, int OutputPortId);
   UFUNCTION()
-  void DestroyCable(int64 cableId);
+  void DestroyCable(int64 CableId);
 
   void RequestMenu(const VCVMenu& Menu) const;
   void ClickMenuItem(const VCVMenuItem& MenuItem) const;
@@ -46,7 +46,7 @@ public:
 
 private:
   UPROPERTY()
-  class Aosc3GameModeBase* gameMode;
+  class Aosc3GameModeBase* GameMode;
 
   UPROPERTY()
   UOSCClient* OSCClient;
@@ -55,7 +55,7 @@ private:
   UOSCServer* OSCServer;
   
   void AddRoute(const FString &AddressPattern, const FName &MethodName);
-  bool ModuleGuard(const FOSCMessage &message, int64_t &moduleId);
+  bool ModuleGuard(const FOSCMessage &Message, int64_t &ModuleId);
 
   UFUNCTION()
   void LogOSC(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port);
@@ -82,6 +82,8 @@ private:
   UFUNCTION()
   void SyncParam(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port);
 
+  void AddPort(const FOSCMessage &Message, VCVPort& vcv_port);
+
   UFUNCTION()
   void SetLibraryJsonPath(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port);
 
@@ -96,7 +98,7 @@ private:
   // void TestMessage(const FOSCMessage& InMessage, const FString& InIPAddress, int32 InPort);
 
   UFUNCTION()
-  void NotifyReceived(FString type, int64 outerId, int innerId = -1);
+  void NotifyReceived(FString Type, int64 OuterId, int InnerId = -1);
   
   // void PrintVCVModule(VCVModule mod);
 

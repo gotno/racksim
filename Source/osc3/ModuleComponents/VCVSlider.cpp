@@ -76,32 +76,32 @@ void AVCVSlider::BeginPlay() {
     HandleMeshComponent->SetMaterial(1, HandleFaceMaterialInstance);
   }
   
-  gameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(this));
+  GameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(this));
 }
 
 void AVCVSlider::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
   
   if (!baseTexture) {
-    baseTexture = gameMode->GetTexture(model->svgPaths[0]);
+    baseTexture = GameMode->GetTexture(Model->svgPaths[0]);
     if (baseTexture) BaseFaceMaterialInstance->SetTextureParameterValue(FName("texture"), baseTexture);
   }
 
   if (!handleTexture) {
-    handleTexture = gameMode->GetTexture(model->svgPaths[1]);
+    handleTexture = GameMode->GetTexture(Model->svgPaths[1]);
     if (handleTexture) HandleFaceMaterialInstance->SetTextureParameterValue(FName("texture"), handleTexture);
   }
 }
 
-void AVCVSlider::init(VCVParam* vcv_param) {
-	Super::init(vcv_param);
+void AVCVSlider::Init(VCVParam* vcv_param) {
+	Super::Init(vcv_param);
 
-  HandleMeshComponent->SetWorldScale3D(FVector(RENDER_SCALE, model->handleBox.size.x, model->handleBox.size.y));
-  spawnLights(HandleMeshComponent);
+  HandleMeshComponent->SetWorldScale3D(FVector(RENDER_SCALE, Model->handleBox.size.x, Model->handleBox.size.y));
+  SpawnLights(HandleMeshComponent);
 
-  FVector minHandlePosition = GetActorLocation() + FVector(0, model->minHandlePos.x, model->minHandlePos.y);
-  FVector maxHandlePosition = GetActorLocation() + FVector(0, model->maxHandlePos.x, model->maxHandlePos.y);
-  MaxOffset = model->horizontal
+  FVector minHandlePosition = GetActorLocation() + FVector(0, Model->minHandlePos.x, Model->minHandlePos.y);
+  FVector maxHandlePosition = GetActorLocation() + FVector(0, Model->maxHandlePos.x, Model->maxHandlePos.y);
+  MaxOffset = Model->horizontal
     ? maxHandlePosition.Y - minHandlePosition.Y
     : maxHandlePosition.Z - minHandlePosition.Z;
 
@@ -111,34 +111,34 @@ void AVCVSlider::init(VCVParam* vcv_param) {
 }
 
 FVector AVCVSlider::GetSliderDirectionVector() {
-  return model->horizontal
+  return Model->horizontal
     ? HandleMeshComponent->GetRightVector()
     : HandleMeshComponent->GetUpVector();
 }
 
 float AVCVSlider::getOffsetFromValue() {
-  float valuePercent = (model->value - model->minValue) / (model->maxValue - model->minValue);
+  float valuePercent = (Model->value - Model->minValue) / (Model->maxValue - Model->minValue);
   return valuePercent * MaxOffset;
 }
 
 float AVCVSlider::getValueFromOffset() {
   float offsetPercent = ShadowOffset / MaxOffset;
-  float value = model->minValue + offsetPercent * (model->maxValue - model->minValue);
-  if (model->snap) value = round(value);
+  float value = Model->minValue + offsetPercent * (Model->maxValue - Model->minValue);
+  if (Model->snap) value = round(value);
   return value;
 }
 
-void AVCVSlider::engage(FVector ControllerPosition) {
-  Super::engage();
+void AVCVSlider::Engage(FVector ControllerPosition) {
+  Super::Engage();
 
   LastControllerPosition = ControllerPosition;
   LastPositionDelta = 0.f;
-  LastValue = model->value;
+  LastValue = Model->value;
 }
 
-void AVCVSlider::alter(FVector ControllerPosition) {
-  Super::alter(ControllerPosition);
-  if (!engaged) return;
+void AVCVSlider::Alter(FVector ControllerPosition) {
+  Super::Alter(ControllerPosition);
+  if (!bEngaged) return;
 
   FVector sliderDirectionVector = GetSliderDirectionVector();
   FVector controllerVector = ControllerPosition - LastControllerPosition; 
@@ -151,23 +151,23 @@ void AVCVSlider::alter(FVector ControllerPosition) {
 
   ShadowOffset = FMath::Clamp(ShadowOffset + positionDelta, 0.f, MaxOffset);
 
-  setValue(getValueFromOffset());
+  SetValue(getValueFromOffset());
   FVector zeroPosition = HandleMeshComponent->GetComponentLocation() - sliderDirectionVector * WorldOffset;
-  WorldOffset = model->snap ? getOffsetFromValue() : ShadowOffset;
+  WorldOffset = Model->snap ? getOffsetFromValue() : ShadowOffset;
   HandleMeshComponent->SetWorldLocation(zeroPosition + sliderDirectionVector * WorldOffset);
   
   LastControllerPosition = ControllerPosition;
 }
 
-void AVCVSlider::release() {
-  Super::release();
+void AVCVSlider::Release() {
+  Super::Release();
   
   // treat snapping sliders like a switch and increment
   // if they haven't been dragged enough to change value
-  if (model->snap && model->value == LastValue) {
-    float newValue = model->value + 1;
-    if (newValue > model->maxValue) newValue = 0;
-    setValue(newValue);
+  if (Model->snap && Model->value == LastValue) {
+    float newValue = Model->value + 1;
+    if (newValue > Model->maxValue) newValue = 0;
+    SetValue(newValue);
     
     FVector sliderDirectionVector = GetSliderDirectionVector();
     FVector zeroPosition = HandleMeshComponent->GetComponentLocation() - sliderDirectionVector * WorldOffset;
@@ -175,12 +175,12 @@ void AVCVSlider::release() {
     HandleMeshComponent->SetWorldLocation(zeroPosition + sliderDirectionVector * WorldOffset);
   }
 
-  LastValue = model->value;
+  LastValue = Model->value;
   ShadowOffset = WorldOffset;
 }
 
-void AVCVSlider::resetValue() {
-  Super::resetValue();
+void AVCVSlider::ResetValue() {
+  Super::ResetValue();
 
   FVector sliderDirectionVector = GetSliderDirectionVector();
   FVector zeroPosition = HandleMeshComponent->GetComponentLocation() - sliderDirectionVector * WorldOffset;
@@ -190,8 +190,8 @@ void AVCVSlider::resetValue() {
   ShadowOffset = WorldOffset;
 }
 
-void AVCVSlider::Update(VCVParam& Param) {
-  Super::Update(Param);
+void AVCVSlider::Update(VCVParam& vcv_param) {
+  Super::Update(vcv_param);
 
   FVector sliderDirectionVector = GetSliderDirectionVector();
   FVector zeroPosition = HandleMeshComponent->GetComponentLocation() - sliderDirectionVector * WorldOffset;

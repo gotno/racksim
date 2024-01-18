@@ -20,10 +20,10 @@ protected:
 public:	
 	virtual void Tick(float DeltaTime) override;
 
-  void init(struct VCVLight* model);
-  void SetColor(FLinearColor color);
-  void SetEmissiveColor(FLinearColor color);
-  void SetEmissiveIntensity(float intensity);
+  void Init(struct VCVLight* Model);
+  void SetColor(FLinearColor Color);
+  void SetEmissiveColor(FLinearColor Color);
+  void SetEmissiveIntensity(float Intensity);
   
 private:
   UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
@@ -46,9 +46,7 @@ private:
   
   bool bHandledOverlap{false};
 
-  UTexture2D* texture; 
-
-  Aosc3GameModeBase* gameMode;
+  Aosc3GameModeBase* GameMode;
   
-  VCVLight* model;
+  VCVLight* Model;
 };

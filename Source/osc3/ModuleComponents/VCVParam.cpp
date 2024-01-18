@@ -23,39 +23,39 @@ void AVCVParam::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 }
 
-void AVCVParam::init(VCVParam* vcv_param) {
-  model = vcv_param; 
-  owner = Cast<AVCVModule>(GetOwner());
-  SetActorHiddenInGame(!model->visible);
-  SetActorEnableCollision(model->visible);
-  SetActorScale3D(FVector(RENDER_SCALE, model->box.size.x, model->box.size.y));
+void AVCVParam::Init(VCVParam* vcv_param) {
+  Model = vcv_param; 
+  Module = Cast<AVCVModule>(GetOwner());
+  SetActorHiddenInGame(!Model->visible);
+  SetActorEnableCollision(Model->visible);
+  SetActorScale3D(FVector(RENDER_SCALE, Model->box.size.x, Model->box.size.y));
 }
 
-void AVCVParam::Update(VCVParam& param) {
+void AVCVParam::Update(VCVParam& vcv_param) {
   FScopeLock Lock(&DataGuard);
-  model->merge(param);
-  SetActorHiddenInGame(!model->visible);
-  SetActorEnableCollision(model->visible);
+  Model->merge(vcv_param);
+  SetActorHiddenInGame(!Model->visible);
+  SetActorEnableCollision(Model->visible);
 }
 
-FString AVCVParam::getModuleBrand() {
-  return owner->Brand;
+FString AVCVParam::GetModuleBrand() {
+  return Module->Brand;
 }
 
 void AVCVParam::GetTooltipText(FString& Label, FString& DisplayValue) {
   FScopeLock Lock(&DataGuard);
-  Label = model->name;
-  DisplayValue = model->displayValue;
+  Label = Model->name;
+  DisplayValue = Model->displayValue;
 }
 
-void AVCVParam::spawnLights(USceneComponent* attachTo) {
+void AVCVParam::SpawnLights(USceneComponent* AttachTo) {
   FActorSpawnParameters spawnParams;
   spawnParams.Owner = this;
 
-  for (TPair<int32, VCVLight>& light_kvp : model->Lights) {
+  for (TPair<int32, VCVLight>& light_kvp : Model->Lights) {
     VCVLight& light = light_kvp.Value;
 
-    FVector lightLocation = attachTo->GetComponentLocation();
+    FVector lightLocation = AttachTo->GetComponentLocation();
 
     AVCVLight* a_light = GetWorld()->SpawnActor<AVCVLight>(
       AVCVLight::StaticClass(),
@@ -63,51 +63,51 @@ void AVCVParam::spawnLights(USceneComponent* attachTo) {
       FRotator(0, 0, 0),
       spawnParams
     );
-    a_light->AttachToComponent(attachTo, FAttachmentTransformRules::KeepWorldTransform);
-    a_light->init(&light);
-    owner->registerParamLight(light.id, a_light);
+    a_light->AttachToComponent(AttachTo, FAttachmentTransformRules::KeepWorldTransform);
+    a_light->Init(&light);
+    Module->RegisterParamLight(light.id, a_light);
   }
 }
 
-void AVCVParam::setValue(float newValue) {
-  float roundedValue = FMath::RoundHalfToEven(newValue * 1000) / 1000;
-  if (roundedValue == model->value) return;
+void AVCVParam::SetValue(float inValue) {
+  float roundedValue = FMath::RoundHalfToEven(inValue * 1000) / 1000;
+  if (roundedValue == Model->value) return;
 
   FScopeLock Lock(&DataGuard);
-  model->value = roundedValue;
-  owner->paramUpdated(model->id, model->value);
+  Model->value = roundedValue;
+  Module->ParamUpdated(Model->id, Model->value);
 }
 
-void AVCVParam::engage() {
+void AVCVParam::Engage() {
   // UE_LOG(LogTemp, Warning, TEXT("param engage"));
-  engaged = true;
+  bEngaged = true;
 }
 
-void AVCVParam::engage(float _value) {
+void AVCVParam::Engage(float _value) {
   // UE_LOG(LogTemp, Warning, TEXT("param engage"));
-  engaged = true;
+  bEngaged = true;
 }
 
-void AVCVParam::engage(FVector _value) {
+void AVCVParam::Engage(FVector _value) {
   // UE_LOG(LogTemp, Warning, TEXT("param engage"));
-  engaged = true;
+  bEngaged = true;
 }
 
-void AVCVParam::alter(float amount) {
-  // UE_LOG(LogTemp, Warning, TEXT("param alter %f, ratio'd: %f"), amount, amount * alterRatio);
+void AVCVParam::Alter(float amount) {
+  // UE_LOG(LogTemp, Warning, TEXT("param alter %f, ratio'd: %f"), amount, amount * AlterRatio);
 }
 
-void AVCVParam::alter(FVector _value) {
-  // UE_LOG(LogTemp, Warning, TEXT("param alter %s, ratio'd: %s"), *_value.ToCompactString(), *(_value * alterRatio).ToCompactString());
+void AVCVParam::Alter(FVector _value) {
+  // UE_LOG(LogTemp, Warning, TEXT("param alter %s, ratio'd: %s"), *_value.ToCompactString(), *(_value * AlterRatio).ToCompactString());
 }
 
-void AVCVParam::release() {
+void AVCVParam::Release() {
   // UE_LOG(LogTemp, Warning, TEXT("param release"));
-  engaged = false;
-  GameMode->RequestModuleDiff(owner->GetId());
+  bEngaged = false;
+  GameMode->RequestModuleDiff(Module->Id);
 }
 
-void AVCVParam::resetValue() {
+void AVCVParam::ResetValue() {
   // UE_LOG(LogTemp, Warning, TEXT("param reset"));
-  if (model) setValue(model->defaultValue);
+  if (Model) SetValue(Model->defaultValue);
 }

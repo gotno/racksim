@@ -54,20 +54,20 @@ void AVCVPort::Tick(float DeltaTime) {
   
   if (Texture) return;
   
-  Texture = GameMode->GetTexture(model->svgPath);
+  Texture = GameMode->GetTexture(Model->svgPath);
   if (Texture) FaceMaterialInstance->SetTextureParameterValue(FName("texture"), Texture);
 }
 
-void AVCVPort::init(VCVPort* vcv_port) {
-  model = vcv_port;
+void AVCVPort::Init(VCVPort* vcv_port) {
+  Model = vcv_port;
 
   Id = vcv_port->id;
   Type = vcv_port->type;
 
-  StaticMeshComponent->SetWorldScale3D(FVector(RENDER_SCALE, model->box.size.x, model->box.size.y));
+  StaticMeshComponent->SetWorldScale3D(FVector(RENDER_SCALE, Model->box.size.x, Model->box.size.y));
   
-  BaseMaterialInstance->SetVectorParameterValue(FName("color"), model->bodyColor);
-  FaceMaterialInstance->SetVectorParameterValue(FName("background_color"), model->bodyColor);
+  BaseMaterialInstance->SetVectorParameterValue(FName("color"), Model->bodyColor);
+  FaceMaterialInstance->SetVectorParameterValue(FName("background_color"), Model->bodyColor);
 }
 
 bool AVCVPort::CanConnect(PortType inType) {
@@ -110,11 +110,11 @@ void AVCVPort::TriggerCableUpdates() {
 }
 
 void AVCVPort::GetTooltipText(FString& Name, FString& Description) {
-  Name = model->name;
+  Name = Model->name;
   if (Name.IsEmpty()) {
     Name = FString("#");
-    Name.AppendInt(model->id + 1);
+    Name.AppendInt(Model->id + 1);
   }
   Name.Append(Type == PortType::Input ? " input" : " output");
-  Description = model->description;
+  Description = Model->description;
 }

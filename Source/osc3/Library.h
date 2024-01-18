@@ -1,6 +1,5 @@
 #pragma once
 
-#include "osc3.h"
 #include "VCVData/VCVLibrary.h"
 #include "Grabbable.h"
 

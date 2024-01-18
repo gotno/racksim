@@ -19,7 +19,7 @@ protected:
 
 public:
 	virtual void Tick(float DeltaTime) override;
-  void init(VCVParam* vcv_param) override;
+  void Init(VCVParam* vcv_param) override;
 
 private:
   UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
@@ -41,12 +41,12 @@ private:
   TCHAR* FaceMaterialReference = TEXT("/Script/Engine.Material'/Game/meshes/faced/texture_face_bg.texture_face_bg'");
   
   UPROPERTY()
-  TArray<UTexture2D*> frames;
+  TArray<UTexture2D*> Frames;
   
-  Aosc3GameModeBase* gameMode;
+  Aosc3GameModeBase* GameMode;
 public:
-  void engage() override;
-  void release() override;
+  void Engage() override;
+  void Release() override;
 
-  void Update(VCVParam& Param) override;
+  void Update(VCVParam& vcv_param) override;
 };

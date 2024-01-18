@@ -53,54 +53,54 @@ void AVCVButton::BeginPlay() {
     MeshComponent->SetMaterial(1, FaceMaterialInstance);
   }
 
-  gameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(this));
+  GameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(this));
 }
 
 void AVCVButton::Tick(float DeltaTime) {
-  for (int i = 0; i < model->svgPaths.Num(); i++) {
-    if (!frames[i]) {
-      frames[i] = gameMode->GetTexture(model->svgPaths[i]);
-      if (frames[i] && model->value == i) {
-        FaceMaterialInstance->SetTextureParameterValue(FName("texture"), frames[i]);
+  for (int i = 0; i < Model->svgPaths.Num(); i++) {
+    if (!Frames[i]) {
+      Frames[i] = GameMode->GetTexture(Model->svgPaths[i]);
+      if (Frames[i] && Model->value == i) {
+        FaceMaterialInstance->SetTextureParameterValue(FName("texture"), Frames[i]);
       }
     }
   }
 }
 
-void AVCVButton::init(VCVParam* vcv_param) {
-  Super::init(vcv_param);
+void AVCVButton::Init(VCVParam* vcv_param) {
+  Super::Init(vcv_param);
 
   // remove empty svg paths and init frames array to same size
   vcv_param->svgPaths.Remove(FString(""));
-  frames.Init(nullptr, vcv_param->svgPaths.Num());
+  Frames.Init(nullptr, vcv_param->svgPaths.Num());
 
-  spawnLights(MeshComponent);
-  BaseMaterialInstance->SetVectorParameterValue(TEXT("color"), model->bodyColor);
-  FaceMaterialInstance->SetVectorParameterValue(TEXT("background_color"), model->bodyColor);
+  SpawnLights(MeshComponent);
+  BaseMaterialInstance->SetVectorParameterValue(TEXT("color"), Model->bodyColor);
+  FaceMaterialInstance->SetVectorParameterValue(TEXT("background_color"), Model->bodyColor);
 }
 
-void AVCVButton::engage() {
-  Super::engage();
-  setValue(model->value == model->minValue ? model->maxValue : model->minValue);
+void AVCVButton::Engage() {
+  Super::Engage();
+  SetValue(Model->value == Model->minValue ? Model->maxValue : Model->minValue);
   FaceMaterialInstance->SetTextureParameterValue(
     FName("texture"),
-    model->value == model->minValue ? frames[0] : frames[frames.Num() - 1]
+    Model->value == Model->minValue ? Frames[0] : Frames[Frames.Num() - 1]
   );
 }
 
-void AVCVButton::release() {
-  Super::release();
-  if (model->momentary) {
-    setValue(model->minValue);
-    FaceMaterialInstance->SetTextureParameterValue(FName("texture"), frames[model->value]);
+void AVCVButton::Release() {
+  Super::Release();
+  if (Model->momentary) {
+    SetValue(Model->minValue);
+    FaceMaterialInstance->SetTextureParameterValue(FName("texture"), Frames[Model->value]);
   }
 }
 
-void AVCVButton::Update(VCVParam& Param) {
-  Super::Update(Param);
+void AVCVButton::Update(VCVParam& vcv_param) {
+  Super::Update(vcv_param);
 
   FaceMaterialInstance->SetTextureParameterValue(
     FName("texture"),
-    model->value == model->minValue ? frames[0] : frames[frames.Num() - 1]
+    Model->value == Model->minValue ? Frames[0] : Frames[Frames.Num() - 1]
   );
 }

@@ -17,7 +17,7 @@ protected:
 public:	
 	virtual void Tick(float DeltaTime) override;
   
-  void init(struct VCVDisplay* model);
+  void Init(struct VCVDisplay* vcv_display);
 
 private:
   UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
@@ -32,5 +32,5 @@ private:
   UPROPERTY()
   UMaterialInterface* MaterialInterface;
   
-  VCVDisplay* model;
+  VCVDisplay* Model;
 };

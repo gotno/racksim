@@ -20,7 +20,7 @@ protected:
 
 public:
 	virtual void Tick(float DeltaTime) override;
-  void init(struct VCVParam* vcv_param) override;
+  void Init(struct VCVParam* vcv_param) override;
 
 private:
   TCHAR* MeshReference = TEXT("/Script/Engine.StaticMesh'/Game/meshes/faced/unit_knob_faced.unit_knob_faced'");
@@ -44,34 +44,34 @@ private:
   UMaterialInterface* FaceMaterialInterface;
 
   UPROPERTY()
-  UTexture2D* textureBackground;
+  UTexture2D* TextureBackground;
   UPROPERTY()
-  UTexture2D* texture;
+  UTexture2D* Texture;
   UPROPERTY()
-  UTexture2D* textureForeground;
+  UTexture2D* TextureForeground;
   
-  Aosc3GameModeBase* gameMode;
+  Aosc3GameModeBase* GameMode;
   
   // TODO: user override of smoothing constant and ratio
-  float alterRatio{1.f};
+  float AlterRatio{1.f};
   float MovingAverageWeight{0.2f};
 
-  FRotator getRotationFromValue();
-  float getValueFromRotation();
-  void updateRotation(FRotator newRotation);
+  FRotator GetRotationFromValue();
+  float GetValueFromRotation();
+  void UpdateRotation(FRotator inRotation);
   
-  FRotator shadowRotation;
+  FRotator ShadowRotation;
   float LastControllerRoll;
   float LastDeltaRoll;
   
   // gap between min and max position outside of knob range
-  float gap{0};
+  float Gap{0};
 
 public:
-  void engage(float ControllerRoll) override;
-  void alter(float ControllerRoll) override;
-  void release() override;
-  void resetValue() override;
+  void Engage(float ControllerRoll) override;
+  void Alter(float ControllerRoll) override;
+  void Release() override;
+  void ResetValue() override;
 
   void Update(VCVParam& param) override;
 };

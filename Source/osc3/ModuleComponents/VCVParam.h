@@ -18,14 +18,14 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
-  virtual void spawnLights(USceneComponent* attachTo);
-  FString getModuleBrand();
-  bool engaged{false};
+  virtual void SpawnLights(USceneComponent* AttachTo);
+  FString GetModuleBrand();
+  bool bEngaged{false};
   
 private:
-  class AVCVModule* owner;
+  class AVCVModule* Module;
   
-  float alterRatio{1.f};
+  float AlterRatio{1.f};
 
   mutable FCriticalSection DataGuard;
 
@@ -33,21 +33,21 @@ private:
 public:	
 	virtual void Tick(float DeltaTime) override;
 
-  virtual void init(struct VCVParam* model);
-  virtual void Update(VCVParam& param);
-  VCVParam* model;
+  virtual void Init(struct VCVParam* Model);
+  virtual void Update(VCVParam& Param);
+  VCVParam* Model;
 
   void UpdateDisplayValue(const FString& DisplayValue);
 
-  virtual void setValue(float newValue);
+  virtual void SetValue(float inValue);
   
-  virtual void engage();
-  virtual void engage(float _value);
-  virtual void engage(FVector _location);
-  virtual void alter(float amount);
-  virtual void alter(FVector _location);
-  virtual void release();
-  virtual void resetValue();
+  virtual void Engage();
+  virtual void Engage(float _value);
+  virtual void Engage(FVector _location);
+  virtual void Alter(float amount);
+  virtual void Alter(FVector _location);
+  virtual void Release();
+  virtual void ResetValue();
   
   void GetTooltipText(FString& Label, FString& DisplayValue);
 };

@@ -34,8 +34,8 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-  void SpawnModule(VCVModule module);
-  void QueueCableSpawn(VCVCable cable);
+  void SpawnModule(VCVModule vcv_module);
+  void QueueCableSpawn(VCVCable vcv_cable);
 
   AVCVCable* SpawnCable(AVCVPort* Port);
   void SpawnCable(int64_t& Id, AVCVPort* InputPort, AVCVPort* OutputPort);
@@ -43,12 +43,12 @@ public:
   void RegisterCableConnect(AVCVPort* InputPort, AVCVPort* OutputPort);
   void RegisterCableDisconnect(AVCVCable* Cable);
 
-  void UpdateLight(int64_t moduleId, int32 lightId, FLinearColor color);
-  void UpdateParam(int64_t moduleId, VCVParam& param);
+  void UpdateLight(int64_t ModuleId, int32 LightId, FLinearColor Color);
+  void UpdateParam(int64_t ModuleId, VCVParam& Param);
   void UpdateModuleMenuItem(VCVMenuItem& MenuItem);
   void ModuleMenuSynced(VCVMenu& Menu);
 
-  void SendParamUpdate(int64_t moduleId, int32 paramId, float value);
+  void SendParamUpdate(int64_t ModuleId, int32 ParamId, float Value);
   void DuplicateModule(AVCVModule* Module);
   void DestroyModule(int64_t ModuleId, bool bSync = true);
   void RequestModuleSpawn(FString PluginSlug, FString ModuleSlug);
@@ -58,9 +58,9 @@ public:
   void ClickMenuItem(const VCVMenuItem& MenuItem) const;
   void UpdateMenuItemQuantity(const VCVMenuItem& MenuItem, const float& Value) const;
   
-  void RegisterSVG(FString filepath, Vec2 size);
-  void RegisterTexture(FString filepath, UTexture2D* texture);
-  UTexture2D* GetTexture(FString filepath);
+  void RegisterSVG(FString Filepath, Vec2 Size);
+  void RegisterTexture(FString Filepath, UTexture2D* Texture);
+  UTexture2D* GetTexture(FString Filepath);
   
   void SpawnLibrary();
   void SetLibraryJsonPath(FString& Path);

@@ -20,13 +20,10 @@ public:
   virtual void ReleaseGrab();
   virtual void SetHighlighted(bool bHighlighted, FLinearColor OutlineColor = OUTLINE_COLOR);
 
-
   bool bGrabEngaged{false};
 
   FVector GrabOffset;
   FVector LastGrabbedLocation;
   FRotator LastGrabbedRotation;
   FVector LastLocationDelta;
-  
-  float HighlightGlowIntensity{1.0f};
 };

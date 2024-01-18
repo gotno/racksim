@@ -46,106 +46,106 @@ void AVCVKnob::BeginPlay() {
     BaseMeshComponent->SetMaterial(1, FaceMaterialInstance);
   }
   
-  gameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(this));
+  GameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(this));
 }
   
 void AVCVKnob::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
-  if (!textureBackground && !model->svgPaths[0].IsEmpty()) {
-    textureBackground = gameMode->GetTexture(model->svgPaths[0]);
-    if (textureBackground) FaceMaterialInstance->SetTextureParameterValue(FName("texture_bg"), textureBackground);
+  if (!TextureBackground && !Model->svgPaths[0].IsEmpty()) {
+    TextureBackground = GameMode->GetTexture(Model->svgPaths[0]);
+    if (TextureBackground) FaceMaterialInstance->SetTextureParameterValue(FName("texture_bg"), TextureBackground);
   }
-  if (!texture && !model->svgPaths[1].IsEmpty()) {
-    texture = gameMode->GetTexture(model->svgPaths[1]);
-    if (texture) FaceMaterialInstance->SetTextureParameterValue(FName("texture"), texture);
+  if (!Texture && !Model->svgPaths[1].IsEmpty()) {
+    Texture = GameMode->GetTexture(Model->svgPaths[1]);
+    if (Texture) FaceMaterialInstance->SetTextureParameterValue(FName("texture"), Texture);
   }
-  if (!textureForeground && !model->svgPaths[2].IsEmpty()) {
-    textureForeground = gameMode->GetTexture(model->svgPaths[2]);
-    if (textureForeground) FaceMaterialInstance->SetTextureParameterValue(FName("texture_fg"), textureForeground);
+  if (!TextureForeground && !Model->svgPaths[2].IsEmpty()) {
+    TextureForeground = GameMode->GetTexture(Model->svgPaths[2]);
+    if (TextureForeground) FaceMaterialInstance->SetTextureParameterValue(FName("texture_fg"), TextureForeground);
   }
 }
 
-void AVCVKnob::init(VCVParam* vcv_param) {
-	Super::init(vcv_param);
+void AVCVKnob::Init(VCVParam* vcv_param) {
+	Super::Init(vcv_param);
 
-  gap = (180 - FMath::Abs(model->maxAngle)) + (180 - FMath::Abs(model->minAngle));
+  Gap = (180 - FMath::Abs(Model->maxAngle)) + (180 - FMath::Abs(Model->minAngle));
 
-  updateRotation(getRotationFromValue());
+  UpdateRotation(GetRotationFromValue());
 
   VCVOverrides overrides;
-  FVector scaleMultiplier = overrides.getScaleMultiplier(getModuleBrand(), model->svgPaths[1]);
+  FVector scaleMultiplier = overrides.getScaleMultiplier(GetModuleBrand(), Model->svgPaths[1]);
   SetActorScale3D(GetActorScale3D() * scaleMultiplier);
 
-  BaseMaterialInstance->SetVectorParameterValue(FName("color"), model->bodyColor);
+  BaseMaterialInstance->SetVectorParameterValue(FName("color"), Model->bodyColor);
 }
 
-void AVCVKnob::updateRotation(FRotator newRotation) {
-  FaceMaterialInstance->SetScalarParameterValue(FName("rotation"), -newRotation.Roll);
-  BaseMeshComponent->SetRelativeRotation(newRotation);
+void AVCVKnob::UpdateRotation(FRotator inRotation) {
+  FaceMaterialInstance->SetScalarParameterValue(FName("rotation"), -inRotation.Roll);
+  BaseMeshComponent->SetRelativeRotation(inRotation);
 }
 
-FRotator AVCVKnob::getRotationFromValue() {
-  float valuePercent = (model->value - model->minValue) / (model->maxValue - model->minValue);
-  float valueAngle = model->minAngle + valuePercent * (model->maxAngle - model->minAngle);
+FRotator AVCVKnob::GetRotationFromValue() {
+  float valuePercent = (Model->value - Model->minValue) / (Model->maxValue - Model->minValue);
+  float valueAngle = Model->minAngle + valuePercent * (Model->maxAngle - Model->minAngle);
 
   FRotator knobRotation = BaseMeshComponent->GetRelativeRotation();
   return FRotator(knobRotation.Pitch, knobRotation.Yaw, valueAngle);
 }
 
-float AVCVKnob::getValueFromRotation() {
-  float roll = shadowRotation.Roll;
-  float rotationPercent = (roll - model->minAngle) / (model->maxAngle - model->minAngle);
-  float value = model->minValue + ((model->maxValue - model->minValue) * rotationPercent);
+float AVCVKnob::GetValueFromRotation() {
+  float roll = ShadowRotation.Roll;
+  float rotationPercent = (roll - Model->minAngle) / (Model->maxAngle - Model->minAngle);
+  float value = Model->minValue + ((Model->maxValue - Model->minValue) * rotationPercent);
 
-  if (model->snap) value = round(value);
+  if (Model->snap) value = round(value);
   return value;
 }
 
-void AVCVKnob::engage(float ControllerRoll) {
-  Super::engage(ControllerRoll);
-  shadowRotation = BaseMeshComponent->GetRelativeRotation();
+void AVCVKnob::Engage(float ControllerRoll) {
+  Super::Engage(ControllerRoll);
+  ShadowRotation = BaseMeshComponent->GetRelativeRotation();
   LastControllerRoll = ControllerRoll;
 }
 
-void AVCVKnob::alter(float ControllerRoll) {
-  Super::alter(ControllerRoll);
-  if (!engaged) return;
+void AVCVKnob::Alter(float ControllerRoll) {
+  Super::Alter(ControllerRoll);
+  if (!bEngaged) return;
 
   float deltaControllerRoll = ControllerRoll - LastControllerRoll;
-  if (FMath::Abs(deltaControllerRoll) > gap) {
+  if (FMath::Abs(deltaControllerRoll) > Gap) {
     // prevent jump from min to max or max to min
     LastControllerRoll = ControllerRoll;
     return;
   }
 
-  float deltaRoll = deltaControllerRoll * alterRatio;
+  float deltaRoll = deltaControllerRoll * AlterRatio;
   deltaRoll =
     FMath::WeightedMovingAverage(deltaRoll, LastDeltaRoll, MovingAverageWeight);
   LastDeltaRoll = deltaRoll;
 
   FRotator knobRotation = BaseMeshComponent->GetRelativeRotation();
-  shadowRotation.Pitch = knobRotation.Pitch;
-  shadowRotation.Yaw = knobRotation.Yaw;
-  shadowRotation.Roll =
-    FMath::Clamp(shadowRotation.Roll + deltaRoll, model->minAngle, model->maxAngle);
+  ShadowRotation.Pitch = knobRotation.Pitch;
+  ShadowRotation.Yaw = knobRotation.Yaw;
+  ShadowRotation.Roll =
+    FMath::Clamp(ShadowRotation.Roll + deltaRoll, Model->minAngle, Model->maxAngle);
 
 
-  setValue(getValueFromRotation());
-  updateRotation(model->snap ? getRotationFromValue() : shadowRotation);
+  SetValue(GetValueFromRotation());
+  UpdateRotation(Model->snap ? GetRotationFromValue() : ShadowRotation);
 
   LastControllerRoll = ControllerRoll;
 }
 
-void AVCVKnob::release() {
-  Super::release();
+void AVCVKnob::Release() {
+  Super::Release();
 }
 
-void AVCVKnob::resetValue() {
-  Super::resetValue();
-  updateRotation(getRotationFromValue());
+void AVCVKnob::ResetValue() {
+  Super::ResetValue();
+  UpdateRotation(GetRotationFromValue());
 }
 
 void AVCVKnob::Update(VCVParam& param) {
   Super::Update(param);
-  updateRotation(getRotationFromValue());
+  UpdateRotation(GetRotationFromValue());
 }

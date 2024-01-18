@@ -24,10 +24,10 @@ protected:
 
 public:	
 	virtual void Tick(float DeltaTime) override;
-  void SetSVG(UDPSVGAsset* svgAsset, Vec2 size, FString filepath);
+  void SetSVG(UDPSVGAsset* SvgAsset, Vec2 Size, FString Filepath);
 
 private:
-  Aosc3GameModeBase* gameMode;
+  Aosc3GameModeBase* GameMode;
 
   UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
   USceneComponent* SceneComponent;
@@ -38,8 +38,8 @@ private:
   UMaterialInterface* WidgetMaterialInterface;
 
   UPROPERTY()
-  UTexture2D* texture;
+  UTexture2D* Texture;
 
-  FString svgFilepath;
-  float drawSizeScale{150.f};
+  FString SvgFilepath;
+  float DrawSizeScale{150.f};
 };

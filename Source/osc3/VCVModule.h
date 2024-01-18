@@ -30,14 +30,13 @@ protected:
 public:	
 	virtual void Tick(float DeltaTime) override;
 
-  void init(VCVModule model);
+  void Init(VCVModule vcv_module);
   
-  int64 GetId();
   void GetSlugs(FString& PluginSlug, FString& Slug);
   int64_t Id{-1};
 
-  void UpdateLight(int32 lightId, FLinearColor color);
-  AVCVParam* GetParamActor(const int& paramId) { return ParamActors[paramId]; }
+  void UpdateLight(int32 LightId, FLinearColor Color);
+  AVCVParam* GetParamActor(const int& ParamId) { return ParamActors[ParamId]; }
   AVCVPort* GetPortActor(PortType Type, int32& PortId);
 
   void ToggleContextMenu();
@@ -52,8 +51,8 @@ public:
   UPROPERTY()
   TMap<int32, AVCVLight*> ParamLightActors;
   
-  void registerParamLight(int64_t lightId, AVCVLight* lightActor);
-  void paramUpdated(int32 paramId, float value);
+  void RegisterParamLight(int64_t LightId, AVCVLight* LightActor);
+  void ParamUpdated(int32 ParamId, float Value);
 
   FString Brand;
   FString Name;
@@ -85,7 +84,7 @@ private:
   UMaterialInterface* OutlineMaterialInterface;
 
   UPROPERTY()
-  UTexture2D* texture;
+  UTexture2D* Texture;
   
   // TODO: this stuff should all be its own actor
   UWidgetComponent* ContextMenuWidgetComponent;
@@ -94,13 +93,13 @@ private:
   void SetMenu(int MenuId);
   FString MakeMenuBreadcrumbs(int MenuId);
 
-  void spawnComponents();
+  void SpawnComponents();
   
   void TriggerCableUpdates();
 
-  VCVModule model;
+  VCVModule Model;
   
-  Aosc3GameModeBase* gameMode;
+  Aosc3GameModeBase* GameMode;
 
   TMap<int, AVCVParam*> ParamActors;
   TMap<int, AVCVPort*> InputActors;

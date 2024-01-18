@@ -24,7 +24,7 @@ protected:
 
 public:	
 	virtual void Tick(float DeltaTime) override;
-  void init(struct VCVPort* model);
+  void Init(struct VCVPort* Model);
   
   int32 Id{-1};
   AVCVModule* Module;
@@ -58,7 +58,7 @@ private:
   
   Aosc3GameModeBase* GameMode;
 
-  VCVPort* model;
+  VCVPort* Model;
 
   UPROPERTY()
   TArray<AVCVCable*> Cables;

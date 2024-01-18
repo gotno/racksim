@@ -68,7 +68,7 @@ private:
   FColor CableColor;
   // TODO: replace these with colors from potentially-user-overridden rack settings
   TArray<FColor> CableColors{
-    FColor::FromHex(FString("#F3374B")),
+    FColor::FromHex(FString("#f3374b")),
     FColor::FromHex(FString("#ffb437")),
     FColor::FromHex(FString("#00b56e")),
     FColor::FromHex(FString("#3695ef")),
