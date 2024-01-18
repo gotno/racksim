@@ -190,6 +190,10 @@ private:
   
   Aosc3GameModeBase* GameMode;
 
+  AVRMotionController* GetControllerForHand(EControllerHand Hand) {
+    return Hand == EControllerHand::Left ? LeftController : RightController;
+  }
+
   // world manipulation
   bool bLeftHandWorldManipulationActive{false};
   bool bRightHandWorldManipulationActive{false};

@@ -283,8 +283,7 @@ void AVRAvatar::HandleCompleteTeleport(const FInputActionValue& _Value, EControl
   DestinationMarker->SetVisibility(false);
 }
 void AVRAvatar::SweepDestination(EControllerHand Hand) {
-  AVRMotionController* controller =
-    Hand == EControllerHand::Left ? LeftController : RightController;
+  AVRMotionController* controller = GetControllerForHand(Hand);
   FVector controllerLocation = controller->GetActorLocation();
   HasDestinationHit =
     GetWorld()->LineTraceSingleByChannel(
@@ -454,9 +453,7 @@ void AVRAvatar::HandleRotoTranslateWorld(const FInputActionValue& _Value) {
 }
 
 void AVRAvatar::HandleStartGrab(const FInputActionValue& _Value, EControllerHand Hand) {
-  AVRMotionController* controller = 
-    Hand == EControllerHand::Left ? LeftController : RightController;
-  
+  AVRMotionController* controller = GetControllerForHand(Hand);
   AActor* grabbedActor = controller->GetActorToGrab();
 
   UE_LOG(LogTemp, Warning, TEXT("%s hand grab start"), *FString(Hand == EControllerHand::Left ? "left" : "right"));
@@ -469,9 +466,7 @@ void AVRAvatar::HandleStartGrab(const FInputActionValue& _Value, EControllerHand
 }
 
 void AVRAvatar::HandleGrab(const FInputActionValue& _Value, EControllerHand Hand) {
-  AVRMotionController* controller = 
-    Hand == EControllerHand::Left ? LeftController : RightController;
-
+  AVRMotionController* controller = GetControllerForHand(Hand);
   AActor* grabbedActor = controller->GetActorToGrab();
 
   if (grabbedActor && Cast<IGrabbable>(grabbedActor)) {
@@ -480,9 +475,7 @@ void AVRAvatar::HandleGrab(const FInputActionValue& _Value, EControllerHand Hand
 }
 
 void AVRAvatar::HandleCompleteGrab(const FInputActionValue& _Value, EControllerHand Hand) {
-  AVRMotionController* controller = 
-    Hand == EControllerHand::Left ? LeftController : RightController;
-  
+  AVRMotionController* controller = GetControllerForHand(Hand);
   AActor* grabbedActor = controller->GetActorToGrab();
 
   UE_LOG(LogTemp, Warning, TEXT("%s hand grab complete"), *FString(Hand == EControllerHand::Left ? "left" : "right"));
@@ -494,9 +487,7 @@ void AVRAvatar::HandleCompleteGrab(const FInputActionValue& _Value, EControllerH
 }
 
 void AVRAvatar::HandleDuplicateModule(const FInputActionValue& _Value, EControllerHand Hand) {
-  AVRMotionController* controller =
-    Hand == EControllerHand::Left ? LeftController : RightController;
-
+  AVRMotionController* controller = GetControllerForHand(Hand);
   AVCVModule* grabbedModule = Cast<AVCVModule>(controller->GetActorToGrab());
 
   if (grabbedModule) {
@@ -506,9 +497,7 @@ void AVRAvatar::HandleDuplicateModule(const FInputActionValue& _Value, EControll
 }
 
 void AVRAvatar::HandleDestroyModule(const FInputActionValue& _Value, EControllerHand Hand) {
-  AVRMotionController* controller =
-    Hand == EControllerHand::Left ? LeftController : RightController;
-
+  AVRMotionController* controller = GetControllerForHand(Hand);
   AVCVModule* grabbedModule = Cast<AVCVModule>(controller->GetActorToGrab());
 
   if (grabbedModule) {
@@ -518,9 +507,7 @@ void AVRAvatar::HandleDestroyModule(const FInputActionValue& _Value, EController
 }
 
 void AVRAvatar::HandleToggleContextMenu(const FInputActionValue& _Value, EControllerHand Hand) {
-  AVRMotionController* controller =
-    Hand == EControllerHand::Left ? LeftController : RightController;
-
+  AVRMotionController* controller = GetControllerForHand(Hand);
   AVCVModule* grabbedModule = Cast<AVCVModule>(controller->GetActorToGrab());
 
   if (grabbedModule) {
@@ -530,9 +517,7 @@ void AVRAvatar::HandleToggleContextMenu(const FInputActionValue& _Value, EContro
 }
 
 void AVRAvatar::HandleStartParamEngage(const FInputActionValue& _Value, EControllerHand Hand) {
-  AVRMotionController* controller = 
-    Hand == EControllerHand::Left ? LeftController : RightController;
-  
+  AVRMotionController* controller = GetControllerForHand(Hand);
   UE_LOG(LogTemp, Warning, TEXT("%s hand param engage start"), *FString(Hand == EControllerHand::Left ? "left" : "right"));
 
   AVCVParam* interactingParam = Cast<AVCVParam>(controller->GetParamActorToInteract());
@@ -556,9 +541,7 @@ void AVRAvatar::HandleStartParamEngage(const FInputActionValue& _Value, EControl
 }
 
 void AVRAvatar::HandleParamEngage(const FInputActionValue& _Value, EControllerHand Hand) {
-  AVRMotionController* controller = 
-    Hand == EControllerHand::Left ? LeftController : RightController;
-  
+  AVRMotionController* controller = GetControllerForHand(Hand);
   AVCVParam* interactingParam = Cast<AVCVParam>(controller->GetParamActorToInteract());
   if (interactingParam) {
     if (Cast<AVCVKnob>(interactingParam)) {
@@ -584,8 +567,7 @@ void AVRAvatar::HandleParamEngage(const FInputActionValue& _Value, EControllerHa
 }
 
 void AVRAvatar::HandleCompleteParamEngage(const FInputActionValue& _Value, EControllerHand Hand) {
-  AVRMotionController* controller = 
-    Hand == EControllerHand::Left ? LeftController : RightController;
+  AVRMotionController* controller = GetControllerForHand(Hand);
   // UE_LOG(LogTemp, Warning, TEXT("%s hand param engage complete"), *FString(Hand == EControllerHand::Left ? "left" : "right"));
 
   AVCVParam* interactingParam = Cast<AVCVParam>(controller->GetParamActorToInteract());
@@ -603,8 +585,7 @@ void AVRAvatar::HandleCompleteParamEngage(const FInputActionValue& _Value, ECont
 }
 
 void AVRAvatar::HandleParamReset(const FInputActionValue& _Value, EControllerHand Hand) {
-  AVRMotionController* controller = 
-    Hand == EControllerHand::Left ? LeftController : RightController;
+  AVRMotionController* controller = GetControllerForHand(Hand);
   // UE_LOG(LogTemp, Warning, TEXT("%s hand param reset"), *FString(Hand == EControllerHand::Left ? "left" : "right"));
 
   AVCVParam* interactingParam = Cast<AVCVParam>(controller->GetParamActorToInteract());
@@ -641,23 +622,17 @@ void AVRAvatar::Quit(const FInputActionValue& _Value) {
 }
 
 void AVRAvatar::HandleStartWidgetLeftClick(const FInputActionValue& _Value, EControllerHand Hand) {
-  AVRMotionController* controller = 
-    Hand == EControllerHand::Left ? LeftController : RightController;
-  
+  AVRMotionController* controller = GetControllerForHand(Hand);
   controller->StartWidgetLeftClick();
 }
 
 void AVRAvatar::HandleCompleteWidgetLeftClick(const FInputActionValue& _Value, EControllerHand Hand) {
-  AVRMotionController* controller = 
-    Hand == EControllerHand::Left ? LeftController : RightController;
-
+  AVRMotionController* controller = GetControllerForHand(Hand);
   controller->EndWidgetLeftClick();
 }
 
 void AVRAvatar::HandleWidgetScroll(const FInputActionValue& Value, EControllerHand Hand) {
-  AVRMotionController* controller = 
-    Hand == EControllerHand::Left ? LeftController : RightController;
-
+  AVRMotionController* controller = GetControllerForHand(Hand);
   controller->WidgetScroll(Value.Get<float>());
 }
 
