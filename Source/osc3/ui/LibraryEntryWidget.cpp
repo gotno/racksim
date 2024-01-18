@@ -1,7 +1,7 @@
-#include "ui/LibraryEntryWidget.h"
+#include "UI/LibraryEntryWidget.h"
 
 #include "osc3GameModeBase.h"
-#include "ui/LibraryEntry.h"
+#include "UI/LibraryEntry.h"
 
 #include "CommonTextBlock.h"
 #include "Components/TextBlock.h"

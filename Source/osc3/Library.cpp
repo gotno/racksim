@@ -1,8 +1,8 @@
 #include "Library.h"
 
-#include "ui/LibraryWidget.h"
-#include "ui/LibraryEntry.h"
-#include "ui/BasicListEntryData.h"
+#include "UI/LibraryWidget.h"
+#include "UI/LibraryEntry.h"
+#include "UI/BasicListEntryData.h"
 
 #include "Components/PrimitiveComponent.h"
 #include "Components/WidgetComponent.h"

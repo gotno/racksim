@@ -10,8 +10,8 @@
 #include "VCVSlider.h"
 #include "VCVPort.h"
 #include "VCVDisplay.h"
-#include "ui/ContextMenu.h"
-#include "ui/ContextMenuEntryData.h"
+#include "UI/ContextMenu.h"
+#include "UI/ContextMenuEntryData.h"
 
 #include "Engine/Texture2D.h"
 #include "Kismet/GameplayStatics.h"

@@ -1,8 +1,8 @@
-#include "ui/ContextMenuEntry.h"
+#include "UI/ContextMenuEntry.h"
 
 #include "osc3GameModeBase.h"
 #include "VCVModule.h"
-#include "ui/ContextMenuEntryData.h"
+#include "UI/ContextMenuEntryData.h"
 
 #include "CommonTextBlock.h"
 #include "Components/TextBlock.h"

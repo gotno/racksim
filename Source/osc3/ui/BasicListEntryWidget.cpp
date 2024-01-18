@@ -1,6 +1,6 @@
-#include "ui/BasicListEntryWidget.h"
+#include "UI/BasicListEntryWidget.h"
 
-#include "ui/BasicListEntryData.h"
+#include "UI/BasicListEntryData.h"
 #include "osc3GameModeBase.h"
 #include "library.h"
 

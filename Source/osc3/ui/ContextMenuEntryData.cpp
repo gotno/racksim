@@ -1,2 +1,2 @@
-#include "ui/ContextMenuEntryData.h"
+#include "UI/ContextMenuEntryData.h"
 #include "VCVModule.h"

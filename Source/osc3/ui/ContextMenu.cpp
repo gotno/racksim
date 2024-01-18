@@ -1,6 +1,6 @@
-#include "ui/ContextMenu.h"
+#include "UI/ContextMenu.h"
 
-#include "ui/ContextMenuEntryData.h"
+#include "UI/ContextMenuEntryData.h"
 
 #include "Components/ListView.h"
 

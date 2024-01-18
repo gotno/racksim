@@ -1,9 +1,9 @@
-#include "ui/LibraryWidget.h"
+#include "UI/LibraryWidget.h"
 
 #include "osc3GameModeBase.h"
 #include "Library.h"
-#include "ui/LibraryEntry.h"
-#include "ui/BasicListEntryData.h"
+#include "UI/LibraryEntry.h"
+#include "UI/BasicListEntryData.h"
 
 #include "Components/ListView.h"
 #include "Components/TextBlock.h"
