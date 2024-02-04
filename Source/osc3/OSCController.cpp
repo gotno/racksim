@@ -7,11 +7,12 @@
 #include "OSCManager.h"
 
 AOSCController::AOSCController() {
-  OSCClient = UOSCManager::CreateOSCClient("127.0.0.1", 7000, TEXT("OSCCtrlClient"), this);
-  OSCServer = UOSCManager::CreateOSCServer("127.0.0.1", 7001, false, false, TEXT("OSCCtrlServer"), this);
 }
 
 void AOSCController::Init() {
+  OSCClient = UOSCManager::CreateOSCClient("127.0.0.1", 7000, TEXT("OSCCtrlClient"), this);
+  OSCServer = UOSCManager::CreateOSCServer("127.0.0.1", 7001, false, false, TEXT("OSCCtrlServer"), this);
+
   if (Aosc3GameModeBase* gm = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(this))) {
     GameMode = gm;
   } else {
