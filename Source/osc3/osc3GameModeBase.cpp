@@ -14,6 +14,8 @@
 #include "DefinitivePainter/Public/SVG/DPSVGAsset.h"
 #include "Kismet/GameplayStatics.h"
 
+#include "HeadMountedDisplayFunctionLibrary.h"
+
 Aosc3GameModeBase::Aosc3GameModeBase() {
   PlayerControllerClass = Aosc3PlayerController::StaticClass();
 
@@ -22,6 +24,8 @@ Aosc3GameModeBase::Aosc3GameModeBase() {
 
 void Aosc3GameModeBase::BeginPlay() {
 	Super::BeginPlay();
+
+  UHeadMountedDisplayFunctionLibrary::EnableHMD(true);
 
   OSCctrl->Init();
 
