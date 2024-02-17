@@ -29,15 +29,6 @@ void Aosc3GameModeBase::BeginPlay() {
 
   OSCctrl->Init();
 
-  FTimerHandle resyncHandle;
-  GetWorld()->GetTimerManager().SetTimer(
-    resyncHandle,
-    OSCctrl,
-    &AOSCController::NotifyResync,
-    1.f, // seconds, apparently
-    false
-  );
-
   PlayerController = Cast<Aosc3PlayerController>(UGameplayStatics::GetPlayerController(this, 0));
   PlayerPawn = Cast<AVRAvatar>(UGameplayStatics::GetPlayerPawn(this, 0));
   

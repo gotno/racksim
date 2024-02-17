@@ -10,8 +10,8 @@ AOSCController::AOSCController() {
 }
 
 void AOSCController::Init() {
-  OSCClient = UOSCManager::CreateOSCClient("127.0.0.1", 7000, TEXT("OSCCtrlClient"), this);
-  OSCServer = UOSCManager::CreateOSCServer("127.0.0.1", 7001, false, false, TEXT("OSCCtrlServer"), this);
+  OSCClient = UOSCManager::CreateOSCClient(TEXT("127.0.0.1"), RackClientPort, TEXT("OSCCtrlClient"), this);
+  OSCServer = UOSCManager::CreateOSCServer(TEXT("127.0.0.1"), ServerPort, false, false, TEXT("OSCCtrlServer"), this);
 
   if (Aosc3GameModeBase* gm = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(this))) {
     GameMode = gm;
@@ -40,10 +40,20 @@ void AOSCController::Init() {
   AddRoute("/menu/item/add/*", FName(TEXT("AddContextMenuItem")));
   AddRoute("/menu/synced/*", FName(TEXT("MenuSynced")));
 
+  AddRoute("/set_rack_server_port/*", FName(TEXT("SetClientPort")));
+
   // OSCServer->OnOscBundleReceived.AddDynamic(this, &AOSCController::TestBundle);
   // OSCServer->OnOscMessageReceived.AddDynamic(this, &AOSCController::TestMessage);
 
   OSCServer->Listen();
+
+  GetWorld()->GetTimerManager().SetTimer(
+    hSyncPortTimer,
+    this,
+    &AOSCController::SyncPorts,
+    0.05f, // 50 milliseconds
+    true // loop
+  );
 }
 
 void AOSCController::AddRoute(const FString &AddressPattern, const FName &MethodName) {
@@ -52,6 +62,40 @@ void AOSCController::AddRoute(const FString &AddressPattern, const FName &Method
   OSCServer->BindEventToOnOSCAddressPatternMatchesPath(
     UOSCManager::ConvertStringToOSCAddress(AddressPattern),
     Event
+  );
+}
+
+void AOSCController::SyncPorts() {
+  FOSCAddress address = UOSCManager::ConvertStringToOSCAddress(FString("/set_unreal_server_port"));
+  FOSCMessage message;
+  UOSCManager::SetOSCMessageAddress(message, address);
+  UOSCManager::AddInt32(message, ServerPort);
+
+  // UE_LOG(LogTemp, Warning, TEXT("sending /set_unreal_server_port (%d) on port %d"), ServerPort, RackClientPort);
+  OSCClient->SendOSCMessage(message);
+
+  if (++RackClientPort > MaxRackClientPort) RackClientPort = MinRackClientPort;
+  OSCClient->SetSendIPAddress(TEXT("127.0.0.1"), RackClientPort);
+}
+
+void AOSCController::SetClientPort(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port) {
+  int clientPort;
+  UOSCManager::GetInt32(message, 0, clientPort);
+
+  // UE_LOG(LogTemp, Warning, TEXT("received SetClientPort %d"), clientPort);
+  GetWorld()->GetTimerManager().ClearTimer(hSyncPortTimer);
+
+  RackClientPort = clientPort;
+  OSCClient->SetSendIPAddress(TEXT("127.0.0.1"), RackClientPort);
+
+  // wait a moment, request sync
+  FTimerHandle resyncHandle;
+  GetWorld()->GetTimerManager().SetTimer(
+    resyncHandle,
+    this,
+    &AOSCController::NotifyResync,
+    1.f, // 1 second
+    false // loop
   );
 }
 

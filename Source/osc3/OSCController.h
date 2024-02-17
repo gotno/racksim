@@ -45,6 +45,10 @@ public:
   void SendModuleDiffRequest(const int64_t& ModuleId) const;
 
 private:
+  FTimerHandle hSyncPortTimer;
+  int MinRackClientPort{7000}, RackClientPort{7000}, MaxRackClientPort{7020};
+  int ServerPort{7001};
+
   UPROPERTY()
   class Aosc3GameModeBase* GameMode;
 
@@ -56,6 +60,9 @@ private:
   
   void AddRoute(const FString &AddressPattern, const FName &MethodName);
   bool ModuleGuard(const FOSCMessage &Message, int64_t &ModuleId);
+
+  UFUNCTION()
+  void SyncPorts();
 
   UFUNCTION()
   void LogOSC(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port);
@@ -91,6 +98,9 @@ private:
   void AddContextMenuItem(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port);
   UFUNCTION()
   void MenuSynced(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port);
+
+  UFUNCTION()
+  void SetClientPort(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port);
 
   // UFUNCTION()
   // void TestBundle(const FOSCBundle& InBundle, const FString& InIPAddress, int32 InPort);
