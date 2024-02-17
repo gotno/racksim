@@ -40,8 +40,7 @@ struct Rect {
   Rect(Vec2 _pos, Vec2 _size) : pos(_pos), size(_size) {}
 };
 
-
-enum LightShape {
+enum struct LightShape {
   Round,
   Rectangle
 };
@@ -60,7 +59,7 @@ struct VCVLight {
   VCVLight(int32 _id, int64_t _moduleId) : id(_id), moduleId(_moduleId) {}
 };
 
-enum ParamType {
+enum struct ParamType {
   Knob, Slider, Button, Switch
 };
 struct VCVParam {
@@ -164,7 +163,7 @@ struct VCVModule {
     : id(moduleId), brand(moduleBrand), name(moduleName), description(modelDescription), box(panelBox), panelSvgPath(svgPath) {}
 };
 
-enum VCVMenuItemType {
+enum struct VCVMenuItemType {
   LABEL,
   ACTION,
   SUBMENU,
