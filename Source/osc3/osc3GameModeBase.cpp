@@ -1,6 +1,7 @@
 #include "osc3GameModeBase.h"
 #include "osc3PlayerController.h"
 #include "OSCController.h"
+#include "RackManager.h"
 #include "Player/VRAvatar.h"
 
 #include "VCVModule.h"
@@ -20,6 +21,7 @@ Aosc3GameModeBase::Aosc3GameModeBase() {
   PlayerControllerClass = Aosc3PlayerController::StaticClass();
 
   OSCctrl = CreateDefaultSubobject<AOSCController>(FName(TEXT("OSCctrl")));
+  rackman = CreateDefaultSubobject<URackManager>(FName(TEXT("rackman")));
 }
 
 void Aosc3GameModeBase::BeginPlay() {
@@ -27,12 +29,20 @@ void Aosc3GameModeBase::BeginPlay() {
 
   UHeadMountedDisplayFunctionLibrary::EnableHMD(true);
 
+  rackman->Run();
+  // TODO: it'd be nice if this happened after rack was confirmed open
   OSCctrl->Init();
 
   PlayerController = Cast<Aosc3PlayerController>(UGameplayStatics::GetPlayerController(this, 0));
   PlayerPawn = Cast<AVRAvatar>(UGameplayStatics::GetPlayerPawn(this, 0));
   
   SpawnLibrary();
+}
+
+void Aosc3GameModeBase::EndPlay(const EEndPlayReason::Type EndPlayReason) {
+  Super::EndPlay(EndPlayReason);
+
+  rackman->Close();
 }
 
 void Aosc3GameModeBase::Tick(float DeltaTime) {

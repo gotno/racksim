@@ -10,6 +10,7 @@
 #include "osc3GameModeBase.generated.h"
 
 class AOSCController;
+class URackManager;
 class AVRAvatar;
 class AVCVCable;
 class AVCVModule;
@@ -31,7 +32,8 @@ private:
   virtual void Tick(float DeltaTime) override;
 
 protected:
-	virtual void BeginPlay() override;
+  virtual void BeginPlay() override;
+  virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 public:
   void SpawnModule(VCVModule vcv_module);
@@ -67,6 +69,8 @@ public:
   ALibrary* GetLibrary();
 private:
   UPROPERTY()
+  URackManager* rackman;
+  UPROPERTY()
   AOSCController* OSCctrl;
 
   Aosc3PlayerController* PlayerController;
@@ -81,7 +85,6 @@ private:
   TArray<AVCVCable*> CableActors;
   UPROPERTY()
   ALibrary* LibraryActor{nullptr};
-  
 
   FDPSVGImporter SVGImporter;
   UPROPERTY()
