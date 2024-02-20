@@ -30,11 +30,6 @@ void URackManager::Run() {
   LaunchRack();
 }
 
-void URackManager::Close() {
-  TerminateRack();
-  Cleanup();
-}
-
 void URackManager::Setup() {
   IFileManager& FileManager = IFileManager::Get();
   FileManager.Copy(
@@ -53,9 +48,9 @@ void URackManager::LaunchRack() {
     *RackExecutablePath,
     *params,
     // *oscctrlBootstrapPath,
-    true, // does nothing?
-    false, // does nothing?
-    false, // does nothing?
+    true, // launch detached, does nothing?
+    false, // launch hidden, does nothing?
+    false, // launch RLY hidden, does nothing?
     nullptr,
     2, // -2 to 2 priority, idle to highest
     *RackPath, // working directory
@@ -94,31 +89,8 @@ void URackManager::BringViewportToFront() {
   }
 }
 
-void URackManager::TerminateRack() {
-  if (hRackProc.IsValid() && FPlatformProcess::IsProcRunning(hRackProc)) {
-    FPlatformProcess::TerminateProc(hRackProc, false);
-  }
-}
-
 void URackManager::Cleanup() {
-  // FString pluginPath = RackPluginsPath + "/gtnosft";
   FPlatformFileManager::Get()
     .GetPlatformFile()
     .DeleteDirectoryRecursively(*(RackPluginsPath + "/gtnosft"));
-    // .DeleteDirectoryRecursively(*pluginPath);
-
-  // TODO: these don't work without admin privileges
-  // no harm in leaving the dll around (rack won't have
-  // the info to actually show the plugin), but there must
-  // be a way to get rid of it.
-  // MoveFileExA(
-  //   TCHAR_TO_ANSI(*(pluginPath + "/plugin.dll")),
-  //   NULL,
-  //   MOVEFILE_DELAY_UNTIL_REBOOT
-  // );
-  // MoveFileExA(
-  //   TCHAR_TO_ANSI(*pluginPath),
-  //   NULL,
-  //   MOVEFILE_DELAY_UNTIL_REBOOT
-  // );
 }

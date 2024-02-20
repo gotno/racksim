@@ -14,6 +14,7 @@
 #include "Engine/Texture2D.h"
 #include "DefinitivePainter/Public/SVG/DPSVGAsset.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 #include "HeadMountedDisplayFunctionLibrary.h"
 
@@ -42,7 +43,28 @@ void Aosc3GameModeBase::BeginPlay() {
 void Aosc3GameModeBase::EndPlay(const EEndPlayReason::Type EndPlayReason) {
   Super::EndPlay(EndPlayReason);
 
-  rackman->Close();
+  rackman->Cleanup();
+}
+
+void Aosc3GameModeBase::RequestExit() {
+  OSCctrl->SendAutosaveAndExit();
+  FTimerHandle hExit;
+  GetWorld()->GetTimerManager().SetTimer(
+    hExit,
+    this,
+    &Aosc3GameModeBase::Exit,
+    1.f, // 1 second
+    false // loop
+  );
+}
+
+void Aosc3GameModeBase::Exit() {
+  UKismetSystemLibrary::QuitGame(
+    GetWorld(),
+    UGameplayStatics::GetPlayerController(this, 0),
+    EQuitPreference::Quit,
+    false
+  );
 }
 
 void Aosc3GameModeBase::Tick(float DeltaTime) {

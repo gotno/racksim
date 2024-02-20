@@ -38,6 +38,8 @@ public:
   void CreateCable(int64 InputModuleId, int64 OuputModuleId, int InputPortId, int OutputPortId);
   UFUNCTION()
   void DestroyCable(int64 CableId);
+  UFUNCTION()
+  void SendAutosaveAndExit();
 
   void RequestMenu(const VCVMenu& Menu) const;
   void ClickMenuItem(const VCVMenuItem& MenuItem) const;

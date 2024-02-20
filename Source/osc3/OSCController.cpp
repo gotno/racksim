@@ -277,6 +277,13 @@ void AOSCController::CreateCable(int64 InputModuleId, int64 OutputModuleId, int 
   OSCClient->SendOSCMessage(message);
 }
 
+void AOSCController::SendAutosaveAndExit() {
+  FOSCAddress address = UOSCManager::ConvertStringToOSCAddress(FString(TEXT("/autosave_and_exit")));
+  FOSCMessage message;
+  UOSCManager::SetOSCMessageAddress(message, address);
+  OSCClient->SendOSCMessage(message);
+}
+
 void AOSCController::DestroyCable(int64 CableId) {
   FOSCAddress address = UOSCManager::ConvertStringToOSCAddress(FString(TEXT("/destroy/cable")));
   FOSCMessage message;

@@ -23,7 +23,6 @@
 #include "EnhancedInputSubsystems.h"
 
 #include "Kismet/KismetMathLibrary.h"
-#include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/GameplayStatics.h"
 #include "DrawDebugHelpers.h"
 
@@ -613,12 +612,7 @@ void AVRAvatar::RequestScreenshot(const FInputActionValue& _Value) {
 }
 
 void AVRAvatar::Quit(const FInputActionValue& _Value) {
-  UKismetSystemLibrary::QuitGame(
-    GetWorld(),
-    UGameplayStatics::GetPlayerController(this, 0),
-    EQuitPreference::Quit,
-    false
-  );
+  GameMode->RequestExit();
 }
 
 void AVRAvatar::HandleStartWidgetLeftClick(const FInputActionValue& _Value, EControllerHand Hand) {

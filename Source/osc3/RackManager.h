@@ -11,13 +11,11 @@ class OSC3_API URackManager : public UObject {
 public:
   void Init();
   void Run();
-  void Close();
+  void Cleanup();
   
 private:
   void Setup();
   void LaunchRack();
-  void TerminateRack();
-  void Cleanup();
   
   bool bInitd{false};
 

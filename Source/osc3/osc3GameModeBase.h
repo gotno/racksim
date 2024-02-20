@@ -38,6 +38,7 @@ protected:
 public:
   void SpawnModule(VCVModule vcv_module);
   void QueueCableSpawn(VCVCable vcv_cable);
+  void RequestExit();
 
   AVCVCable* SpawnCable(AVCVPort* Port);
   void SpawnCable(int64_t& Id, AVCVPort* InputPort, AVCVPort* OutputPort);
@@ -68,6 +69,9 @@ public:
   void SetLibraryJsonPath(FString& Path);
   ALibrary* GetLibrary();
 private:
+  UFUNCTION()
+  void Exit();
+
   UPROPERTY()
   URackManager* rackman;
   UPROPERTY()
