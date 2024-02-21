@@ -90,6 +90,11 @@ void URackManager::BringViewportToFront() {
 }
 
 void URackManager::Cleanup() {
+  // force Rack to close if it is still running
+  if (hRackProc.IsValid() && FPlatformProcess::IsProcRunning(hRackProc)) {
+    FPlatformProcess::TerminateProc(hRackProc, false);
+  }
+
   FPlatformFileManager::Get()
     .GetPlatformFile()
     .DeleteDirectoryRecursively(*(RackPluginsPath + "/gtnosft"));
