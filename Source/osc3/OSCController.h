@@ -29,7 +29,7 @@ public:
   UFUNCTION()
   void SendParamUpdate(int64 ModuleId, int ParamId, float Value);
   UFUNCTION()
-  void CreateModule(FString PluginSlug, FString ModuleSlug);
+  void SendCreateModule(const FString& PluginSlug, const FString& ModuleSlug, const int& ReturnId);
   UFUNCTION()
   void SetModuleFavorite(FString PluginSlug, FString ModuleSlug, bool bFavorite);
   UFUNCTION()

@@ -74,19 +74,40 @@ void Aosc3GameModeBase::Tick(float DeltaTime) {
 void Aosc3GameModeBase::SpawnModule(VCVModule vcv_module) {
   if (ModuleActors.Contains(vcv_module.id)) return;
 
-  FVector position = FVector(0, vcv_module.box.pos.x, -vcv_module.box.pos.y + 140);
-  position.Y += vcv_module.box.size.x / 2;
-  position.Z += vcv_module.box.size.y / 2;
+  FVector location;
+  FRotator rotation;
+
+  if (vcv_module.returnId == 0 && ModuleActors.Contains(LastClickedMenuModuleId)) {
+    AVCVModule* lastClickedModule = ModuleActors[LastClickedMenuModuleId];
+    lastClickedModule->GetModuleLandingPosition(location, rotation, true);
+  } else if (ReturnModulePositions.Contains(vcv_module.returnId)) {
+    ReturnModulePosition& rmp = ReturnModulePositions[vcv_module.returnId];
+    if (rmp.Location.IsZero()) {
+      LibraryActor->GetModuleLandingPosition(vcv_module.box.size.x, location, rotation);
+    } else {
+      location = rmp.Location;
+      rotation = rmp.Rotation;
+    }
+    ReturnModulePositions.Remove(vcv_module.returnId);
+  } else { 
+    // WTF IS THIS
+    location = FVector(0, vcv_module.box.pos.x, -vcv_module.box.pos.y + 140);
+    location.Y += vcv_module.box.size.x / 2;
+    location.Z += vcv_module.box.size.y / 2;
+    rotation = FRotator(0.f);
+  }
 
   AVCVModule* module =
     GetWorld()->SpawnActor<AVCVModule>(
       AVCVModule::StaticClass(),
-      position,
-      FRotator(0, 0, 0)
+      location,
+      FRotator(0.f)
     );
  
   ModuleActors.Add(vcv_module.id, module);
   module->Init(vcv_module);
+
+  module->SetActorRotation(rotation);
 
   ProcessSpawnCableQueue();
 }
@@ -176,13 +197,24 @@ void Aosc3GameModeBase::DestroyCableActor(AVCVCable* Cable) {
 }
 
 void Aosc3GameModeBase::DuplicateModule(AVCVModule* Module) {
+  int returnId = ++currentReturnModuleId;
+
+  FVector location;
+  FRotator rotation;
+  Module->GetModuleLandingPosition(location, rotation, false);
+  ReturnModulePositions.Add(returnId, ReturnModulePosition(location, rotation));
+
   FString pluginSlug, moduleSlug;
   Module->GetSlugs(pluginSlug, moduleSlug);
-  OSCctrl->CreateModule(pluginSlug, moduleSlug);
+
+  OSCctrl->SendCreateModule(pluginSlug, moduleSlug, returnId);
 }
 
 void Aosc3GameModeBase::RequestModuleSpawn(FString PluginSlug, FString ModuleSlug) {
-  OSCctrl->CreateModule(PluginSlug, ModuleSlug);
+  int returnId = ++currentReturnModuleId;
+
+  ReturnModulePositions.Add(returnId, ReturnModulePosition());
+  OSCctrl->SendCreateModule(PluginSlug, ModuleSlug, returnId);
 }
 
 void Aosc3GameModeBase::RequestModuleDiff(const int64_t& ModuleId) const {
@@ -207,7 +239,8 @@ void Aosc3GameModeBase::RequestMenu(const VCVMenu& Menu) const {
   OSCctrl->RequestMenu(Menu);
 }
 
-void Aosc3GameModeBase::ClickMenuItem(const VCVMenuItem& MenuItem) const {
+void Aosc3GameModeBase::ClickMenuItem(const VCVMenuItem& MenuItem) {
+  LastClickedMenuModuleId = MenuItem.moduleId;
   OSCctrl->ClickMenuItem(MenuItem);
 }
 

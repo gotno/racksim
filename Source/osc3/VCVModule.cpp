@@ -352,6 +352,7 @@ void AVCVModule::ReleaseGrab() {
   bGrabEngaged = false;
   StaticMeshComponent->AddWorldOffset(GrabOffset);
   AddActorWorldOffset(-GrabOffset);
+  GrabOffset = FVector(0.f);
 }
 
 void AVCVModule::TriggerCableUpdates() {
@@ -483,4 +484,10 @@ void AVCVModule::Tick(float DeltaTime) {
 
   Texture = GameMode->GetTexture(Model.panelSvgPath);
   if (Texture) FaceMaterialInstance->SetTextureParameterValue(FName("texture"), Texture);
+}
+
+void AVCVModule::GetModuleLandingPosition(FVector& Location, FRotator& Rotation, bool bOffset) {
+  Location = StaticMeshComponent->GetComponentLocation();
+  if (bOffset) Location -= StaticMeshComponent->GetForwardVector() * (2 * MODULE_DEPTH * RENDER_SCALE);
+  Rotation = StaticMeshComponent->GetComponentRotation();
 }

@@ -21,6 +21,18 @@ class Aosc3PlayerController;
 class UDPSVGAsset;
 class UTexture2D;
 
+struct ReturnModulePosition {
+  FVector Location{0.f};
+  FRotator Rotation{0.f};
+  
+  // spawned from library is zeros, we'll calculate later
+  ReturnModulePosition() {}
+
+  // duplicated from module
+  ReturnModulePosition(FVector _Location, FRotator _Rotation)
+    : Location(_Location), Rotation(_Rotation) {}
+};
+
 UCLASS()
 class OSC3_API Aosc3GameModeBase : public AGameMode {
 	GENERATED_BODY()
@@ -58,7 +70,7 @@ public:
   void RequestModuleDiff(const int64_t& ModuleId) const;
   void SetModuleFavorite(FString PluginSlug, FString ModuleSlug, bool bFavorite);
   void RequestMenu(const VCVMenu& Menu) const;
-  void ClickMenuItem(const VCVMenuItem& MenuItem) const;
+  void ClickMenuItem(const VCVMenuItem& MenuItem);
   void UpdateMenuItemQuantity(const VCVMenuItem& MenuItem, const float& Value) const;
   
   void RegisterSVG(FString Filepath, Vec2 Size);
@@ -89,6 +101,10 @@ private:
   TArray<AVCVCable*> CableActors;
   UPROPERTY()
   ALibrary* LibraryActor{nullptr};
+
+  int64_t LastClickedMenuModuleId{-1};
+  int currentReturnModuleId{0};
+  TMap<int32, ReturnModulePosition> ReturnModulePositions;
 
   FDPSVGImporter SVGImporter;
   UPROPERTY()

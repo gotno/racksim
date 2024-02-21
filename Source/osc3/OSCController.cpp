@@ -179,6 +179,8 @@ void AOSCController::AddModule(const FOSCAddress& AddressPattern, const FOSCMess
   Modules[moduleId].slug = slug;
   Modules[moduleId].pluginSlug = pluginSlug;
 
+  UOSCManager::GetInt32(message, 14, Modules[moduleId].returnId);
+
   NotifyReceived("module", moduleId);
 }
 
@@ -222,13 +224,14 @@ void AOSCController::SendParamUpdate(int64 ModuleId, int ParamId, float Value) {
   OSCClient->SendOSCMessage(message);
 }
 
-void AOSCController::CreateModule(FString PluginSlug, FString ModuleSlug) {
+void AOSCController::SendCreateModule(const FString& PluginSlug, const FString& ModuleSlug, const int& ReturnId) {
   UE_LOG(LogTemp, Warning, TEXT("Sending /create/module %s:%s"), *PluginSlug, *ModuleSlug);
   FOSCAddress address = UOSCManager::ConvertStringToOSCAddress(FString(TEXT("/create/module")));
   FOSCMessage message;
   UOSCManager::SetOSCMessageAddress(message, address);
   UOSCManager::AddString(message, PluginSlug);
   UOSCManager::AddString(message, ModuleSlug);
+  UOSCManager::AddInt32(message, ReturnId);
 
   OSCClient->SendOSCMessage(message);
 }

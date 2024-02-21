@@ -395,3 +395,14 @@ void ALibrary::ReleaseGrab() {
   StaticMeshComponent->AddWorldOffset(GrabOffset);
   AddActorWorldOffset(-GrabOffset);
 }
+
+void ALibrary::GetModuleLandingPosition(const float& ModuleWidth, FVector& Location, FRotator& Rotation) {
+  float toEdge = DesiredWidth * 0.5;
+  float moduleOffset = ModuleWidth * 0.5f + RENDER_SCALE;
+
+  Location =
+    // TODO: dominant hand
+    StaticMeshComponent->GetComponentLocation() +
+      StaticMeshComponent->GetRightVector() * (toEdge + moduleOffset);
+  Rotation = StaticMeshComponent->GetComponentRotation();
+}

@@ -151,6 +151,8 @@ struct VCVModule {
 
   FString slug;
   FString pluginSlug;
+  
+  int32 returnId;
 
   TMap<int32, VCVParam> Params;
   TMap<int32, VCVPort> Inputs;

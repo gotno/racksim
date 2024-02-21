@@ -35,6 +35,8 @@ public:
   void GetSlugs(FString& PluginSlug, FString& Slug);
   int64_t Id{-1};
 
+  void GetModuleLandingPosition(FVector& Location, FRotator& Rotation, bool bOffset = true);
+
   void UpdateLight(int32 LightId, FLinearColor Color);
   AVCVParam* GetParamActor(const int& ParamId) { return ParamActors[ParamId]; }
   AVCVPort* GetPortActor(PortType Type, int32& PortId);

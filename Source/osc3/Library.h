@@ -44,6 +44,7 @@ public:
   void SetHighlighted(bool bHighlighted, FLinearColor OutlineColor = OUTLINE_COLOR) override;
 
   void SetJsonPath(FString& JsonPath);
+  void GetModuleLandingPosition(const float& ModuleWidth, FVector& Location, FRotator& Rotation);
 private:
   UPROPERTY(VisibleAnywhere)
   USceneComponent* RootSceneComponent;
