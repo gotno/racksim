@@ -30,7 +30,7 @@ ALibrary::ALibrary() {
   OutlineMeshComponent->SetWorldScale3D(FVector(1.1f, 1.1f, 1.1f));
   OutlineMeshComponent->AddLocalOffset(FVector(-0.05f, 0.f, 0.f));
   
-  static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshBody(TEXT("/Script/Engine.StaticMesh'/Game/meshes/unit_widget_base.unit_widget_base'"));
+  static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshBody(TEXT("/Script/Engine.StaticMesh'/Game/meshes/unit_module.unit_module'"));
   
   if (MeshBody.Object) {
     StaticMeshComponent->SetStaticMesh(MeshBody.Object);
@@ -68,6 +68,8 @@ void ALibrary::BeginPlay() {
   }
 
   LibraryWidget = Cast<ULibraryWidget>(LibraryWidgetComponent->GetUserWidgetObject());
+  LibraryWidgetComponent->SetWorldRotation(FRotator(0.f, 180.f, 0.f));
+  LibraryWidgetComponent->AddWorldOffset(StaticMeshComponent->GetForwardVector() * -0.01f);
 
   Tags.Add(TAG_INTERACTABLE);
   Tags.Add(TAG_GRABBABLE);
@@ -149,6 +151,9 @@ void ALibrary::RefreshTagsFilterList() {
 }
 
 void ALibrary::SetScale() {
+  // TODO: this is handled better by context menu scaling
+  // TODO: library should be same height as modules (desired *height*)
+
   // get initial actor bounds, which will be the rendered widget size
   FVector _origin, extent;
   GetActorBounds(false, _origin, extent);
@@ -160,7 +165,6 @@ void ALibrary::SetScale() {
 
   // scale the widget component based on initial bounds
   LibraryWidgetComponent->SetWorldScale3D(FVector(1.f, scale, scale));
-  LibraryWidgetComponent->AddLocalOffset(FVector(0.1f, 0.f, 0.f));
 }
 
 TArray<ULibraryEntry*> ALibrary::GenerateLibraryEntries() {

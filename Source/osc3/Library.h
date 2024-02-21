@@ -2,6 +2,7 @@
 
 #include "VCVData/VCVLibrary.h"
 #include "Grabbable.h"
+#include "osc3.h"
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
@@ -75,6 +76,6 @@ private:
   bool bFavoritesFilterActive;
   
   void SetScale();
-  float DesiredWidth{28.f};
+  float DesiredWidth{14.f * RENDER_SCALE};
   float BasePadding{0.4f};
 };

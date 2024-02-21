@@ -288,7 +288,7 @@ void Aosc3GameModeBase::SpawnLibrary() {
     GetWorld()->SpawnActor<ALibrary>(
       ALibrary::StaticClass(),
       FVector(0, 0, 100.f),
-      FRotator(0, 180.f, 0),
+      FRotator(0.f),
       spawnParams
     );
 }
