@@ -2,13 +2,13 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "ContextMenu.generated.h"
+#include "ContextMenuWidget.generated.h"
 
 class UListView;
 class UContextMenuEntryData;
 
 UCLASS()
-class OSC3_API UContextMenu : public UUserWidget {
+class OSC3_API UContextMenuWidget : public UUserWidget {
 	GENERATED_BODY()
     
 public:

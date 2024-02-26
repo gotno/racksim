@@ -10,7 +10,7 @@ class Aosc3GameModeBase;
 class AVCVLight;
 class AVCVPort;
 class AVCVParam;
-class UContextMenu;
+class UContextMenuWidget;
 class UWidgetComponent;
 
 UCLASS()
@@ -74,7 +74,7 @@ private:
   
   // TODO: this context menu stuff should all be its own actor
   UWidgetComponent* ContextMenuWidgetComponent;
-  UContextMenu* ContextMenuWidget;
+  UContextMenuWidget* ContextMenuWidget;
   void SetupContextMenuWidget();
   void SetMenu(int MenuId);
   FString MakeMenuBreadcrumbs(int MenuId);

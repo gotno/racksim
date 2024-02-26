@@ -11,7 +11,7 @@
 #include "ModuleComponents/VCVSlider.h"
 #include "ModuleComponents/VCVPort.h"
 #include "ModuleComponents/VCVDisplay.h"
-#include "UI/ContextMenu.h"
+#include "UI/ContextMenuWidget.h"
 #include "UI/ContextMenuEntryData.h"
 
 #include "Engine/Texture2D.h"
@@ -44,8 +44,8 @@ AVCVModule::AVCVModule() {
   ContextMenuWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("ContextMenuWidget"));
   ContextMenuWidgetComponent->SetWindowFocusable(false);
 
-  static ConstructorHelpers::FClassFinder<UContextMenu>
-    contextMenuWidgetObject(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/widgets/BP_ContextMenu.BP_ContextMenu_C'"));
+  static ConstructorHelpers::FClassFinder<UContextMenuWidget>
+    contextMenuWidgetObject(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/widgets/BP_ContextMenuWidget.BP_ContextMenuWidget_C'"));
   if (contextMenuWidgetObject.Succeeded()) {
     ContextMenuWidgetComponent->SetWidgetClass(contextMenuWidgetObject.Class);
   }
@@ -70,7 +70,7 @@ void AVCVModule::BeginPlay() {
     StaticMeshComponent->SetMaterial(1, FaceMaterialInstance);
   }
   
-  ContextMenuWidget = Cast<UContextMenu>(ContextMenuWidgetComponent->GetUserWidgetObject());
+  ContextMenuWidget = Cast<UContextMenuWidget>(ContextMenuWidgetComponent->GetUserWidgetObject());
   ContextMenuWidgetComponent->SetWorldRotation(FRotator(0.f, 180.f, 0.f));
   ContextMenuWidgetComponent->SetVisibility(false);
 
