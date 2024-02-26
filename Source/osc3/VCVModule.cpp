@@ -1,5 +1,6 @@
 #include "VCVModule.h"
 
+#include "osc3.h"
 #include "osc3GameModeBase.h"
 #include "VCVData/VCV.h"
 #include "VCVData/VCVOverrides.h"
@@ -15,7 +16,6 @@
 
 #include "Engine/Texture2D.h"
 #include "Kismet/GameplayStatics.h"
-#include "Kismet/KismetMathLibrary.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Components/PrimitiveComponent.h"
 #include "Components/WidgetComponent.h"
@@ -25,22 +25,7 @@
 AVCVModule::AVCVModule() {
 	PrimaryActorTick.bCanEverTick = true;
 
-  RootSceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root Scene Component"));
-  SetRootComponent(RootSceneComponent);
-
-  StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Static Mesh"));
-  StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-  StaticMeshComponent->SetupAttachment(GetRootComponent());
-  StaticMeshComponent->SetRenderInDepthPass(true);
-  StaticMeshComponent->SetRenderCustomDepth(true);
-  StaticMeshComponent->SetCustomDepthStencilValue(2);
-
-  OutlineMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Outline Mesh"));
-  OutlineMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-  OutlineMeshComponent->SetupAttachment(StaticMeshComponent);
-  OutlineMeshComponent->SetVisibility(false);
-  // OutlineMeshComponent->SetWorldScale3D(FVector(1.05f, 1.05f, 1.05f));
-  // OutlineMeshComponent->AddLocalOffset(FVector(-0.025f, 0.f, 0.f));
+  // RootSceneComponent/StaticMeshComponent/OutlineMeshComponent setup in GrabbableActor
   
   static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshBody(TEXT("/Script/Engine.StaticMesh'/Game/meshes/faced/unit_module_faced.unit_module_faced'"));
   if (MeshBody.Object) StaticMeshComponent->SetStaticMesh(MeshBody.Object);
@@ -54,8 +39,7 @@ AVCVModule::AVCVModule() {
   static ConstructorHelpers::FObjectFinder<UMaterial> FaceMaterial(TEXT("/Script/Engine.Material'/Game/meshes/faced/texture_face_bg.texture_face_bg'"));
   if (FaceMaterial.Object) FaceMaterialInterface = Cast<UMaterial>(FaceMaterial.Object);
 
-  static ConstructorHelpers::FObjectFinder<UMaterial> OutlineMaterial(TEXT("/Script/Engine.Material'/Game/materials/looman_outlines/M_LocalOutlines.M_LocalOutlines'"));
-  if (OutlineMaterial.Object) OutlineMaterialInterface = Cast<UMaterial>(OutlineMaterial.Object);
+  // OutlineMaterialInterface setup in GrabbableActor
   
   ContextMenuWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("ContextMenuWidget"));
   ContextMenuWidgetComponent->SetWindowFocusable(false);
@@ -84,11 +68,6 @@ void AVCVModule::BeginPlay() {
   if (FaceMaterialInterface) {
     FaceMaterialInstance = UMaterialInstanceDynamic::Create(FaceMaterialInterface, this);
     StaticMeshComponent->SetMaterial(1, FaceMaterialInstance);
-  }
-
-  if (OutlineMaterialInterface) {
-    OutlineMaterialInstance = UMaterialInstanceDynamic::Create(OutlineMaterialInterface, this);
-    OutlineMeshComponent->SetMaterial(0, OutlineMaterialInstance);
   }
   
   ContextMenuWidget = Cast<UContextMenu>(ContextMenuWidgetComponent->GetUserWidgetObject());
@@ -308,51 +287,10 @@ void AVCVModule::SpawnComponents() {
   }
 }
 
-void AVCVModule::SetHighlighted(bool bHighlighted, FLinearColor HighlightColor) {
-  OutlineMeshComponent->SetVisibility(bHighlighted);
-  OutlineMaterialInstance->SetVectorParameterValue(FName("Color"), HighlightColor);
-}
-
-void AVCVModule::EngageGrab(FVector GrabbedLocation, FRotator GrabbedRotation) {
-  // UE_LOG(LogTemp, Warning, TEXT("%s: grab engage"), *GetActorNameOrLabel());
-  bGrabEngaged = true;
-  GrabOffset = GrabbedLocation - GetActorLocation();
-  StaticMeshComponent->AddWorldOffset(-GrabOffset);
-
-  LastGrabbedRotation = GrabbedRotation;
-  LastGrabbedLocation = GrabbedLocation - GrabOffset;
-  LastLocationDelta = FVector(0.f, 0.f, 0.f);
-  SetHighlighted(false);
-}
-
 void AVCVModule::AlterGrab(FVector GrabbedLocation, FRotator GrabbedRotation) {
-  FQuat qFrom = LastGrabbedRotation.Quaternion();
-  FQuat qTo =  GrabbedRotation.Quaternion();
-  FQuat qDelta = qTo * qFrom.Inverse();
-  
-  FVector locationDelta = GrabbedLocation - LastGrabbedLocation;
-  locationDelta = UKismetMathLibrary::WeightedMovingAverage_FVector(
-    locationDelta,
-    LastLocationDelta,
-    0.4f
-  );
-  LastLocationDelta = locationDelta;
+  Super::AlterGrab(GrabbedLocation, GrabbedRotation);
 
-  AddActorWorldOffset(locationDelta);
-  AddActorWorldRotation(qDelta);
-
-  LastGrabbedLocation = GrabbedLocation;
-  LastGrabbedRotation = GrabbedRotation;
-  
   TriggerCableUpdates();
-}
-
-void AVCVModule::ReleaseGrab() {
-  // UE_LOG(LogTemp, Warning, TEXT("%s: grab release"), *GetActorNameOrLabel());
-  bGrabEngaged = false;
-  StaticMeshComponent->AddWorldOffset(GrabOffset);
-  AddActorWorldOffset(-GrabOffset);
-  GrabOffset = FVector(0.f);
 }
 
 void AVCVModule::TriggerCableUpdates() {

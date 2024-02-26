@@ -1,11 +1,9 @@
 #pragma once
 
 #include "VCVData/VCVLibrary.h"
-#include "Grabbable.h"
+#include "Utility/GrabbableActor.h"
 #include "osc3.h"
 
-#include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
 #include "Library.generated.h"
 
 class UWidgetComponent;
@@ -15,7 +13,7 @@ class ULibraryEntry;
 class UBasicListEntryData;
 
 UCLASS()
-class OSC3_API ALibrary : public AActor, public IGrabbable {
+class OSC3_API ALibrary : public AGrabbableActor {
 	GENERATED_BODY()
 	
 public:	
@@ -38,29 +36,14 @@ public:
   void ClearBrandFilter();
   void ClearTagsFilter();
 
-  void EngageGrab(FVector GrabbedLocation, FRotator GrabbedRotation) override;
-  void AlterGrab(FVector GrabbedLocation, FRotator GrabbedRotation) override;
-  void ReleaseGrab() override;
-  void SetHighlighted(bool bHighlighted, FLinearColor OutlineColor = OUTLINE_COLOR) override;
-
   void SetJsonPath(FString& JsonPath);
   void GetModuleLandingPosition(const float& ModuleWidth, FVector& Location, FRotator& Rotation);
 private:
-  UPROPERTY(VisibleAnywhere)
-  USceneComponent* RootSceneComponent;
-  UPROPERTY(VisibleAnywhere)
-  UStaticMeshComponent* StaticMeshComponent;
-  UPROPERTY(VisibleAnywhere)
-  UStaticMeshComponent* OutlineMeshComponent;
 
   UPROPERTY()
   UMaterialInstanceDynamic* BaseMaterialInstance;
   UPROPERTY()
   UMaterialInterface* BaseMaterialInterface;
-  UPROPERTY()
-  UMaterialInstanceDynamic* OutlineMaterialInstance;
-  UPROPERTY()
-  UMaterialInterface* OutlineMaterialInterface;
   
   UPROPERTY(EditDefaultsOnly)
   UWidgetComponent* LibraryWidgetComponent;

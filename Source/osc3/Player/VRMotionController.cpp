@@ -9,7 +9,7 @@
 #include "ModuleComponents/VCVParam.h"
 #include "ModuleComponents/VCVPort.h"
 #include "UI/Tooltip.h"
-#include "Grabbable.h"
+#include "Utility/GrabbableActor.h"
 
 #include "Components/SphereComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -351,11 +351,11 @@ void AVRMotionController::HandleInteractorEndOverlap(UPrimitiveComponent* Overla
 void AVRMotionController::HandleGrabberBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult) {
   if (bIsGrabbing || bIsParamInteracting) return;
 
-  if (OtherActor->ActorHasTag(TAG_GRABBABLE) && Cast<IGrabbable>(OtherActor)) {
+  if (OtherActor->ActorHasTag(TAG_GRABBABLE) && Cast<AGrabbableActor>(OtherActor)) {
     // UE_LOG(LogTemp, Display, TEXT("%s set ActorToGrab %s"), *HandName, *OtherActor->GetActorNameOrLabel());
 
     ActorToGrab = OtherActor;
-    Cast<IGrabbable>(OtherActor)->SetHighlighted(true);
+    Cast<AGrabbableActor>(OtherActor)->SetHighlighted(true);
     Avatar->SetControllerGrabbing(
       MotionController->GetTrackingSource(),
       true
@@ -385,13 +385,13 @@ void AVRMotionController::EndGrab() {
       false
     );
   } else {
-    Cast<IGrabbable>(ActorToGrab)->SetHighlighted(true);
+    Cast<AGrabbableActor>(ActorToGrab)->SetHighlighted(true);
   }
 }
 
 void AVRMotionController::HandleGrabberEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex) {
-  if (OtherActor->ActorHasTag(TAG_GRABBABLE) && Cast<IGrabbable>(OtherActor))
-    Cast<IGrabbable>(OtherActor)->SetHighlighted(false);
+  if (OtherActor->ActorHasTag(TAG_GRABBABLE) && Cast<AGrabbableActor>(OtherActor))
+    Cast<AGrabbableActor>(OtherActor)->SetHighlighted(false);
   if (bIsGrabbing || bIsParamInteracting) return;
 
   TSet<AActor*> overlappingActors;

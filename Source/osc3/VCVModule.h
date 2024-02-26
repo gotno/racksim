@@ -1,11 +1,8 @@
 #pragma once
 
-#include "osc3.h"
 #include "VCVData/VCV.h"
-#include "Grabbable.h"
+#include "Utility/GrabbableActor.h"
 
-#include "CoreMinimal.h"
-#include "GameFramework/Actor.h"
 #include "VCVModule.generated.h"
 
 class UTexture2D;
@@ -17,7 +14,7 @@ class UContextMenu;
 class UWidgetComponent;
 
 UCLASS()
-class OSC3_API AVCVModule : public AActor, public IGrabbable {
+class OSC3_API AVCVModule : public AGrabbableActor {
 	GENERATED_BODY()
 	
 public:	
@@ -59,18 +56,9 @@ public:
   FString Brand;
   FString Name;
 
-  void EngageGrab(FVector GrabbedLocation, FRotator GrabbedRotation) override;
   void AlterGrab(FVector GrabbedLocation, FRotator GrabbedRotation) override;
-  void ReleaseGrab() override;
-  void SetHighlighted(bool bHighlighted, FLinearColor OutlineColor = OUTLINE_COLOR) override;
   
 private:
-  UPROPERTY(VisibleAnywhere)
-  USceneComponent* RootSceneComponent;
-  UPROPERTY(VisibleAnywhere)
-  UStaticMeshComponent* StaticMeshComponent;
-  UPROPERTY(VisibleAnywhere)
-  UStaticMeshComponent* OutlineMeshComponent;
 
   UPROPERTY()
   UMaterialInstanceDynamic* BaseMaterialInstance;
@@ -80,20 +68,18 @@ private:
   UMaterialInstanceDynamic* FaceMaterialInstance;
   UPROPERTY()
   UMaterialInterface* FaceMaterialInterface;
-  UPROPERTY()
-  UMaterialInstanceDynamic* OutlineMaterialInstance;
-  UPROPERTY()
-  UMaterialInterface* OutlineMaterialInterface;
 
   UPROPERTY()
   UTexture2D* Texture;
   
-  // TODO: this stuff should all be its own actor
+  // TODO: this context menu stuff should all be its own actor
   UWidgetComponent* ContextMenuWidgetComponent;
   UContextMenu* ContextMenuWidget;
   void SetupContextMenuWidget();
   void SetMenu(int MenuId);
   FString MakeMenuBreadcrumbs(int MenuId);
+
+  TArray<VCVMenu> ContextMenus;
 
   void SpawnComponents();
   
@@ -106,6 +92,4 @@ private:
   TMap<int, AVCVParam*> ParamActors;
   TMap<int, AVCVPort*> InputActors;
   TMap<int, AVCVPort*> OutputActors;
-  
-  TArray<VCVMenu> ContextMenus;
 };

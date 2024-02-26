@@ -5,7 +5,7 @@
 
 #define RENDER_SCALE 2.f
 #define MODULE_DEPTH 2.f
-#define OUTLINE_COLOR FLinearColor(1.f, 1.f, 0.f)
+#define OUTLINE_COLOR FLinearColor(0.724268f, 0.385187f, 0.503043f)
 #define CABLE_OPACITY 0.6f
 
 #define LIGHT_OBJECT ECC_GameTraceChannel1

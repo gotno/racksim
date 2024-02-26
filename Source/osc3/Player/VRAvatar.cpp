@@ -13,7 +13,7 @@
 #include "ModuleComponents/VCVPort.h"
 #include "VCVCable.h"
 #include "Library.h"
-#include "Grabbable.h"
+#include "Utility/GrabbableActor.h"
 
 #include "Player/VRMotionController.h"
 #include "MotionControllerComponent.h"
@@ -456,11 +456,11 @@ void AVRAvatar::HandleStartGrab(const FInputActionValue& _Value, EControllerHand
   AActor* grabbedActor = controller->GetActorToGrab();
 
   UE_LOG(LogTemp, Warning, TEXT("%s hand grab start"), *FString(Hand == EControllerHand::Left ? "left" : "right"));
-  if (grabbedActor && Cast<IGrabbable>(grabbedActor)) {
+  if (grabbedActor && Cast<AGrabbableActor>(grabbedActor)) {
     UE_LOG(LogTemp, Warning, TEXT("  grabbing %s"), *grabbedActor->GetActorNameOrLabel());
     controller->StartGrab();
     SetControllerParamOrPortInteracting(Hand, false);
-    Cast<IGrabbable>(grabbedActor)->EngageGrab(controller->GetActorLocation(), controller->GetActorRotation());
+    Cast<AGrabbableActor>(grabbedActor)->EngageGrab(controller->GetActorLocation(), controller->GetActorRotation());
   }
 }
 
@@ -468,8 +468,8 @@ void AVRAvatar::HandleGrab(const FInputActionValue& _Value, EControllerHand Hand
   AVRMotionController* controller = GetControllerForHand(Hand);
   AActor* grabbedActor = controller->GetActorToGrab();
 
-  if (grabbedActor && Cast<IGrabbable>(grabbedActor)) {
-    Cast<IGrabbable>(grabbedActor)->AlterGrab(controller->GetActorLocation(), controller->GetActorRotation());
+  if (grabbedActor && Cast<AGrabbableActor>(grabbedActor)) {
+    Cast<AGrabbableActor>(grabbedActor)->AlterGrab(controller->GetActorLocation(), controller->GetActorRotation());
   }
 }
 
@@ -478,9 +478,9 @@ void AVRAvatar::HandleCompleteGrab(const FInputActionValue& _Value, EControllerH
   AActor* grabbedActor = controller->GetActorToGrab();
 
   UE_LOG(LogTemp, Warning, TEXT("%s hand grab complete"), *FString(Hand == EControllerHand::Left ? "left" : "right"));
-  if (grabbedActor && Cast<IGrabbable>(grabbedActor)) {
+  if (grabbedActor && Cast<AGrabbableActor>(grabbedActor)) {
     UE_LOG(LogTemp, Warning, TEXT("  releasing %s"), *grabbedActor->GetActorNameOrLabel());
-    Cast<IGrabbable>(grabbedActor)->ReleaseGrab();
+    Cast<AGrabbableActor>(grabbedActor)->ReleaseGrab();
     controller->EndGrab();
   }
 }

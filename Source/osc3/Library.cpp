@@ -4,31 +4,15 @@
 #include "UI/LibraryEntry.h"
 #include "UI/BasicListEntryData.h"
 
+#include "UObject/ConstructorHelpers.h"
 #include "Components/PrimitiveComponent.h"
 #include "Components/WidgetComponent.h"
-#include "UObject/ConstructorHelpers.h"
-#include "Kismet/KismetMathLibrary.h"
 #include "Json.h"
 
 ALibrary::ALibrary() {
 	PrimaryActorTick.bCanEverTick = true;
 
-  RootSceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootSceneComponent"));
-  SetRootComponent(RootSceneComponent);
-
-  StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Static Mesh"));
-  StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-  StaticMeshComponent->SetupAttachment(GetRootComponent());
-  StaticMeshComponent->SetRenderInDepthPass(true);
-  StaticMeshComponent->SetRenderCustomDepth(true);
-  StaticMeshComponent->SetCustomDepthStencilValue(2);
-
-  OutlineMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Outline Mesh"));
-  OutlineMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-  OutlineMeshComponent->SetupAttachment(StaticMeshComponent);
-  OutlineMeshComponent->SetVisibility(false);
-  OutlineMeshComponent->SetWorldScale3D(FVector(1.1f, 1.1f, 1.1f));
-  OutlineMeshComponent->AddLocalOffset(FVector(-0.05f, 0.f, 0.f));
+  // RootSceneComponent/StaticMeshComponent/OutlineMeshComponent setup in GrabbableActor
   
   static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshBody(TEXT("/Script/Engine.StaticMesh'/Game/meshes/unit_module.unit_module'"));
   
@@ -40,8 +24,7 @@ ALibrary::ALibrary() {
   static ConstructorHelpers::FObjectFinder<UMaterial> BaseMaterial(TEXT("/Script/Engine.Material'/Game/materials/generic_color.generic_color'"));
   if (BaseMaterial.Object) BaseMaterialInterface = Cast<UMaterial>(BaseMaterial.Object);
 
-  static ConstructorHelpers::FObjectFinder<UMaterial> OutlineMaterial(TEXT("/Script/Engine.Material'/Game/materials/looman_outlines/M_LocalOutlines.M_LocalOutlines'"));
-  if (OutlineMaterial.Object) OutlineMaterialInterface = Cast<UMaterial>(OutlineMaterial.Object);
+  // OutlineMaterialInterface setup in GrabbableActor
 
   LibraryWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("LibraryWidget"));
   LibraryWidgetComponent->SetupAttachment(StaticMeshComponent);
@@ -60,11 +43,6 @@ void ALibrary::BeginPlay() {
     BaseMaterialInstance = UMaterialInstanceDynamic::Create(BaseMaterialInterface, this);
     StaticMeshComponent->SetMaterial(0, BaseMaterialInstance);
     BaseMaterialInstance->SetVectorParameterValue(TEXT("Color"), FLinearColor::Black);
-  }
-
-  if (OutlineMaterialInterface) {
-    OutlineMaterialInstance = UMaterialInstanceDynamic::Create(OutlineMaterialInterface, this);
-    OutlineMeshComponent->SetMaterial(0, OutlineMaterialInstance);
   }
 
   LibraryWidget = Cast<ULibraryWidget>(LibraryWidgetComponent->GetUserWidgetObject());
@@ -162,6 +140,8 @@ void ALibrary::SetScale() {
   // scale the base mesh to desired
   float baseWidth = DesiredWidth + (BasePadding * 2);
   StaticMeshComponent->SetWorldScale3D(FVector(RENDER_SCALE * MODULE_DEPTH, baseWidth, baseWidth));
+  OutlineMeshComponent->SetWorldScale3D(FVector(RENDER_SCALE * MODULE_DEPTH + 0.2f, baseWidth + 0.2f, baseWidth + 0.2f));
+  OutlineMeshComponent->AddLocalOffset(FVector(-0.1f, 0.f, 0.f));
 
   // scale the widget component based on initial bounds
   LibraryWidgetComponent->SetWorldScale3D(FVector(1.f, scale, scale));
@@ -350,50 +330,6 @@ void ALibrary::ClearTagsFilter() {
   LibraryWidget->SetTagsFilterButtonLabel(FString("All Tags"), false);
   RefreshTagsFilterList();
   RefreshLibraryList();
-}
-
-void ALibrary::SetHighlighted(bool bHighlighted, FLinearColor OutlineColor) {
-  OutlineMeshComponent->SetVisibility(bHighlighted);
-  OutlineMaterialInstance->SetVectorParameterValue(FName("Color"), OutlineColor);
-}
-
-void ALibrary::EngageGrab(FVector GrabbedLocation, FRotator GrabbedRotation) {
-  // UE_LOG(LogTemp, Warning, TEXT("%s: grab engage"), *GetActorNameOrLabel());
-  bGrabEngaged = true;
-  GrabOffset = GrabbedLocation - GetActorLocation();
-  StaticMeshComponent->AddWorldOffset(-GrabOffset);
-
-  LastGrabbedRotation = GrabbedRotation;
-  LastGrabbedLocation = GrabbedLocation - GrabOffset;
-  LastLocationDelta = FVector(0.f, 0.f, 0.f);
-  SetHighlighted(false);
-}
-
-void ALibrary::AlterGrab(FVector GrabbedLocation, FRotator GrabbedRotation) {
-  FQuat qFrom = LastGrabbedRotation.Quaternion();
-  FQuat qTo =  GrabbedRotation.Quaternion();
-  FQuat qDelta = qTo * qFrom.Inverse();
-  
-  FVector locationDelta = GrabbedLocation - LastGrabbedLocation;
-  locationDelta = UKismetMathLibrary::WeightedMovingAverage_FVector(
-    locationDelta,
-    LastLocationDelta,
-    0.4f
-  );
-  LastLocationDelta = locationDelta;
-
-  AddActorWorldOffset(locationDelta);
-  AddActorWorldRotation(qDelta);
-
-  LastGrabbedLocation = GrabbedLocation;
-  LastGrabbedRotation = GrabbedRotation;
-}
-
-void ALibrary::ReleaseGrab() {
-  // UE_LOG(LogTemp, Warning, TEXT("%s: grab release"), *GetActorNameOrLabel());
-  bGrabEngaged = false;
-  StaticMeshComponent->AddWorldOffset(GrabOffset);
-  AddActorWorldOffset(-GrabOffset);
 }
 
 void ALibrary::GetModuleLandingPosition(const float& ModuleWidth, FVector& Location, FRotator& Rotation) {
