@@ -332,7 +332,7 @@ void AVRAvatar::HandleRotateWorld(const FInputActionValue& _Value, EControllerHa
     ) * RotateWorldScale;
   
   deltaYaw =
-    FMath::WeightedMovingAverage(deltaYaw, LastRotateWorldDelta, 0.2f);
+    FMath::WeightedMovingAverage(deltaYaw, LastRotateWorldDelta, WORLD_ROTATION_SMOOTHING_FACTOR_DEFAULT);
   LastRotateWorldDelta = deltaYaw;
   
   RotateWorldAroundPivot(deltaYaw, Camera->GetComponentLocation());
@@ -389,7 +389,7 @@ void AVRAvatar::HandleTranslateWorld(const FInputActionValue& _Value, EControlle
   locationDelta *= TranslateWorldScale;
 
   locationDelta =
-    UKismetMathLibrary::WeightedMovingAverage_FVector(locationDelta, LastTranslateWorldDelta, 0.2f);
+    UKismetMathLibrary::WeightedMovingAverage_FVector(locationDelta, LastTranslateWorldDelta, WORLD_TRANSLATION_SMOOTHING_FACTOR_DEFAULT);
   LastTranslateWorldDelta = locationDelta;
 
   AddActorWorldOffset(locationDelta);
@@ -424,7 +424,7 @@ void AVRAvatar::HandleRotoTranslateWorld(const FInputActionValue& _Value) {
   float deltaYaw = lastRotation.Yaw - thisRotation.Yaw;
 
   deltaYaw =
-    FMath::WeightedMovingAverage(deltaYaw, LastRotateWorldDelta, 0.2f);
+    FMath::WeightedMovingAverage(deltaYaw, LastRotateWorldDelta, WORLD_ROTATION_SMOOTHING_FACTOR_DEFAULT);
   LastRotateWorldDelta = deltaYaw;
   
   FVector pivot = (leftControllerLocation - rightControllerLocation) / 2 + rightControllerLocation;
@@ -440,7 +440,7 @@ void AVRAvatar::HandleRotoTranslateWorld(const FInputActionValue& _Value) {
   FVector locationDelta = (leftLocationDelta + rightLocationDelta) / 2;
 
   locationDelta =
-    UKismetMathLibrary::WeightedMovingAverage_FVector(locationDelta, LastTranslateWorldDelta, 0.2f);
+    UKismetMathLibrary::WeightedMovingAverage_FVector(locationDelta, LastTranslateWorldDelta, WORLD_TRANSLATION_SMOOTHING_FACTOR_DEFAULT);
   LastTranslateWorldDelta = locationDelta;
 
   AddActorWorldOffset(locationDelta);
