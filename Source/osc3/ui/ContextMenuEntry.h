@@ -31,6 +31,8 @@ protected:
   UPROPERTY(meta = (BindWidget))
 	UCommonTextBlock* ActionButtonText;
   UPROPERTY(meta = (BindWidget))
+	UTextBlock* ActionButtonTextStill;
+  UPROPERTY(meta = (BindWidget))
 	UTextBlock* SelectedIndicator;
   UPROPERTY(meta = (BindWidget))
 	UTextBlock* SubmenuIndicator;
@@ -67,6 +69,10 @@ private:
   
   UFUNCTION()
   void HandleClick();
+  UFUNCTION()
+  void HandleActionHover();
+  UFUNCTION()
+  void HandleActionUnhover();
   UFUNCTION()
   void HandleSliderChange(float Value);
   UFUNCTION()

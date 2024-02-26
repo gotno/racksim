@@ -19,6 +19,8 @@ void UContextMenuEntry::NativeConstruct() {
   GameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(this));
   
   ActionButton->OnReleased.AddDynamic(this, &UContextMenuEntry::HandleClick);
+  ActionButton->OnHovered.AddDynamic(this, &UContextMenuEntry::HandleActionHover);
+  ActionButton->OnUnhovered.AddDynamic(this, &UContextMenuEntry::HandleActionUnhover);
   BackButton->OnReleased.AddDynamic(this, &UContextMenuEntry::HandleClick);
   Slider->OnValueChanged.AddDynamic(this, &UContextMenuEntry::HandleSliderChange);
   Slider->OnMouseCaptureEnd.AddDynamic(this, &UContextMenuEntry::HandleSliderRelease);
@@ -34,10 +36,12 @@ void UContextMenuEntry::NativeOnListItemObjectSet(UObject* ListItemObject) {
 
   // set up offsets to make space for submenu/bool indicators
   UCanvasPanelSlot* actionTextSlot = Cast<UCanvasPanelSlot>(ActionButtonText->Slot);
+  UCanvasPanelSlot* actionTextStillSlot = Cast<UCanvasPanelSlot>(ActionButtonTextStill->Slot);
   FMargin actionTextOffsets = actionTextSlot->GetOffsets();
   // set default
   actionTextOffsets.Right = 0.f;
   actionTextSlot->SetOffsets(actionTextOffsets);
+  actionTextStillSlot->SetOffsets(actionTextOffsets);
   // set up for later
   actionTextOffsets.Right = ActionIndicatorsMargin;
 
@@ -56,18 +60,22 @@ void UContextMenuEntry::NativeOnListItemObjectSet(UObject* ListItemObject) {
     case VCVMenuItemType::ACTION:
       Container = ActionContainer;
       ActionButtonText->SetText(FText::FromString(MenuItem.text));
+      ActionButtonTextStill->SetText(FText::FromString(MenuItem.text));
       ActionButton->SetIsEnabled(!MenuItem.disabled);
 
       if (MenuItem.checked) {
         SelectedIndicator->SetVisibility(ESlateVisibility::Visible);
         actionTextSlot->SetOffsets(actionTextOffsets);
+        actionTextStillSlot->SetOffsets(actionTextOffsets);
       }
       break;
     case VCVMenuItemType::SUBMENU:
       Container = ActionContainer;
       ActionButtonText->SetText(FText::FromString(MenuItem.text));
+      ActionButtonTextStill->SetText(FText::FromString(MenuItem.text));
       SubmenuIndicator->SetVisibility(ESlateVisibility::Visible);
       actionTextSlot->SetOffsets(actionTextOffsets);
+      actionTextStillSlot->SetOffsets(actionTextOffsets);
       break;
     case VCVMenuItemType::LABEL:
       Container = LabelContainer;
@@ -91,6 +99,17 @@ void UContextMenuEntry::NativeOnListItemObjectSet(UObject* ListItemObject) {
   float bottomMargin{entry->DividerNext ? 2.f : 0.f};
   Container->SetPadding(FMargin( 0.f, 0.f, 0.f, bottomMargin));
   Container->SetVisibility(ESlateVisibility::Visible);
+}
+
+void UContextMenuEntry::HandleActionHover() {
+  ActionButtonText->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+  ActionButtonText->ResetScrollState();
+  ActionButtonTextStill->SetVisibility(ESlateVisibility::Hidden);
+}
+
+void UContextMenuEntry::HandleActionUnhover() {
+  ActionButtonText->SetVisibility(ESlateVisibility::Hidden);
+  ActionButtonTextStill->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 }
 
 void UContextMenuEntry::HandleClick() {
