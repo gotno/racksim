@@ -172,8 +172,8 @@ void AVCVCable::UpdateEndPositions() {
     CableSleepHandle,
     this,
     &AVCVCable::Sleep,
-    1.2f, // seconds, apparently
-    false
+    2.f, // seconds
+    false // loop
   );
   Wake();
 }
