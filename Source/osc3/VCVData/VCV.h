@@ -1,9 +1,13 @@
 #pragma once
 
+#include "CoreMinimal.h"
+
 #include "osc3.h"
 #include "Math/Color.h"
 #include <unordered_map>
 #include <vector>
+
+#include "VCV.generated.h"
 
 struct Vec2 {
   float x, y;
@@ -175,12 +179,15 @@ enum struct VCVMenuItemType {
   BACK
 };
 
-struct VCVMenuItem {
-  int64_t moduleId;
-  int menuId, index;
-  VCVMenuItemType type;
+USTRUCT()
+struct FVCVMenuItem {
+  GENERATED_BODY()
 
-  FString text;
+  int64_t moduleId{-1};
+  int menuId{-1}, index{-1};
+  VCVMenuItemType type{VCVMenuItemType::LABEL};
+
+  FString text{""};
   bool checked{false};
   bool disabled{false};
 
@@ -189,17 +196,21 @@ struct VCVMenuItem {
   FString quantityLabel{""},
     quantityUnit{""};
   
-  VCVMenuItem() {}
-  VCVMenuItem(int64_t _moduleId, int _menuId, int _index)
+  FVCVMenuItem() {}
+  FVCVMenuItem(int64_t _moduleId, int _menuId, int _index)
     : moduleId(_moduleId), menuId(_menuId), index(_index) {}
 };
 
-struct VCVMenu {
+USTRUCT()
+struct FVCVMenu {
+  GENERATED_BODY()
+
   int64_t moduleId;
   int id, parentMenuId{-1}, parentItemIndex{-1};
-  TMap<int, VCVMenuItem> MenuItems;
+  TMap<int, FVCVMenuItem> MenuItems;
   
-  VCVMenu(int64_t _moduleId, int _id) : moduleId(_moduleId), id(_id) {}
+  FVCVMenu() {}
+  FVCVMenu(int64_t _moduleId, int _id) : moduleId(_moduleId), id(_id) {}
 };
 
-typedef TMap<int, VCVMenu> ModuleMenuMap;
+typedef TMap<int, FVCVMenu> ModuleMenuMap;

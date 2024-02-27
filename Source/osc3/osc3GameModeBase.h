@@ -14,6 +14,7 @@ class URackManager;
 class AVRAvatar;
 class AVCVCable;
 class AVCVModule;
+class AContextMenu;
 class AVCVPort;
 class ALibrary;
 class AWidgetSurrogate;
@@ -60,8 +61,6 @@ public:
 
   void UpdateLight(int64_t ModuleId, int32 LightId, FLinearColor Color);
   void UpdateParam(int64_t ModuleId, VCVParam& Param);
-  void UpdateModuleMenuItem(VCVMenuItem& MenuItem);
-  void ModuleMenuSynced(VCVMenu& Menu);
 
   void SendParamUpdate(int64_t ModuleId, int32 ParamId, float Value);
   void DuplicateModule(AVCVModule* Module);
@@ -69,9 +68,9 @@ public:
   void RequestModuleSpawn(FString PluginSlug, FString ModuleSlug);
   void RequestModuleDiff(const int64_t& ModuleId) const;
   void SetModuleFavorite(FString PluginSlug, FString ModuleSlug, bool bFavorite);
-  void RequestMenu(const VCVMenu& Menu) const;
-  void ClickMenuItem(const VCVMenuItem& MenuItem);
-  void UpdateMenuItemQuantity(const VCVMenuItem& MenuItem, const float& Value) const;
+  void RequestMenu(const FVCVMenu& Menu) const;
+  void ClickMenuItem(const FVCVMenuItem& MenuItem);
+  void UpdateMenuItemQuantity(const FVCVMenuItem& MenuItem, const float& Value) const;
   
   void RegisterSVG(FString Filepath, Vec2 Size);
   void RegisterTexture(FString Filepath, UTexture2D* Texture);
@@ -80,6 +79,7 @@ public:
   void SpawnLibrary();
   void SetLibraryJsonPath(FString& Path);
   ALibrary* GetLibrary();
+
 private:
   UFUNCTION()
   void Exit();
@@ -113,4 +113,9 @@ private:
   TMap<FString, AWidgetSurrogate*> SVGWidgetSurrogates;
   UPROPERTY()
   TMap<FString, UTexture2D*> SVGTextures;
+
+public:
+  // delegate stuff
+  void SubscribeMenuItemSyncedDelegate(AContextMenu* ContextMenu);
+  void SubscribeMenuSyncedDelegate(AContextMenu* ContextMenu);
 };

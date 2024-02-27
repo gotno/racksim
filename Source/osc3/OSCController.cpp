@@ -296,7 +296,7 @@ void AOSCController::DestroyCable(int64 CableId) {
   OSCClient->SendOSCMessage(message);
 }
 
-void AOSCController::RequestMenu(const VCVMenu& Menu) const {
+void AOSCController::RequestMenu(const FVCVMenu& Menu) const {
   UE_LOG(LogTemp, Warning, TEXT("Sending /get_menu %lld"), Menu.moduleId);
   FOSCAddress address = UOSCManager::ConvertStringToOSCAddress(FString(TEXT("/get_menu")));
   FOSCMessage message;
@@ -310,7 +310,7 @@ void AOSCController::RequestMenu(const VCVMenu& Menu) const {
   OSCClient->SendOSCMessage(message);
 }
 
-void AOSCController::ClickMenuItem(const VCVMenuItem& MenuItem) const {
+void AOSCController::ClickMenuItem(const FVCVMenuItem& MenuItem) const {
   UE_LOG(LogTemp, Warning, TEXT("Sending /click_menu_item %lld"), MenuItem.moduleId);
   FOSCAddress address = UOSCManager::ConvertStringToOSCAddress(FString(TEXT("/click_menu_item")));
   FOSCMessage message;
@@ -323,7 +323,7 @@ void AOSCController::ClickMenuItem(const VCVMenuItem& MenuItem) const {
   OSCClient->SendOSCMessage(message);
 }
 
-void AOSCController::UpdateMenuItemQuantity(const VCVMenuItem& MenuItem, const float& Value) const {
+void AOSCController::UpdateMenuItemQuantity(const FVCVMenuItem& MenuItem, const float& Value) const {
   UE_LOG(LogTemp, Warning, TEXT("Sending /update_menu_item_quantity %lld"), MenuItem.moduleId);
   FOSCAddress address = UOSCManager::ConvertStringToOSCAddress(FString(TEXT("/update_menu_item_quantity")));
   FOSCMessage message;
@@ -349,7 +349,7 @@ void AOSCController::AddContextMenuItem(const FOSCAddress& AddressPattern, const
   int itemIndex;
   UOSCManager::GetInt32(message, 2, itemIndex);
   
-  VCVMenuItem menuItem(moduleId, menuId, itemIndex);
+  FVCVMenuItem menuItem(moduleId, menuId, itemIndex);
 
   int32 type;
   UOSCManager::GetInt32(message, 3, type);
@@ -365,7 +365,7 @@ void AOSCController::AddContextMenuItem(const FOSCAddress& AddressPattern, const
   UOSCManager::GetString(message, 11, menuItem.quantityLabel);
   UOSCManager::GetString(message, 12, menuItem.quantityUnit);
   
-  GameMode->UpdateModuleMenuItem(menuItem);
+  OnMenuItemSyncedDelegate.Broadcast(menuItem);
 }
 
 void AOSCController::MenuSynced(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port) {
@@ -377,9 +377,9 @@ void AOSCController::MenuSynced(const FOSCAddress& AddressPattern, const FOSCMes
   int menuId;
   UOSCManager::GetInt32(message, 1, menuId);
   
-  VCVMenu menu(moduleId, menuId);
+  FVCVMenu menu(moduleId, menuId);
 
-  GameMode->ModuleMenuSynced(menu);
+  OnMenuSyncedDelegate.Broadcast(menu);
 }
 
 

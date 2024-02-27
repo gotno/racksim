@@ -6,6 +6,7 @@
 
 #include "VCVModule.h"
 #include "VCVCable.h"
+#include "ModuleComponents/ContextMenu.h"
 #include "ModuleComponents/VCVParam.h"
 #include "ModuleComponents/VCVPort.h"
 #include "Library.h"
@@ -235,16 +236,16 @@ void Aosc3GameModeBase::DestroyModule(int64_t ModuleId, bool bSync) {
   if (bSync) OSCctrl->SendDestroyModule(ModuleId);
 }
 
-void Aosc3GameModeBase::RequestMenu(const VCVMenu& Menu) const {
+void Aosc3GameModeBase::RequestMenu(const FVCVMenu& Menu) const {
   OSCctrl->RequestMenu(Menu);
 }
 
-void Aosc3GameModeBase::ClickMenuItem(const VCVMenuItem& MenuItem) {
+void Aosc3GameModeBase::ClickMenuItem(const FVCVMenuItem& MenuItem) {
   LastClickedMenuModuleId = MenuItem.moduleId;
   OSCctrl->ClickMenuItem(MenuItem);
 }
 
-void Aosc3GameModeBase::UpdateMenuItemQuantity(const VCVMenuItem& MenuItem, const float& Value) const {
+void Aosc3GameModeBase::UpdateMenuItemQuantity(const FVCVMenuItem& MenuItem, const float& Value) const {
   OSCctrl->UpdateMenuItemQuantity(MenuItem, Value);
 }
 
@@ -256,16 +257,6 @@ void Aosc3GameModeBase::UpdateLight(int64_t ModuleId, int32 LightId, FLinearColo
 void Aosc3GameModeBase::UpdateParam(int64_t ModuleId, VCVParam& Param) {
   if (!ModuleActors.Contains(ModuleId)) return;
   ModuleActors[ModuleId]->GetParamActor(Param.id)->Update(Param);
-}
-
-void Aosc3GameModeBase::UpdateModuleMenuItem(VCVMenuItem& MenuItem) {
-  if (!ModuleActors.Contains(MenuItem.moduleId)) return;
-  ModuleActors[MenuItem.moduleId]->AddMenuItem(MenuItem);
-}
-
-void Aosc3GameModeBase::ModuleMenuSynced(VCVMenu& Menu) {
-  if (!ModuleActors.Contains(Menu.moduleId)) return;
-  ModuleActors[Menu.moduleId]->MenuSynced(Menu);
 }
 
 void Aosc3GameModeBase::SendParamUpdate(int64_t ModuleId, int32 ParamId, float Value) {
@@ -333,4 +324,12 @@ ALibrary* Aosc3GameModeBase::GetLibrary() {
 
 void Aosc3GameModeBase::SetLibraryJsonPath(FString& Path) {
   LibraryActor->SetJsonPath(Path);
+}
+
+void Aosc3GameModeBase::SubscribeMenuItemSyncedDelegate(AContextMenu* ContextMenu) {
+  OSCctrl->OnMenuItemSyncedDelegate.AddUObject(ContextMenu, &AContextMenu::AddMenuItem);
+}
+
+void Aosc3GameModeBase::SubscribeMenuSyncedDelegate(AContextMenu* ContextMenu) {
+  OSCctrl->OnMenuSyncedDelegate.AddUObject(ContextMenu, &AContextMenu::MenuSynced);
 }

@@ -12,6 +12,9 @@
 
 class Aosc3GameModeBase;
 
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnMenuItemSyncedSignature, FVCVMenuItem /* MenuItem */);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnMenuSyncedSignature, FVCVMenu /* Menu */);
+
 UCLASS()
 class OSC3_API AOSCController : public AActor {
 	GENERATED_BODY()
@@ -41,9 +44,9 @@ public:
   UFUNCTION()
   void SendAutosaveAndExit();
 
-  void RequestMenu(const VCVMenu& Menu) const;
-  void ClickMenuItem(const VCVMenuItem& MenuItem) const;
-  void UpdateMenuItemQuantity(const VCVMenuItem& MenuItem, const float& Value) const;
+  void RequestMenu(const FVCVMenu& Menu) const;
+  void ClickMenuItem(const FVCVMenuItem& MenuItem) const;
+  void UpdateMenuItemQuantity(const FVCVMenuItem& MenuItem, const float& Value) const;
   void SendModuleDiffRequest(const int64_t& ModuleId) const;
 
 private:
@@ -115,4 +118,9 @@ private:
   // void PrintVCVModule(VCVModule mod);
 
   TMap<int64, VCVModule> Modules;
+
+public:
+  // delegates
+  FOnMenuItemSyncedSignature OnMenuItemSyncedDelegate;
+  FOnMenuSyncedSignature OnMenuSyncedDelegate;
 };

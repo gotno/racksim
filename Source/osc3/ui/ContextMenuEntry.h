@@ -9,7 +9,7 @@
 #include "ContextMenuEntry.generated.h"
 
 class Aosc3GameModeBase;
-class AVCVModule;
+class AContextMenu;
 class UButton;
 class UTextBlock;
 class UCommonTextBlock;
@@ -59,8 +59,8 @@ protected:
 	UTextBlock* BackButtonText;
 private:
   Aosc3GameModeBase* GameMode;
-  VCVMenuItem MenuItem;
-  AVCVModule* Module;
+  FVCVMenuItem MenuItem;
+  AContextMenu* ContextMenu;
   
   // for type: BACK
   int ParentMenuId;

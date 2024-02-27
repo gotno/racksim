@@ -10,8 +10,7 @@ class Aosc3GameModeBase;
 class AVCVLight;
 class AVCVPort;
 class AVCVParam;
-class UContextMenuWidget;
-class UWidgetComponent;
+class AContextMenu;
 
 UCLASS()
 class OSC3_API AVCVModule : public AGrabbableActor {
@@ -39,11 +38,6 @@ public:
   AVCVPort* GetPortActor(PortType Type, int32& PortId);
 
   void ToggleContextMenu();
-  void AddMenuItem(VCVMenuItem& MenuItem);
-  void MenuSynced(VCVMenu& Menu);
-  void MakeMenu(int ParentMenuId = -1, int ParentItemIndex = -1);
-  void RequestMenu(int MenuId);
-  void CloseMenu();
 
   UPROPERTY()
   TMap<int32, AVCVLight*> LightActors;
@@ -59,7 +53,6 @@ public:
   void AlterGrab(FVector GrabbedLocation, FRotator GrabbedRotation) override;
   
 private:
-
   UPROPERTY()
   UMaterialInstanceDynamic* BaseMaterialInstance;
   UPROPERTY()
@@ -72,14 +65,8 @@ private:
   UPROPERTY()
   UTexture2D* Texture;
   
-  // TODO: this context menu stuff should all be its own actor
-  UWidgetComponent* ContextMenuWidgetComponent;
-  UContextMenuWidget* ContextMenuWidget;
-  void SetupContextMenuWidget();
-  void SetMenu(int MenuId);
-  FString MakeMenuBreadcrumbs(int MenuId);
-
-  TArray<VCVMenu> ContextMenus;
+  UPROPERTY()
+  AContextMenu* ContextMenu;
 
   void SpawnComponents();
   

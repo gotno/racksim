@@ -1,7 +1,7 @@
 #include "UI/ContextMenuEntry.h"
 
 #include "osc3GameModeBase.h"
-#include "VCVModule.h"
+#include "ModuleComponents/ContextMenu.h"
 #include "UI/ContextMenuEntryData.h"
 
 #include "CommonTextBlock.h"
@@ -29,7 +29,7 @@ void UContextMenuEntry::NativeConstruct() {
 void UContextMenuEntry::NativeOnListItemObjectSet(UObject* ListItemObject) {
 	UContextMenuEntryData* entry = Cast<UContextMenuEntryData>(ListItemObject);
   MenuItem = entry->MenuItem;
-  Module = entry->Module;
+  ContextMenu = entry->ContextMenu;
   ParentMenuId = entry->ParentMenuId;
   
   ActionContainer->SetVisibility(ESlateVisibility::Hidden);
@@ -118,13 +118,13 @@ void UContextMenuEntry::HandleClick() {
       GameMode->ClickMenuItem(MenuItem);
       break;
     case VCVMenuItemType::SUBMENU:
-      Module->MakeMenu(MenuItem.menuId, MenuItem.index);
+      ContextMenu->MakeMenu(MenuItem.menuId, MenuItem.index);
       break;
     case VCVMenuItemType::BACK:
       if (ParentMenuId == -1) {
-        Module->CloseMenu();
+        ContextMenu->CloseMenu();
       } else {
-        Module->RequestMenu(ParentMenuId);
+        ContextMenu->RequestMenu(ParentMenuId);
       }
       break;
     default:

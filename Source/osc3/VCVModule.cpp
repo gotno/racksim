@@ -4,6 +4,7 @@
 #include "osc3GameModeBase.h"
 #include "VCVData/VCV.h"
 #include "VCVData/VCVOverrides.h"
+#include "ModuleComponents/ContextMenu.h"
 #include "ModuleComponents/VCVLight.h"
 #include "ModuleComponents/VCVKnob.h"
 #include "ModuleComponents/VCVButton.h"
@@ -11,15 +12,11 @@
 #include "ModuleComponents/VCVSlider.h"
 #include "ModuleComponents/VCVPort.h"
 #include "ModuleComponents/VCVDisplay.h"
-#include "UI/ContextMenuWidget.h"
-#include "UI/ContextMenuEntryData.h"
 
 #include "Engine/Texture2D.h"
 #include "Kismet/GameplayStatics.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Components/PrimitiveComponent.h"
-#include "Components/WidgetComponent.h"
-#include "Algo/Reverse.h"
 #include "PhysicsEngine/BodySetup.h"
 
 AVCVModule::AVCVModule() {
@@ -40,15 +37,6 @@ AVCVModule::AVCVModule() {
   if (FaceMaterial.Object) FaceMaterialInterface = Cast<UMaterial>(FaceMaterial.Object);
 
   // OutlineMaterialInterface setup in GrabbableActor
-  
-  ContextMenuWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("ContextMenuWidget"));
-  ContextMenuWidgetComponent->SetWindowFocusable(false);
-
-  static ConstructorHelpers::FClassFinder<UContextMenuWidget>
-    contextMenuWidgetObject(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/widgets/BP_ContextMenuWidget.BP_ContextMenuWidget_C'"));
-  if (contextMenuWidgetObject.Succeeded()) {
-    ContextMenuWidgetComponent->SetWidgetClass(contextMenuWidgetObject.Class);
-  }
 }
 
 void AVCVModule::BeginPlay() {
@@ -69,10 +57,6 @@ void AVCVModule::BeginPlay() {
     FaceMaterialInstance = UMaterialInstanceDynamic::Create(FaceMaterialInterface, this);
     StaticMeshComponent->SetMaterial(1, FaceMaterialInstance);
   }
-  
-  ContextMenuWidget = Cast<UContextMenuWidget>(ContextMenuWidgetComponent->GetUserWidgetObject());
-  ContextMenuWidgetComponent->SetWorldRotation(FRotator(0.f, 180.f, 0.f));
-  ContextMenuWidgetComponent->SetVisibility(false);
 
   GameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(this));
   
@@ -130,28 +114,6 @@ void AVCVModule::Init(VCVModule vcv_module) {
 
   SpawnComponents();
   SetHidden(false);
-  
-  SetupContextMenuWidget();
-}
-
-void AVCVModule::SetupContextMenuWidget() {
-  FVector2D drawSize(350.f, 700.f);
-  float desiredContextMenuHeight = Model.box.size.y - 2 * RENDER_SCALE;
-  float scale = desiredContextMenuHeight / drawSize.Y;
-
-  ContextMenuWidgetComponent->SetDrawSize(drawSize);
-  ContextMenuWidgetComponent->SetWorldScale3D(FVector(1.f, scale, scale));
-
-  float halfModuleWidth = Model.box.size.x * 0.5f;
-  float halfMenuWidth = scale * drawSize.X * 0.5f;
-  float rightOffset = halfModuleWidth + halfMenuWidth;
-  ContextMenuWidgetComponent->SetWorldLocation(
-    GetActorLocation()
-    + (GetActorRightVector() * rightOffset)
-    + (GetActorForwardVector() * -1.f)
-  );
-
-  ContextMenuWidgetComponent->AttachToComponent(StaticMeshComponent, FAttachmentTransformRules::KeepWorldTransform);
 }
 
 void AVCVModule::GetSlugs(FString& PluginSlug, FString& Slug) {
@@ -189,6 +151,18 @@ void AVCVModule::ParamUpdated(int32 ParamId, float Value) {
 void AVCVModule::SpawnComponents() {
   FActorSpawnParameters spawnParams;
   spawnParams.Owner = this;
+
+  ContextMenu = GetWorld()->SpawnActor<AContextMenu>(
+    AContextMenu::StaticClass(),
+    GetActorLocation(),
+    FRotator(0, 0, 0),
+    spawnParams
+  );
+  ContextMenu->AttachToComponent(
+    StaticMeshComponent,
+    FAttachmentTransformRules::KeepWorldTransform
+  );
+  ContextMenu->Init(Model.box.size);
 
   for (TPair<int32, VCVParam>& param_kvp : Model.Params) {
     VCVParam& param = param_kvp.Value;
@@ -303,116 +277,7 @@ void AVCVModule::TriggerCableUpdates() {
 }
 
 void AVCVModule::ToggleContextMenu() {
-  if (ContextMenuWidgetComponent->IsVisible()) {
-    CloseMenu();
-    return;
-  }
-
-  // (re)create the base menu struct
-  MakeMenu();
-
-  ContextMenuWidgetComponent->SetVisibility(true);
-}
-
-void AVCVModule::MakeMenu(int ParentMenuId, int ParentItemIndex) {
-  int foundMenuIndex = ContextMenus.IndexOfByPredicate([&](const VCVMenu& menu) {
-    return menu.parentMenuId == ParentMenuId && menu.parentItemIndex == ParentItemIndex;
-  });
-
-  if (foundMenuIndex != INDEX_NONE) {
-    RequestMenu(foundMenuIndex);
-    return;
-  }
-
-  int menuId = ContextMenus.Num();
-  VCVMenu menu(Model.id, menuId);
-
-  menu.parentMenuId = ParentMenuId;
-  menu.parentItemIndex = ParentItemIndex;
-
-  ContextMenus.Push(menu);
-  RequestMenu(menuId);
-}
-
-void AVCVModule::RequestMenu(int MenuId) {
-  GameMode->RequestMenu(ContextMenus[MenuId]);
-}
-
-FString AVCVModule::MakeMenuBreadcrumbs(int MenuId) {
-  TArray<FString> crumbs;
-
-  int currentId = MenuId;
-  while (currentId > 0) {
-    int parentMenuId = ContextMenus[currentId].parentMenuId;
-    int parentItemIndex = ContextMenus[currentId].parentItemIndex;
-
-    crumbs.Push(ContextMenus[parentMenuId].MenuItems[parentItemIndex].text);
-
-    currentId = parentMenuId;
-  }
-
-  Algo::Reverse(crumbs);
-  return FString::Join(crumbs, _T(" > "));
-}
-
-void AVCVModule::SetMenu(int MenuId) {
-  TArray<UContextMenuEntryData*> entries;
-
-  // add close/back button
-  UContextMenuEntryData* backButtonEntry =
-    NewObject<UContextMenuEntryData>(this);
-  backButtonEntry->MenuItem.type = VCVMenuItemType::BACK;
-  backButtonEntry->MenuItem.text = MenuId == 0 ? FString("Close") : FString("Back");
-  backButtonEntry->Module = this;
-  backButtonEntry->ParentMenuId = ContextMenus[MenuId].parentMenuId;
-  backButtonEntry->DividerNext = true;
-  entries.Add(backButtonEntry);
-
-  // add breadcrumbs label for submenus
-  if (MenuId != 0) {
-    int parentMenuId = ContextMenus[MenuId].parentMenuId;
-    int parentItemIndex = ContextMenus[MenuId].parentItemIndex;
-
-    UContextMenuEntryData* crumbsLabelEntry =
-      NewObject<UContextMenuEntryData>(this);
-    crumbsLabelEntry->MenuItem.type = VCVMenuItemType::LABEL;
-    crumbsLabelEntry->MenuItem.text = MakeMenuBreadcrumbs(MenuId);
-    crumbsLabelEntry->DividerNext = true;
-    entries.Add(crumbsLabelEntry);
-  }
-
-  for (auto& pair : ContextMenus[MenuId].MenuItems) {
-    VCVMenuItem& menuItem = pair.Value;
-    VCVMenuItemType divider = VCVMenuItemType::DIVIDER;
-    if (menuItem.type == divider) continue;
-
-    UContextMenuEntryData* entry = NewObject<UContextMenuEntryData>(this);
-    entry->MenuItem = menuItem;
-    entry->Module = this;
-
-    int& index = pair.Key;
-    if (ContextMenus[MenuId].MenuItems.Contains(index + 1)) 
-      if (ContextMenus[MenuId].MenuItems[index + 1].type == divider) 
-        entry->DividerNext = true;
-
-    entries.Add(entry);
-  }
-
-  ContextMenuWidget->SetListItems(entries);
-}
-
-void AVCVModule::CloseMenu() {
-  ContextMenuWidgetComponent->SetVisibility(false);
-  ContextMenus.Empty();
-}
-
-void AVCVModule::AddMenuItem(VCVMenuItem& MenuItem) {
-  ContextMenus[MenuItem.menuId].MenuItems.Add(MenuItem.index, MenuItem);
-}
-
-void AVCVModule::MenuSynced(VCVMenu& Menu) {
-  ContextMenus[Menu.id].MenuItems.KeySort([](int A, int B) { return A < B; });
-  SetMenu(Menu.id);
+  ContextMenu->ToggleVisible();
 }
 
 void AVCVModule::Tick(float DeltaTime) {

@@ -7,14 +7,14 @@
 
 #include "ContextMenuEntryData.generated.h"
 
-class AVCVModule;
+class AContextMenu;
 
 UCLASS()
 class OSC3_API UContextMenuEntryData : public UObject {
 	GENERATED_BODY()
 public:
-  AVCVModule* Module;
-  VCVMenuItem MenuItem;
+  AContextMenu* ContextMenu;
+  FVCVMenuItem MenuItem;
   bool DividerNext{false};
   
   // for type: BACK
