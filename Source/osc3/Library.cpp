@@ -129,21 +129,29 @@ void ALibrary::RefreshTagsFilterList() {
 }
 
 void ALibrary::SetScale() {
-  // TODO: this is handled better by context menu scaling
-  // TODO: library should be same height as modules (desired *height*)
+  float padding = 0.2f * DEFAULT_RENDER_SCALE;
+  float desiredHeight = UNSCALED_MODULE_HEIGHT * DEFAULT_RENDER_SCALE;
+  float desiredMenuHeight = desiredHeight - (2 * padding);
 
-  // get initial actor bounds, which will be the rendered widget size
-  FVector _origin, extent;
-  GetActorBounds(false, _origin, extent);
-  float scale = DesiredWidth / (extent.Y * 2);
-
-  // scale the base mesh to desired
-  float baseWidth = DesiredWidth + (BasePadding * 2);
-  StaticMeshComponent->SetWorldScale3D(FVector(RENDER_SCALE * MODULE_DEPTH, baseWidth, baseWidth));
-  OutlineMeshComponent->SetWorldScale3D(FVector(RENDER_SCALE * MODULE_DEPTH + 0.2f, baseWidth + 0.2f, baseWidth + 0.2f));
+  StaticMeshComponent->SetWorldScale3D(
+    FVector(
+      DEFAULT_RENDER_SCALE * MODULE_DEPTH,
+      desiredHeight,
+      desiredHeight
+    )
+  );
+  OutlineMeshComponent->SetWorldScale3D(
+    FVector(
+      DEFAULT_RENDER_SCALE * MODULE_DEPTH + 0.2f,
+      desiredHeight + 0.2f,
+      desiredHeight + 0.2f
+    )
+  );
   OutlineMeshComponent->AddLocalOffset(FVector(-0.1f, 0.f, 0.f));
 
-  // scale the widget component based on initial bounds
+  FVector2D drawSize(700.f, 700.f);
+  float scale = desiredMenuHeight / drawSize.Y;
+  LibraryWidgetComponent->SetDrawSize(drawSize);
   LibraryWidgetComponent->SetWorldScale3D(FVector(1.f, scale, scale));
 }
 

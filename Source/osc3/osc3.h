@@ -3,8 +3,12 @@
 #include "CoreMinimal.h"
 #include "UObject/ObjectMacros.h"
 
+#define DEFAULT_RENDER_SCALE 2.f
 #define RENDER_SCALE 2.f
+
+#define UNSCALED_MODULE_HEIGHT 12.869334f
 #define MODULE_DEPTH 2.f
+
 #define OUTLINE_COLOR FLinearColor(0.724268f, 0.385187f, 0.503043f)
 #define CABLE_OPACITY 0.6f
 
