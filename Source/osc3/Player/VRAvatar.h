@@ -168,9 +168,9 @@ public:
 
   UEnhancedInputLocalPlayerSubsystem* InputSubsystem;
   
-  void SetControllerWidgetInteracting(EControllerHand Hand, bool bInteracting);
-  void SetControllerGrabbing(EControllerHand Hand, bool bGrabbing);
-  void SetControllerParamOrPortInteracting(EControllerHand Hand, bool bInteracting);
+  void SetControllerWidgetInteracting(EControllerHand Hand, bool bEnable);
+  void SetControllerGrabbing(EControllerHand Hand, bool bEnable);
+  void SetControllerParamOrPortInteracting(EControllerHand Hand, bool bEnable);
   
   void GetRenderablePosition(FVector& Location, FRotator& Rotation);
   FRotator GetLookAtCameraRotation(FVector FromLocation);
@@ -183,9 +183,9 @@ private:
   UPROPERTY(EditDefaultsOnly, Category="Input")
   TSubclassOf<AVRMotionController> MotionControllerClass;
   UPROPERTY(VisibleAnywhere)
-  AVRMotionController* LeftController;
+  AVRMotionController* LeftController{nullptr};
   UPROPERTY(VisibleAnywhere)
-  AVRMotionController* RightController;
+  AVRMotionController* RightController{nullptr};
 
   UPROPERTY(VisibleAnywhere)
   USceneComponent* VRRoot;

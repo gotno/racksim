@@ -66,10 +66,20 @@ void AVRAvatar::PawnClientRestart() {
     }
   }	
   
-  LeftController = GetWorld()->SpawnActor<AVRMotionController>(MotionControllerClass);
-  LeftController->AttachToComponent(VRRoot, FAttachmentTransformRules::KeepRelativeTransform);
-  LeftController->SetOwner(this);
-  LeftController->SetTrackingSource(EControllerHand::Left);
+  if (!LeftController) {
+    LeftController = GetWorld()->SpawnActor<AVRMotionController>(MotionControllerClass);
+    LeftController->AttachToComponent(VRRoot, FAttachmentTransformRules::KeepRelativeTransform);
+    LeftController->SetOwner(this);
+    LeftController->SetTrackingSource(EControllerHand::Left);
+  }
+
+  if (!RightController) {
+    RightController = GetWorld()->SpawnActor<AVRMotionController>(MotionControllerClass);
+    RightController->AttachToComponent(VRRoot, FAttachmentTransformRules::KeepRelativeTransform);
+    RightController->SetOwner(this);
+    RightController->SetTrackingSource(EControllerHand::Right);
+  }
+}
 
 void AVRAvatar::EnableWorldManipulation() {
   InputSubsystem->AddMappingContext(InputMappingContexts.WorldManipulationLeft, 1);
@@ -167,19 +177,21 @@ void AVRAvatar::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
   Input->BindAction(BaseActions.RequestScreenshot, ETriggerEvent::Completed, this, &AVRAvatar::RequestScreenshot);
   // quit
   Input->BindAction(BaseActions.Quit, ETriggerEvent::Completed, this, &AVRAvatar::Quit);
+  // quit
+  Input->BindAction(BaseActions.MenuToggle, ETriggerEvent::Completed, this, &AVRAvatar::ToggleMainMenu);
 
+  // widget interaction
   // widget left click
   Input->BindAction(WidgetManipulationActions.WidgetLeftClickLeft, ETriggerEvent::Started, this, &AVRAvatar::HandleStartWidgetLeftClick, EControllerHand::Left);
   Input->BindAction(WidgetManipulationActions.WidgetLeftClickRight, ETriggerEvent::Started, this, &AVRAvatar::HandleStartWidgetLeftClick, EControllerHand::Right);
   Input->BindAction(WidgetManipulationActions.WidgetLeftClickLeft, ETriggerEvent::Completed, this, &AVRAvatar::HandleCompleteWidgetLeftClick, EControllerHand::Left);
   Input->BindAction(WidgetManipulationActions.WidgetLeftClickRight, ETriggerEvent::Completed, this, &AVRAvatar::HandleCompleteWidgetLeftClick, EControllerHand::Right);
-
   // widget scroll
   Input->BindAction(WidgetManipulationActions.WidgetScrollLeft, ETriggerEvent::Triggered, this, &AVRAvatar::HandleWidgetScroll, EControllerHand::Left);
   Input->BindAction(WidgetManipulationActions.WidgetScrollRight, ETriggerEvent::Triggered, this, &AVRAvatar::HandleWidgetScroll, EControllerHand::Right);
 }
 
-void AVRAvatar::SetControllerWidgetInteracting(EControllerHand Hand, bool bInteracting) {
+void AVRAvatar::SetControllerWidgetInteracting(EControllerHand Hand, bool bEnable) {
   if (Hand == EControllerHand::Left && bLeftHandWorldManipulationActive) return;
   if (Hand == EControllerHand::Right && bRightHandWorldManipulationActive) return;
 
@@ -188,16 +200,16 @@ void AVRAvatar::SetControllerWidgetInteracting(EControllerHand Hand, bool bInter
       ? InputMappingContexts.WidgetManipulationLeft
       : InputMappingContexts.WidgetManipulationRight;
 
-  // UE_LOG(LogTemp, Warning, TEXT("setting widget interacting mapping %d"), bInteracting);
+  // UE_LOG(LogTemp, Warning, TEXT("setting widget interacting mapping %d"), bEnable);
 
-  if (bInteracting) {
+  if (bEnable) {
     InputSubsystem->AddMappingContext(widgetManipulationMappingContext, 2);
   } else {
     InputSubsystem->RemoveMappingContext(widgetManipulationMappingContext);
   }
 }
 
-void AVRAvatar::SetControllerGrabbing(EControllerHand Hand, bool bGrabbing) {
+void AVRAvatar::SetControllerGrabbing(EControllerHand Hand, bool bEnable) {
   if (Hand == EControllerHand::Left && bLeftHandWorldManipulationActive) return;
   if (Hand == EControllerHand::Right && bRightHandWorldManipulationActive) return;
 
@@ -206,16 +218,16 @@ void AVRAvatar::SetControllerGrabbing(EControllerHand Hand, bool bGrabbing) {
       ? InputMappingContexts.ModuleManipulationLeft
       : InputMappingContexts.ModuleManipulationRight;
 
-  // UE_LOG(LogTemp, Warning, TEXT("setting module grabbing mapping %d"), bGrabbing);
+  // UE_LOG(LogTemp, Warning, TEXT("setting module grabbing mapping %d"), bEnable);
 
-  if (bGrabbing) {
+  if (bEnable) {
     InputSubsystem->AddMappingContext(moduleManipulationMappingContext, 3);
   } else {
     InputSubsystem->RemoveMappingContext(moduleManipulationMappingContext);
   }
 }
 
-void AVRAvatar::SetControllerParamOrPortInteracting(EControllerHand Hand, bool bInteracting) {
+void AVRAvatar::SetControllerParamOrPortInteracting(EControllerHand Hand, bool bEnable) {
   if (Hand == EControllerHand::Left && bLeftHandWorldManipulationActive) return;
   if (Hand == EControllerHand::Right && bRightHandWorldManipulationActive) return;
 
@@ -224,9 +236,9 @@ void AVRAvatar::SetControllerParamOrPortInteracting(EControllerHand Hand, bool b
       ? InputMappingContexts.ParamInteractionLeft
       : InputMappingContexts.ParamInteractionRight;
   
-  // UE_LOG(LogTemp, Warning, TEXT("setting param interacting mapping %d"), bInteracting);
+  // UE_LOG(LogTemp, Warning, TEXT("setting param interacting mapping %d"), bEnable);
 
-  if (bInteracting) {
+  if (bEnable) {
     InputSubsystem->AddMappingContext(paramInteractingMappingContext, 4);
   } else {
     InputSubsystem->RemoveMappingContext(paramInteractingMappingContext);
@@ -452,9 +464,9 @@ void AVRAvatar::HandleStartGrab(const FInputActionValue& _Value, EControllerHand
   AVRMotionController* controller = GetControllerForHand(Hand);
   AActor* grabbedActor = controller->GetActorToGrab();
 
-  UE_LOG(LogTemp, Warning, TEXT("%s hand grab start"), *FString(Hand == EControllerHand::Left ? "left" : "right"));
+  // UE_LOG(LogTemp, Warning, TEXT("%s hand AVRAvatar::HandleStartGrab"), *FString(Hand == EControllerHand::Left ? "left" : "right"));
   if (grabbedActor && Cast<AGrabbableActor>(grabbedActor)) {
-    UE_LOG(LogTemp, Warning, TEXT("  grabbing %s"), *grabbedActor->GetActorNameOrLabel());
+    // UE_LOG(LogTemp, Warning, TEXT("  AVRAvatar::HandleStartGrab grabbing %s"), *grabbedActor->GetActorNameOrLabel());
     controller->StartGrab();
     SetControllerParamOrPortInteracting(Hand, false);
     Cast<AGrabbableActor>(grabbedActor)->EngageGrab(controller->GetActorLocation(), controller->GetActorRotation());
@@ -462,6 +474,7 @@ void AVRAvatar::HandleStartGrab(const FInputActionValue& _Value, EControllerHand
 }
 
 void AVRAvatar::HandleGrab(const FInputActionValue& _Value, EControllerHand Hand) {
+  // UE_LOG(LogTemp, Warning, TEXT("%s hand grabbing"), *FString(Hand == EControllerHand::Left ? "left" : "right"));
   AVRMotionController* controller = GetControllerForHand(Hand);
   AActor* grabbedActor = controller->GetActorToGrab();
 
@@ -474,9 +487,9 @@ void AVRAvatar::HandleCompleteGrab(const FInputActionValue& _Value, EControllerH
   AVRMotionController* controller = GetControllerForHand(Hand);
   AActor* grabbedActor = controller->GetActorToGrab();
 
-  UE_LOG(LogTemp, Warning, TEXT("%s hand grab complete"), *FString(Hand == EControllerHand::Left ? "left" : "right"));
+  // UE_LOG(LogTemp, Warning, TEXT("%s hand AVRAvatar::HandleCompleteGrab"), *FString(Hand == EControllerHand::Left ? "left" : "right"));
   if (grabbedActor && Cast<AGrabbableActor>(grabbedActor)) {
-    UE_LOG(LogTemp, Warning, TEXT("  releasing %s"), *grabbedActor->GetActorNameOrLabel());
+    // UE_LOG(LogTemp, Warning, TEXT("  AVRAvatar::HandleCompleteGrab releasing %s"), *grabbedActor->GetActorNameOrLabel());
     Cast<AGrabbableActor>(grabbedActor)->ReleaseGrab();
     controller->EndGrab();
   }
@@ -514,11 +527,11 @@ void AVRAvatar::HandleToggleContextMenu(const FInputActionValue& _Value, EContro
 
 void AVRAvatar::HandleStartParamEngage(const FInputActionValue& _Value, EControllerHand Hand) {
   AVRMotionController* controller = GetControllerForHand(Hand);
-  UE_LOG(LogTemp, Warning, TEXT("%s hand param engage start"), *FString(Hand == EControllerHand::Left ? "left" : "right"));
+  // UE_LOG(LogTemp, Warning, TEXT("%s hand AVRAvatar::HandleStartParamEngage"), *FString(Hand == EControllerHand::Left ? "left" : "right"));
 
   AVCVParam* interactingParam = Cast<AVCVParam>(controller->GetParamActorToInteract());
   if (interactingParam) {
-    UE_LOG(LogTemp, Warning, TEXT("  engaging param %s"), *interactingParam->GetActorNameOrLabel());
+    // UE_LOG(LogTemp, Warning, TEXT("  engaging param %s"), *interactingParam->GetActorNameOrLabel());
     controller->StartParamInteract();
 
     if (Cast<AVCVKnob>(interactingParam)) {

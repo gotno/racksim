@@ -245,12 +245,12 @@ void AVRMotionController::HandleInteractorBeginOverlap(UPrimitiveComponent* Over
 }
 
 void AVRMotionController::StartParamInteract() {
-  UE_LOG(LogTemp, Display, TEXT("%s start param interact"), *HandName);
+  // UE_LOG(LogTemp, Display, TEXT("%s hand AVRMotionController::StartParamInteract"), *HandName);
   bIsParamInteracting = true;
 }
 
 void AVRMotionController::EndParamInteract() {
-  UE_LOG(LogTemp, Display, TEXT("%s end param interact"), *HandName);
+  // UE_LOG(LogTemp, Display, TEXT("%s hand AVRMotionController::EndParamInteract"), *HandName);
   bIsParamInteracting = false;
 
   TSet<AActor*> overlappingActors;
@@ -262,6 +262,7 @@ void AVRMotionController::EndParamInteract() {
       MotionController->GetTrackingSource(),
       false
     );
+    // UE_LOG(LogTemp, Warning, TEXT("  (from AVRMotionController::EndParamInteract)"));
 
     SetTooltipVisibility(false);
   }
@@ -304,6 +305,7 @@ void AVRMotionController::EndPortInteract() {
       MotionController->GetTrackingSource(),
       false
     );
+    // UE_LOG(LogTemp, Warning, TEXT("  (from AVRMotionController::EndPortInteract)"));
 
     SetTooltipVisibility(false);
   } else if (overlappingActors.Contains(DestinationPortActor)) {
@@ -318,6 +320,7 @@ void AVRMotionController::EndPortInteract() {
 
 void AVRMotionController::HandleInteractorEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex) {
   if (bIsGrabbing || bIsParamInteracting) return;
+  // UE_LOG(LogTemp, Warning, TEXT("AVRMotionController::HandleInteractorEndOverlap with %s, bIsParamInteracting %d"), *OtherActor->GetActorNameOrLabel(), bIsParamInteracting);
   
   if (bIsPortInteracting) {
     if (OtherActor->ActorHasTag(TAG_INTERACTABLE_PORT)) {
@@ -343,6 +346,7 @@ void AVRMotionController::HandleInteractorEndOverlap(UPrimitiveComponent* Overla
       MotionController->GetTrackingSource(),
       false
     );
+    // UE_LOG(LogTemp, Warning, TEXT("  (from AVRMotionController::HandleInteractorEndOverlap)"));
     
     SetTooltipVisibility(false);
   }
@@ -352,7 +356,7 @@ void AVRMotionController::HandleGrabberBeginOverlap(UPrimitiveComponent* Overlap
   if (bIsGrabbing || bIsParamInteracting) return;
 
   if (OtherActor->ActorHasTag(TAG_GRABBABLE) && Cast<AGrabbableActor>(OtherActor)) {
-    // UE_LOG(LogTemp, Display, TEXT("%s set ActorToGrab %s"), *HandName, *OtherActor->GetActorNameOrLabel());
+    // UE_LOG(LogTemp, Display, TEXT("%s AVRMotionController::HandleGrabberBeginOverlap set ActorToGrab %s"), *HandName, *OtherActor->GetActorNameOrLabel());
 
     ActorToGrab = OtherActor;
     Cast<AGrabbableActor>(OtherActor)->SetHighlighted(true);
@@ -364,16 +368,15 @@ void AVRMotionController::HandleGrabberBeginOverlap(UPrimitiveComponent* Overlap
 }
 
 void AVRMotionController::StartGrab() {
-  // UE_LOG(LogTemp, Display, TEXT("%s start grab"), *HandName);
   bIsGrabbing = true;
+  // UE_LOG(LogTemp, Warning, TEXT("  %s hand AVRMotionController::StartGrab (bIsGrabbing %d)"), *HandName, bIsGrabbing);
   SetTooltipVisibility(false);
   PlayerController->PlayHapticEffect(HapticEffects.Bump, MotionController->GetTrackingSource());
 }
 
 void AVRMotionController::EndGrab() {
-  // UE_LOG(LogTemp, Display, TEXT("%s end grab"), *HandName);
-
   bIsGrabbing = false;
+  // UE_LOG(LogTemp, Warning, TEXT("  %s hand AVRMotionController::EndGrab (bIsGrabbing %d)"), *HandName, bIsGrabbing);
 
   TSet<AActor*> overlappingActors;
   GrabSphere->GetOverlappingActors(overlappingActors);
@@ -398,7 +401,7 @@ void AVRMotionController::HandleGrabberEndOverlap(UPrimitiveComponent* Overlappe
   GrabSphere->GetOverlappingActors(overlappingActors);
 
   if (OtherActor->ActorHasTag(TAG_GRABBABLE) && !overlappingActors.Contains(ActorToGrab)) {
-    // UE_LOG(LogTemp, Display, TEXT("%s end overlap"), *HandName);
+    // UE_LOG(LogTemp, Warning, TEXT("  %s hand AVRMotionController::HandleGrabberEndOverlap (bIsGrabbing %d)"), *HandName, bIsGrabbing);
     ActorToGrab = nullptr;
     Avatar->SetControllerGrabbing(
       MotionController->GetTrackingSource(),
