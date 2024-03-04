@@ -10,14 +10,18 @@ class OSC3_API URackManager : public UObject {
     
 public:
   void Init();
-  void Run();
+  void Run(bool bNewPatch, TFunction<void ()> inFinishRunCallback);
   void Cleanup();
+  bool RackIsRunning() { return bRunning; }
+  bool DoesAutosaveExist();
   
 private:
-  void Setup();
-  void LaunchRack();
+  void SetupPlugin();
+  void LaunchRack(bool bNewPatch);
+  void FinishRun();
+  TFunction<void ()> FinishRunCallback;
   
-  bool bInitd{false};
+  bool bRunning{false};
 
   FString RackPluginsPath{""};
   FString gtnosftPluginFilename{"gtnosft-2.0.1-win-x64.vcvplugin"};
@@ -28,6 +32,6 @@ private:
   FString AutosavePath{""};
 
   FProcHandle hRackProc;
-  FTimerHandle hFocusViewportTimer;
+  FTimerHandle hFinishRunTimer;
   void BringViewportToFront();
 };

@@ -1,8 +1,11 @@
 #include "osc3GameModeBase.h"
+#include "osc3GameState.h"
 #include "osc3PlayerController.h"
 #include "OSCController.h"
 #include "RackManager.h"
+#include "MainMenu.h"
 #include "Player/VRAvatar.h"
+#include "osc3SaveGame.h"
 
 #include "VCVModule.h"
 #include "VCVCable.h"
@@ -21,6 +24,8 @@
 
 Aosc3GameModeBase::Aosc3GameModeBase() {
   PlayerControllerClass = Aosc3PlayerController::StaticClass();
+  GameStateClass = Aosc3GameState::StaticClass();
+  DefaultPawnClass = AVRAvatar::StaticClass();
 
   OSCctrl = CreateDefaultSubobject<AOSCController>(FName(TEXT("OSCctrl")));
   rackman = CreateDefaultSubobject<URackManager>(FName(TEXT("rackman")));
@@ -31,14 +36,110 @@ void Aosc3GameModeBase::BeginPlay() {
 
   UHeadMountedDisplayFunctionLibrary::EnableHMD(true);
 
-  rackman->Run();
-  // TODO: it'd be nice if this happened after rack was confirmed open
-  OSCctrl->Init();
+  GameState = Cast<Aosc3GameState>(UGameplayStatics::GetGameState(this));
+  if (GameState) UE_LOG(LogTemp, Warning, TEXT("GameState exists"));
+  
+  rackman->Init();
+  GameState->SetCanContinueAutosave(rackman->DoesAutosaveExist());
 
   PlayerController = Cast<Aosc3PlayerController>(UGameplayStatics::GetPlayerController(this, 0));
+  if (PlayerController) UE_LOG(LogTemp, Warning, TEXT("PlayerController exists"));
+
   PlayerPawn = Cast<AVRAvatar>(UGameplayStatics::GetPlayerPawn(this, 0));
+  if (PlayerPawn) {
+    UE_LOG(LogTemp, Warning, TEXT("PlayerPawn exists"));
+    DefaultInPatchPlayerLocation =
+      PlayerPawn->GetActorLocation() + FVector(0.f, 0.f, 606.f);
+  }
   
   SpawnLibrary();
+  SpawnMainMenu();
+}
+
+// new
+//   RackIsRunning?
+//   else
+//     load rack with bootstrap
+// continue (TODO: only if autosave dir exists)
+//   load rack without bootstrap
+
+void Aosc3GameModeBase::NewPatch() {
+  SaveData = nullptr;
+
+  if (rackman->RackIsRunning()) {
+    // reset GameState
+    // clear Modules/Cables
+    // tell rack to load bootstrap
+  } else {
+    StartRack(true);
+  }
+}
+
+void Aosc3GameModeBase::ContinueAutosave() {
+  if (!UGameplayStatics::DoesSaveGameExist(TEXT("autosave"), 0)) {
+    StartRack(false);
+    return;
+  }
+
+  FAsyncLoadGameFromSlotDelegate LoadedDelegate;
+  LoadedDelegate.BindLambda([&](const FString& SlotName, const int32 UserIndex, USaveGame* LoadedGameData) {
+    SaveData = Cast<Uosc3SaveGame>(LoadedGameData);
+    UE_LOG(LogTemp, Warning, TEXT("player position: %s"), *SaveData->PlayerLocation.ToString());
+    UE_LOG(LogTemp, Warning, TEXT("library position: %s"), *SaveData->LibraryPosition.Location.ToString());
+    PlayerPawn->SetActorLocation(SaveData->PlayerLocation);
+    LibraryActor->SetActorLocation(SaveData->LibraryPosition.Location);
+    LibraryActor->SetActorRotation(SaveData->LibraryPosition.Rotation);
+    StartRack(false);
+  });
+  UGameplayStatics::AsyncLoadGameFromSlot(TEXT("autosave"), 0, LoadedDelegate);
+}
+
+void Aosc3GameModeBase::StartRack(bool bNewPatch) {
+  rackman->Run(bNewPatch, [&]() {
+    OSCctrl->Init();
+
+    GameState->SetPatchLoaded(true);
+    GameState->SetIsAutosave(!bNewPatch);
+
+    if (!SaveData) PlayerPawn->SetActorLocation(DefaultInPatchPlayerLocation);
+    PlayerPawn->EnableWorldManipulation();
+
+    MainMenu->Hide();
+  });
+}
+
+// TODO break into save/save+exit/exit
+void Aosc3GameModeBase::RequestExit() {
+  Uosc3SaveGame* SaveGame = MakeSaveGame();
+
+  FAsyncSaveGameToSlotDelegate SavedDelegate;
+
+  SavedDelegate.BindLambda([&](const FString& SlotName, const int32 UserIndex, bool bSuccess) {
+    float exitDelay{0.1f}; // seconds
+
+    if (OSCctrl->IsRunning() && rackman->RackIsRunning()) {
+      // give rack a second to finish exiting before EndPlay runs Cleanup
+      exitDelay = 1.f;
+
+      OSCctrl->SendAutosaveAndExit();
+    }
+
+    FTimerHandle hExit;
+    GetWorld()->GetTimerManager().SetTimer(
+      hExit,
+      this,
+      &Aosc3GameModeBase::Exit,
+      exitDelay,
+      false // loop
+    );
+  });
+
+  // TODO GameState->patch path or something
+  UGameplayStatics::AsyncSaveGameToSlot(SaveGame, TEXT("autosave"), 0, SavedDelegate);
+}
+
+void Aosc3GameModeBase::ToggleMainMenu() {
+  MainMenu->Toggle();
 }
 
 void Aosc3GameModeBase::EndPlay(const EEndPlayReason::Type EndPlayReason) {
@@ -47,16 +148,21 @@ void Aosc3GameModeBase::EndPlay(const EEndPlayReason::Type EndPlayReason) {
   rackman->Cleanup();
 }
 
-void Aosc3GameModeBase::RequestExit() {
-  OSCctrl->SendAutosaveAndExit();
-  FTimerHandle hExit;
-  GetWorld()->GetTimerManager().SetTimer(
-    hExit,
-    this,
-    &Aosc3GameModeBase::Exit,
-    1.f, // 1 second
-    false // loop
-  );
+Uosc3SaveGame* Aosc3GameModeBase::MakeSaveGame() {
+  if (Uosc3SaveGame* SaveGameInstance = Cast<Uosc3SaveGame>(UGameplayStatics::CreateSaveGameObject(Uosc3SaveGame::StaticClass()))) {
+    for (const TPair<int64, AVCVModule*>& pair : ModuleActors) {
+      FVCVModuleInfo info;
+      AVCVModule* module = pair.Value;
+      module->GetModulePosition(info.Position.Location, info.Position.Rotation);
+      SaveGameInstance->ModuleInfos.Add(module->Id, info);
+    }
+
+    LibraryActor->GetPosition(SaveGameInstance->LibraryPosition.Location, SaveGameInstance->LibraryPosition.Rotation);
+    SaveGameInstance->PlayerLocation = PlayerPawn->GetActorLocation();
+
+    return SaveGameInstance;
+  }
+  return nullptr;
 }
 
 void Aosc3GameModeBase::Exit() {
@@ -81,6 +187,9 @@ void Aosc3GameModeBase::SpawnModule(VCVModule vcv_module) {
   if (vcv_module.returnId == 0 && ModuleActors.Contains(LastClickedMenuModuleId)) {
     AVCVModule* lastClickedModule = ModuleActors[LastClickedMenuModuleId];
     lastClickedModule->GetModuleLandingPosition(location, rotation, true);
+  } else if (vcv_module.returnId == -1 && SaveData && SaveData->ModuleInfos.Contains(vcv_module.id)) {
+    location = SaveData->ModuleInfos[vcv_module.id].Position.Location;
+    rotation = SaveData->ModuleInfos[vcv_module.id].Position.Rotation;
   } else if (ReturnModulePositions.Contains(vcv_module.returnId)) {
     ReturnModulePosition& rmp = ReturnModulePositions[vcv_module.returnId];
     if (rmp.Location.IsZero()) {
@@ -91,7 +200,6 @@ void Aosc3GameModeBase::SpawnModule(VCVModule vcv_module) {
     }
     ReturnModulePositions.Remove(vcv_module.returnId);
   } else { 
-    // WTF IS THIS
     location = FVector(0, vcv_module.box.pos.x, -vcv_module.box.pos.y + 140);
     location.Y += vcv_module.box.size.x / 2;
     location.Z += vcv_module.box.size.y / 2;
@@ -311,10 +419,31 @@ void Aosc3GameModeBase::SpawnLibrary() {
   LibraryActor =
     GetWorld()->SpawnActor<ALibrary>(
       ALibrary::StaticClass(),
-      FVector(0, 0, 100.f),
+      FVector(100.f, 100.f, 0.f),
       FRotator(0.f),
       spawnParams
     );
+  // LibraryActor->SetActorHiddenInGame(true);
+}
+
+void Aosc3GameModeBase::SpawnMainMenu() {
+  FActorSpawnParameters spawnParams;
+  spawnParams.Owner = this;
+
+  MainMenu =
+    GetWorld()->SpawnActor<AMainMenu>(
+      AMainMenu::StaticClass(),
+      FVector(0.f, 0.f, -600.f),
+      FRotator(0.f),
+      spawnParams
+    );
+  MainMenu->Init(
+    PlayerPawn,
+    GameState,
+    [&]() { RequestExit(); }, // 'exit' button callback
+    [&]() { NewPatch(); }, // 'new patch' button callback
+    [&]() { ContinueAutosave(); } // 'continue with autosave' button callback
+  );
 }
 
 ALibrary* Aosc3GameModeBase::GetLibrary() {

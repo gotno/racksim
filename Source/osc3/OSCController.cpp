@@ -54,6 +54,8 @@ void AOSCController::Init() {
     0.05f, // 50 milliseconds
     true // loop
   );
+
+  bRunning = true;
 }
 
 void AOSCController::AddRoute(const FString &AddressPattern, const FName &MethodName) {

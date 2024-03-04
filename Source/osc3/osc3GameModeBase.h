@@ -6,11 +6,14 @@
 
 #include "VCVData/VCV.h"
 
-#include "GameFramework/GameMode.h"
+#include "GameFramework/GameModeBase.h"
 #include "osc3GameModeBase.generated.h"
 
+class Aosc3GameState;
 class AOSCController;
 class URackManager;
+class AMainMenu;
+class Uosc3SaveGame;
 class AVRAvatar;
 class AVCVCable;
 class AVCVModule;
@@ -35,7 +38,7 @@ struct ReturnModulePosition {
 };
 
 UCLASS()
-class OSC3_API Aosc3GameModeBase : public AGameMode {
+class OSC3_API Aosc3GameModeBase : public AGameModeBase {
 	GENERATED_BODY()
 
 public:
@@ -52,6 +55,7 @@ public:
   void SpawnModule(VCVModule vcv_module);
   void QueueCableSpawn(VCVCable vcv_cable);
   void RequestExit();
+  void ToggleMainMenu();
 
   AVCVCable* SpawnCable(AVCVPort* Port);
   void SpawnCable(int64_t& Id, AVCVPort* InputPort, AVCVPort* OutputPort);
@@ -77,6 +81,7 @@ public:
   UTexture2D* GetTexture(FString Filepath);
   
   void SpawnLibrary();
+  void SpawnMainMenu();
   void SetLibraryJsonPath(FString& Path);
   ALibrary* GetLibrary();
 
@@ -84,13 +89,20 @@ private:
   UFUNCTION()
   void Exit();
 
+  UFUNCTION()
+  Uosc3SaveGame* MakeSaveGame();
+
   UPROPERTY()
   URackManager* rackman;
   UPROPERTY()
   AOSCController* OSCctrl;
+  UPROPERTY()
+  AMainMenu* MainMenu;
 
   Aosc3PlayerController* PlayerController;
   AVRAvatar* PlayerPawn;
+  FVector DefaultInPatchPlayerLocation{0.f};
+  Aosc3GameState* GameState;
 
   void ProcessSpawnCableQueue();
   TArray<VCVCable> cableQueue;
@@ -106,6 +118,8 @@ private:
   int currentReturnModuleId{0};
   TMap<int32, ReturnModulePosition> ReturnModulePositions;
 
+  Uosc3SaveGame* SaveData{nullptr};
+
   FDPSVGImporter SVGImporter;
   UPROPERTY()
   TMap<FString, UDPSVGAsset*> SVGAssets;
@@ -113,7 +127,10 @@ private:
   TMap<FString, AWidgetSurrogate*> SVGWidgetSurrogates;
   UPROPERTY()
   TMap<FString, UTexture2D*> SVGTextures;
-
+  
+  void NewPatch();
+  void ContinueAutosave();
+  void StartRack(bool bNewPatch);
 public:
   // delegate stuff
   void SubscribeMenuItemSyncedDelegate(AContextMenu* ContextMenu);

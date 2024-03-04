@@ -37,6 +37,7 @@ public:
   void ClearTagsFilter();
 
   void SetJsonPath(FString& JsonPath);
+  void GetPosition(FVector& Location, FRotator& Rotation);
   void GetModuleLandingPosition(const float& ModuleWidth, FVector& Location, FRotator& Rotation);
 private:
 

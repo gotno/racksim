@@ -63,8 +63,6 @@ void AVRAvatar::PawnClientRestart() {
     if (InputSubsystem) {
       InputSubsystem->ClearAllMappings();
       InputSubsystem->AddMappingContext(InputMappingContexts.Base, 0);
-      InputSubsystem->AddMappingContext(InputMappingContexts.WorldManipulationLeft, 1);
-      InputSubsystem->AddMappingContext(InputMappingContexts.WorldManipulationRight, 1);
     }
   }	
   
@@ -73,10 +71,9 @@ void AVRAvatar::PawnClientRestart() {
   LeftController->SetOwner(this);
   LeftController->SetTrackingSource(EControllerHand::Left);
 
-  RightController = GetWorld()->SpawnActor<AVRMotionController>(MotionControllerClass);
-  RightController->AttachToComponent(VRRoot, FAttachmentTransformRules::KeepRelativeTransform);
-  RightController->SetOwner(this);
-  RightController->SetTrackingSource(EControllerHand::Right);
+void AVRAvatar::EnableWorldManipulation() {
+  InputSubsystem->AddMappingContext(InputMappingContexts.WorldManipulationLeft, 1);
+  InputSubsystem->AddMappingContext(InputMappingContexts.WorldManipulationRight, 1);
 }
 
 void AVRAvatar::Tick(float DeltaTime) {
@@ -615,6 +612,10 @@ void AVRAvatar::Quit(const FInputActionValue& _Value) {
   GameMode->RequestExit();
 }
 
+void AVRAvatar::ToggleMainMenu(const FInputActionValue& _Value) {
+  GameMode->ToggleMainMenu();
+}
+
 void AVRAvatar::HandleStartWidgetLeftClick(const FInputActionValue& _Value, EControllerHand Hand) {
   AVRMotionController* controller = GetControllerForHand(Hand);
   controller->StartWidgetLeftClick();
@@ -643,3 +644,8 @@ FRotator AVRAvatar::GetLookAtCameraRotation(FVector FromPosition) {
     Camera->GetComponentLocation()
   );
 }
+
+FVector AVRAvatar::GetMainMenuPosition() {
+  return Camera->GetComponentLocation() + Camera->GetForwardVector() * 60;
+}
+

@@ -31,6 +31,7 @@ public:
   void GetSlugs(FString& PluginSlug, FString& Slug);
   int64_t Id{-1};
 
+  void GetModulePosition(FVector& Location, FRotator& Rotation);
   void GetModuleLandingPosition(FVector& Location, FRotator& Rotation, bool bOffset = true);
 
   void UpdateLight(int32 LightId, FLinearColor Color);

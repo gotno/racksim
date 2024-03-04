@@ -8,9 +8,9 @@ THIRD_PARTY_INCLUDES_START
 THIRD_PARTY_INCLUDES_END
 #include "Windows/HideWindowsPlatformTypes.h"
 
-void URackManager::Init() {
-  UE_LOG(LogTemp, Warning, TEXT("RACKMAN INNIT?"));
+#include "Misc/Paths.h"
 
+void URackManager::Init() {
 #if !UE_BUILD_SHIPPING
   RackPath = "C:/VCV/UnrealBuild/Windows/osc3_dev/Rack2Free/";
 #else
@@ -18,19 +18,17 @@ void URackManager::Init() {
 #endif
   RackExecutablePath = RackPath + "Rack.exe";
   OSCctrlBootstrapPath = RackPath + "oscctrl-bootstrap.vcv";
-  AutosavePath = RackPath + "autosave";
+  AutosavePath = RackPath + "autosave/patch.json";
   RackPluginsPath = FString(FPlatformProcess::UserDir()) + "Rack2/plugins-win-x64/";
-  
-  bInitd = true;
 }
 
-void URackManager::Run() {
-  if (!bInitd) Init();
-  Setup();
-  LaunchRack();
+void URackManager::Run(bool bNewPatch, TFunction<void ()> inFinishRunCallback) {
+  SetupPlugin();
+  FinishRunCallback = inFinishRunCallback;
+  LaunchRack(bNewPatch);
 }
 
-void URackManager::Setup() {
+void URackManager::SetupPlugin() {
   IFileManager& FileManager = IFileManager::Get();
   FileManager.Copy(
     *(RackPluginsPath + gtnosftPluginFilename),
@@ -38,16 +36,21 @@ void URackManager::Setup() {
   );
 }
 
-void URackManager::LaunchRack() {
+bool URackManager::DoesAutosaveExist() {
+  // TODO?: check for OSCctrl module in autosave
+  //        definitely if ever we share the autosave with system rack
+  return FPaths::FileExists(AutosavePath);
+}
+
+void URackManager::LaunchRack(bool bNewPatch) {
   FString params =
-    IFileManager::Get().DirectoryExists(*AutosavePath)
-      ? ""
-      : OSCctrlBootstrapPath;
+    bNewPatch
+      ? OSCctrlBootstrapPath
+      : "";
 
   hRackProc = FPlatformProcess::CreateProc(
     *RackExecutablePath,
     *params,
-    // *oscctrlBootstrapPath,
     true, // launch detached, does nothing?
     false, // launch hidden, does nothing?
     false, // launch RLY hidden, does nothing?
@@ -60,33 +63,41 @@ void URackManager::LaunchRack() {
 
   if (hRackProc.IsValid()) {
     GetWorld()->GetTimerManager().SetTimer(
-      hFocusViewportTimer,
+      hFinishRunTimer,
       this,
-      &URackManager::BringViewportToFront,
+      &URackManager::FinishRun,
       0.1f, // 100 ms
       true // loop
     );
   }
 }
 
-void URackManager::BringViewportToFront() {
+void URackManager::FinishRun() {
+  // ensure rack is running before continuing
   if (!hRackProc.IsValid()) return;
   if (!FPlatformProcess::IsProcRunning(hRackProc)) return;
-  if (!GEngine || !GEngine->GameViewport) return;
 
+  // find rack window before continuing
   LPCSTR rackWindowClass = "GLFW30";
   LPCSTR rackWindowName = "RACK";
   HWND hWnd = FindWindowA(rackWindowClass, rackWindowName);
-  if (hWnd) {
-    FGenericWindow* window = GEngine->GameViewport->GetWindow()->GetNativeWindow().Get();
-    window->Minimize();
-    window->Restore();
-    // window->Maximize();
-    // window->BringToFront(true);
-    // window->SetWindowFocus();
+  if (!hWnd) return;
+  
+  // ensure we can get the unreal window before continuing
+  if (!GEngine || !GEngine->GameViewport) return;
+  
+  BringViewportToFront();
+  bRunning = true;
+  FinishRunCallback();
 
-    GetWorld()->GetTimerManager().ClearTimer(hFocusViewportTimer);
-  }
+  GetWorld()->GetTimerManager().ClearTimer(hFinishRunTimer);
+}
+
+void URackManager::BringViewportToFront() {
+  FGenericWindow* window =
+    GEngine->GameViewport->GetWindow()->GetNativeWindow().Get();
+  window->Minimize();
+  window->Restore();
 }
 
 void URackManager::Cleanup() {

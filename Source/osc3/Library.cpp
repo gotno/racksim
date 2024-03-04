@@ -340,13 +340,17 @@ void ALibrary::ClearTagsFilter() {
   RefreshLibraryList();
 }
 
+void ALibrary::GetPosition(FVector& Location, FRotator& Rotation) {
+  Location = StaticMeshComponent->GetComponentLocation();
+  Rotation = StaticMeshComponent->GetComponentRotation();
+}
+
 void ALibrary::GetModuleLandingPosition(const float& ModuleWidth, FVector& Location, FRotator& Rotation) {
   float toEdge = DesiredWidth * 0.5;
   float moduleOffset = ModuleWidth * 0.5f + RENDER_SCALE;
 
-  Location =
-    // TODO: dominant hand
-    StaticMeshComponent->GetComponentLocation() +
-      StaticMeshComponent->GetRightVector() * (toEdge + moduleOffset);
-  Rotation = StaticMeshComponent->GetComponentRotation();
+  GetPosition(Location, Rotation);
+
+  // TODO: dominant hand
+  Location += StaticMeshComponent->GetRightVector() * (toEdge + moduleOffset);
 }

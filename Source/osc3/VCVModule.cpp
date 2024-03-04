@@ -289,8 +289,12 @@ void AVCVModule::Tick(float DeltaTime) {
   if (Texture) FaceMaterialInstance->SetTextureParameterValue(FName("texture"), Texture);
 }
 
-void AVCVModule::GetModuleLandingPosition(FVector& Location, FRotator& Rotation, bool bOffset) {
+void AVCVModule::GetModulePosition(FVector& Location, FRotator& Rotation) {
   Location = StaticMeshComponent->GetComponentLocation();
-  if (bOffset) Location -= StaticMeshComponent->GetForwardVector() * (2 * MODULE_DEPTH * RENDER_SCALE);
   Rotation = StaticMeshComponent->GetComponentRotation();
+}
+
+void AVCVModule::GetModuleLandingPosition(FVector& Location, FRotator& Rotation, bool bOffset) {
+  GetModulePosition(Location, Rotation);
+  if (bOffset) Location -= StaticMeshComponent->GetForwardVector() * (2 * MODULE_DEPTH * RENDER_SCALE);
 }

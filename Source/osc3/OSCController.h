@@ -26,6 +26,8 @@ public:
   UFUNCTION()
   void Init();
 
+  bool IsRunning() { return bRunning; }
+
   UFUNCTION()
   void NotifyResync();
 
@@ -53,6 +55,7 @@ private:
   FTimerHandle hSyncPortTimer;
   int MinRackClientPort{7000}, RackClientPort{7000}, MaxRackClientPort{7020};
   int ServerPort{7001};
+  bool bRunning{false};
 
   UPROPERTY()
   class Aosc3GameModeBase* GameMode;

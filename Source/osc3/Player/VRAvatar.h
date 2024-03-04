@@ -23,6 +23,9 @@ struct FBaseActions {
 
   UPROPERTY(EditDefaultsOnly)
   UInputAction* Quit;
+
+  UPROPERTY(EditDefaultsOnly)
+  UInputAction* MenuToggle;
 };
 
 USTRUCT()
@@ -147,6 +150,7 @@ protected:
 public:	
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+  void EnableWorldManipulation();
 
   UPROPERTY(EditAnywhere, Category="Input")
   FBaseActions BaseActions;
@@ -170,6 +174,7 @@ public:
   
   void GetRenderablePosition(FVector& Location, FRotator& Rotation);
   FRotator GetLookAtCameraRotation(FVector FromLocation);
+  FVector GetMainMenuPosition();
 
 private:
   UPROPERTY(VisibleAnywhere)
@@ -254,6 +259,7 @@ private:
   // general controls
   void RequestScreenshot(const FInputActionValue& _Value);
   void Quit(const FInputActionValue& _Value);
+  void ToggleMainMenu(const FInputActionValue& _Value);
   
   // widget controls
   void HandleStartWidgetLeftClick(const FInputActionValue& _Value, EControllerHand Hand);
