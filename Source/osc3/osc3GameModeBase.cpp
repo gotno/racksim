@@ -23,10 +23,6 @@
 #include "HeadMountedDisplayFunctionLibrary.h"
 
 Aosc3GameModeBase::Aosc3GameModeBase() {
-  PlayerControllerClass = Aosc3PlayerController::StaticClass();
-  GameStateClass = Aosc3GameState::StaticClass();
-  DefaultPawnClass = AVRAvatar::StaticClass();
-
   OSCctrl = CreateDefaultSubobject<AOSCController>(FName(TEXT("OSCctrl")));
   rackman = CreateDefaultSubobject<URackManager>(FName(TEXT("rackman")));
 }
