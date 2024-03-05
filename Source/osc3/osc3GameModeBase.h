@@ -100,10 +100,14 @@ private:
   UPROPERTY()
   AMainMenu* MainMenu;
 
+  UPROPERTY()
+  Aosc3GameState* osc3GameState;
+  UPROPERTY()
   Aosc3PlayerController* PlayerController;
+  UPROPERTY()
   AVRAvatar* PlayerPawn;
+
   FVector DefaultInPatchPlayerLocation{0.f};
-  Aosc3GameState* GameState;
 
   void ProcessSpawnCableQueue();
   TArray<VCVCable> cableQueue;

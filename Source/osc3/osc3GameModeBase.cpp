@@ -35,11 +35,11 @@ void Aosc3GameModeBase::BeginPlay() {
 
   UHeadMountedDisplayFunctionLibrary::EnableHMD(true);
 
-  GameState = Cast<Aosc3GameState>(UGameplayStatics::GetGameState(this));
-  if (GameState) UE_LOG(LogTemp, Warning, TEXT("GameState exists"));
+  osc3GameState = Cast<Aosc3GameState>(UGameplayStatics::GetGameState(this));
+  if (osc3GameState) UE_LOG(LogTemp, Warning, TEXT("GameState exists"));
   
   rackman->Init();
-  GameState->SetCanContinueAutosave(rackman->DoesAutosaveExist());
+  osc3GameState->SetCanContinueAutosave(rackman->DoesAutosaveExist());
 
   PlayerController = Cast<Aosc3PlayerController>(UGameplayStatics::GetPlayerController(this, 0));
   if (PlayerController) UE_LOG(LogTemp, Warning, TEXT("PlayerController exists"));
@@ -97,8 +97,8 @@ void Aosc3GameModeBase::StartRack(bool bNewPatch) {
   rackman->Run(bNewPatch, [&]() {
     OSCctrl->Init();
 
-    GameState->SetPatchLoaded(true);
-    GameState->SetIsAutosave(!bNewPatch);
+    osc3GameState->SetPatchLoaded(true);
+    osc3GameState->SetIsAutosave(!bNewPatch);
 
     if (!SaveData) PlayerPawn->SetActorLocation(DefaultInPatchPlayerLocation);
     PlayerPawn->EnableWorldManipulation();
@@ -438,7 +438,7 @@ void Aosc3GameModeBase::SpawnMainMenu() {
     );
   MainMenu->Init(
     PlayerPawn,
-    GameState,
+    osc3GameState,
     [&]() { RequestExit(); }, // 'exit' button callback
     [&]() { NewPatch(); }, // 'new patch' button callback
     [&]() { ContinueAutosave(); } // 'continue with autosave' button callback
