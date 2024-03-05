@@ -54,8 +54,6 @@ void AVRMotionController::BeginPlay() {
   Avatar = Cast<AVRAvatar>(GetOwner());
   GameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(this));
 
-  GrabSphere->OnComponentEndOverlap.AddDynamic(this, &AVRMotionController::HandleGrabberEndOverlap);
-
   InteractCapsule->AddLocalOffset(InteractCapsule->GetUnscaledCapsuleHalfHeight_WithoutHemisphere() * InteractCapsule->GetUpVector());
   InteractCapsule->AttachToComponent(InteractCapsuleRoot, FAttachmentTransformRules::KeepRelativeTransform);
   InteractCapsuleRoot->AddLocalOffset(InteractCapsuleOffset);
@@ -357,7 +355,7 @@ void AVRMotionController::GrabberTick() {
   GrabSphere->GetOverlappingActors(overlappingActors, AGrabbableActor::StaticClass());
 
   FVector grabSphereLocation = GrabSphere->GetComponentLocation();
-  double shortestDistance{9999};
+  double shortestDistance{9999999};
   AActor* closestGrabbable{nullptr};
   for (AActor* actor : overlappingActors) {
     double thisDistance = FVector::Dist(grabSphereLocation, actor->GetActorLocation());
@@ -366,7 +364,8 @@ void AVRMotionController::GrabberTick() {
       shortestDistance = thisDistance;
     }
   }
-  if (closestGrabbable) {
+
+  if (closestGrabbable != TargetedGrabbable) {
     // UE_LOG(LogTemp, Warning, TEXT("closestGrabbable: %s"), *closestGrabbable->GetActorNameOrLabel());
     // if (GEngine) {
     //   GEngine->AddOnScreenDebugMessage(
@@ -381,8 +380,9 @@ void AVRMotionController::GrabberTick() {
     //     false
     //   );
     // }
+    TargetedGrabbable = closestGrabbable;
     OnGrabbableTargetedDelegate.Broadcast(
-      closestGrabbable,
+      TargetedGrabbable,
       MotionController->GetTrackingSource()
     );
   }
@@ -396,19 +396,6 @@ void AVRMotionController::StartGrab() {
 
 void AVRMotionController::EndGrab() {
   bIsGrabbing = false;
-}
-
-void AVRMotionController::HandleGrabberEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex) {
-  if (bIsGrabbing || bIsParamInteracting) return;
-
-  TSet<AActor*> overlappingActors;
-  GrabSphere->GetOverlappingActors(overlappingActors, AGrabbableActor::StaticClass());
-  if (overlappingActors.IsEmpty()) {
-    OnGrabbableTargetedDelegate.Broadcast(
-      nullptr,
-      MotionController->GetTrackingSource()
-    );
-  }
 }
 
 void AVRMotionController::StartWidgetLeftClick() {

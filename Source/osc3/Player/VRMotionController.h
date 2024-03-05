@@ -113,11 +113,11 @@ private:
   float GrabSphereRadius = MODULE_DEPTH * RENDER_SCALE;
   UPROPERTY(EditDefaultsOnly, Category="Interaction")
   FVector GrabSphereOffset{0.f, -2.f, -2.f};
-
-  void GrabberTick();
-  UFUNCTION()
-  void HandleGrabberEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+  // grabber handling
   bool bIsGrabbing{false};
+  void GrabberTick();
+  UPROPERTY()
+  AActor* TargetedGrabbable{nullptr};
 
   bool bIsParamInteracting{false};
   AActor* ParamActorToInteract;
