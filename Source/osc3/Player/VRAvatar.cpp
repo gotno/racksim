@@ -206,7 +206,7 @@ void AVRAvatar::SetControllerWidgetInteracting(EControllerHand Hand, bool bEnabl
 
   // UE_LOG(LogTemp, Warning, TEXT("setting widget interacting mapping %d"), bEnable);
 
-  if (bEnable) {
+  if (bEnable && !InputSubsystem->HasMappingContext(widgetManipulationMappingContext)) {
     InputSubsystem->AddMappingContext(widgetManipulationMappingContext, 2);
   } else {
     InputSubsystem->RemoveMappingContext(widgetManipulationMappingContext);
@@ -224,7 +224,7 @@ void AVRAvatar::SetControllerGrabbing(EControllerHand Hand, bool bEnable) {
 
   // UE_LOG(LogTemp, Warning, TEXT("setting module grabbing mapping %d"), bEnable);
 
-  if (bEnable) {
+  if (bEnable && !InputSubsystem->HasMappingContext(moduleManipulationMappingContext)) {
     InputSubsystem->AddMappingContext(moduleManipulationMappingContext, 3);
   } else {
     InputSubsystem->RemoveMappingContext(moduleManipulationMappingContext);
@@ -242,7 +242,7 @@ void AVRAvatar::SetControllerParamOrPortInteracting(EControllerHand Hand, bool b
   
   // UE_LOG(LogTemp, Warning, TEXT("setting param interacting mapping %d"), bEnable);
 
-  if (bEnable) {
+  if (bEnable && !InputSubsystem->HasMappingContext(paramInteractingMappingContext)) {
     InputSubsystem->AddMappingContext(paramInteractingMappingContext, 4);
   } else {
     InputSubsystem->RemoveMappingContext(paramInteractingMappingContext);
