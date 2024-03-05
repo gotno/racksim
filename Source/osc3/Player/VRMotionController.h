@@ -3,7 +3,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 
-#include "MotionControllerComponent.h"
+#include "osc3.h"
 
 #include "VRMotionController.generated.h"
 
@@ -14,12 +14,15 @@ class AVCVCable;
 class AVCVPort;
 class UTooltip;
 
+class UMotionControllerComponent;
 class USceneComponent;
 class USphereComponent;
 class UCapsuleComponent;
 class UPrimitiveComponent;
 class UWidgetComponent;
 class UWidgetInteractionComponent;
+
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnGrabbableTargetedSignature, AActor* /* GrabbableActor */, EControllerHand /* Hand */);
 
 USTRUCT()
 struct FHapticEffects {
@@ -44,8 +47,6 @@ public:
 
   void SetTrackingSource(EControllerHand Hand);
 
-
-  AActor* GetActorToGrab() { return ActorToGrab; }
   void StartGrab();
   void EndGrab();
 
@@ -86,13 +87,7 @@ private:
   UWidgetComponent* TooltipWidgetComponent;
   UTooltip* TooltipWidget;
   
-  UPROPERTY(VisibleAnywhere)
-  USphereComponent* GrabSphere;
-  UPROPERTY(EditDefaultsOnly, Category="Interaction")
-  float GrabSphereRadius{1.f};
-  UPROPERTY(EditDefaultsOnly, Category="Interaction")
-  FVector GrabSphereOffset{0.f, -2.f, -2.f};
-
+  // interactor
   UPROPERTY(VisibleAnywhere)
   USceneComponent* InteractCapsuleRoot;
   UPROPERTY(VisibleAnywhere)
@@ -105,25 +100,31 @@ private:
   FVector InteractCapsuleOffset{0.f, 0.f, 0.f};
   UPROPERTY(EditDefaultsOnly, Category="Interaction")
   FRotator InteractCapsuleRotation{0.f, -90.f, 0.f};
-  
-  UFUNCTION()
-  void LogOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
-
-  UFUNCTION()
-  void HandleGrabberBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
-  UFUNCTION()
-  void HandleGrabberEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
-  AActor* ActorToGrab;
-  bool bIsGrabbing{false};
 
   UFUNCTION()
   void HandleInteractorBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
   UFUNCTION()
   void HandleInteractorEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
+  // grabber
+  UPROPERTY(VisibleAnywhere)
+  USphereComponent* GrabSphere;
+  UPROPERTY(EditDefaultsOnly, Category="Interaction")
+  float GrabSphereRadius = MODULE_DEPTH * RENDER_SCALE;
+  UPROPERTY(EditDefaultsOnly, Category="Interaction")
+  FVector GrabSphereOffset{0.f, -2.f, -2.f};
+
+  void GrabberTick();
+  UFUNCTION()
+  void HandleGrabberEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+  bool bIsGrabbing{false};
+
   bool bIsParamInteracting{false};
   AActor* ParamActorToInteract;
   
+  UFUNCTION()
+  void LogOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
+
   void SetTooltipVisibility(bool bVisible);
   // TODO: user setting
   bool bTooltipEnabled{true};
@@ -135,4 +136,8 @@ private:
   AVCVCable* HeldCable;
 
   bool bIsWidgetInteracting{false};
+
+  public:
+    // delegates
+    FOnGrabbableTargetedSignature OnGrabbableTargetedDelegate;
 };

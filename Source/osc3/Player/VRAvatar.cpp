@@ -71,6 +71,8 @@ void AVRAvatar::PawnClientRestart() {
     LeftController->AttachToComponent(VRRoot, FAttachmentTransformRules::KeepRelativeTransform);
     LeftController->SetOwner(this);
     LeftController->SetTrackingSource(EControllerHand::Left);
+
+    LeftController->OnGrabbableTargetedDelegate.AddUObject(this, &AVRAvatar::HandleGrabbableTargetSet);
   }
 
   if (!RightController) {
@@ -78,6 +80,8 @@ void AVRAvatar::PawnClientRestart() {
     RightController->AttachToComponent(VRRoot, FAttachmentTransformRules::KeepRelativeTransform);
     RightController->SetOwner(this);
     RightController->SetTrackingSource(EControllerHand::Right);
+
+    RightController->OnGrabbableTargetedDelegate.AddUObject(this, &AVRAvatar::HandleGrabbableTargetSet);
   }
 }
 
@@ -460,69 +464,90 @@ void AVRAvatar::HandleRotoTranslateWorld(const FInputActionValue& _Value) {
   LastRightHandLocation = RightController->GetActorLocation();
 }
 
-void AVRAvatar::HandleStartGrab(const FInputActionValue& _Value, EControllerHand Hand) {
-  AVRMotionController* controller = GetControllerForHand(Hand);
-  AActor* grabbedActor = controller->GetActorToGrab();
-
-  // UE_LOG(LogTemp, Warning, TEXT("%s hand AVRAvatar::HandleStartGrab"), *FString(Hand == EControllerHand::Left ? "left" : "right"));
-  if (grabbedActor && Cast<AGrabbableActor>(grabbedActor)) {
-    // UE_LOG(LogTemp, Warning, TEXT("  AVRAvatar::HandleStartGrab grabbing %s"), *grabbedActor->GetActorNameOrLabel());
-    controller->StartGrab();
-    SetControllerParamOrPortInteracting(Hand, false);
-    Cast<AGrabbableActor>(grabbedActor)->EngageGrab(controller->GetActorLocation(), controller->GetActorRotation());
+void AVRAvatar::HandleGrabbableTargetSet(AActor* GrabbableActor, EControllerHand Hand) {
+  if (GrabbableActor) {
+    SetControllerGrabbing(Hand, true);
+    if (Hand == EControllerHand::Left) {
+      LeftHandGrabbableActor = Cast<AGrabbableActor>(GrabbableActor);
+    } else {
+      RightHandGrabbableActor = Cast<AGrabbableActor>(GrabbableActor);
+    }
+  } else {
+    SetControllerGrabbing(Hand, false);
+    if (Hand == EControllerHand::Left) {
+      LeftHandGrabbableActor = nullptr;
+    } else {
+      RightHandGrabbableActor = nullptr;
+    }
   }
 }
 
-void AVRAvatar::HandleGrab(const FInputActionValue& _Value, EControllerHand Hand) {
-  // UE_LOG(LogTemp, Warning, TEXT("%s hand grabbing"), *FString(Hand == EControllerHand::Left ? "left" : "right"));
+void AVRAvatar::HandleStartGrab(const FInputActionValue& _Value, EControllerHand Hand) {
   AVRMotionController* controller = GetControllerForHand(Hand);
-  AActor* grabbedActor = controller->GetActorToGrab();
+  AGrabbableActor* grabbedActor =
+    Hand == EControllerHand::Left
+      ? LeftHandGrabbableActor
+      : RightHandGrabbableActor;
 
-  if (grabbedActor && Cast<AGrabbableActor>(grabbedActor)) {
-    Cast<AGrabbableActor>(grabbedActor)->AlterGrab(controller->GetActorLocation(), controller->GetActorRotation());
-  }
+  controller->StartGrab();
+  grabbedActor->EngageGrab(controller->GetActorLocation(), controller->GetActorRotation());
+}
+
+void AVRAvatar::HandleGrab(const FInputActionValue& _Value, EControllerHand Hand) {
+  AVRMotionController* controller = GetControllerForHand(Hand);
+  AGrabbableActor* grabbedActor =
+    Hand == EControllerHand::Left
+      ? LeftHandGrabbableActor
+      : RightHandGrabbableActor;
+
+  grabbedActor->AlterGrab(controller->GetActorLocation(), controller->GetActorRotation());
 }
 
 void AVRAvatar::HandleCompleteGrab(const FInputActionValue& _Value, EControllerHand Hand) {
   AVRMotionController* controller = GetControllerForHand(Hand);
-  AActor* grabbedActor = controller->GetActorToGrab();
+  AGrabbableActor* grabbedActor =
+    Hand == EControllerHand::Left
+      ? LeftHandGrabbableActor
+      : RightHandGrabbableActor;
 
-  // UE_LOG(LogTemp, Warning, TEXT("%s hand AVRAvatar::HandleCompleteGrab"), *FString(Hand == EControllerHand::Left ? "left" : "right"));
-  if (grabbedActor && Cast<AGrabbableActor>(grabbedActor)) {
-    // UE_LOG(LogTemp, Warning, TEXT("  AVRAvatar::HandleCompleteGrab releasing %s"), *grabbedActor->GetActorNameOrLabel());
-    Cast<AGrabbableActor>(grabbedActor)->ReleaseGrab();
-    controller->EndGrab();
-  }
+  grabbedActor->ReleaseGrab();
+  controller->EndGrab();
 }
 
 void AVRAvatar::HandleDuplicateModule(const FInputActionValue& _Value, EControllerHand Hand) {
   AVRMotionController* controller = GetControllerForHand(Hand);
-  AVCVModule* grabbedModule = Cast<AVCVModule>(controller->GetActorToGrab());
+  AVCVModule* grabbedModule =
+    Cast<AVCVModule>(
+      Hand == EControllerHand::Left
+        ? LeftHandGrabbableActor
+        : RightHandGrabbableActor
+    );
 
-  if (grabbedModule) {
-    // UE_LOG(LogTemp, Warning, TEXT("%s duplicate module %s"), Hand == EControllerHand::Left ? *FString("left") : *FString("right"), *grabbedModule->GetActorNameOrLabel());
-    GameMode->DuplicateModule(grabbedModule);
-  }
+  if (grabbedModule) GameMode->DuplicateModule(grabbedModule);
 }
 
 void AVRAvatar::HandleDestroyModule(const FInputActionValue& _Value, EControllerHand Hand) {
   AVRMotionController* controller = GetControllerForHand(Hand);
-  AVCVModule* grabbedModule = Cast<AVCVModule>(controller->GetActorToGrab());
+  AVCVModule* grabbedModule =
+    Cast<AVCVModule>(
+      Hand == EControllerHand::Left
+        ? LeftHandGrabbableActor
+        : RightHandGrabbableActor
+    );
 
-  if (grabbedModule) {
-    // UE_LOG(LogTemp, Warning, TEXT("%s destroy module %s"), Hand == EControllerHand::Left ? *FString("left") : *FString("right"), *grabbedModule->GetActorNameOrLabel());
-    GameMode->DestroyModule(grabbedModule->Id);
-  }
+  if (grabbedModule) GameMode->DestroyModule(grabbedModule->Id);
 }
 
 void AVRAvatar::HandleToggleContextMenu(const FInputActionValue& _Value, EControllerHand Hand) {
   AVRMotionController* controller = GetControllerForHand(Hand);
-  AVCVModule* grabbedModule = Cast<AVCVModule>(controller->GetActorToGrab());
+  AVCVModule* grabbedModule =
+    Cast<AVCVModule>(
+      Hand == EControllerHand::Left
+        ? LeftHandGrabbableActor
+        : RightHandGrabbableActor
+    );
 
-  if (grabbedModule) {
-    // UE_LOG(LogTemp, Warning, TEXT("%s open module context menu %s:%s"), Hand == EControllerHand::Left ? *FString("left") : *FString("right"), *grabbedModule->ModuleBrand, *grabbedModule->ModuleName);
-    grabbedModule->ToggleContextMenu();
-  }
+  if (grabbedModule) grabbedModule->ToggleContextMenu();
 }
 
 void AVRAvatar::HandleStartParamEngage(const FInputActionValue& _Value, EControllerHand Hand) {

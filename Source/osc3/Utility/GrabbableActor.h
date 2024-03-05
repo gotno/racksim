@@ -39,9 +39,16 @@ protected:
   UPROPERTY()
   UMaterialInterface* OutlineMaterialInterface;
 
+  bool bTargetGrabOfLeftHand{false};
+  bool bTargetGrabOfRightHand{false};
+
   bool bGrabEngaged{false};
   FVector GrabOffset;
   FVector LastLocationDelta;
   FVector LastGrabbedLocation;
   FRotator LastGrabbedRotation;
+
+public:
+  // delegate stuff
+  void HighlightIfTargeted(AActor* GrabbableTarget, EControllerHand Hand);
 };

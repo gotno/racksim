@@ -2,6 +2,7 @@
 
 #include "osc3.h"
 #include "osc3GameModeBase.h"
+#include "Utility/GrabbableActor.h"
 #include "Player/VRAvatar.h"
 #include "VCVData/VCV.h"
 #include "VCVModule.h"
@@ -11,6 +12,7 @@
 #include "UI/Tooltip.h"
 #include "Utility/GrabbableActor.h"
 
+#include "MotionControllerComponent.h"
 #include "Components/SphereComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/WidgetComponent.h"
@@ -52,9 +54,7 @@ void AVRMotionController::BeginPlay() {
   Avatar = Cast<AVRAvatar>(GetOwner());
   GameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(this));
 
-  GrabSphere->OnComponentBeginOverlap.AddDynamic(this, &AVRMotionController::HandleGrabberBeginOverlap);
   GrabSphere->OnComponentEndOverlap.AddDynamic(this, &AVRMotionController::HandleGrabberEndOverlap);
-  GrabSphere->ComponentTags.Add(TAG_GRABBER);
 
   InteractCapsule->AddLocalOffset(InteractCapsule->GetUnscaledCapsuleHalfHeight_WithoutHemisphere() * InteractCapsule->GetUpVector());
   InteractCapsule->AttachToComponent(InteractCapsuleRoot, FAttachmentTransformRules::KeepRelativeTransform);
@@ -90,6 +90,8 @@ void AVRMotionController::SetTrackingSource(EControllerHand Hand) {
 
 void AVRMotionController::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
+
+  GrabberTick();
 
   // grab sphere
   DrawDebugSphere(
@@ -149,10 +151,6 @@ void AVRMotionController::Tick(float DeltaTime) {
 
 void AVRMotionController::LogOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherCompomponent, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
   // UE_LOG(LogTemp, Warning, TEXT("%s overlap %s"), *HandName, *OtherActor->GetActorNameOrLabel());
-
-  if (OtherActor->ActorHasTag(TAG_GRABBABLE)) {
-    // UE_LOG(LogTemp, Warning, TEXT("%s hand can grab %s"), *HandName, *OtherActor->GetActorNameOrLabel());
-  }
 
   if (OtherActor->ActorHasTag(TAG_INTERACTABLE_PARAM) || OtherActor->ActorHasTag(TAG_INTERACTABLE_PORT)) {
     // UE_LOG(LogTemp, Warning, TEXT("%s hand can interact %s"), *HandName, *OtherActor->GetActorNameOrLabel());
@@ -352,60 +350,63 @@ void AVRMotionController::HandleInteractorEndOverlap(UPrimitiveComponent* Overla
   }
 }
 
-void AVRMotionController::HandleGrabberBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult) {
-  if (bIsGrabbing || bIsParamInteracting) return;
+void AVRMotionController::GrabberTick() {
+  if (bIsGrabbing) return;
 
-  if (OtherActor->ActorHasTag(TAG_GRABBABLE) && Cast<AGrabbableActor>(OtherActor)) {
-    // UE_LOG(LogTemp, Display, TEXT("%s AVRMotionController::HandleGrabberBeginOverlap set ActorToGrab %s"), *HandName, *OtherActor->GetActorNameOrLabel());
+  TSet<AActor*> overlappingActors;
+  GrabSphere->GetOverlappingActors(overlappingActors, AGrabbableActor::StaticClass());
 
-    ActorToGrab = OtherActor;
-    Cast<AGrabbableActor>(OtherActor)->SetHighlighted(true);
-    Avatar->SetControllerGrabbing(
-      MotionController->GetTrackingSource(),
-      true
+  FVector grabSphereLocation = GrabSphere->GetComponentLocation();
+  double shortestDistance{9999};
+  AActor* closestGrabbable{nullptr};
+  for (AActor* actor : overlappingActors) {
+    double thisDistance = FVector::Dist(grabSphereLocation, actor->GetActorLocation());
+    if (thisDistance < shortestDistance) {
+      closestGrabbable = actor;
+      shortestDistance = thisDistance;
+    }
+  }
+  if (closestGrabbable) {
+    // UE_LOG(LogTemp, Warning, TEXT("closestGrabbable: %s"), *closestGrabbable->GetActorNameOrLabel());
+    // if (GEngine) {
+    //   GEngine->AddOnScreenDebugMessage(
+    //     -1,
+    //     2.f,
+    //     FColor::Yellow,
+    //     FString::Printf(
+    //       TEXT("%s hand closest grabbable %s"),
+    //       *HandName,
+    //       *closestGrabbable->GetActorNameOrLabel()
+    //     ),
+    //     false
+    //   );
+    // }
+    OnGrabbableTargetedDelegate.Broadcast(
+      closestGrabbable,
+      MotionController->GetTrackingSource()
     );
   }
 }
 
 void AVRMotionController::StartGrab() {
   bIsGrabbing = true;
-  // UE_LOG(LogTemp, Warning, TEXT("  %s hand AVRMotionController::StartGrab (bIsGrabbing %d)"), *HandName, bIsGrabbing);
   SetTooltipVisibility(false);
   PlayerController->PlayHapticEffect(HapticEffects.Bump, MotionController->GetTrackingSource());
 }
 
 void AVRMotionController::EndGrab() {
   bIsGrabbing = false;
-  // UE_LOG(LogTemp, Warning, TEXT("  %s hand AVRMotionController::EndGrab (bIsGrabbing %d)"), *HandName, bIsGrabbing);
-
-  TSet<AActor*> overlappingActors;
-  GrabSphere->GetOverlappingActors(overlappingActors);
-
-  if (!overlappingActors.Contains(ActorToGrab)) {
-    ActorToGrab = nullptr;
-    Avatar->SetControllerGrabbing(
-      MotionController->GetTrackingSource(),
-      false
-    );
-  } else {
-    Cast<AGrabbableActor>(ActorToGrab)->SetHighlighted(true);
-  }
 }
 
 void AVRMotionController::HandleGrabberEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex) {
-  if (OtherActor->ActorHasTag(TAG_GRABBABLE) && Cast<AGrabbableActor>(OtherActor))
-    Cast<AGrabbableActor>(OtherActor)->SetHighlighted(false);
   if (bIsGrabbing || bIsParamInteracting) return;
 
   TSet<AActor*> overlappingActors;
-  GrabSphere->GetOverlappingActors(overlappingActors);
-
-  if (OtherActor->ActorHasTag(TAG_GRABBABLE) && !overlappingActors.Contains(ActorToGrab)) {
-    // UE_LOG(LogTemp, Warning, TEXT("  %s hand AVRMotionController::HandleGrabberEndOverlap (bIsGrabbing %d)"), *HandName, bIsGrabbing);
-    ActorToGrab = nullptr;
-    Avatar->SetControllerGrabbing(
-      MotionController->GetTrackingSource(),
-      false
+  GrabSphere->GetOverlappingActors(overlappingActors, AGrabbableActor::StaticClass());
+  if (overlappingActors.IsEmpty()) {
+    OnGrabbableTargetedDelegate.Broadcast(
+      nullptr,
+      MotionController->GetTrackingSource()
     );
   }
 }

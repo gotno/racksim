@@ -1,6 +1,9 @@
 #include "Utility/GrabbableActor.h"
 
+#include "osc3GameModeBase.h"
+
 #include "Kismet/KismetMathLibrary.h"
+#include "Kismet/GameplayStatics.h"
 
 AGrabbableActor::AGrabbableActor() {
 	PrimaryActorTick.bCanEverTick = true;
@@ -31,6 +34,8 @@ void AGrabbableActor::BeginPlay() {
     OutlineMaterialInstance = UMaterialInstanceDynamic::Create(OutlineMaterialInterface, this);
     OutlineMeshComponent->SetMaterial(0, OutlineMaterialInstance);
   }
+
+  Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(this))->SubscribeGrabbableSetDelegate(this);
 }
 
 void AGrabbableActor::Tick(float DeltaTime) {
@@ -46,6 +51,7 @@ void AGrabbableActor::EngageGrab(FVector GrabbedLocation, FRotator GrabbedRotati
   // UE_LOG(LogTemp, Warning, TEXT("%s: grab engage"), *GetActorNameOrLabel());
   bGrabEngaged = true;
   GrabOffset = GrabbedLocation - GetActorLocation();
+
   StaticMeshComponent->AddWorldOffset(-GrabOffset);
 
   LastGrabbedRotation = GrabbedRotation;
@@ -82,4 +88,16 @@ void AGrabbableActor::ReleaseGrab() {
   StaticMeshComponent->AddWorldOffset(GrabOffset);
   AddActorWorldOffset(-GrabOffset);
   GrabOffset = FVector(0.f);
+}
+
+void AGrabbableActor::HighlightIfTargeted(AActor* GrabbableTarget, EControllerHand Hand) {
+  if (GrabbableTarget == this) {
+    if (Hand == EControllerHand::Left) bTargetGrabOfLeftHand = true;
+    if (Hand == EControllerHand::Right) bTargetGrabOfRightHand = true;
+  } else {
+    if (Hand == EControllerHand::Left) bTargetGrabOfLeftHand = false;
+    if (Hand == EControllerHand::Right) bTargetGrabOfRightHand = false;
+  }
+
+  SetHighlighted(bTargetGrabOfLeftHand || bTargetGrabOfRightHand ? true : false);
 }

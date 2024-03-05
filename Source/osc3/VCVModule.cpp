@@ -61,7 +61,6 @@ void AVCVModule::BeginPlay() {
   GameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(this));
   
   Tags.Add(TAG_INTERACTABLE);
-  Tags.Add(TAG_GRABBABLE);
 }
 
 void AVCVModule::EndPlay(const EEndPlayReason::Type EndPlayReason) {

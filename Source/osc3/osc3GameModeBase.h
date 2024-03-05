@@ -11,6 +11,7 @@
 
 class Aosc3GameState;
 class AOSCController;
+class AGrabbableActor;
 class URackManager;
 class AMainMenu;
 class Uosc3SaveGame;
@@ -131,8 +132,10 @@ private:
   void NewPatch();
   void ContinueAutosave();
   void StartRack(bool bNewPatch);
+
 public:
   // delegate stuff
   void SubscribeMenuItemSyncedDelegate(AContextMenu* ContextMenu);
   void SubscribeMenuSyncedDelegate(AContextMenu* ContextMenu);
+  void SubscribeGrabbableSetDelegate(AGrabbableActor* GrabbableActor);
 };

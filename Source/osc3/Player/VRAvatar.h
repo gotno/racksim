@@ -13,6 +13,7 @@ struct FHitResult;
 class UHapticFeedbackEffect_Base;
 class Aosc3GameModeBase;
 class AVCVCable;
+class AGrabbableActor;
 
 USTRUCT()
 struct FBaseActions {
@@ -152,6 +153,14 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
   void EnableWorldManipulation();
 
+  AVRMotionController* GetMotionController(EControllerHand Hand) {
+    if (Hand == EControllerHand::Left) {
+      return LeftController;
+    } else {
+      return RightController;
+    }
+  }
+
   UPROPERTY(EditAnywhere, Category="Input")
   FBaseActions BaseActions;
   UPROPERTY(EditAnywhere, Category="Input")
@@ -238,6 +247,8 @@ private:
   void HandleCompleteRotoTranslateWorld(const FInputActionValue& _Value);
 
   // module manipulation
+  AGrabbableActor* RightHandGrabbableActor{nullptr};
+  AGrabbableActor* LeftHandGrabbableActor{nullptr};
   void HandleStartGrab(const FInputActionValue& _Value, EControllerHand Hand);
   void HandleGrab(const FInputActionValue& _Value, EControllerHand Hand);
   void HandleCompleteGrab(const FInputActionValue& _Value, EControllerHand Hand);
@@ -265,4 +276,8 @@ private:
   void HandleStartWidgetLeftClick(const FInputActionValue& _Value, EControllerHand Hand);
   void HandleCompleteWidgetLeftClick(const FInputActionValue& _Value, EControllerHand Hand);
   void HandleWidgetScroll(const FInputActionValue& _Value, EControllerHand Hand);
+
+public:
+  // delegate stuff
+  void HandleGrabbableTargetSet(AActor* GrabbableActor, EControllerHand Hand);
 };

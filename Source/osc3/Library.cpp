@@ -50,7 +50,6 @@ void ALibrary::BeginPlay() {
   LibraryWidgetComponent->AddWorldOffset(StaticMeshComponent->GetForwardVector() * -0.01f);
 
   Tags.Add(TAG_INTERACTABLE);
-  Tags.Add(TAG_GRABBABLE);
 
   SetScale();
 }

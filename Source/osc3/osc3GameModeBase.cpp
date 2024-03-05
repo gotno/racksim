@@ -7,6 +7,9 @@
 #include "Player/VRAvatar.h"
 #include "osc3SaveGame.h"
 
+#include "Player/VRMotionController.h"
+#include "Utility/GrabbableActor.h"
+
 #include "VCVModule.h"
 #include "VCVCable.h"
 #include "ModuleComponents/ContextMenu.h"
@@ -457,4 +460,26 @@ void Aosc3GameModeBase::SubscribeMenuItemSyncedDelegate(AContextMenu* ContextMen
 
 void Aosc3GameModeBase::SubscribeMenuSyncedDelegate(AContextMenu* ContextMenu) {
   OSCctrl->OnMenuSyncedDelegate.AddUObject(ContextMenu, &AContextMenu::MenuSynced);
+}
+
+void Aosc3GameModeBase::SubscribeGrabbableSetDelegate(AGrabbableActor* GrabbableActor) {
+  if (!PlayerPawn) return;
+
+  AVRMotionController* leftController =
+    PlayerPawn->GetMotionController(EControllerHand::Left);
+  if (leftController) {
+    leftController->OnGrabbableTargetedDelegate.AddUObject(
+      GrabbableActor,
+      &AGrabbableActor::HighlightIfTargeted
+    );
+  }
+
+  AVRMotionController* rightController =
+    PlayerPawn->GetMotionController(EControllerHand::Right);
+  if (rightController) {
+    rightController->OnGrabbableTargetedDelegate.AddUObject(
+      GrabbableActor,
+      &AGrabbableActor::HighlightIfTargeted
+    );
+  }
 }
