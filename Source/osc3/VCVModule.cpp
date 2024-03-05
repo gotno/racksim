@@ -110,7 +110,6 @@ void AVCVModule::Init(VCVModule vcv_module) {
 
   StaticMeshComponent->SetWorldScale3D(FVector(RENDER_SCALE * MODULE_DEPTH, Model.box.size.x, Model.box.size.y));
   OutlineMeshComponent->SetWorldScale3D(FVector(RENDER_SCALE * MODULE_DEPTH + 0.2f, Model.box.size.x + 0.2f, Model.box.size.y + 0.2f));
-  OutlineMeshComponent->AddLocalOffset(FVector(-0.1f, 0.f, 0.f));
 
   SpawnComponents();
   SetHidden(false);

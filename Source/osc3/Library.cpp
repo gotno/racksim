@@ -147,7 +147,6 @@ void ALibrary::SetScale() {
       desiredHeight + 0.2f
     )
   );
-  OutlineMeshComponent->AddLocalOffset(FVector(-0.1f, 0.f, 0.f));
 
   FVector2D drawSize(700.f, 700.f);
   float scale = desiredMenuHeight / drawSize.Y;
