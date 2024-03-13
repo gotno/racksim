@@ -27,9 +27,13 @@
 
 #define LIGHT_OBJECT ECC_GameTraceChannel1
 #define PARAM_OBJECT ECC_GameTraceChannel2
+#define PORT_OBJECT ECC_GameTraceChannel7
+#define CABLE_END_OBJECT ECC_GameTraceChannel8
+#define INTERACTOR_OBJECT ECC_GameTraceChannel5
+#define DISPLAY_OBJECT ECC_GameTraceChannel6
+
 #define PARAM_TRACE ECC_GameTraceChannel3
 #define TELEPORT_TRACE ECC_GameTraceChannel4
-#define INTERACTOR_OBJECT ECC_GameTraceChannel5
 
 #define TAG_INTERACTABLE FName("interactable")
 #define TAG_INTERACTABLE_PARAM FName("interactable_param")
@@ -39,5 +43,8 @@ UENUM()
 enum class PortType : int32
 {
     Input,
-    Output
-}; 
+    Output,
+    Any
+};
+
+#define ODB(Format, ...) if(GEngine){ GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Yellow, FString::Printf(TEXT(Format), ##__VA_ARGS__), false); }

@@ -34,6 +34,9 @@ AVCVSlider::AVCVSlider() {
   if (MeshHandle.Object) HandleMeshComponent->SetStaticMesh(MeshHandle.Object);
   HandleMeshComponent->SetupAttachment(GetRootComponent());
 
+  BaseMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+  BaseMeshComponent->SetCollisionObjectType(PARAM_OBJECT);
+
   HandleMeshComponent->SetGenerateOverlapEvents(true);
   HandleMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
   HandleMeshComponent->SetCollisionObjectType(PARAM_OBJECT);

@@ -9,7 +9,7 @@
 class Aosc3GameModeBase;
 class UTexture2D;
 
-class AVCVCable;
+class ACableEnd;
 class AVCVModule;
 
 UCLASS()
@@ -30,11 +30,12 @@ public:
   AVCVModule* Module;
 
   PortType Type;
-  void AddCable(AVCVCable* Cable);
-  void RemoveCable(AVCVCable* Cable);
+  void Connect(ACableEnd* CableEnd);
+  void Disconnect(ACableEnd* CableEnd);
+
   bool CanConnect(PortType Type);
-  bool HasCables();
-  AVCVCable* GetTopCable();
+  bool HasConnections();
+  ACableEnd* GetTopCableEnd();
   void TriggerCableUpdates();
 
   void GetTooltipText(FString& Name, FString& Description);
@@ -61,8 +62,5 @@ private:
   VCVPort* Model;
 
   UPROPERTY()
-  TArray<AVCVCable*> Cables;
-  
-  UPROPERTY()
-  TArray<AVCVCable*> AttachedCableActors;
+  TArray<ACableEnd*> ConnectedCableEnds;
 };

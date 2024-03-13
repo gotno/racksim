@@ -7,13 +7,13 @@
 #include "VCVCable.generated.h"
 
 class USceneComponent;
-class UStaticMeshComponent;
 class UMaterialInstanceDynamic;
 class UMaterialInterface;
 class UCableComponent;
 
 class Aosc3GameModeBase;
 class AVCVPort;
+class ACableEnd;
 
 UCLASS()
 class OSC3_API AVCVCable : public AActor {
@@ -32,38 +32,37 @@ public:
   int64_t Id{-1};
   void SetId(int64_t inId) { Id = inId; }
 
-  void SetPort(AVCVPort* Port);
-  void UnsetPort(PortType Type);
+  void ConnectToPort(AVCVPort* Port);
+  void DisconnectFromPort(PortType Type);
   AVCVPort* GetPort(PortType Type);
+  AVCVPort* GetPort(ACableEnd* CableEnd);
+  AVCVPort* GetOtherPort(ACableEnd* CableEnd);
+  ACableEnd* GetOtherEnd(AVCVPort* Port);
+  void Abandon();
 
-  void UpdateEndPositions();
-  void SetHangingEndLocation(FVector inHangingLocation, FVector inHangingForwardVector);
-  PortType GetHangingType();
+  void HandleRegistration();
+
+  void Stir(float WakeSeconds = 2.f);
   
+  void ToggleLatched() {
+    bLatched = !bLatched;
+  }
 private:
   UPROPERTY(VisibleAnywhere)
   USceneComponent* RootSceneComponent;
-  UPROPERTY(VisibleAnywhere)
-  UStaticMeshComponent* InputMeshComponent;
-  UPROPERTY(VisibleAnywhere)
-  UStaticMeshComponent* OutputMeshComponent;
-  
-  TCHAR* JackMeshReference = TEXT("/Script/Engine.StaticMesh'/Game/meshes/jack.jack'");
   
   UPROPERTY(VisibleAnywhere)
   UCableComponent* CableComponent;
-
-  TCHAR* BaseMaterialReference = TEXT("/Script/Engine.Material'/Game/materials/generic_color.generic_color'");
-  UPROPERTY()
-  UMaterialInstanceDynamic* BaseMaterialInstance;
-  UPROPERTY()
-  UMaterialInterface* BaseMaterialInterface;
-
   TCHAR* CableMaterialReference = TEXT("/Script/Engine.Material'/Game/materials/cable.cable'");
   UPROPERTY()
   UMaterialInstanceDynamic* CableMaterialInstance;
   UPROPERTY()
   UMaterialInterface* CableMaterialInterface;
+
+  UPROPERTY()
+  ACableEnd* CableEndA{nullptr};
+  UPROPERTY()
+  ACableEnd* CableEndB{nullptr};
 
   FColor CableColor;
   // TODO: replace these with colors from potentially-user-overridden rack settings
@@ -80,22 +79,11 @@ private:
   void Sleep();
   void Wake();
   
-  FVector HangingLocation, HangingForwardVector;
-  
   Aosc3GameModeBase* GameMode{nullptr};
   
-  bool IsComplete() {
-    return Ports.Contains(PortType::Input) && Ports.Contains(PortType::Output);
-  }
-
-  bool IsRegistered() {
-    return Id != -1;
-  }
-
-  void HandlePortChange();
+  bool IsComplete();
+  bool IsRegistered();
   
-  // // allowed to exist even if incomplete (hanging end is floating, not held)
-  // bool Latched{false};
-  UPROPERTY()
-  TMap<PortType, AVCVPort*> Ports;
+  // allowed to exist even if unattached (IsIncomplete)
+  bool bLatched{false};
 };

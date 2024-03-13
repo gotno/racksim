@@ -13,6 +13,9 @@ struct FHitResult;
 class UHapticFeedbackEffect_Base;
 class Aosc3GameModeBase;
 class AVCVCable;
+class ACableEnd;
+class AVCVParam;
+class AVCVPort;
 class AGrabbableActor;
 
 USTRUCT()
@@ -108,6 +111,21 @@ struct FParamInteractionActions {
 };
 
 USTRUCT()
+struct FPortInteractionActions {
+  GENERATED_BODY()
+
+  UPROPERTY(EditDefaultsOnly)
+  UInputAction* PortEngageLeft;
+  UPROPERTY(EditDefaultsOnly)
+  UInputAction* PortEngageRight;
+
+  UPROPERTY(EditDefaultsOnly)
+  UInputAction* CableLatchLeft;
+  UPROPERTY(EditDefaultsOnly)
+  UInputAction* CableLatchRight;
+};
+
+USTRUCT()
 struct FInputMappingContexts {
 	GENERATED_BODY()
     
@@ -133,6 +151,11 @@ struct FInputMappingContexts {
   UInputMappingContext* ParamInteractionLeft;
   UPROPERTY(EditDefaultsOnly)
   UInputMappingContext* ParamInteractionRight;
+
+  UPROPERTY(EditDefaultsOnly)
+  UInputMappingContext* PortInteractionLeft;
+  UPROPERTY(EditDefaultsOnly)
+  UInputMappingContext* PortInteractionRight;
 };
 
 class UEnhancedInputLocalPlayerSubsystem;
@@ -171,6 +194,8 @@ public:
   FModuleManipulationActions ModuleManipulationActions;
   UPROPERTY(EditAnywhere, Category="Input")
   FParamInteractionActions ParamInteractionActions;
+  UPROPERTY(EditAnywhere, Category="Input")
+  FPortInteractionActions PortInteractionActions;
 
   UPROPERTY(EditAnywhere, Category="Input")
   FInputMappingContexts InputMappingContexts;
@@ -179,7 +204,8 @@ public:
   
   void SetControllerWidgetInteracting(EControllerHand Hand, bool bEnable);
   void SetControllerGrabbing(EControllerHand Hand, bool bEnable);
-  void SetControllerParamOrPortInteracting(EControllerHand Hand, bool bEnable);
+  void SetControllerParamInteracting(EControllerHand Hand, bool bEnable);
+  void SetControllerPortInteracting(EControllerHand Hand, bool bEnable);
   
   void GetRenderablePosition(FVector& Location, FRotator& Rotation);
   FRotator GetLookAtCameraRotation(FVector FromLocation);
@@ -247,8 +273,8 @@ private:
   void HandleCompleteRotoTranslateWorld(const FInputActionValue& _Value);
 
   // module manipulation
-  AGrabbableActor* RightHandGrabbableActor{nullptr};
   AGrabbableActor* LeftHandGrabbableActor{nullptr};
+  AGrabbableActor* RightHandGrabbableActor{nullptr};
   void HandleStartGrab(const FInputActionValue& _Value, EControllerHand Hand);
   void HandleGrab(const FInputActionValue& _Value, EControllerHand Hand);
   void HandleCompleteGrab(const FInputActionValue& _Value, EControllerHand Hand);
@@ -258,12 +284,19 @@ private:
   void HandleToggleContextMenu(const FInputActionValue& _Value, EControllerHand Hand);
 
   // param interaction
+  AVCVParam* LeftHandParamActor{nullptr};
+  AVCVParam* RightHandParamActor{nullptr};
   void HandleStartParamEngage(const FInputActionValue& _Value, EControllerHand Hand);
   void HandleParamEngage(const FInputActionValue& _Value, EControllerHand Hand);
   void HandleCompleteParamEngage(const FInputActionValue& _Value, EControllerHand Hand);
-  AVCVCable* LeftHandControlledCable;
-  AVCVCable* RightHandControlledCable;
   void HandleParamReset(const FInputActionValue& _Value, EControllerHand Hand);
+
+  ACableEnd* LeftHandHeldCableEnd;
+  ACableEnd* RightHandHeldCableEnd;
+  void HandleStartPortEngage(const FInputActionValue& _Value, EControllerHand Hand);
+  void HandlePortEngage(const FInputActionValue& _Value, EControllerHand Hand);
+  void HandleCompletePortEngage(const FInputActionValue& _Value, EControllerHand Hand);
+  void HandleCableLatch(const FInputActionValue& _Value, EControllerHand Hand);
 
   void LogInput(const FInputActionValue& _Value, FString msg);
 
@@ -280,4 +313,8 @@ private:
 public:
   // delegate stuff
   void HandleGrabbableTargetSet(AActor* GrabbableActor, EControllerHand Hand);
+  void HandleParamTargetSet(AActor* ParamActor, EControllerHand Hand);
+  void HandleOriginPortOrCableTargetSet(AActor* PortOrCableActor, EControllerHand Hand);
+  void HandleDestinationPortTargetSet(AActor* PortActor, EControllerHand Hand);
+  void HandleHeldCableSet(AActor* CableEnd, EControllerHand Hand);
 };

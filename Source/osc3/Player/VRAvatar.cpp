@@ -12,6 +12,7 @@
 #include "ModuleComponents/VCVKnob.h"
 #include "ModuleComponents/VCVPort.h"
 #include "VCVCable.h"
+#include "CableEnd.h"
 #include "Library.h"
 #include "Utility/GrabbableActor.h"
 
@@ -73,6 +74,10 @@ void AVRAvatar::PawnClientRestart() {
     LeftController->SetTrackingSource(EControllerHand::Left);
 
     LeftController->OnGrabbableTargetedDelegate.AddUObject(this, &AVRAvatar::HandleGrabbableTargetSet);
+    LeftController->OnParamTargetedDelegate.AddUObject(this, &AVRAvatar::HandleParamTargetSet);
+    LeftController->OnOriginPortTargetedDelegate.AddUObject(this, &AVRAvatar::HandleOriginPortOrCableTargetSet);
+    LeftController->OnCableTargetedDelegate.AddUObject(this, &AVRAvatar::HandleOriginPortOrCableTargetSet);
+    LeftController->OnCableHeldDelegate.AddUObject(this, &AVRAvatar::HandleHeldCableSet);
   }
 
   if (!RightController) {
@@ -82,6 +87,10 @@ void AVRAvatar::PawnClientRestart() {
     RightController->SetTrackingSource(EControllerHand::Right);
 
     RightController->OnGrabbableTargetedDelegate.AddUObject(this, &AVRAvatar::HandleGrabbableTargetSet);
+    RightController->OnParamTargetedDelegate.AddUObject(this, &AVRAvatar::HandleParamTargetSet);
+    RightController->OnOriginPortTargetedDelegate.AddUObject(this, &AVRAvatar::HandleOriginPortOrCableTargetSet);
+    RightController->OnCableTargetedDelegate.AddUObject(this, &AVRAvatar::HandleOriginPortOrCableTargetSet);
+    RightController->OnCableHeldDelegate.AddUObject(this, &AVRAvatar::HandleHeldCableSet);
   }
 }
 
@@ -92,19 +101,6 @@ void AVRAvatar::EnableWorldManipulation() {
 
 void AVRAvatar::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
-  
-  // FVector vrRootLocation = VRRoot->GetComponentLocation();
-  // vrRootLocation.Z = 10.f;
-  // FVector cameraLocation = Camera->GetComponentLocation();
-  // cameraLocation.Z = 10.f;
-  // DrawDebugSphere(GetWorld(), vrRootLocation, 5.f, 32, FColor::Red);
-  // DrawDebugSphere(GetWorld(), cameraLocation, 10.f, 32, FColor::Blue);
-  // DrawDebugSphere(GetWorld(), GetActorLocation(), 5.f, 32, FColor::Green);
-
-  // DrawDebugSphere(GetWorld(), FVector(200.f, 200.f, 10.f), 5.f, 32, FColor::Magenta);
-  // DrawDebugSphere(GetWorld(), FVector(-200.f, 200.f, 10.f), 5.f, 32, FColor::Magenta);
-  // DrawDebugSphere(GetWorld(), FVector(-200.f, -200.f, 10.f), 5.f, 32, FColor::Magenta);
-  // DrawDebugSphere(GetWorld(), FVector(200.f, -200.f, 10.f), 5.f, 32, FColor::Magenta);
 }
 
 void AVRAvatar::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
@@ -176,13 +172,25 @@ void AVRAvatar::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
   Input->BindAction(ParamInteractionActions.ParamResetLeft, ETriggerEvent::Started, this, &AVRAvatar::HandleParamReset, EControllerHand::Left);
   Input->BindAction(ParamInteractionActions.ParamResetRight, ETriggerEvent::Started, this, &AVRAvatar::HandleParamReset, EControllerHand::Right);
 
+  // port/cable interaction
+  // engage
+  Input->BindAction(PortInteractionActions.PortEngageLeft, ETriggerEvent::Started, this, &AVRAvatar::HandleStartPortEngage, EControllerHand::Left);
+  Input->BindAction(PortInteractionActions.PortEngageRight, ETriggerEvent::Started, this, &AVRAvatar::HandleStartPortEngage, EControllerHand::Right);
+  Input->BindAction(PortInteractionActions.PortEngageLeft, ETriggerEvent::Triggered, this, &AVRAvatar::HandlePortEngage, EControllerHand::Left);
+  Input->BindAction(PortInteractionActions.PortEngageRight, ETriggerEvent::Triggered, this, &AVRAvatar::HandlePortEngage, EControllerHand::Right);
+  Input->BindAction(PortInteractionActions.PortEngageLeft, ETriggerEvent::Completed, this, &AVRAvatar::HandleCompletePortEngage, EControllerHand::Left);
+  Input->BindAction(PortInteractionActions.PortEngageRight, ETriggerEvent::Completed, this, &AVRAvatar::HandleCompletePortEngage, EControllerHand::Right);
+  // toggle latched (allow cable to exist unconnected)
+  Input->BindAction(PortInteractionActions.CableLatchLeft, ETriggerEvent::Completed, this, &AVRAvatar::HandleCableLatch, EControllerHand::Left);
+  Input->BindAction(PortInteractionActions.CableLatchRight, ETriggerEvent::Completed, this, &AVRAvatar::HandleCableLatch, EControllerHand::Right);
+
   // general
+  // toggle main menu
+  Input->BindAction(BaseActions.MenuToggle, ETriggerEvent::Completed, this, &AVRAvatar::ToggleMainMenu);
   // request screenshot
   Input->BindAction(BaseActions.RequestScreenshot, ETriggerEvent::Completed, this, &AVRAvatar::RequestScreenshot);
   // quit
   Input->BindAction(BaseActions.Quit, ETriggerEvent::Completed, this, &AVRAvatar::Quit);
-  // quit
-  Input->BindAction(BaseActions.MenuToggle, ETriggerEvent::Completed, this, &AVRAvatar::ToggleMainMenu);
 
   // widget interaction
   // widget left click
@@ -219,19 +227,19 @@ void AVRAvatar::SetControllerGrabbing(EControllerHand Hand, bool bEnable) {
 
   UInputMappingContext* moduleManipulationMappingContext = 
     Hand == EControllerHand::Left
-      ? InputMappingContexts.ModuleManipulationLeft
+    ? InputMappingContexts.ModuleManipulationLeft
       : InputMappingContexts.ModuleManipulationRight;
 
   // UE_LOG(LogTemp, Warning, TEXT("setting module grabbing mapping %d"), bEnable);
 
   if (bEnable && !InputSubsystem->HasMappingContext(moduleManipulationMappingContext)) {
     InputSubsystem->AddMappingContext(moduleManipulationMappingContext, 3);
-  } else {
+  } else if (!bEnable) {
     InputSubsystem->RemoveMappingContext(moduleManipulationMappingContext);
   }
 }
 
-void AVRAvatar::SetControllerParamOrPortInteracting(EControllerHand Hand, bool bEnable) {
+void AVRAvatar::SetControllerParamInteracting(EControllerHand Hand, bool bEnable) {
   if (Hand == EControllerHand::Left && bLeftHandWorldManipulationActive) return;
   if (Hand == EControllerHand::Right && bRightHandWorldManipulationActive) return;
 
@@ -239,13 +247,27 @@ void AVRAvatar::SetControllerParamOrPortInteracting(EControllerHand Hand, bool b
     Hand == EControllerHand::Left
       ? InputMappingContexts.ParamInteractionLeft
       : InputMappingContexts.ParamInteractionRight;
-  
-  // UE_LOG(LogTemp, Warning, TEXT("setting param interacting mapping %d"), bEnable);
 
   if (bEnable && !InputSubsystem->HasMappingContext(paramInteractingMappingContext)) {
     InputSubsystem->AddMappingContext(paramInteractingMappingContext, 4);
-  } else {
+  } else if (!bEnable) {
     InputSubsystem->RemoveMappingContext(paramInteractingMappingContext);
+  }
+}
+
+void AVRAvatar::SetControllerPortInteracting(EControllerHand Hand, bool bEnable) {
+  if (Hand == EControllerHand::Left && bLeftHandWorldManipulationActive) return;
+  if (Hand == EControllerHand::Right && bRightHandWorldManipulationActive) return;
+
+  UInputMappingContext* portInteractingMappingContext = 
+    Hand == EControllerHand::Left
+      ? InputMappingContexts.PortInteractionLeft
+      : InputMappingContexts.PortInteractionRight;
+
+  if (bEnable && !InputSubsystem->HasMappingContext(portInteractingMappingContext)) {
+    InputSubsystem->AddMappingContext(portInteractingMappingContext, 4);
+  } else if (!bEnable) {
+    InputSubsystem->RemoveMappingContext(portInteractingMappingContext);
   }
 }
 
@@ -259,6 +281,7 @@ void AVRAvatar::SetWorldManipulationActive(EControllerHand Hand, bool bActive) {
   } else {
     bRightHandWorldManipulationActive = bActive;
   }
+  GetControllerForHand(Hand)->SetWorldInteract(bActive);
 }
 
 // teleport
@@ -337,7 +360,6 @@ void AVRAvatar::HandleRotateWorld(const FInputActionValue& _Value, EControllerHa
     lastControllerLocation = LastRightHandLocation;
   }
 
-
   float deltaYaw =
     GetRotationalDistanceBetweenControllerPositions(
       lastControllerLocation,
@@ -373,7 +395,6 @@ void AVRAvatar::HandleCompleteRotateWorld(const FInputActionValue& _Value, ECont
 // translate world
 void AVRAvatar::HandleStartTranslateWorld(const FInputActionValue& _Value, EControllerHand Hand) {
   SetWorldManipulationActive(Hand, true);
-  FString handLabel(Hand == EControllerHand::Left ? "left" : "right");
 
   if (Hand == EControllerHand::Left) {
     LastLeftHandLocation = LeftController->GetActorLocation();
@@ -464,6 +485,48 @@ void AVRAvatar::HandleRotoTranslateWorld(const FInputActionValue& _Value) {
   LastRightHandLocation = RightController->GetActorLocation();
 }
 
+void AVRAvatar::HandleParamTargetSet(AActor* ParamActor, EControllerHand Hand) {
+  if (ParamActor) {
+    SetControllerParamInteracting(Hand, true);
+    if (Hand == EControllerHand::Left) {
+      LeftHandParamActor = Cast<AVCVParam>(ParamActor);
+    } else {
+      RightHandParamActor = Cast<AVCVParam>(ParamActor);
+    }
+  } else {
+    SetControllerParamInteracting(Hand, false);
+    if (Hand == EControllerHand::Left) {
+      LeftHandParamActor = nullptr;
+    } else {
+      RightHandParamActor = nullptr;
+    }
+  }
+}
+
+void AVRAvatar::HandleOriginPortOrCableTargetSet(AActor* PortOrCableActor, EControllerHand Hand) {
+  if (PortOrCableActor) {
+    SetControllerPortInteracting(Hand, true);
+  } else {
+    SetControllerPortInteracting(Hand, false);
+  }
+}
+
+void AVRAvatar::HandleHeldCableSet(AActor* CableEnd, EControllerHand Hand) {
+  if (CableEnd) {
+    if (Hand == EControllerHand::Left) {
+      LeftHandHeldCableEnd = Cast<ACableEnd>(CableEnd);
+    } else {
+      RightHandHeldCableEnd = Cast<ACableEnd>(CableEnd);
+    }
+  } else {
+    if (Hand == EControllerHand::Left) {
+      LeftHandHeldCableEnd = nullptr;
+    } else {
+      RightHandHeldCableEnd = nullptr;
+    }
+  }
+}
+
 void AVRAvatar::HandleGrabbableTargetSet(AActor* GrabbableActor, EControllerHand Hand) {
   if (GrabbableActor) {
     SetControllerGrabbing(Hand, true);
@@ -552,83 +615,97 @@ void AVRAvatar::HandleToggleContextMenu(const FInputActionValue& _Value, EContro
 
 void AVRAvatar::HandleStartParamEngage(const FInputActionValue& _Value, EControllerHand Hand) {
   AVRMotionController* controller = GetControllerForHand(Hand);
-  // UE_LOG(LogTemp, Warning, TEXT("%s hand AVRAvatar::HandleStartParamEngage"), *FString(Hand == EControllerHand::Left ? "left" : "right"));
+  AVCVParam* interactingParam =
+    Hand == EControllerHand::Left
+      ? LeftHandParamActor
+      : RightHandParamActor;
 
-  AVCVParam* interactingParam = Cast<AVCVParam>(controller->GetParamActorToInteract());
-  if (interactingParam) {
-    // UE_LOG(LogTemp, Warning, TEXT("  engaging param %s"), *interactingParam->GetActorNameOrLabel());
-    controller->StartParamInteract();
+  controller->StartParamInteract();
 
-    if (Cast<AVCVKnob>(interactingParam)) {
-      interactingParam->Engage(controller->GetActorRotation().Roll);
-    } else if (Cast<AVCVSlider>(interactingParam)) {
-      interactingParam->Engage(controller->GetActorLocation());
-    } else {
-      interactingParam->Engage();
-    }
-  }
-
-  AVCVPort* interactingPort = controller->GetPortActorToInteract();
-  if (interactingPort) {
-    controller->StartPortInteract();
+  if (Cast<AVCVKnob>(interactingParam)) {
+    interactingParam->Engage(controller->GetActorRotation().Roll);
+  } else if (Cast<AVCVSlider>(interactingParam)) {
+    interactingParam->Engage(controller->GetActorLocation());
+  } else {
+    interactingParam->Engage();
   }
 }
 
 void AVRAvatar::HandleParamEngage(const FInputActionValue& _Value, EControllerHand Hand) {
   AVRMotionController* controller = GetControllerForHand(Hand);
-  AVCVParam* interactingParam = Cast<AVCVParam>(controller->GetParamActorToInteract());
-  if (interactingParam) {
-    if (Cast<AVCVKnob>(interactingParam)) {
-      interactingParam->Alter(controller->GetActorRotation().Roll);
-    } else if (Cast<AVCVSlider>(interactingParam)) {
-      interactingParam->Alter(controller->GetActorLocation());
-    }
-    controller->RefreshTooltip();
+  AVCVParam* interactingParam =
+    Hand == EControllerHand::Left
+      ? LeftHandParamActor
+      : RightHandParamActor;
+
+  if (Cast<AVCVKnob>(interactingParam)) {
+    interactingParam->Alter(controller->GetActorRotation().Roll);
+  } else if (Cast<AVCVSlider>(interactingParam)) {
+    interactingParam->Alter(controller->GetActorLocation());
   }
 
-  AVCVCable* heldCable = controller->GetHeldCable();
-  if (heldCable) {
-    AVCVPort* destinationPort = controller->GetDestinationPortActor();
-    FVector location, direction;
-    if (destinationPort) {
-      location = destinationPort->GetActorLocation();
-      direction = destinationPort->GetActorForwardVector();
-    } else {
-      controller->GetHeldCableEndInfo(location, direction);
-    }
-    heldCable->SetHangingEndLocation(location, direction);
-  }
-}
-
-void AVRAvatar::HandleCompleteParamEngage(const FInputActionValue& _Value, EControllerHand Hand) {
-  AVRMotionController* controller = GetControllerForHand(Hand);
-  // UE_LOG(LogTemp, Warning, TEXT("%s hand param engage complete"), *FString(Hand == EControllerHand::Left ? "left" : "right"));
-
-  AVCVParam* interactingParam = Cast<AVCVParam>(controller->GetParamActorToInteract());
-  if (interactingParam) {
-    // UE_LOG(LogTemp, Warning, TEXT("  releasing %s"), *interactingParam->GetActorNameOrLabel());
-    controller->EndParamInteract();
-    interactingParam->Release();
-  }
-
-  AVCVCable* heldCable = controller->GetHeldCable();
-  if (heldCable) {
-    controller->EndPortInteract();
-    // heldCable->SetAlive(false);
-  }
+  controller->RefreshTooltip();
 }
 
 void AVRAvatar::HandleParamReset(const FInputActionValue& _Value, EControllerHand Hand) {
   AVRMotionController* controller = GetControllerForHand(Hand);
-  // UE_LOG(LogTemp, Warning, TEXT("%s hand param reset"), *FString(Hand == EControllerHand::Left ? "left" : "right"));
+  AVCVParam* interactingParam =
+    Hand == EControllerHand::Left
+      ? LeftHandParamActor
+      : RightHandParamActor;
 
-  AVCVParam* interactingParam = Cast<AVCVParam>(controller->GetParamActorToInteract());
-  if (interactingParam) {
-    // UE_LOG(LogTemp, Warning, TEXT("  resetting %s"), *interactingParam->GetActorNameOrLabel());
-    interactingParam->Release();
-    interactingParam->ResetValue();
-    controller->EndParamInteract();
-  }
+  interactingParam->Release();
+  interactingParam->ResetValue();
+  controller->EndParamInteract();
+}
+
+void AVRAvatar::HandleCompleteParamEngage(const FInputActionValue& _Value, EControllerHand Hand) {
+  AVRMotionController* controller = GetControllerForHand(Hand);
+  AVCVParam* interactingParam =
+    Hand == EControllerHand::Left
+      ? LeftHandParamActor
+      : RightHandParamActor;
+
+  controller->EndParamInteract();
+  interactingParam->Release();
+}
+
+void AVRAvatar::HandleStartPortEngage(const FInputActionValue& _Value, EControllerHand Hand) {
+  AVRMotionController* controller = GetControllerForHand(Hand);
+  controller->StartPortInteract();
+}
+
+void AVRAvatar::HandlePortEngage(const FInputActionValue& _Value, EControllerHand Hand) {
+  AVRMotionController* controller = GetControllerForHand(Hand);
+  ACableEnd* heldCableEnd =
+    Hand == EControllerHand::Left
+      ? LeftHandHeldCableEnd
+      : RightHandHeldCableEnd;
+
+  FVector location, forwardVector;
+  controller->GetHeldCableEndInfo(location, forwardVector);
+  heldCableEnd->SetPosition(location, forwardVector.Rotation());
+}
+
+void AVRAvatar::HandleCompletePortEngage(const FInputActionValue& _Value, EControllerHand Hand) {
+  AVRMotionController* controller = GetControllerForHand(Hand);
+  ACableEnd* heldCableEnd =
+    Hand == EControllerHand::Left
+      ? LeftHandHeldCableEnd
+      : RightHandHeldCableEnd;
+
+  heldCableEnd->Drop();
+  controller->EndPortInteract();
+}
+
+void AVRAvatar::HandleCableLatch(const FInputActionValue& _Value, EControllerHand Hand) {
+  AVRMotionController* controller = GetControllerForHand(Hand);
+  ACableEnd* heldCableEnd =
+    Hand == EControllerHand::Left
+      ? LeftHandHeldCableEnd
+      : RightHandHeldCableEnd;
+
+  if (heldCableEnd) heldCableEnd->Cable->ToggleLatched();
 }
 
 void AVRAvatar::RequestScreenshot(const FInputActionValue& _Value) {

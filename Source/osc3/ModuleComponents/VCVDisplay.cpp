@@ -13,7 +13,7 @@ AVCVDisplay::AVCVDisplay() {
 
   BaseMeshComponent->SetGenerateOverlapEvents(true);
   BaseMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-  BaseMeshComponent->SetCollisionObjectType(PARAM_OBJECT);
+  BaseMeshComponent->SetCollisionObjectType(DISPLAY_OBJECT);
   BaseMeshComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
   BaseMeshComponent->SetCollisionResponseToChannel(LIGHT_OBJECT, ECollisionResponse::ECR_Overlap);
   

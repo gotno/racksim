@@ -2,6 +2,7 @@
 
 #include "osc3.h"
 #include "osc3GameModeBase.h"
+#include "CableEnd.h"
 #include "VCVData/VCV.h"
 #include "VCVData/VCVOverrides.h"
 #include "ModuleComponents/ContextMenu.h"
@@ -68,17 +69,21 @@ void AVCVModule::EndPlay(const EEndPlayReason::Type EndPlayReason) {
 
   for (auto& pair : InputActors) {
     AVCVPort* port = pair.Value;
-    while (port->HasCables()) {
-      AVCVCable* cable = port->GetTopCable();
-      GameMode->DestroyCableActor(cable);
+    while (port->HasConnections()) {
+      ACableEnd* cableEnd = port->GetTopCableEnd();
+      port->Disconnect(cableEnd);
+      cableEnd->HandleDisconnected();
+      GameMode->DestroyCableActor(cableEnd->Cable);
     }
   }
 
   for (auto& pair : OutputActors) {
     AVCVPort* port = pair.Value;
-    while (port->HasCables()) {
-      AVCVCable* cable = port->GetTopCable();
-      GameMode->DestroyCableActor(cable);
+    while (port->HasConnections()) {
+      ACableEnd* cableEnd = port->GetTopCableEnd();
+      port->Disconnect(cableEnd);
+      cableEnd->HandleDisconnected();
+      GameMode->DestroyCableActor(cableEnd->Cable);
     }
   }
 
@@ -266,12 +271,8 @@ void AVCVModule::AlterGrab(FVector GrabbedLocation, FRotator GrabbedRotation) {
 }
 
 void AVCVModule::TriggerCableUpdates() {
-  for (auto& pair : InputActors) {
-    pair.Value->TriggerCableUpdates();
-  }
-  for (auto& pair : OutputActors) {
-    pair.Value->TriggerCableUpdates();
-  }
+  for (auto& pair : InputActors) pair.Value->TriggerCableUpdates();
+  for (auto& pair : OutputActors) pair.Value->TriggerCableUpdates();
 }
 
 void AVCVModule::ToggleContextMenu() {

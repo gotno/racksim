@@ -19,6 +19,8 @@ AVCVButton::AVCVButton() {
   MeshComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
   MeshComponent->SetCollisionResponseToChannel(LIGHT_OBJECT, ECollisionResponse::ECR_Overlap);
   MeshComponent->SetCollisionResponseToChannel(INTERACTOR_OBJECT, ECollisionResponse::ECR_Overlap);
+
+  MeshComponent->SetCollisionResponseToChannel(PARAM_TRACE, ECollisionResponse::ECR_Block);
   
   static ConstructorHelpers::FObjectFinder<UStaticMesh> Mesh(MeshReference);
   if (Mesh.Object) MeshComponent->SetStaticMesh(Mesh.Object);

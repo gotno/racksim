@@ -15,6 +15,9 @@
 AVCVKnob::AVCVKnob() {
   BaseMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Static Mesh"));
   RootComponent = BaseMeshComponent;
+
+  BaseMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+  BaseMeshComponent->SetCollisionObjectType(PARAM_OBJECT);
   
   static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshBody(MeshReference);
   

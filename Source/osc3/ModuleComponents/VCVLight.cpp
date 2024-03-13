@@ -22,6 +22,7 @@ AVCVLight::AVCVLight() {
   BaseMeshComponent->SetCollisionObjectType(LIGHT_OBJECT);
   BaseMeshComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
   BaseMeshComponent->SetCollisionResponseToChannel(PARAM_OBJECT, ECollisionResponse::ECR_Overlap);
+  BaseMeshComponent->SetCollisionResponseToChannel(DISPLAY_OBJECT, ECollisionResponse::ECR_Overlap);
   BaseMeshComponent->OnComponentBeginOverlap.AddDynamic(this, &AVCVLight::HandleBeginOverlap);
 
   static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshCircle(CircleMeshReference);

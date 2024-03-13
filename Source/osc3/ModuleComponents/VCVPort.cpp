@@ -4,7 +4,7 @@
 #include "osc3GameModeBase.h"
 #include "VCVData/VCV.h"
 #include "VCVModule.h"
-#include "VCVCable.h"
+#include "CableEnd.h"
 
 #include "engine/Texture2D.h"
 #include "Kismet/GameplayStatics.h"
@@ -15,7 +15,10 @@ AVCVPort::AVCVPort() {
 
   StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Static Mesh"));
   RootComponent = StaticMeshComponent;
-  
+
+  StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+  StaticMeshComponent->SetCollisionObjectType(PORT_OBJECT);
+
   static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshBody(TEXT("/Script/Engine.StaticMesh'/Game/meshes/faced/unit_port_faced.unit_port_faced'"));
   if (MeshBody.Object) StaticMeshComponent->SetStaticMesh(MeshBody.Object);
 
@@ -71,41 +74,41 @@ void AVCVPort::Init(VCVPort* vcv_port) {
 }
 
 bool AVCVPort::CanConnect(PortType inType) {
-  if (inType != Type) return false;
-  if (Type == PortType::Input && HasCables()) return false;
+  if (inType != PortType::Any && inType != Type) return false;
+  if (Type == PortType::Input && HasConnections()) return false;
   return true;
 }
 
-bool AVCVPort::HasCables() {
-  return Cables.Num() > 0;
+bool AVCVPort::HasConnections() {
+  return ConnectedCableEnds.Num() > 0;
 }
 
-AVCVCable* AVCVPort::GetTopCable() {
-  if (!HasCables()) return nullptr;
-  return Cables[Cables.Num() - 1];
+ACableEnd* AVCVPort::GetTopCableEnd() {
+  if (!HasConnections()) return nullptr;
+  return ConnectedCableEnds[ConnectedCableEnds.Num() - 1];
 }
 
-void AVCVPort::AddCable(AVCVCable* Cable) {
+void AVCVPort::Connect(ACableEnd* CableEnd) {
   checkf(
-    Type == PortType::Output || !HasCables(),
+    Type == PortType::Output || !HasConnections(),
     TEXT("attempting to add more than one cable to an Input")
   );
 
-  Cables.Add(Cable);
+  ConnectedCableEnds.Add(CableEnd);
 }
 
-void AVCVPort::RemoveCable(AVCVCable* Cable) {
+void AVCVPort::Disconnect(ACableEnd* CableEnd) {
   checkf(
-    HasCables(),
+    HasConnections(),
     TEXT("attempting to remove a cable from an empty port")
   );
 
-  Cables.Remove(Cable);
+  ConnectedCableEnds.Remove(CableEnd);
 }
 
 void AVCVPort::TriggerCableUpdates() {
-  for (AVCVCable* cable : Cables) {
-    cable->UpdateEndPositions();
+  for (ACableEnd* cableEnd : ConnectedCableEnds) {
+    cableEnd->UpdatePosition();
   }
 }
 

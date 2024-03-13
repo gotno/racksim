@@ -11,6 +11,7 @@ class Aosc3GameModeBase;
 class APlayerController;
 class AVRAvatar;
 class AVCVCable;
+class ACableEnd;
 class AVCVPort;
 class UTooltip;
 
@@ -23,6 +24,10 @@ class UWidgetComponent;
 class UWidgetInteractionComponent;
 
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnGrabbableTargetedSignature, AActor* /* GrabbableActor */, EControllerHand /* Hand */);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnParamTargetedSignature, AActor* /* VCVParam */, EControllerHand /* Hand */);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnOriginPortTargetedSignature, AActor* /* VCVPort */, EControllerHand /* Hand */);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnCableTargetedSignature, AActor* /* VCVPort */, EControllerHand /* Hand */);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnCableHeldSignature, AActor* /* VCVCable */, EControllerHand /* Hand */);
 
 USTRUCT()
 struct FHapticEffects {
@@ -47,16 +52,14 @@ public:
 
   void SetTrackingSource(EControllerHand Hand);
 
+  void SetWorldInteract(bool bActive);
+
   void StartGrab();
   void EndGrab();
 
-  AActor* GetParamActorToInteract() { return ParamActorToInteract; }
   void StartParamInteract();
   void EndParamInteract();
 
-  AVCVPort* GetPortActorToInteract() { return OriginPortActor; }
-  AVCVPort* GetDestinationPortActor() { return DestinationPortActor; }
-  AVCVCable* GetHeldCable() { return HeldCable; }
   void StartPortInteract();
   void EndPortInteract();
   void GetHeldCableEndInfo(FVector& Location, FVector& ForwardVector);
@@ -74,70 +77,73 @@ private:
   AVRAvatar* Avatar;
   Aosc3GameModeBase* GameMode;
   APlayerController* PlayerController;
-
   FString HandName;
 
   UPROPERTY(VisibleAnywhere)
   UMotionControllerComponent* MotionController;
-  
+
+  // grabber
+  UPROPERTY(VisibleAnywhere)
+  USphereComponent* GrabSphere;
+  UPROPERTY(EditDefaultsOnly, Category="Interaction")
+  float GrabSphereRadius = MODULE_DEPTH * RENDER_SCALE * 1.5;
+  UPROPERTY(EditDefaultsOnly, Category="Interaction")
+  FVector GrabSphereOffset{0.f, -2.f, -2.f};
+
   UPROPERTY(VisibleAnywhere)
   UWidgetInteractionComponent* WidgetInteractionComponent;
 
   UPROPERTY(EditDefaultsOnly)
   UWidgetComponent* TooltipWidgetComponent;
   UTooltip* TooltipWidget;
+  void WidgetInteractionTick();
   
-  // interactor
-  UPROPERTY(VisibleAnywhere)
-  USceneComponent* InteractCapsuleRoot;
-  UPROPERTY(VisibleAnywhere)
-  UCapsuleComponent* InteractCapsule;
-  UPROPERTY(EditDefaultsOnly, Category="Interaction")
-  float InteractCapsuleRadius{0.2f};
-  UPROPERTY(EditDefaultsOnly, Category="Interaction")
-  float InteractCapsuleHalfHeight{2.f};
-  UPROPERTY(EditDefaultsOnly, Category="Interaction")
-  FVector InteractCapsuleOffset{0.f, 0.f, 0.f};
-  UPROPERTY(EditDefaultsOnly, Category="Interaction")
-  FRotator InteractCapsuleRotation{0.f, -90.f, 0.f};
-
-  UFUNCTION()
-  void HandleInteractorBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
-  UFUNCTION()
-  void HandleInteractorEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
-
-  // grabber
-  UPROPERTY(VisibleAnywhere)
-  USphereComponent* GrabSphere;
-  UPROPERTY(EditDefaultsOnly, Category="Interaction")
-  float GrabSphereRadius = MODULE_DEPTH * RENDER_SCALE;
-  UPROPERTY(EditDefaultsOnly, Category="Interaction")
-  FVector GrabSphereOffset{0.f, -2.f, -2.f};
-  // grabber handling
-  bool bIsGrabbing{false};
-  void GrabberTick();
-  UPROPERTY()
-  AActor* TargetedGrabbable{nullptr};
-
-  bool bIsParamInteracting{false};
-  AActor* ParamActorToInteract;
-  
-  UFUNCTION()
-  void LogOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
+  void HapticBump();
 
   void SetTooltipVisibility(bool bVisible);
   // TODO: user setting
   bool bTooltipEnabled{true};
 
+  bool bIsWorldInteracting{false};
+
+  FVector InteractTraceStart{0.f}, InteractTraceEnd{0.f};
+
+  void ParamTargetTick();
+  AActor* TargetedParam{nullptr};
+  bool bIsParamInteracting{false};
+
+  bool bIsGrabbing{false};
+  void GrabbableTargetTick();
+  UPROPERTY()
+  AActor* TargetedGrabbable{nullptr};
+
   bool bIsPortInteracting{false};
-  AVCVPort* PortActorToInteract;
-  AVCVPort* OriginPortActor;
-  AVCVPort* DestinationPortActor;
-  AVCVCable* HeldCable;
+  void PortTargetTick();
+  void CableTargetTick();
+  AActor* TargetedOriginPort{nullptr};
+  AVCVPort* TargetedDestinationPort{nullptr};
+  AActor* TargetedCableEnd{nullptr};
+  ACableEnd* HeldCableEnd;
 
   bool bIsWidgetInteracting{false};
+
+  bool ControllerIsBusy() {
+    return bIsWorldInteracting
+      || bIsGrabbing
+      || bIsParamInteracting
+      || bIsPortInteracting;
+  }
+
+  TArray<FDelegateHandle> CableTargetedDelegates;
+  TArray<FDelegateHandle> CableHeldDelegates;
 
   public:
     // delegates
     FOnGrabbableTargetedSignature OnGrabbableTargetedDelegate;
+    FOnParamTargetedSignature OnParamTargetedDelegate;
+    FOnOriginPortTargetedSignature OnOriginPortTargetedDelegate;
+    FOnCableTargetedSignature OnCableTargetedDelegate;
+    FOnCableHeldSignature OnCableHeldDelegate;
+    void HandleDestinationPortTargeted(AVCVPort* Port);
+    void HandleOwnTargetings(AActor* TargetedActor, EControllerHand Hand);
 };

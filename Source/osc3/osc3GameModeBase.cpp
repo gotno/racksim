@@ -199,7 +199,7 @@ void Aosc3GameModeBase::SpawnModule(VCVModule vcv_module) {
     }
     ReturnModulePositions.Remove(vcv_module.returnId);
   } else { 
-    location = FVector(0, vcv_module.box.pos.x, -vcv_module.box.pos.y + 140);
+    location = FVector(0, vcv_module.box.pos.x, -vcv_module.box.pos.y);
     location.Y += vcv_module.box.size.x / 2;
     location.Z += vcv_module.box.size.y / 2;
     rotation = FRotator(0.f);
@@ -277,7 +277,7 @@ AVCVCable* Aosc3GameModeBase::SpawnCable(AVCVPort* Port) {
       FVector(0, 0, 0),
       FRotator(0, 0, 0)
     );
-  cable->SetPort(Port);
+  cable->ConnectToPort(Port);
   
   CableActors.Push(cable);
   return cable;
@@ -287,7 +287,7 @@ AVCVCable* Aosc3GameModeBase::SpawnCable(AVCVPort* Port) {
 void Aosc3GameModeBase::SpawnCable(int64_t& Id, AVCVPort* InputPort, AVCVPort* OutputPort) {
   AVCVCable* cable = SpawnCable(InputPort);
   cable->SetId(Id);
-  cable->SetPort(OutputPort);
+  cable->ConnectToPort(OutputPort);
 }
 
 void Aosc3GameModeBase::RegisterCableConnect(AVCVPort* InputPort, AVCVPort* OutputPort) {
