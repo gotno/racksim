@@ -59,13 +59,22 @@ void AVCVButton::BeginPlay() {
 }
 
 void AVCVButton::Tick(float DeltaTime) {
-  for (int i = 0; i < Model->svgPaths.Num(); i++) {
-    if (!Frames[i]) {
-      Frames[i] = GameMode->GetTexture(Model->svgPaths[i]);
-      if (Frames[i] && Model->value == i) {
-        FaceMaterialInstance->SetTextureParameterValue(FName("texture"), Frames[i]);
+  if (!bAllFramesFound) {
+    int initialFrameToShow =
+      Model->value == Model->minValue ? 0 : Frames.Num() - 1;
+    bool bAnyFramesMissing{false};
+
+    for (int i = 0; i < Model->svgPaths.Num(); i++) {
+      if (!Frames[i]) {
+        bAnyFramesMissing = true;
+        Frames[i] = GameMode->GetTexture(Model->svgPaths[i]);
+        if (Frames[i] && initialFrameToShow == i) {
+          FaceMaterialInstance->SetTextureParameterValue(FName("texture"), Frames[i]);
+        }
       }
     }
+
+    bAllFramesFound = !bAnyFramesMissing;
   }
 }
 

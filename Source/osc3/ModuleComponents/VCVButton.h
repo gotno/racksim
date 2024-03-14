@@ -22,6 +22,8 @@ public:
   void Init(VCVParam* vcv_param) override;
 
 private:
+  Aosc3GameModeBase* GameMode;
+
   UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
   UStaticMeshComponent* MeshComponent;
   UPROPERTY()
@@ -42,8 +44,7 @@ private:
   
   UPROPERTY()
   TArray<UTexture2D*> Frames;
-  
-  Aosc3GameModeBase* GameMode;
+  bool bAllFramesFound{false};
 public:
   void Engage() override;
   void Release() override;
