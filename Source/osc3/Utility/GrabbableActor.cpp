@@ -88,6 +88,7 @@ void AGrabbableActor::ReleaseGrab() {
   StaticMeshComponent->AddWorldOffset(GrabOffset);
   AddActorWorldOffset(-GrabOffset);
   GrabOffset = FVector(0.f);
+  SetHighlighted(true);
 }
 
 void AGrabbableActor::HighlightIfTargeted(AActor* GrabbableTarget, EControllerHand Hand) {
