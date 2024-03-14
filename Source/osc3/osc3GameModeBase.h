@@ -57,6 +57,7 @@ public:
   void QueueCableSpawn(VCVCable vcv_cable);
   void RequestExit();
   void ToggleMainMenu();
+  void SummonLibrary(FVector Location, FRotator Rotation);
 
   AVCVCable* SpawnCable(AVCVPort* Port);
   void SpawnCable(int64_t& Id, AVCVPort* InputPort, AVCVPort* OutputPort);

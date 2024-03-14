@@ -29,7 +29,12 @@ struct FBaseActions {
   UInputAction* Quit;
 
   UPROPERTY(EditDefaultsOnly)
-  UInputAction* MenuToggle;
+  UInputAction* ToggleMenu;
+
+  UPROPERTY(EditDefaultsOnly)
+  UInputAction* SummonLibraryLeft;
+  UPROPERTY(EditDefaultsOnly)
+  UInputAction* SummonLibraryRight;
 };
 
 USTRUCT()
@@ -304,6 +309,7 @@ private:
   void RequestScreenshot(const FInputActionValue& _Value);
   void Quit(const FInputActionValue& _Value);
   void ToggleMainMenu(const FInputActionValue& _Value);
+  void SummonLibrary(const FInputActionValue& _Value, EControllerHand Hand);
   
   // widget controls
   void HandleStartWidgetLeftClick(const FInputActionValue& _Value, EControllerHand Hand);

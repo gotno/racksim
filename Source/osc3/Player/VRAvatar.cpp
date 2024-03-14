@@ -186,7 +186,10 @@ void AVRAvatar::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
   // general
   // toggle main menu
-  Input->BindAction(BaseActions.MenuToggle, ETriggerEvent::Completed, this, &AVRAvatar::ToggleMainMenu);
+  Input->BindAction(BaseActions.ToggleMenu, ETriggerEvent::Completed, this, &AVRAvatar::ToggleMainMenu);
+  // summon library
+  Input->BindAction(BaseActions.SummonLibraryLeft, ETriggerEvent::Completed, this, &AVRAvatar::SummonLibrary, EControllerHand::Left);
+  Input->BindAction(BaseActions.SummonLibraryRight, ETriggerEvent::Completed, this, &AVRAvatar::SummonLibrary, EControllerHand::Right);
   // request screenshot
   Input->BindAction(BaseActions.RequestScreenshot, ETriggerEvent::Completed, this, &AVRAvatar::RequestScreenshot);
   // quit
@@ -598,7 +601,21 @@ void AVRAvatar::HandleDestroyModule(const FInputActionValue& _Value, EController
         : RightHandGrabbableActor
     );
 
-  if (grabbedModule) GameMode->DestroyModule(grabbedModule->Id);
+  if (grabbedModule) {
+    GameMode->DestroyModule(grabbedModule->Id);
+    return;
+  }
+
+  ALibrary* library =
+    Cast<ALibrary>(
+      Hand == EControllerHand::Left
+        ? LeftHandGrabbableActor
+        : RightHandGrabbableActor
+    );
+
+  if (library) {
+    library->SetActorHiddenInGame(true);
+  }
 }
 
 void AVRAvatar::HandleToggleContextMenu(const FInputActionValue& _Value, EControllerHand Hand) {
@@ -729,6 +746,17 @@ void AVRAvatar::Quit(const FInputActionValue& _Value) {
 
 void AVRAvatar::ToggleMainMenu(const FInputActionValue& _Value) {
   GameMode->ToggleMainMenu();
+}
+
+void AVRAvatar::SummonLibrary(const FInputActionValue& _Value, EControllerHand Hand) {
+  AVRMotionController* controller = GetControllerForHand(Hand);
+  FVector location = controller->GetActorLocation() + controller->GetActorForwardVector() * 16.f;
+  FRotator rotation =
+    UKismetMathLibrary::FindLookAtRotation(
+      controller->GetActorLocation(),
+      location
+    );
+  GameMode->SummonLibrary(location, rotation);
 }
 
 void AVRAvatar::HandleStartWidgetLeftClick(const FInputActionValue& _Value, EControllerHand Hand) {
