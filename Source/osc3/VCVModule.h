@@ -26,7 +26,7 @@ protected:
 public:	
 	virtual void Tick(float DeltaTime) override;
 
-  void Init(VCVModule vcv_module);
+  void Init(VCVModule vcv_module, TFunction<void ()> ReadyCallback);
   
   void GetSlugs(FString& PluginSlug, FString& Slug);
   int64_t Id{-1};

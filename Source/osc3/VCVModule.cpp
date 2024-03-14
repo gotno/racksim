@@ -94,7 +94,7 @@ void AVCVModule::EndPlay(const EEndPlayReason::Type EndPlayReason) {
   }
 }
 
-void AVCVModule::Init(VCVModule vcv_module) {
+void AVCVModule::Init(VCVModule vcv_module, TFunction<void ()> ReadyCallback) {
   Model = vcv_module; 
 
   Id = Model.id;
@@ -117,6 +117,8 @@ void AVCVModule::Init(VCVModule vcv_module) {
 
   SpawnComponents();
   SetHidden(false);
+
+  ReadyCallback();
 }
 
 void AVCVModule::GetSlugs(FString& PluginSlug, FString& Slug) {

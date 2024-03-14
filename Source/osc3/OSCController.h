@@ -45,6 +45,8 @@ public:
   void DestroyCable(int64 CableId);
   UFUNCTION()
   void SendAutosaveAndExit();
+  UFUNCTION()
+  void NotifyReceived(FString Type, int64 OuterId, int InnerId = -1);
 
   void RequestMenu(const FVCVMenu& Menu) const;
   void ClickMenuItem(const FVCVMenuItem& MenuItem) const;
@@ -114,9 +116,6 @@ private:
   // void TestBundle(const FOSCBundle& InBundle, const FString& InIPAddress, int32 InPort);
   // UFUNCTION()
   // void TestMessage(const FOSCMessage& InMessage, const FString& InIPAddress, int32 InPort);
-
-  UFUNCTION()
-  void NotifyReceived(FString Type, int64 OuterId, int InnerId = -1);
   
   // void PrintVCVModule(VCVModule mod);
 
