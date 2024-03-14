@@ -40,11 +40,10 @@
 #define TAG_INTERACTABLE_PORT FName("interactable_port")
 
 UENUM()
-enum class PortType : int32
-{
-    Input,
-    Output,
-    Any
+enum class PortType : int32 {
+  Input,
+  Output,
+  Any
 };
 
 #define ODB(Format, ...) if(GEngine){ GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Yellow, FString::Printf(TEXT(Format), ##__VA_ARGS__), false); }
