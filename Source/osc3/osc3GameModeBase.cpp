@@ -82,12 +82,17 @@ void Aosc3GameModeBase::ContinueAutosave() {
 
   FAsyncLoadGameFromSlotDelegate LoadedDelegate;
   LoadedDelegate.BindLambda([&](const FString& SlotName, const int32 UserIndex, USaveGame* LoadedGameData) {
-    SaveData = Cast<Uosc3SaveGame>(LoadedGameData);
-    UE_LOG(LogTemp, Warning, TEXT("player position: %s"), *SaveData->PlayerLocation.ToString());
-    UE_LOG(LogTemp, Warning, TEXT("library position: %s"), *SaveData->LibraryPosition.Location.ToString());
-    PlayerPawn->SetActorLocation(SaveData->PlayerLocation);
-    LibraryActor->SetActorLocation(SaveData->LibraryPosition.Location);
-    LibraryActor->SetActorRotation(SaveData->LibraryPosition.Rotation);
+    if (LoadedGameData) {
+      UE_LOG(LogTemp, Warning, TEXT("%s savegame load success"), *SlotName);
+      SaveData = Cast<Uosc3SaveGame>(LoadedGameData);
+      PlayerPawn->SetActorLocation(SaveData->PlayerLocation);
+      LibraryActor->SetActorLocation(SaveData->LibraryPosition.Location);
+      LibraryActor->SetActorRotation(SaveData->LibraryPosition.Rotation);
+      LibraryActor->SetActorHiddenInGame(SaveData->bLibraryHidden);
+    } else {
+      UE_LOG(LogTemp, Warning, TEXT("%s savegame load fail"), *SlotName);
+      SaveData = nullptr;
+    }
     StartRack(false);
   });
   UGameplayStatics::AsyncLoadGameFromSlot(TEXT("autosave"), 0, LoadedDelegate);
@@ -157,6 +162,7 @@ Uosc3SaveGame* Aosc3GameModeBase::MakeSaveGame() {
     }
 
     LibraryActor->GetPosition(SaveGameInstance->LibraryPosition.Location, SaveGameInstance->LibraryPosition.Rotation);
+    SaveGameInstance->bLibraryHidden = LibraryActor->IsHidden();
     SaveGameInstance->PlayerLocation = PlayerPawn->GetActorLocation();
 
     return SaveGameInstance;

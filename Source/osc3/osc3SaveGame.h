@@ -39,5 +39,7 @@ public:
   UPROPERTY(VisibleAnywhere, Category = Base)
   FVCVPositionInfo LibraryPosition;
   UPROPERTY(VisibleAnywhere, Category = Base)
+  bool bLibraryHidden{true};
+  UPROPERTY(VisibleAnywhere, Category = Base)
   FVector PlayerLocation{0.f};
 };
