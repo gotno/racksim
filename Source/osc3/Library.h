@@ -35,12 +35,12 @@ public:
   void SetModuleFavorite(FString PluginSlug, FString ModuleSlug, bool bFavorite);
   void ClearBrandFilter();
   void ClearTagsFilter();
+  void Summon(FVector Location, FRotator Rotation);
 
   void SetJsonPath(FString& JsonPath);
   void GetPosition(FVector& Location, FRotator& Rotation);
   void GetModuleLandingPosition(const float& ModuleWidth, FVector& Location, FRotator& Rotation);
 private:
-
   UPROPERTY()
   UMaterialInstanceDynamic* BaseMaterialInstance;
   UPROPERTY()
@@ -63,4 +63,10 @@ private:
   void SetScale();
   float DesiredWidth{14.f * RENDER_SCALE};
   float BasePadding{0.4f};
+
+  // summoning
+  FVector StartLocation, TargetLocation;
+  FRotator StartRotation, TargetRotation;
+  float SummonAlpha{0.f};
+  bool bSummoned;
 };

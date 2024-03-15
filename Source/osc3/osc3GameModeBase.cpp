@@ -429,9 +429,7 @@ void Aosc3GameModeBase::SpawnLibrary() {
 }
 
 void Aosc3GameModeBase::SummonLibrary(FVector Location, FRotator Rotation) {
-  LibraryActor->SetActorLocation(Location);
-  LibraryActor->SetActorRotation(Rotation);
-  LibraryActor->SetActorHiddenInGame(false);
+  LibraryActor->Summon(Location, Rotation);
 }
 
 void Aosc3GameModeBase::SpawnMainMenu() {

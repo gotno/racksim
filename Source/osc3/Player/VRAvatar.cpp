@@ -615,6 +615,7 @@ void AVRAvatar::HandleDestroyModule(const FInputActionValue& _Value, EController
 
   if (library) {
     library->SetActorHiddenInGame(true);
+    library->AddActorWorldOffset(FVector(0.f, 0.f, -500.f));
   }
 }
 
@@ -753,7 +754,7 @@ void AVRAvatar::SummonLibrary(const FInputActionValue& _Value, EControllerHand H
   FVector location = controller->GetActorLocation() + controller->GetActorForwardVector() * 16.f;
   FRotator rotation =
     UKismetMathLibrary::FindLookAtRotation(
-      controller->GetActorLocation(),
+      Camera->GetComponentLocation(),
       location
     );
   GameMode->SummonLibrary(location, rotation);
