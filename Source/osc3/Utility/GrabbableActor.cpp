@@ -85,8 +85,12 @@ void AGrabbableActor::AlterGrab(FVector GrabbedLocation, FRotator GrabbedRotatio
 void AGrabbableActor::ReleaseGrab() {
   // UE_LOG(LogTemp, Warning, TEXT("%s: grab release"), *GetActorNameOrLabel());
   bGrabEngaged = false;
-  StaticMeshComponent->AddWorldOffset(GrabOffset);
-  AddActorWorldOffset(-GrabOffset);
+
+  FVector staticMeshLocation = StaticMeshComponent->GetComponentLocation();
+  FVector finalOffset = GetActorLocation() - staticMeshLocation;
+  SetActorLocation(staticMeshLocation);
+  StaticMeshComponent->AddWorldOffset(finalOffset);
+
   GrabOffset = FVector(0.f);
   SetHighlighted(true);
 }
