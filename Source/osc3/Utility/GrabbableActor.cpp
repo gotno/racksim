@@ -105,5 +105,5 @@ void AGrabbableActor::HighlightIfTargeted(AActor* GrabbableTarget, EControllerHa
     if (Hand == EControllerHand::Right) bTargetGrabOfRightHand = false;
   }
 
-  SetHighlighted(bTargetGrabOfLeftHand || bTargetGrabOfRightHand ? true : false);
+  SetHighlighted(bTargetGrabOfLeftHand || bTargetGrabOfRightHand);
 }
