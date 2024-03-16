@@ -53,9 +53,10 @@ void AGrabbableActor::EngageGrab(FVector GrabbedLocation, FRotator GrabbedRotati
   GrabOffset = GrabbedLocation - GetActorLocation();
 
   StaticMeshComponent->AddWorldOffset(-GrabOffset);
+  SetActorLocation(GrabbedLocation);
 
   LastGrabbedRotation = GrabbedRotation;
-  LastGrabbedLocation = GrabbedLocation - GrabOffset;
+  LastGrabbedLocation = GrabbedLocation;
   LastLocationDelta = FVector(0.f, 0.f, 0.f);
   SetHighlighted(false);
 }
