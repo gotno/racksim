@@ -7,6 +7,8 @@
 
 #include "GrabbableActor.generated.h"
 
+class AModuleWeldment;
+
 UCLASS()
 class OSC3_API AGrabbableActor : public AActor
 {
@@ -48,6 +50,7 @@ protected:
   FVector LastGrabbedLocation;
   FRotator LastGrabbedRotation;
 
+  AModuleWeldment* Weldment{nullptr};
 public:
   // delegate stuff
   void HighlightIfTargeted(AActor* GrabbableTarget, EControllerHand Hand);

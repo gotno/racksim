@@ -11,6 +11,7 @@ class AVCVLight;
 class AVCVPort;
 class AVCVParam;
 class AContextMenu;
+class AModuleWeldment;
 
 UCLASS()
 class OSC3_API AVCVModule : public AGrabbableActor {
@@ -40,6 +41,8 @@ public:
 
   void ToggleContextMenu();
 
+  void TriggerCableUpdates();
+
   UPROPERTY()
   TMap<int32, AVCVLight*> LightActors;
   UPROPERTY()
@@ -52,7 +55,13 @@ public:
   FString Name;
 
   void AlterGrab(FVector GrabbedLocation, FRotator GrabbedRotation) override;
-  
+
+  void SetWeldment(AModuleWeldment* inWeldment) {
+    Weldment = inWeldment;
+  }
+  bool IsInWeldment() {
+    return !!Weldment;
+  }
 private:
   UPROPERTY()
   UMaterialInstanceDynamic* BaseMaterialInstance;
@@ -70,8 +79,6 @@ private:
   AContextMenu* ContextMenu;
 
   void SpawnComponents();
-  
-  void TriggerCableUpdates();
 
   VCVModule Model;
   

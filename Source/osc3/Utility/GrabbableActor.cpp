@@ -1,6 +1,7 @@
 #include "Utility/GrabbableActor.h"
 
 #include "osc3GameModeBase.h"
+#include "Utility/ModuleWeldment.h"
 
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/GameplayStatics.h"
@@ -50,6 +51,13 @@ void AGrabbableActor::SetHighlighted(bool bHighlighted, FLinearColor OutlineColo
 void AGrabbableActor::EngageGrab(FVector GrabbedLocation, FRotator GrabbedRotation) {
   // UE_LOG(LogTemp, Warning, TEXT("%s: grab engage"), *GetActorNameOrLabel());
   bGrabEngaged = true;
+  SetHighlighted(false);
+
+  if (Weldment) {
+    Weldment->EngageGrab(GrabbedLocation, GrabbedRotation);
+    return;
+  }
+
   GrabOffset = GrabbedLocation - GetActorLocation();
 
   StaticMeshComponent->AddWorldOffset(-GrabOffset);
@@ -58,10 +66,14 @@ void AGrabbableActor::EngageGrab(FVector GrabbedLocation, FRotator GrabbedRotati
   LastGrabbedRotation = GrabbedRotation;
   LastGrabbedLocation = GrabbedLocation;
   LastLocationDelta = FVector(0.f, 0.f, 0.f);
-  SetHighlighted(false);
 }
 
 void AGrabbableActor::AlterGrab(FVector GrabbedLocation, FRotator GrabbedRotation) {
+  if (Weldment) {
+    Weldment->AlterGrab(GrabbedLocation, GrabbedRotation);
+    return;
+  }
+
   FQuat qFrom = LastGrabbedRotation.Quaternion();
   // TODO: user
   FQuat qTo = FQuat::Slerp(qFrom, GrabbedRotation.Quaternion(), GRABBABLE_ROTATION_SMOOTHING_FACTOR_DEFAULT);
@@ -86,6 +98,7 @@ void AGrabbableActor::AlterGrab(FVector GrabbedLocation, FRotator GrabbedRotatio
 void AGrabbableActor::ReleaseGrab() {
   // UE_LOG(LogTemp, Warning, TEXT("%s: grab release"), *GetActorNameOrLabel());
   bGrabEngaged = false;
+  SetHighlighted(true);
 
   FVector staticMeshLocation = StaticMeshComponent->GetComponentLocation();
   FVector finalOffset = GetActorLocation() - staticMeshLocation;
@@ -93,7 +106,6 @@ void AGrabbableActor::ReleaseGrab() {
   StaticMeshComponent->AddWorldOffset(finalOffset);
 
   GrabOffset = FVector(0.f);
-  SetHighlighted(true);
 }
 
 void AGrabbableActor::HighlightIfTargeted(AActor* GrabbableTarget, EControllerHand Hand) {
