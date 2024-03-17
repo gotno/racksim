@@ -5,13 +5,15 @@
 
 #include "VCVModule.generated.h"
 
-class UTexture2D;
 class Aosc3GameModeBase;
 class AVCVLight;
 class AVCVPort;
 class AVCVParam;
 class AContextMenu;
 class AModuleWeldment;
+
+class UTexture2D;
+class UBoxComponent;
 
 UCLASS()
 class OSC3_API AVCVModule : public AGrabbableActor {
@@ -43,6 +45,8 @@ public:
 
   void TriggerCableUpdates();
 
+  void SetSnapMode(bool inbSnapMode);
+
   UPROPERTY()
   TMap<int32, AVCVLight*> LightActors;
   UPROPERTY()
@@ -64,6 +68,11 @@ public:
   }
 private:
   UPROPERTY()
+  UBoxComponent* SnapColliderLeft;
+  UPROPERTY()
+  UBoxComponent* SnapColliderRight;
+
+  UPROPERTY()
   UMaterialInstanceDynamic* BaseMaterialInstance;
   UPROPERTY()
   UMaterialInterface* BaseMaterialInterface;
@@ -81,6 +90,9 @@ private:
   void SpawnComponents();
 
   VCVModule Model;
+
+  void SnapModeTick();
+  bool bSnapMode{false};
   
   Aosc3GameModeBase* GameMode;
 

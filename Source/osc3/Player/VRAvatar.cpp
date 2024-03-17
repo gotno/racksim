@@ -159,6 +159,12 @@ void AVRAvatar::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
   Input->BindAction(ModuleManipulationActions.ModuleContextMenuLeft, ETriggerEvent::Completed, this, &AVRAvatar::HandleToggleContextMenu, EControllerHand::Left);
   Input->BindAction(ModuleManipulationActions.ModuleContextMenuRight, ETriggerEvent::Completed, this, &AVRAvatar::HandleToggleContextMenu, EControllerHand::Right);
 
+  // set snap mode
+  Input->BindAction(ModuleManipulationActions.ModuleSnapModeLeft, ETriggerEvent::Started, this, &AVRAvatar::HandleStartModuleSnapMode, EControllerHand::Left);
+  Input->BindAction(ModuleManipulationActions.ModuleSnapModeRight, ETriggerEvent::Started, this, &AVRAvatar::HandleStartModuleSnapMode, EControllerHand::Right);
+  Input->BindAction(ModuleManipulationActions.ModuleSnapModeLeft, ETriggerEvent::Completed, this, &AVRAvatar::HandleCompleteModuleSnapMode, EControllerHand::Left);
+  Input->BindAction(ModuleManipulationActions.ModuleSnapModeRight, ETriggerEvent::Completed, this, &AVRAvatar::HandleCompleteModuleSnapMode, EControllerHand::Right);
+
   // param interaction
   // engage
   Input->BindAction(ParamInteractionActions.ParamEngageLeft, ETriggerEvent::Started, this, &AVRAvatar::HandleStartParamEngage, EControllerHand::Left);
@@ -578,6 +584,26 @@ void AVRAvatar::HandleCompleteGrab(const FInputActionValue& _Value, EControllerH
 
   grabbedActor->ReleaseGrab();
   controller->EndGrab();
+}
+
+void AVRAvatar::HandleStartModuleSnapMode(const FInputActionValue& _Value, EControllerHand Hand) {
+  AGrabbableActor* grabbedActor =
+    Hand == EControllerHand::Left
+      ? LeftHandGrabbableActor
+      : RightHandGrabbableActor;
+
+  if (Cast<AVCVModule>(grabbedActor))
+    Cast<AVCVModule>(grabbedActor)->SetSnapMode(true);
+}
+
+void AVRAvatar::HandleCompleteModuleSnapMode(const FInputActionValue& _Value, EControllerHand Hand) {
+  AGrabbableActor* grabbedActor =
+    Hand == EControllerHand::Left
+      ? LeftHandGrabbableActor
+      : RightHandGrabbableActor;
+
+  if (Cast<AVCVModule>(grabbedActor))
+    Cast<AVCVModule>(grabbedActor)->SetSnapMode(false);
 }
 
 void AVRAvatar::HandleDuplicateModule(const FInputActionValue& _Value, EControllerHand Hand) {

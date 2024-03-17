@@ -14,6 +14,7 @@
 #include "ModuleComponents/VCVPort.h"
 #include "ModuleComponents/VCVDisplay.h"
 
+#include "Components/BoxComponent.h"
 #include "Engine/Texture2D.h"
 #include "Kismet/GameplayStatics.h"
 #include "UObject/ConstructorHelpers.h"
@@ -24,7 +25,21 @@ AVCVModule::AVCVModule() {
 	PrimaryActorTick.bCanEverTick = true;
 
   // RootSceneComponent/StaticMeshComponent/OutlineMeshComponent setup in GrabbableActor
-  
+
+  SnapColliderLeft = CreateDefaultSubobject<UBoxComponent>(TEXT("Snap Collider Left"));
+  SnapColliderLeft->InitBoxExtent(FVector(0.5f, 0.005f, 0.5f));
+  SnapColliderLeft->AddWorldOffset(StaticMeshComponent->GetForwardVector() * 0.5f);
+  SnapColliderLeft->SetupAttachment(StaticMeshComponent);
+  SnapColliderLeft->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+  SnapColliderLeft->SetCollisionObjectType(LEFT_SNAP_OBJECT);
+
+  SnapColliderRight = CreateDefaultSubobject<UBoxComponent>(TEXT("Snap Collider Right"));
+  SnapColliderRight->InitBoxExtent(FVector(0.5f, 0.005f, 0.5f));
+  SnapColliderRight->AddWorldOffset(StaticMeshComponent->GetForwardVector() * 0.5f);
+  SnapColliderRight->SetupAttachment(StaticMeshComponent);
+  SnapColliderRight->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+  SnapColliderRight->SetCollisionObjectType(RIGHT_SNAP_OBJECT);
+
   static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshBody(TEXT("/Script/Engine.StaticMesh'/Game/meshes/faced/unit_module_faced.unit_module_faced'"));
   if (MeshBody.Object) StaticMeshComponent->SetStaticMesh(MeshBody.Object);
 
@@ -114,6 +129,9 @@ void AVCVModule::Init(VCVModule vcv_module, TFunction<void ()> ReadyCallback) {
 
   StaticMeshComponent->SetWorldScale3D(FVector(RENDER_SCALE * MODULE_DEPTH, Model.box.size.x, Model.box.size.y));
   OutlineMeshComponent->SetWorldScale3D(FVector(RENDER_SCALE * MODULE_DEPTH + 0.2f, Model.box.size.x + 0.2f, Model.box.size.y + 0.2f));
+
+  SnapColliderLeft->AddWorldOffset(-StaticMeshComponent->GetRightVector() * Model.box.size.x * 0.5f);
+  SnapColliderRight->AddWorldOffset(StaticMeshComponent->GetRightVector() * Model.box.size.x * 0.5f);
 
   SpawnComponents();
   SetHidden(false);
@@ -284,10 +302,79 @@ void AVCVModule::ToggleContextMenu() {
 void AVCVModule::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
   
-  if (Texture) return;
+  if (!Texture) {
+    Texture = GameMode->GetTexture(Model.panelSvgPath);
+    if (Texture) FaceMaterialInstance->SetTextureParameterValue(FName("texture"), Texture);
+  }
 
-  Texture = GameMode->GetTexture(Model.panelSvgPath);
-  if (Texture) FaceMaterialInstance->SetTextureParameterValue(FName("texture"), Texture);
+  SnapModeTick();
+}
+
+void AVCVModule::SetSnapMode(bool inbSnapMode) {
+  bSnapMode = inbSnapMode;
+}
+
+void AVCVModule::SnapModeTick() {
+  if (!bSnapMode) return;
+
+  DrawDebugBox(
+    GetWorld(),
+    SnapColliderLeft->GetComponentLocation(),
+    SnapColliderLeft->GetScaledBoxExtent(),
+    SnapColliderLeft->GetComponentRotation().Quaternion(),
+    FColor::Yellow
+  );
+  DrawDebugBox(
+    GetWorld(),
+    SnapColliderRight->GetComponentLocation(),
+    SnapColliderRight->GetScaledBoxExtent(),
+    SnapColliderRight->GetComponentRotation().Quaternion(),
+    FColor::Red
+  );
+
+  float halfWidth = Model.box.size.x * 0.5;
+  FVector meshCenter =
+    StaticMeshRoot->GetComponentLocation()
+      + (StaticMeshRoot->GetForwardVector() * MODULE_DEPTH * RENDER_SCALE * 0.5f);
+
+  FVector traceStart =
+    meshCenter + (StaticMeshRoot->GetRightVector() * (halfWidth + 0.1f));
+  FVector traceEnd =
+    traceStart + StaticMeshRoot->GetRightVector() * 1.5 * RENDER_SCALE;
+
+  FHitResult leftHit;
+  FCollisionObjectQueryParams leftQueryParams;
+  leftQueryParams.AddObjectTypesToQuery(LEFT_SNAP_OBJECT);
+  GetWorld()->LineTraceSingleByObjectType(leftHit, traceStart, traceEnd, leftQueryParams);
+  DrawDebugLine(GetWorld(), traceStart, traceEnd, FColor::Yellow);
+
+  if (leftHit.GetActor()) {
+    ODB("%s hit %s left side", *GetActorNameOrLabel(), *leftHit.GetActor()->GetActorNameOrLabel());
+  //   StaticMeshComponent->SetWorldLocation(hit.GetActor()->GetActorLocation());
+  //   StaticMeshComponent->SetWorldRotation(hit.GetActor()->GetActorRotation());
+  //   return;
+  }
+
+  traceStart =
+    meshCenter - (StaticMeshRoot->GetRightVector() * (halfWidth + 0.1f));
+  traceEnd =
+    traceStart - StaticMeshRoot->GetRightVector() * 1.5 * RENDER_SCALE;
+
+  FHitResult rightHit;
+  FCollisionObjectQueryParams rightQueryParams;
+  rightQueryParams.AddObjectTypesToQuery(RIGHT_SNAP_OBJECT);
+  GetWorld()->LineTraceSingleByObjectType(rightHit, traceStart, traceEnd, rightQueryParams);
+  DrawDebugLine(GetWorld(), traceStart, traceEnd, FColor::Red);
+
+  if (rightHit.GetActor()) {
+    ODB("%s hit %s right side", *GetActorNameOrLabel(), *rightHit.GetActor()->GetActorNameOrLabel());
+  //   StaticMeshComponent->SetWorldLocation(hit.GetActor()->GetActorLocation());
+  //   StaticMeshComponent->SetWorldRotation(hit.GetActor()->GetActorRotation());
+  //   return;
+  }
+
+  // StaticMeshComponent->SetWorldLocation(StaticMeshRoot->GetComponentLocation());
+  // StaticMeshComponent->SetWorldRotation(StaticMeshRoot->GetComponentRotation());
 }
 
 void AVCVModule::GetModulePosition(FVector& Location, FRotator& Rotation) {

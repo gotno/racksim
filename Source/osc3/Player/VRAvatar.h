@@ -98,6 +98,11 @@ struct FModuleManipulationActions {
   UInputAction* ModuleContextMenuLeft;
   UPROPERTY(EditDefaultsOnly)
   UInputAction* ModuleContextMenuRight;
+
+  UPROPERTY(EditDefaultsOnly)
+  UInputAction* ModuleSnapModeLeft;
+  UPROPERTY(EditDefaultsOnly)
+  UInputAction* ModuleSnapModeRight;
 };
 
 USTRUCT()
@@ -283,6 +288,9 @@ private:
   void HandleStartGrab(const FInputActionValue& _Value, EControllerHand Hand);
   void HandleGrab(const FInputActionValue& _Value, EControllerHand Hand);
   void HandleCompleteGrab(const FInputActionValue& _Value, EControllerHand Hand);
+
+  void HandleStartModuleSnapMode(const FInputActionValue& _Value, EControllerHand Hand);
+  void HandleCompleteModuleSnapMode(const FInputActionValue& _Value, EControllerHand Hand);
 
   void HandleDuplicateModule(const FInputActionValue& _Value, EControllerHand Hand);
   void HandleDestroyModule(const FInputActionValue& _Value, EControllerHand Hand);

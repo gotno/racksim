@@ -12,9 +12,12 @@ AGrabbableActor::AGrabbableActor() {
   RootSceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root Scene Component"));
   SetRootComponent(RootSceneComponent);
 
+  StaticMeshRoot = CreateDefaultSubobject<USceneComponent>(TEXT("Static Mesh Root"));
+  StaticMeshRoot->SetupAttachment(GetRootComponent());
+
   StaticMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Static Mesh"));
   StaticMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-  StaticMeshComponent->SetupAttachment(GetRootComponent());
+  StaticMeshComponent->SetupAttachment(StaticMeshRoot);
   StaticMeshComponent->SetRenderInDepthPass(true);
   StaticMeshComponent->SetRenderCustomDepth(true);
   StaticMeshComponent->SetCustomDepthStencilValue(2);
@@ -60,7 +63,7 @@ void AGrabbableActor::EngageGrab(FVector GrabbedLocation, FRotator GrabbedRotati
 
   GrabOffset = GrabbedLocation - GetActorLocation();
 
-  StaticMeshComponent->AddWorldOffset(-GrabOffset);
+  StaticMeshRoot->AddWorldOffset(-GrabOffset);
   SetActorLocation(GrabbedLocation);
 
   LastGrabbedRotation = GrabbedRotation;
@@ -100,10 +103,10 @@ void AGrabbableActor::ReleaseGrab() {
   bGrabEngaged = false;
   SetHighlighted(true);
 
-  FVector staticMeshLocation = StaticMeshComponent->GetComponentLocation();
+  FVector staticMeshLocation = StaticMeshRoot->GetComponentLocation();
   FVector finalOffset = GetActorLocation() - staticMeshLocation;
   SetActorLocation(staticMeshLocation);
-  StaticMeshComponent->AddWorldOffset(finalOffset);
+  StaticMeshRoot->AddWorldOffset(finalOffset);
 
   GrabOffset = FVector(0.f);
 }

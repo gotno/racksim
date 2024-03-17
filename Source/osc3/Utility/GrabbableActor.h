@@ -32,6 +32,8 @@ protected:
   UPROPERTY(VisibleAnywhere)
   USceneComponent* RootSceneComponent;
   UPROPERTY(VisibleAnywhere)
+  USceneComponent* StaticMeshRoot;
+  UPROPERTY(VisibleAnywhere)
   UStaticMeshComponent* StaticMeshComponent;
   UPROPERTY(VisibleAnywhere)
   UStaticMeshComponent* OutlineMeshComponent;
