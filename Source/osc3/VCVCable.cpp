@@ -99,7 +99,7 @@ void AVCVCable::Stir(float WakeSeconds) {
       CableEndA->GetActorLocation(),
       CableEndB->GetActorLocation()
     );
-  CableComponent->CableLength = distanceBetweenEnds * 0.8;
+  CableComponent->CableLength = distanceBetweenEnds * 0.8f;
 
   // naive attempt to set cable force relative to average of cable end vectors
   // actually working kind of ok!
