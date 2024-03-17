@@ -18,7 +18,6 @@ AVCVButton::AVCVButton() {
   MeshComponent->SetCollisionObjectType(PARAM_OBJECT);
   MeshComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
   MeshComponent->SetCollisionResponseToChannel(LIGHT_OBJECT, ECollisionResponse::ECR_Overlap);
-  MeshComponent->SetCollisionResponseToChannel(INTERACTOR_OBJECT, ECollisionResponse::ECR_Overlap);
 
   MeshComponent->SetCollisionResponseToChannel(PARAM_TRACE, ECollisionResponse::ECR_Block);
   

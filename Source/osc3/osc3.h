@@ -29,7 +29,6 @@
 #define PARAM_OBJECT ECC_GameTraceChannel2
 #define PORT_OBJECT ECC_GameTraceChannel7
 #define CABLE_END_OBJECT ECC_GameTraceChannel8
-#define INTERACTOR_OBJECT ECC_GameTraceChannel5
 #define DISPLAY_OBJECT ECC_GameTraceChannel6
 
 #define PARAM_TRACE ECC_GameTraceChannel3

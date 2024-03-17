@@ -42,7 +42,6 @@ AVCVSlider::AVCVSlider() {
   HandleMeshComponent->SetCollisionObjectType(PARAM_OBJECT);
   HandleMeshComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
   HandleMeshComponent->SetCollisionResponseToChannel(LIGHT_OBJECT, ECollisionResponse::ECR_Overlap);
-  HandleMeshComponent->SetCollisionResponseToChannel(INTERACTOR_OBJECT, ECollisionResponse::ECR_Overlap);
 
   // handle materials
   static ConstructorHelpers::FObjectFinder<UMaterial> HandleMaterial(HandleMaterialReference);
