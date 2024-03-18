@@ -28,7 +28,7 @@ void AModuleWeldment::Tick(float DeltaTime) {
   );
 }
 
-void AModuleWeldment::AddModule(AVCVModule* Module) {
+void AModuleWeldment::ValidateModuleInclusion(AVCVModule* Module) {
   checkf(
     !Modules.Contains(Module),
     TEXT("module can only be in a weldment once")
@@ -37,7 +37,21 @@ void AModuleWeldment::AddModule(AVCVModule* Module) {
     !Module->IsInWeldment(),
     TEXT("module can only be in one weldment")
   );
+}
+
+void AModuleWeldment::AddModuleFront(AVCVModule* Module) {
+  ValidateModuleInclusion(Module);
+  Modules.Insert(Module, 0);
+  AddModule(Module);
+}
+
+void AModuleWeldment::AddModuleBack(AVCVModule* Module) {
+  ValidateModuleInclusion(Module);
   Modules.Push(Module);
+  AddModule(Module);
+}
+
+void AModuleWeldment::AddModule(AVCVModule* Module) {
   Module->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
   Module->SetWeldment(this);
 }

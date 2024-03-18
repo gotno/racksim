@@ -19,7 +19,8 @@ protected:
 public:	
 	virtual void Tick(float DeltaTime) override;
   
-  void AddModule(AVCVModule* Module);
+  void AddModuleBack(AVCVModule* Module);
+  void AddModuleFront(AVCVModule* Module);
 
   void EngageGrab(FVector GrabbedLocation, FRotator GrabbedRotation);
   void AlterGrab(FVector GrabbedLocation, FRotator GrabbedRotation);
@@ -34,4 +35,7 @@ private:
   FVector LastLocationDelta;
   FVector LastGrabbedLocation;
   FRotator LastGrabbedRotation;
+
+  void AddModule(AVCVModule* Module);
+  void ValidateModuleInclusion(AVCVModule* Module);
 };

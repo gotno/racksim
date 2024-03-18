@@ -11,6 +11,7 @@
 #include "Utility/GrabbableActor.h"
 
 #include "VCVModule.h"
+#include "Utility/ModuleWeldment.h"
 #include "VCVCable.h"
 #include "ModuleComponents/ContextMenu.h"
 #include "ModuleComponents/VCVParam.h"
@@ -494,5 +495,29 @@ void Aosc3GameModeBase::SubscribeGrabbableSetDelegate(AGrabbableActor* Grabbable
       GrabbableActor,
       &AGrabbableActor::HighlightIfTargeted
     );
+  }
+}
+
+void Aosc3GameModeBase::WeldModules(AVCVModule* LeftModule, AVCVModule* RightModule) {
+  if (LeftModule->IsInWeldment() && RightModule->IsInWeldment()) {
+    // TODO: combine weldments
+    // but this requires snapping weldments like modules can
+  } else if (LeftModule->IsInWeldment()) {
+    AModuleWeldment* weldment = LeftModule->GetWeldment();
+    weldment->AddModuleBack(RightModule);
+  } else if (RightModule->IsInWeldment()) {
+    AModuleWeldment* weldment = RightModule->GetWeldment();
+    weldment->AddModuleFront(LeftModule);
+  } else {
+    AModuleWeldment* newWeldment =
+      GetWorld()->SpawnActor<AModuleWeldment>(
+        AModuleWeldment::StaticClass(),
+        LeftModule->GetActorLocation(),
+        FRotator(0.f)
+      );
+    ModuleWeldments.Add(newWeldment);
+
+    newWeldment->AddModuleBack(LeftModule);
+    newWeldment->AddModuleBack(RightModule);
   }
 }

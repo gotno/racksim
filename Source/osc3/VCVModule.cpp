@@ -294,9 +294,11 @@ void AVCVModule::ReleaseGrab() {
   Super::ReleaseGrab();
 
   if (SnapToSide) {
+    // reset mesh position
     StaticMeshComponent->SetWorldRotation(StaticMeshRoot->GetComponentRotation());
     StaticMeshComponent->SetWorldLocation(StaticMeshRoot->GetComponentLocation());
 
+    // update actor position
     AVCVModule* module = Cast<AVCVModule>(SnapToSide->GetOwner());
     FVector location, vector;
     FRotator rotation;
@@ -304,6 +306,17 @@ void AVCVModule::ReleaseGrab() {
     SetActorRotation(rotation);
     SetActorLocation(location + vector * Model.box.size.x * 0.5f);
     
+    // create weldment
+    // or
+    // add to weldment
+    // or
+    // combine weldments
+    if (SnapToSide->GetCollisionObjectType() == LEFT_SNAP_OBJECT) {
+      GameMode->WeldModules(this, Cast<AVCVModule>(SnapToSide->GetOwner()));
+    } else {
+      GameMode->WeldModules(Cast<AVCVModule>(SnapToSide->GetOwner()), this);
+    }
+
     SnapToSide = nullptr;
   }
 }
@@ -337,8 +350,12 @@ void AVCVModule::Tick(float DeltaTime) {
 }
 
 void AVCVModule::SetSnapMode(bool inbSnapMode) {
+  if (IsInWeldment()) {
+    bSnapMode = false;
+    return;
+  }
+
   bSnapMode = inbSnapMode;
-  if (!bSnapMode) SnapToSide = nullptr;
 }
 
 void AVCVModule::GetSnapPositioning(UBoxComponent* Collider, FVector& OffsetLocation, FVector& Vector, FRotator& Rotation) {

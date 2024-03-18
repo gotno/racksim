@@ -62,6 +62,9 @@ public:
   void ReleaseGrab() override;
 
   void GetSnapPositioning(UBoxComponent* Collider, FVector& OffsetLocation, FVector& Vector, FRotator& Rotation);
+  AModuleWeldment* GetWeldment() {
+    return Weldment;
+  }
   void SetWeldment(AModuleWeldment* inWeldment) {
     Weldment = inWeldment;
   }

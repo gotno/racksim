@@ -25,6 +25,7 @@ class AWidgetSurrogate;
 class Aosc3PlayerController;
 class UDPSVGAsset;
 class UTexture2D;
+class AModuleWeldment;
 
 struct ReturnModulePosition {
   FVector Location{0.f};
@@ -87,6 +88,8 @@ public:
   void SetLibraryJsonPath(FString& Path);
   ALibrary* GetLibrary();
 
+  void WeldModules(AVCVModule* LeftModule, AVCVModule* RightModule);
+
 private:
   UFUNCTION()
   void Exit();
@@ -116,6 +119,8 @@ private:
   UPROPERTY()
   TMap<int64, AVCVModule*> ModuleActors;
   UPROPERTY()
+  TArray<AModuleWeldment*> ModuleWeldments;
+  UPROPERTY()
   TArray<AVCVCable*> CableActors;
   UPROPERTY()
   ALibrary* LibraryActor{nullptr};
@@ -137,7 +142,6 @@ private:
   void NewPatch();
   void ContinueAutosave();
   void StartRack(bool bNewPatch);
-
 public:
   // delegate stuff
   void SubscribeMenuItemSyncedDelegate(AContextMenu* ContextMenu);
