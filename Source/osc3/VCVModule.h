@@ -59,7 +59,9 @@ public:
   FString Name;
 
   void AlterGrab(FVector GrabbedLocation, FRotator GrabbedRotation) override;
+  void ReleaseGrab() override;
 
+  void GetSnapPositioning(UBoxComponent* Collider, FVector& OffsetLocation, FVector& Vector, FRotator& Rotation);
   void SetWeldment(AModuleWeldment* inWeldment) {
     Weldment = inWeldment;
   }
@@ -93,6 +95,7 @@ private:
 
   void SnapModeTick();
   bool bSnapMode{false};
+  UBoxComponent* SnapToSide{nullptr};
   
   Aosc3GameModeBase* GameMode;
 
