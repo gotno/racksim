@@ -54,6 +54,7 @@ void AModuleWeldment::AddModuleBack(AVCVModule* Module) {
 void AModuleWeldment::AddModule(AVCVModule* Module) {
   Module->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
   Module->SetWeldment(this);
+  HighlightModules();
 }
 
 void AModuleWeldment::EngageGrab(FVector GrabbedLocation, FRotator GrabbedRotation) {
@@ -92,4 +93,21 @@ void AModuleWeldment::AlterGrab(FVector GrabbedLocation, FRotator GrabbedRotatio
   
   for (AVCVModule* module : Modules)
     module->TriggerCableUpdates();
+}
+
+void AModuleWeldment::HighlightModules() {
+  for (AVCVModule* module : Modules) module->SetHighlighted(true);
+
+  FTimerHandle hUnhighlight;
+  GetWorld()->GetTimerManager().SetTimer(
+    hUnhighlight,
+    this,
+    &AModuleWeldment::UnhighlightModules,
+    0.4f, // seconds
+    false // loop
+  );
+}
+
+void AModuleWeldment::UnhighlightModules() {
+  for (AVCVModule* module : Modules) module->SetHighlighted(false);
 }
