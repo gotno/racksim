@@ -182,6 +182,8 @@ void AOSCController::AddModule(const FOSCAddress& AddressPattern, const FOSCMess
   Modules[moduleId].pluginSlug = pluginSlug;
 
   UOSCManager::GetInt32(message, 14, Modules[moduleId].returnId);
+  UOSCManager::GetInt64(message, 15, Modules[moduleId].leftExpanderId);
+  UOSCManager::GetInt64(message, 16, Modules[moduleId].rightExpanderId);
 }
 
 void AOSCController::DestroyModule(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port) {

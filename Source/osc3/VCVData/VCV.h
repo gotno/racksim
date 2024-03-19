@@ -158,6 +158,8 @@ struct VCVModule {
   
   int32 returnId;
 
+  int64_t leftExpanderId{-1}, rightExpanderId{-1};
+
   TMap<int32, VCVParam> Params;
   TMap<int32, VCVPort> Inputs;
   TMap<int32, VCVPort> Outputs;
