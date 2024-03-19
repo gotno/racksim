@@ -39,6 +39,7 @@ private:
   void AddModule(AVCVModule* Module);
   void ValidateModuleInclusion(AVCVModule* Module);
 
+  void ResetLocation();
   void HighlightModules();
   void UnhighlightModules();
 };

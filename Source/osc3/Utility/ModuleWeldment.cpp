@@ -54,7 +54,22 @@ void AModuleWeldment::AddModuleBack(AVCVModule* Module) {
 void AModuleWeldment::AddModule(AVCVModule* Module) {
   Module->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
   Module->SetWeldment(this);
+  ResetLocation();
   HighlightModules();
+}
+
+void AModuleWeldment::ResetLocation() {
+  FVector averageLocation{0.f};
+
+  for (AVCVModule* module : Modules)
+    averageLocation = averageLocation + module->GetActorLocation();
+  averageLocation = averageLocation / (float)Modules.Num();
+
+  FVector offset = averageLocation - GetActorLocation();
+
+  AddActorWorldOffset(offset);
+  for (AVCVModule* module : Modules)
+    module->AddActorWorldOffset(-offset);
 }
 
 void AModuleWeldment::EngageGrab(FVector GrabbedLocation, FRotator GrabbedRotation) {
