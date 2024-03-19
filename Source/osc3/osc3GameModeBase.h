@@ -88,6 +88,7 @@ public:
   void SetLibraryJsonPath(FString& Path);
   ALibrary* GetLibrary();
 
+  void WeldModules(TArray<int64>& ModuleIds);
   void WeldModules(AVCVModule* LeftModule, AVCVModule* RightModule);
 
 private:
@@ -113,15 +114,18 @@ private:
 
   FVector DefaultInPatchPlayerLocation{0.f};
 
-  void ProcessSpawnCableQueue();
-  TArray<VCVCable> cableQueue;
-
   UPROPERTY()
   TMap<int64, AVCVModule*> ModuleActors;
+
   UPROPERTY()
   TArray<AModuleWeldment*> ModuleWeldments;
+  void ProcessWeldmentQueue();
+
   UPROPERTY()
   TArray<AVCVCable*> CableActors;
+  void ProcessSpawnCableQueue();
+  TArray<VCVCable> CableQueue;
+
   UPROPERTY()
   ALibrary* LibraryActor{nullptr};
 

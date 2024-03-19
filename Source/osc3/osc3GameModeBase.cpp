@@ -162,6 +162,14 @@ Uosc3SaveGame* Aosc3GameModeBase::MakeSaveGame() {
       SaveGameInstance->ModuleInfos.Add(module->Id, info);
     }
 
+    for (AModuleWeldment* weldment : ModuleWeldments) {
+      FWeldmentInfo info;
+      info.Position.Location = weldment->GetActorLocation();
+      info.Position.Rotation = weldment->GetActorRotation();
+      weldment->GetModuleIds(info.ModuleIds);
+      SaveGameInstance->WeldmentInfos.Add(info);
+    }
+
     LibraryActor->GetPosition(SaveGameInstance->LibraryPosition.Location, SaveGameInstance->LibraryPosition.Rotation);
     SaveGameInstance->bLibraryHidden = LibraryActor->IsHidden();
     SaveGameInstance->PlayerLocation = PlayerPawn->GetActorLocation();
@@ -228,10 +236,11 @@ void Aosc3GameModeBase::SpawnModule(VCVModule vcv_module) {
   module->SetActorRotation(rotation);
 
   ProcessSpawnCableQueue();
+  ProcessWeldmentQueue();
 }
 
 void Aosc3GameModeBase::QueueCableSpawn(VCVCable vcv_cable) {
-  cableQueue.Push(vcv_cable);
+  CableQueue.Push(vcv_cable);
   ProcessSpawnCableQueue();
 }
 
@@ -242,7 +251,7 @@ void Aosc3GameModeBase::ProcessSpawnCableQueue() {
     return Cable->Id == -1;
   });
 
-  for (VCVCable cable : cableQueue) {
+  for (VCVCable cable : CableQueue) {
     AVCVCable* matchingUnpersistedCable{nullptr};
     
     if (anyUnpersistedCables) {
@@ -275,7 +284,28 @@ void Aosc3GameModeBase::ProcessSpawnCableQueue() {
   }
 
   for (VCVCable cable : spawnedCables) {
-    cableQueue.RemoveSwap(cable);
+    CableQueue.RemoveSwap(cable);
+  }
+}
+
+void Aosc3GameModeBase::ProcessWeldmentQueue() {
+  if (!SaveData) return;
+
+  for (FWeldmentInfo& info : SaveData->WeldmentInfos) {
+    if (info.bRestored) continue;
+
+    bool bReadyToRestore{true};
+    for (int64& moduleId : info.ModuleIds) {
+      if (!ModuleActors.Contains(moduleId)) {
+        bReadyToRestore = false;
+        break;
+      }
+    }
+
+    if (bReadyToRestore) {
+      WeldModules(info.ModuleIds);
+      info.bRestored = true;
+    }
   }
 }
 
@@ -498,6 +528,17 @@ void Aosc3GameModeBase::SubscribeGrabbableSetDelegate(AGrabbableActor* Grabbable
   }
 }
 
+void Aosc3GameModeBase::WeldModules(TArray<int64>& ModuleIds) {
+  checkf(ModuleIds.Num() > 1, TEXT("can't weld a single module"));
+
+  for (int i = 1; i < ModuleIds.Num(); i++) {
+    WeldModules(
+      ModuleActors[ModuleIds[i - 1]],
+      ModuleActors[ModuleIds[i]]
+    );
+  }
+}
+
 void Aosc3GameModeBase::WeldModules(AVCVModule* LeftModule, AVCVModule* RightModule) {
   if (LeftModule->IsInWeldment() && RightModule->IsInWeldment()) {
     // TODO: combine weldments
@@ -512,7 +553,7 @@ void Aosc3GameModeBase::WeldModules(AVCVModule* LeftModule, AVCVModule* RightMod
     AModuleWeldment* newWeldment =
       GetWorld()->SpawnActor<AModuleWeldment>(
         AModuleWeldment::StaticClass(),
-        LeftModule->GetActorLocation(),
+        FVector(0.f),
         FRotator(0.f)
       );
     ModuleWeldments.Add(newWeldment);

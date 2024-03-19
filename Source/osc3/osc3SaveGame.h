@@ -5,7 +5,7 @@
 #include "osc3SaveGame.generated.h"
 
 USTRUCT()
-struct FVCVPositionInfo {
+struct FPositionInfo {
   GENERATED_BODY()
 
   UPROPERTY()
@@ -19,7 +19,21 @@ struct FVCVModuleInfo {
   GENERATED_BODY()
     
   UPROPERTY()
-  FVCVPositionInfo Position;
+  FPositionInfo Position;
+};
+
+USTRUCT()
+struct FWeldmentInfo {
+  GENERATED_BODY()
+
+  UPROPERTY()
+  bool bRestored{false};
+
+  UPROPERTY()
+  TArray<int64> ModuleIds;
+
+  UPROPERTY()
+  FPositionInfo Position;
 };
 
 UCLASS()
@@ -37,7 +51,9 @@ public:
   UPROPERTY(VisibleAnywhere, Category = Base)
   TMap<int64, FVCVModuleInfo> ModuleInfos;
   UPROPERTY(VisibleAnywhere, Category = Base)
-  FVCVPositionInfo LibraryPosition;
+  TArray<FWeldmentInfo> WeldmentInfos;
+  UPROPERTY(VisibleAnywhere, Category = Base)
+  FPositionInfo LibraryPosition;
   UPROPERTY(VisibleAnywhere, Category = Base)
   bool bLibraryHidden{true};
   UPROPERTY(VisibleAnywhere, Category = Base)

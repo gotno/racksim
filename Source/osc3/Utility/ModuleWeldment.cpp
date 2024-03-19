@@ -28,6 +28,10 @@ void AModuleWeldment::Tick(float DeltaTime) {
   );
 }
 
+void AModuleWeldment::GetModuleIds(TArray<int64>& ModuleIds) {
+  for (AVCVModule* module : Modules) ModuleIds.Push(module->Id);
+}
+
 void AModuleWeldment::ValidateModuleInclusion(AVCVModule* Module) {
   checkf(
     !Modules.Contains(Module),

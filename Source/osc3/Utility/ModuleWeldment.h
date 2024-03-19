@@ -21,6 +21,7 @@ public:
   
   void AddModuleBack(AVCVModule* Module);
   void AddModuleFront(AVCVModule* Module);
+  void GetModuleIds(TArray<int64>& ModuleIds);
 
   void EngageGrab(FVector GrabbedLocation, FRotator GrabbedRotation);
   void AlterGrab(FVector GrabbedLocation, FRotator GrabbedRotation);
