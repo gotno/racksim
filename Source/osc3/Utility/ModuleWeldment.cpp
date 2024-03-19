@@ -1,7 +1,9 @@
 #include "Utility/ModuleWeldment.h"
 
+#include "osc3GameModeBase.h"
 #include "VCVModule.h"
 
+#include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "DrawDebugHelpers.h"
 
@@ -14,6 +16,14 @@ AModuleWeldment::AModuleWeldment() {
 
 void AModuleWeldment::BeginPlay() {
 	Super::BeginPlay();
+
+  GameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(this));
+}
+
+void AModuleWeldment::EndPlay(const EEndPlayReason::Type EndPlayReason) {
+	Super::EndPlay(EndPlayReason);
+
+  for (AVCVModule* module : Modules) module->SetWeldment(nullptr);
 }
 
 void AModuleWeldment::Tick(float DeltaTime) {
@@ -28,8 +38,12 @@ void AModuleWeldment::Tick(float DeltaTime) {
   );
 }
 
-void AModuleWeldment::GetModuleIds(TArray<int64>& ModuleIds) {
-  for (AVCVModule* module : Modules) ModuleIds.Push(module->Id);
+void AModuleWeldment::GetModules(TArray<AVCVModule*>& outModules) {
+  for (AVCVModule* module : Modules) outModules.Push(module);
+}
+
+void AModuleWeldment::GetModuleIds(TArray<int64>& outModuleIds) {
+  for (AVCVModule* module : Modules) outModuleIds.Push(module->Id);
 }
 
 void AModuleWeldment::ValidateModuleInclusion(AVCVModule* Module) {
@@ -60,6 +74,16 @@ void AModuleWeldment::AddModule(AVCVModule* Module) {
   Module->SetWeldment(this);
   ResetLocation();
   HighlightModules();
+}
+
+void AModuleWeldment::Append(AModuleWeldment* OtherWeldment) {
+  TArray<AVCVModule*> otherModules;
+  OtherWeldment->GetModules(otherModules);
+  GameMode->DestroyWeldment(OtherWeldment);
+
+  for (AVCVModule* module : otherModules) {
+    AddModuleBack(module);
+  }
 }
 
 void AModuleWeldment::ResetLocation() {

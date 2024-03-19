@@ -539,10 +539,16 @@ void Aosc3GameModeBase::WeldModules(TArray<int64>& ModuleIds) {
   }
 }
 
+void Aosc3GameModeBase::DestroyWeldment(AModuleWeldment* Weldment) {
+  ModuleWeldments.RemoveSwap(Weldment);
+  Weldment->Destroy();
+}
+
 void Aosc3GameModeBase::WeldModules(AVCVModule* LeftModule, AVCVModule* RightModule) {
   if (LeftModule->IsInWeldment() && RightModule->IsInWeldment()) {
-    // TODO: combine weldments
-    // but this requires snapping weldments like modules can
+    // TODO: [x] combine weldments
+    LeftModule->GetWeldment()->Append(RightModule->GetWeldment());
+    // [ ] but this requires snapping weldments like modules can
   } else if (LeftModule->IsInWeldment()) {
     AModuleWeldment* weldment = LeftModule->GetWeldment();
     weldment->AddModuleBack(RightModule);

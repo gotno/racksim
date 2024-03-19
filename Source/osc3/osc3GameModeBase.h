@@ -88,6 +88,7 @@ public:
   void SetLibraryJsonPath(FString& Path);
   ALibrary* GetLibrary();
 
+  void DestroyWeldment(AModuleWeldment* Weldment);
   void WeldModules(TArray<int64>& ModuleIds);
   void WeldModules(AVCVModule* LeftModule, AVCVModule* RightModule);
 

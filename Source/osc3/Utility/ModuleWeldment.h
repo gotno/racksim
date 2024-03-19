@@ -4,6 +4,7 @@
 #include "GameFramework/Actor.h"
 #include "ModuleWeldment.generated.h"
 
+class Aosc3GameModeBase;
 class AVCVModule;
 
 UCLASS()
@@ -15,17 +16,22 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 public:	
 	virtual void Tick(float DeltaTime) override;
   
   void AddModuleBack(AVCVModule* Module);
   void AddModuleFront(AVCVModule* Module);
-  void GetModuleIds(TArray<int64>& ModuleIds);
+  void GetModules(TArray<AVCVModule*>& outModules);
+  void GetModuleIds(TArray<int64>& outModuleIds);
+  void Append(AModuleWeldment* OtherWeldment);
 
   void EngageGrab(FVector GrabbedLocation, FRotator GrabbedRotation);
   void AlterGrab(FVector GrabbedLocation, FRotator GrabbedRotation);
 private:
+  Aosc3GameModeBase* GameMode{nullptr};
+
   UPROPERTY(VisibleAnywhere)
   USceneComponent* RootSceneComponent;
 
