@@ -120,6 +120,7 @@ private:
 
   UPROPERTY()
   TArray<AModuleWeldment*> ModuleWeldments;
+  TMap<int64_t, VCVModule> ModulesSeekingWeldment;
   void ProcessWeldmentQueue();
 
   UPROPERTY()

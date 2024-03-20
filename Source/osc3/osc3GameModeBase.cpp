@@ -236,6 +236,9 @@ void Aosc3GameModeBase::SpawnModule(VCVModule vcv_module) {
   module->SetActorRotation(rotation);
 
   ProcessSpawnCableQueue();
+
+  if (vcv_module.leftExpanderId > 0 || vcv_module.rightExpanderId > 0)
+    ModulesSeekingWeldment.Add(vcv_module.id, vcv_module);
   ProcessWeldmentQueue();
 }
 
@@ -289,22 +292,58 @@ void Aosc3GameModeBase::ProcessSpawnCableQueue() {
 }
 
 void Aosc3GameModeBase::ProcessWeldmentQueue() {
-  if (!SaveData) return;
+  if (SaveData) {
+    for (FWeldmentInfo& info : SaveData->WeldmentInfos) {
+      if (info.bRestored) continue;
 
-  for (FWeldmentInfo& info : SaveData->WeldmentInfos) {
-    if (info.bRestored) continue;
+      bool bReadyToRestore{true};
+      for (int64& moduleId : info.ModuleIds) {
+        if (!ModuleActors.Contains(moduleId)) {
+          bReadyToRestore = false;
+          break;
+        }
+      }
 
-    bool bReadyToRestore{true};
-    for (int64& moduleId : info.ModuleIds) {
-      if (!ModuleActors.Contains(moduleId)) {
-        bReadyToRestore = false;
-        break;
+      if (bReadyToRestore) {
+        WeldModules(info.ModuleIds);
+        info.bRestored = true;
       }
     }
+  }
 
-    if (bReadyToRestore) {
-      WeldModules(info.ModuleIds);
-      info.bRestored = true;
+  if (!SaveData) {
+    for (auto& kv : ModulesSeekingWeldment) {
+      VCVModule& startModule = kv.Value;
+      if (startModule.leftExpanderId != -1) continue;
+
+      int64_t nextModuleId = startModule.rightExpanderId;
+      if (!ModulesSeekingWeldment.Contains(nextModuleId)) continue;
+
+      TArray<int64_t> modulesToWeld;
+      modulesToWeld.Push(startModule.id);
+
+      bool bReadyToWeld{false};
+
+      while (nextModuleId != -1) {
+        modulesToWeld.Push(nextModuleId);
+        VCVModule& nextModule = ModulesSeekingWeldment[nextModuleId];
+
+        nextModuleId = nextModule.rightExpanderId;
+
+        if (nextModuleId == -1) {
+          bReadyToWeld = true;
+          continue;
+        }
+
+        if (!ModulesSeekingWeldment.Contains(nextModuleId)) break;
+      }
+
+      if (bReadyToWeld) {
+        WeldModules(modulesToWeld);
+        for (int64_t moduleId : modulesToWeld) {
+          ModulesSeekingWeldment.Remove(moduleId);
+        }
+      }
     }
   }
 }
