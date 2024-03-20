@@ -573,27 +573,30 @@ void Aosc3GameModeBase::WeldModules(TArray<int64>& ModuleIds) {
   for (int i = 1; i < ModuleIds.Num(); i++) {
     WeldModules(
       ModuleActors[ModuleIds[i - 1]],
-      ModuleActors[ModuleIds[i]]
+      ModuleActors[ModuleIds[i]],
+      // this method is only used for restoring prior welds
+      // or creating welds for expanders, so don't ask rack to rearrange
+      false
     );
   }
 }
 
-void Aosc3GameModeBase::DestroyWeldment(AModuleWeldment* Weldment) {
-  ModuleWeldments.RemoveSwap(Weldment);
-  Weldment->Destroy();
-}
-
-void Aosc3GameModeBase::WeldModules(AVCVModule* LeftModule, AVCVModule* RightModule) {
+void Aosc3GameModeBase::WeldModules(AVCVModule* LeftModule, AVCVModule* RightModule, bool bShouldArrangeRackside) {
+  AModuleWeldment* affectedWeldment;
   if (LeftModule->IsInWeldment() && RightModule->IsInWeldment()) {
     // TODO: [x] combine weldments
-    LeftModule->GetWeldment()->Append(RightModule->GetWeldment());
+    AModuleWeldment* weldment = LeftModule->GetWeldment();
+    weldment->Append(RightModule->GetWeldment());
     // [ ] but this requires snapping weldments like modules can
+    affectedWeldment = weldment;
   } else if (LeftModule->IsInWeldment()) {
     AModuleWeldment* weldment = LeftModule->GetWeldment();
     weldment->AddModuleBack(RightModule);
+    affectedWeldment = weldment;
   } else if (RightModule->IsInWeldment()) {
     AModuleWeldment* weldment = RightModule->GetWeldment();
     weldment->AddModuleFront(LeftModule);
+    affectedWeldment = weldment;
   } else {
     AModuleWeldment* newWeldment =
       GetWorld()->SpawnActor<AModuleWeldment>(
@@ -605,5 +608,23 @@ void Aosc3GameModeBase::WeldModules(AVCVModule* LeftModule, AVCVModule* RightMod
 
     newWeldment->AddModuleBack(LeftModule);
     newWeldment->AddModuleBack(RightModule);
+    affectedWeldment = newWeldment;
   }
+
+  if (bShouldArrangeRackside) {
+    TArray<int64> moduleIds;
+    affectedWeldment->GetModuleIds(moduleIds);
+
+    for (int i = 1; i < moduleIds.Num(); i++) {
+      OSCctrl->SendArrangeModules(
+        moduleIds[i - 1],
+        moduleIds[i]
+      );
+    }
+  }
+}
+
+void Aosc3GameModeBase::DestroyWeldment(AModuleWeldment* Weldment) {
+  ModuleWeldments.RemoveSwap(Weldment);
+  Weldment->Destroy();
 }

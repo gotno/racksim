@@ -90,7 +90,7 @@ public:
 
   void DestroyWeldment(AModuleWeldment* Weldment);
   void WeldModules(TArray<int64>& ModuleIds);
-  void WeldModules(AVCVModule* LeftModule, AVCVModule* RightModule);
+  void WeldModules(AVCVModule* LeftModule, AVCVModule* RightModule, bool bShouldArrangeRackside = true);
 
 private:
   UFUNCTION()

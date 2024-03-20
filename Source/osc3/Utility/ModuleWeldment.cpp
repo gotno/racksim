@@ -5,7 +5,7 @@
 
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
-#include "DrawDebugHelpers.h"
+// #include "DrawDebugHelpers.h"
 
 AModuleWeldment::AModuleWeldment() {
 	PrimaryActorTick.bCanEverTick = true;
@@ -29,13 +29,13 @@ void AModuleWeldment::EndPlay(const EEndPlayReason::Type EndPlayReason) {
 void AModuleWeldment::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 
-  DrawDebugSphere(
-    GetWorld(),
-    GetActorLocation(),
-    5.f,
-    16,
-    FColor::Black
-  );
+  // DrawDebugSphere(
+  //   GetWorld(),
+  //   GetActorLocation(),
+  //   5.f,
+  //   16,
+  //   FColor::Black
+  // );
 }
 
 void AModuleWeldment::GetModules(TArray<AVCVModule*>& outModules) {

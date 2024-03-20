@@ -46,6 +46,8 @@ public:
   UFUNCTION()
   void SendAutosaveAndExit();
   UFUNCTION()
+  void SendArrangeModules(int64 LeftModuleId, int64 RightModuleId);
+  UFUNCTION()
   void NotifyReceived(FString Type, int64 OuterId, int InnerId = -1);
 
   void RequestMenu(const FVCVMenu& Menu) const;
