@@ -61,7 +61,6 @@ public:
   void AlterGrab(FVector GrabbedLocation, FRotator GrabbedRotation) override;
   void ReleaseGrab() override;
 
-  void GetSnapPositioning(UBoxComponent* Collider, FVector& OffsetLocation, FVector& Vector, FRotator& Rotation);
   AModuleWeldment* GetWeldment() {
     return Weldment;
   }
@@ -71,11 +70,18 @@ public:
   bool IsInWeldment() {
     return !!Weldment;
   }
+  // get the location, rotation and vector of another module to snap this one to
+  void GetSnapPositioning(UBoxComponent* SideCollider, FVector& OffsetLocation, FVector& Vector, FRotator& Rotation);
 private:
   UPROPERTY()
   UBoxComponent* SnapColliderLeft;
   UPROPERTY()
   UBoxComponent* SnapColliderRight;
+
+  // get the offset and rotation necessary to move this static mesh to another location
+  void GetSnapOffset(UBoxComponent* SideCollider, FVector& Offset, FRotator& Rotation);
+  void OffsetMesh(FVector Offset, FRotator Rotation);
+  void ResetMeshPosition();
 
   UPROPERTY()
   UMaterialInstanceDynamic* BaseMaterialInstance;
@@ -96,6 +102,8 @@ private:
 
   VCVModule Model;
 
+  FHitResult RunLeftSnapTrace();
+  FHitResult RunRightSnapTrace();
   void SnapModeTick();
   bool bSnapMode{false};
   UBoxComponent* SnapToSide{nullptr};

@@ -13,6 +13,7 @@
 #include "ModuleComponents/VCVSlider.h"
 #include "ModuleComponents/VCVPort.h"
 #include "ModuleComponents/VCVDisplay.h"
+#include "Utility/ModuleWeldment.h"
 
 #include "Components/BoxComponent.h"
 #include "Engine/Texture2D.h"
@@ -294,27 +295,19 @@ void AVCVModule::ReleaseGrab() {
   Super::ReleaseGrab();
 
   if (SnapToSide) {
-    // reset mesh position
-    StaticMeshComponent->SetWorldRotation(StaticMeshRoot->GetComponentRotation());
-    StaticMeshComponent->SetWorldLocation(StaticMeshRoot->GetComponentLocation());
+    ResetMeshPosition();
 
-    // update actor position
-    AVCVModule* module = Cast<AVCVModule>(SnapToSide->GetOwner());
-    FVector location, vector;
+    FVector offset;
     FRotator rotation;
-    module->GetSnapPositioning(SnapToSide, location, vector, rotation);
+    GetSnapOffset(SnapToSide, offset, rotation);
     SetActorRotation(rotation);
-    SetActorLocation(location + vector * Model.box.size.x * 0.5f);
+    AddActorWorldOffset(offset);
     
-    // create weldment
-    // or
-    // add to weldment
-    // or
-    // combine weldments
+    AVCVModule* snapToModule = Cast<AVCVModule>(SnapToSide->GetOwner());
     if (SnapToSide->GetCollisionObjectType() == LEFT_SNAP_OBJECT) {
-      GameMode->WeldModules(this, Cast<AVCVModule>(SnapToSide->GetOwner()));
+      GameMode->WeldModules(this, snapToModule);
     } else {
-      GameMode->WeldModules(Cast<AVCVModule>(SnapToSide->GetOwner()), this);
+      GameMode->WeldModules(snapToModule, this);
     }
 
     SnapToSide = nullptr;
@@ -340,36 +333,13 @@ void AVCVModule::Tick(float DeltaTime) {
 
   SnapModeTick();
   if (SnapToSide) {
-    AVCVModule* module = Cast<AVCVModule>(SnapToSide->GetOwner());
-    FVector location, vector;
+    FVector offset;
     FRotator rotation;
-    module->GetSnapPositioning(SnapToSide, location, vector, rotation);
-    StaticMeshComponent->SetWorldRotation(rotation);
-    StaticMeshComponent->SetWorldLocation(location + vector * Model.box.size.x * 0.5f);
-  }
-}
-
-void AVCVModule::SetSnapMode(bool inbSnapMode) {
-  if (IsInWeldment()) {
-    bSnapMode = false;
-    return;
+    GetSnapOffset(SnapToSide, offset, rotation);
+    OffsetMesh(offset, rotation);
   }
 
-  bSnapMode = inbSnapMode;
-}
-
-void AVCVModule::GetSnapPositioning(UBoxComponent* Collider, FVector& OffsetLocation, FVector& Vector, FRotator& Rotation) {
-  int direction = Collider == SnapColliderLeft ? -1 : 1;
-  float halfWidth = Model.box.size.x * 0.5f;
-
-  Rotation = StaticMeshRoot->GetComponentRotation();
-  Vector = direction * StaticMeshRoot->GetRightVector();
-  OffsetLocation = StaticMeshRoot->GetComponentLocation() + Vector * halfWidth;
-}
-
-void AVCVModule::SnapModeTick() {
-  if (!bSnapMode) return;
-
+  // Snap Colliders
   // DrawDebugBox(
   //   GetWorld(),
   //   SnapColliderLeft->GetComponentLocation(),
@@ -384,7 +354,13 @@ void AVCVModule::SnapModeTick() {
   //   SnapColliderRight->GetComponentRotation().Quaternion(),
   //   FColor::Red
   // );
+}
 
+void AVCVModule::SetSnapMode(bool inbSnapMode) {
+  bSnapMode = inbSnapMode;
+}
+
+FHitResult AVCVModule::RunLeftSnapTrace() {
   float halfWidth = Model.box.size.x * 0.5f;
   FVector meshCenter =
     StaticMeshRoot->GetComponentLocation()
@@ -399,38 +375,67 @@ void AVCVModule::SnapModeTick() {
   FCollisionObjectQueryParams leftQueryParams;
   leftQueryParams.AddObjectTypesToQuery(LEFT_SNAP_OBJECT);
   GetWorld()->LineTraceSingleByObjectType(leftHit, traceStart, traceEnd, leftQueryParams);
-  // DrawDebugLine(GetWorld(), traceStart, traceEnd, FColor::Yellow);
+  DrawDebugLine(GetWorld(), traceStart, traceEnd, FColor::Yellow);
 
-  // if (leftHit.GetActor()) {
-  //   ODB("%s hit %s left side", *GetActorNameOrLabel(), *leftHit.GetActor()->GetActorNameOrLabel());
-  //   SnapToSide = Cast<UBoxComponent>(leftHit.GetComponent());
-  // //   StaticMeshComponent->SetWorldLocation(hit.GetActor()->GetActorLocation());
-  // //   StaticMeshComponent->SetWorldRotation(hit.GetActor()->GetActorRotation());
-  //   return;
-  // } else {
-  //   SnapToSide = nullptr;
-  // }
+  return leftHit;
+}
 
-  traceStart =
+FHitResult AVCVModule::RunRightSnapTrace() {
+  float halfWidth = Model.box.size.x * 0.5f;
+  FVector meshCenter =
+    StaticMeshRoot->GetComponentLocation()
+      + (StaticMeshRoot->GetForwardVector() * MODULE_DEPTH * RENDER_SCALE * 0.5f);
+
+  FVector traceStart =
     meshCenter - (StaticMeshRoot->GetRightVector() * (halfWidth + 0.1f));
-  traceEnd =
+  FVector traceEnd =
     traceStart - StaticMeshRoot->GetRightVector() * 1.5 * RENDER_SCALE;
 
   FHitResult rightHit;
   FCollisionObjectQueryParams rightQueryParams;
   rightQueryParams.AddObjectTypesToQuery(RIGHT_SNAP_OBJECT);
   GetWorld()->LineTraceSingleByObjectType(rightHit, traceStart, traceEnd, rightQueryParams);
-  // DrawDebugLine(GetWorld(), traceStart, traceEnd, FColor::Red);
+  DrawDebugLine(GetWorld(), traceStart, traceEnd, FColor::Red);
 
-  // if (rightHit.GetActor()) {
-  //   ODB("%s hit %s right side", *GetActorNameOrLabel(), *rightHit.GetActor()->GetActorNameOrLabel());
-  //   SnapToSide = Cast<UBoxComponent>(rightHit.GetComponent());
-  // //   StaticMeshComponent->SetWorldLocation(hit.GetActor()->GetActorLocation());
-  // //   StaticMeshComponent->SetWorldRotation(hit.GetActor()->GetActorRotation());
-  //   return;
-  // } else {
-  //   SnapToSide = nullptr;
-  // }
+  return rightHit;
+}
+
+void AVCVModule::GetSnapPositioning(UBoxComponent* SideCollider, FVector& OffsetLocation, FVector& Vector, FRotator& Rotation) {
+  int direction = SideCollider == SnapColliderLeft ? -1 : 1;
+  float halfWidth = Model.box.size.x * 0.5f;
+
+  Rotation = StaticMeshRoot->GetComponentRotation();
+  Vector = direction * StaticMeshRoot->GetRightVector();
+  OffsetLocation = StaticMeshRoot->GetComponentLocation() + Vector * halfWidth;
+}
+
+void AVCVModule::GetSnapOffset(UBoxComponent* SideCollider, FVector& Offset, FRotator& Rotation) {
+  AVCVModule* module = Cast<AVCVModule>(SnapToSide->GetOwner());
+  FVector location, vector;
+  FRotator rotation;
+  module->GetSnapPositioning(SideCollider, location, vector, rotation);
+
+  Rotation = rotation;
+  FVector newLocation = location + vector * Model.box.size.x * 0.5f;
+  Offset = newLocation - StaticMeshRoot->GetComponentLocation();
+}
+
+void AVCVModule::OffsetMesh(FVector Offset, FRotator Rotation) {
+  ResetMeshPosition();
+  StaticMeshComponent->AddWorldOffset(Offset);
+  StaticMeshComponent->SetWorldRotation(Rotation);
+}
+
+void AVCVModule::ResetMeshPosition() {
+  StaticMeshComponent->SetWorldRotation(StaticMeshRoot->GetComponentRotation());
+  StaticMeshComponent->SetWorldLocation(StaticMeshRoot->GetComponentLocation());
+}
+
+void AVCVModule::SnapModeTick() {
+  if (!bSnapMode) return;
+
+  FHitResult leftHit = RunLeftSnapTrace();
+  FHitResult rightHit = RunRightSnapTrace();
 
   UBoxComponent* newSnapTo{nullptr};
   if (leftHit.GetActor() && rightHit.GetActor()) {
@@ -454,10 +459,7 @@ void AVCVModule::SnapModeTick() {
   
   if (newSnapTo != SnapToSide) {
     SnapToSide = newSnapTo;
-    if (!SnapToSide) {
-      StaticMeshComponent->SetWorldRotation(StaticMeshRoot->GetComponentRotation());
-      StaticMeshComponent->SetWorldLocation(StaticMeshRoot->GetComponentLocation());
-    }
+    if (!SnapToSide) ResetMeshPosition();
   }
 }
 
