@@ -311,6 +311,8 @@ void AVCVModule::ReleaseGrab() {
     }
 
     SnapToSide = nullptr;
+  } else if (IsInWeldment()) {
+    Weldment->ReleaseGrab();
   }
 }
 
@@ -375,7 +377,7 @@ FHitResult AVCVModule::RunLeftSnapTrace() {
   FCollisionObjectQueryParams leftQueryParams;
   leftQueryParams.AddObjectTypesToQuery(LEFT_SNAP_OBJECT);
   GetWorld()->LineTraceSingleByObjectType(leftHit, traceStart, traceEnd, leftQueryParams);
-  DrawDebugLine(GetWorld(), traceStart, traceEnd, FColor::Yellow);
+  // DrawDebugLine(GetWorld(), traceStart, traceEnd, FColor::Yellow);
 
   return leftHit;
 }
@@ -395,7 +397,7 @@ FHitResult AVCVModule::RunRightSnapTrace() {
   FCollisionObjectQueryParams rightQueryParams;
   rightQueryParams.AddObjectTypesToQuery(RIGHT_SNAP_OBJECT);
   GetWorld()->LineTraceSingleByObjectType(rightHit, traceStart, traceEnd, rightQueryParams);
-  DrawDebugLine(GetWorld(), traceStart, traceEnd, FColor::Red);
+  // DrawDebugLine(GetWorld(), traceStart, traceEnd, FColor::Red);
 
   return rightHit;
 }
@@ -404,13 +406,13 @@ void AVCVModule::GetSnapPositioning(UBoxComponent* SideCollider, FVector& Offset
   int direction = SideCollider == SnapColliderLeft ? -1 : 1;
   float halfWidth = Model.box.size.x * 0.5f;
 
-  Rotation = StaticMeshRoot->GetComponentRotation();
-  Vector = direction * StaticMeshRoot->GetRightVector();
-  OffsetLocation = StaticMeshRoot->GetComponentLocation() + Vector * halfWidth;
+  Rotation = StaticMeshComponent->GetComponentRotation();
+  Vector = direction * StaticMeshComponent->GetRightVector();
+  OffsetLocation = StaticMeshComponent->GetComponentLocation() + Vector * halfWidth;
 }
 
 void AVCVModule::GetSnapOffset(UBoxComponent* SideCollider, FVector& Offset, FRotator& Rotation) {
-  AVCVModule* module = Cast<AVCVModule>(SnapToSide->GetOwner());
+  AVCVModule* module = Cast<AVCVModule>(SideCollider->GetOwner());
   FVector location, vector;
   FRotator rotation;
   module->GetSnapPositioning(SideCollider, location, vector, rotation);
@@ -433,6 +435,10 @@ void AVCVModule::ResetMeshPosition() {
 
 void AVCVModule::SnapModeTick() {
   if (!bSnapMode) return;
+  if (IsInWeldment()) {
+    Weldment->SnapModeTick();
+    return;
+  }
 
   FHitResult leftHit = RunLeftSnapTrace();
   FHitResult rightHit = RunRightSnapTrace();

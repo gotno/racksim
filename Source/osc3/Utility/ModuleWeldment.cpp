@@ -6,6 +6,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 // #include "DrawDebugHelpers.h"
+#include "Components/BoxComponent.h"
 
 AModuleWeldment::AModuleWeldment() {
 	PrimaryActorTick.bCanEverTick = true;
@@ -36,6 +37,56 @@ void AModuleWeldment::Tick(float DeltaTime) {
   //   16,
   //   FColor::Black
   // );
+  if (SnapToSide) Snap();
+}
+
+void AModuleWeldment::SnapModeTick() {
+  FHitResult rightHit = Modules[0]->RunRightSnapTrace();
+  FHitResult leftHit = Modules[Modules.Num() - 1]->RunLeftSnapTrace();
+
+  UBoxComponent* newSnapTo{nullptr};
+  if (leftHit.GetActor()) {
+    newSnapTo = Cast<UBoxComponent>(leftHit.GetComponent());
+  } else if (rightHit.GetActor()) {
+    newSnapTo = Cast<UBoxComponent>(rightHit.GetComponent());
+  }
+
+  if (newSnapTo != SnapToSide) {
+    SnapToSide = newSnapTo;
+    if (!SnapToSide) Unsnap();
+  }
+}
+
+void AModuleWeldment::Snap(bool bTemporarily) {
+  FVector offset;
+  FRotator rotation;
+  UBoxComponent* nextSide = SnapToSide;
+  AVCVModule* moduleToSnap;
+
+  for (int i = 0; i < Modules.Num(); i++) {
+    moduleToSnap =
+      SnapToSide->GetCollisionObjectType() == RIGHT_SNAP_OBJECT
+        ? Modules[i]
+        : Modules[Modules.Num() - (i + 1)];
+
+    moduleToSnap->GetSnapOffset(nextSide, offset, rotation);
+    if (bTemporarily) {
+      moduleToSnap->OffsetMesh(offset, rotation);
+    } else {
+      moduleToSnap->ResetMeshPosition();
+      moduleToSnap->SetActorRotation(rotation);
+      moduleToSnap->AddActorWorldOffset(offset);
+    }
+
+    nextSide =
+      SnapToSide->GetCollisionObjectType() == RIGHT_SNAP_OBJECT
+        ? moduleToSnap->SnapColliderRight
+        : moduleToSnap->SnapColliderLeft;
+  }
+}
+
+void AModuleWeldment::Unsnap() {
+  for (AVCVModule* module : Modules) module->ResetMeshPosition();
 }
 
 void AModuleWeldment::GetModules(TArray<AVCVModule*>& outModules) {
@@ -136,6 +187,27 @@ void AModuleWeldment::AlterGrab(FVector GrabbedLocation, FRotator GrabbedRotatio
   
   for (AVCVModule* module : Modules)
     module->TriggerCableUpdates();
+}
+
+void AModuleWeldment::ReleaseGrab() {
+  if (SnapToSide) {
+    Unsnap();
+    Snap(false);
+
+    AVCVModule* leader =
+      SnapToSide->GetCollisionObjectType() == RIGHT_SNAP_OBJECT
+        ? Modules[0]
+        : Modules[Modules.Num() - 1];
+    AVCVModule* snapToModule = Cast<AVCVModule>(SnapToSide->GetOwner());
+
+    if (SnapToSide->GetCollisionObjectType() == RIGHT_SNAP_OBJECT) {
+      GameMode->WeldModules(snapToModule, leader);
+    } else {
+      GameMode->WeldModules(leader, snapToModule);
+    }
+
+    SnapToSide = nullptr;
+  }
 }
 
 void AModuleWeldment::HighlightModules() {

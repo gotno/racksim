@@ -19,6 +19,8 @@ UCLASS()
 class OSC3_API AVCVModule : public AGrabbableActor {
 	GENERATED_BODY()
 	
+  friend class AModuleWeldment;
+
 public:	
 	AVCVModule();
 
