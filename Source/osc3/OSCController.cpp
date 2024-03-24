@@ -289,13 +289,14 @@ void AOSCController::SendAutosaveAndExit() {
   OSCClient->SendOSCMessage(message);
 }
 
-void AOSCController::SendArrangeModules(int64 LeftModuleId, int64 RightModuleId) {
+void AOSCController::SendArrangeModules(int64 LeftModuleId, int64 RightModuleId, bool bAttach) {
   FOSCAddress address = UOSCManager::ConvertStringToOSCAddress(FString(TEXT("/arrange_modules")));
   FOSCMessage message;
   UOSCManager::SetOSCMessageAddress(message, address);
 
   UOSCManager::AddInt64(message, LeftModuleId);
   UOSCManager::AddInt64(message, RightModuleId);
+  UOSCManager::AddBool(message, bAttach);
 
   OSCClient->SendOSCMessage(message);
 }

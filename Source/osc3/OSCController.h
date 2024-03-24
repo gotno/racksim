@@ -46,7 +46,7 @@ public:
   UFUNCTION()
   void SendAutosaveAndExit();
   UFUNCTION()
-  void SendArrangeModules(int64 LeftModuleId, int64 RightModuleId);
+  void SendArrangeModules(int64 LeftModuleId, int64 RightModuleId, bool bAttach);
   UFUNCTION()
   void NotifyReceived(FString Type, int64 OuterId, int InnerId = -1);
 
