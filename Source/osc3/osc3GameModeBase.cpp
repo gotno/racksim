@@ -567,16 +567,14 @@ void Aosc3GameModeBase::SubscribeGrabbableSetDelegate(AGrabbableActor* Grabbable
   }
 }
 
-void Aosc3GameModeBase::WeldModules(TArray<int64>& ModuleIds) {
+void Aosc3GameModeBase::WeldModules(TArray<int64>& ModuleIds, bool bShouldArrangeRackside) {
   checkf(ModuleIds.Num() > 1, TEXT("can't weld a single module"));
 
   for (int i = 1; i < ModuleIds.Num(); i++) {
     WeldModules(
       ModuleActors[ModuleIds[i - 1]],
       ModuleActors[ModuleIds[i]],
-      // this method is only used for restoring prior welds
-      // or creating welds for expanders, so don't ask rack to rearrange
-      false
+      bShouldArrangeRackside
     );
   }
 }
@@ -618,10 +616,31 @@ void Aosc3GameModeBase::WeldModules(AVCVModule* LeftModule, AVCVModule* RightMod
     for (int i = 1; i < moduleIds.Num(); i++) {
       OSCctrl->SendArrangeModules(
         moduleIds[i - 1],
-        moduleIds[i]
+        moduleIds[i],
+        true
       );
     }
   }
+}
+
+void Aosc3GameModeBase::SplitWeldment(AModuleWeldment* Weldment, int AfterIndex) {
+  TArray<int64> moduleIds;
+  Weldment->GetModuleIds(moduleIds);
+
+  TArray<int64> leftIds;
+  TArray<int64> rightIds;
+  for (int i = 0; i < moduleIds.Num(); i++) {
+    if (i > AfterIndex) {
+      rightIds.Push(moduleIds[i]);
+    } else {
+      leftIds.Push(moduleIds[i]);
+    }
+  }
+
+  DestroyWeldment(Weldment);
+  OSCctrl->SendArrangeModules(leftIds[leftIds.Num() - 1], rightIds[0], false);
+  if (leftIds.Num() > 1) WeldModules(leftIds, true);
+  if (rightIds.Num() > 1) WeldModules(rightIds, true);
 }
 
 void Aosc3GameModeBase::DestroyWeldment(AModuleWeldment* Weldment) {

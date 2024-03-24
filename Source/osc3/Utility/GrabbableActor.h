@@ -28,6 +28,10 @@ public:
   virtual void ReleaseGrab();
   virtual void SetHighlighted(bool bHighlighted, FLinearColor OutlineColor = OUTLINE_COLOR);
 
+  bool IsInWeldment() { return !!Weldment; }
+  AModuleWeldment* GetWeldment() {
+    return Weldment;
+  }
 protected:
   UPROPERTY(VisibleAnywhere)
   USceneComponent* RootSceneComponent;

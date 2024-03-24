@@ -56,6 +56,7 @@ public:
 
   void StartGrab();
   void EndGrab();
+  bool IsGrabbing() { return bIsGrabbing; }
 
   void StartParamInteract();
   void EndParamInteract();

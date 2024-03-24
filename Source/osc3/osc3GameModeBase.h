@@ -89,7 +89,8 @@ public:
   ALibrary* GetLibrary();
 
   void DestroyWeldment(AModuleWeldment* Weldment);
-  void WeldModules(TArray<int64>& ModuleIds);
+  void SplitWeldment(AModuleWeldment* Weldment, int AfterIndex);
+  void WeldModules(TArray<int64>& ModuleIds, bool bShouldArrangeRackside = false);
   void WeldModules(AVCVModule* LeftModule, AVCVModule* RightModule, bool bShouldArrangeRackside = true);
 
 private:

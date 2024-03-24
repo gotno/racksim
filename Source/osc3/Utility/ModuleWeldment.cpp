@@ -97,6 +97,10 @@ void AModuleWeldment::GetModuleIds(TArray<int64>& outModuleIds) {
   for (AVCVModule* module : Modules) outModuleIds.Push(module->Id);
 }
 
+bool AModuleWeldment::Contains(AActor* Actor) {
+  return Modules.Contains(Actor);
+}
+
 void AModuleWeldment::ValidateModuleInclusion(AVCVModule* Module) {
   checkf(
     !Modules.Contains(Module),
@@ -135,6 +139,23 @@ void AModuleWeldment::Append(AModuleWeldment* OtherWeldment) {
   for (AVCVModule* module : otherModules) {
     AddModuleBack(module);
   }
+}
+
+bool AModuleWeldment::MaybeSplit(AVCVModule* leftModule, AVCVModule* rightModule) {
+  int splitIndex;
+  bool bAdjacent{false};
+
+  for (int i = 0; i < Modules.Num() - 1; i++) {
+    splitIndex = i;
+    bAdjacent =
+      (Modules[i] == leftModule && Modules[i + 1] == rightModule)
+        || (Modules[i] == rightModule && Modules[i + 1] == leftModule);
+
+    if (bAdjacent) break;
+  }
+
+  if (bAdjacent) GameMode->SplitWeldment(this, splitIndex);
+  return bAdjacent;
 }
 
 void AModuleWeldment::ResetLocation() {

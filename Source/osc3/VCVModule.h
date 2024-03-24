@@ -21,7 +21,7 @@ class OSC3_API AVCVModule : public AGrabbableActor {
 	
   friend class AModuleWeldment;
 
-public:	
+public:
 	AVCVModule();
 
 protected:
@@ -63,14 +63,8 @@ public:
   void AlterGrab(FVector GrabbedLocation, FRotator GrabbedRotation) override;
   void ReleaseGrab() override;
 
-  AModuleWeldment* GetWeldment() {
-    return Weldment;
-  }
   void SetWeldment(AModuleWeldment* inWeldment) {
     Weldment = inWeldment;
-  }
-  bool IsInWeldment() {
-    return !!Weldment;
   }
   // get the location, rotation and vector of another module to snap this one to
   void GetSnapPositioning(UBoxComponent* SideCollider, FVector& OffsetLocation, FVector& Vector, FRotator& Rotation);

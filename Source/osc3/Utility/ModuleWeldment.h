@@ -27,9 +27,11 @@ public:
   void AddModuleFront(AVCVModule* Module);
 
   void Append(AModuleWeldment* OtherWeldment);
+  bool MaybeSplit(AVCVModule* leftModule, AVCVModule* rightModule);
 
   void GetModules(TArray<AVCVModule*>& outModules);
   void GetModuleIds(TArray<int64>& outModuleIds);
+  bool Contains(AActor* Actor);
 
   void EngageGrab(FVector GrabbedLocation, FRotator GrabbedRotation);
   void AlterGrab(FVector GrabbedLocation, FRotator GrabbedRotation);

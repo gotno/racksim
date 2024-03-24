@@ -7,6 +7,7 @@
 
 #include "osc3GameModeBase.h"
 #include "VCVModule.h"
+#include "Utility/ModuleWeldment.h"
 #include "ModuleComponents/VCVParam.h"
 #include "ModuleComponents/VCVSlider.h"
 #include "ModuleComponents/VCVKnob.h"
@@ -554,12 +555,39 @@ void AVRAvatar::HandleGrabbableTargetSet(AActor* GrabbableActor, EControllerHand
   }
 }
 
+void AVRAvatar::MaybeSplitWeldment(EControllerHand AlreadyGrabbingHand) {
+  AVCVModule* leftModule = Cast<AVCVModule>(LeftHandGrabbableActor);
+  AVCVModule* rightModule = Cast<AVCVModule>(RightHandGrabbableActor);
+
+  if (!leftModule || !rightModule) return;
+  if (!leftModule->IsInWeldment() || !rightModule->IsInWeldment()) return;
+  if (leftModule->GetWeldment() != rightModule->GetWeldment()) return;
+
+  bool didSplit =
+    leftModule->GetWeldment()->MaybeSplit(leftModule, rightModule);
+  if (didSplit) { // re-trigger EngageGrab to reset center on hand that was already grabbing
+    AVRMotionController* controller = GetControllerForHand(AlreadyGrabbingHand);
+    AGrabbableActor* grabbable =
+      AlreadyGrabbingHand == EControllerHand::Left
+        ? LeftHandGrabbableActor
+        : RightHandGrabbableActor;
+
+    grabbable->EngageGrab(
+      controller->GetActorLocation(),
+      controller->GetActorRotation()
+    );
+  }
+}
+
 void AVRAvatar::HandleStartGrab(const FInputActionValue& _Value, EControllerHand Hand) {
   AVRMotionController* controller = GetControllerForHand(Hand);
   AGrabbableActor* grabbedActor =
     Hand == EControllerHand::Left
       ? LeftHandGrabbableActor
       : RightHandGrabbableActor;
+
+  if (GetControllerForOtherHand(Hand)->IsGrabbing())
+    MaybeSplitWeldment(GetOtherHand(Hand));
 
   controller->StartGrab();
   grabbedActor->EngageGrab(controller->GetActorLocation(), controller->GetActorRotation());
@@ -584,6 +612,22 @@ void AVRAvatar::HandleCompleteGrab(const FInputActionValue& _Value, EControllerH
 
   grabbedActor->ReleaseGrab();
   controller->EndGrab();
+
+  // if we snapped to another module/weldment that was currently being grabbed
+  // re-trigger EngageGrab to reset center on snapped to actor
+  if (GetControllerForOtherHand(Hand)->IsGrabbing()) {
+    AGrabbableActor* otherGrabbable =
+      Hand == EControllerHand::Left
+        ? RightHandGrabbableActor
+        : LeftHandGrabbableActor;
+    if (grabbedActor->IsInWeldment() && grabbedActor->GetWeldment()->Contains(otherGrabbable)) {
+      AVRMotionController* otherController = GetControllerForOtherHand(Hand);
+      otherGrabbable->EngageGrab(
+        otherController->GetActorLocation(),
+        otherController->GetActorRotation()
+      );
+    }
+  }
 }
 
 void AVRAvatar::HandleStartModuleSnapMode(const FInputActionValue& _Value, EControllerHand Hand) {

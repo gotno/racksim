@@ -240,8 +240,14 @@ private:
   
   Aosc3GameModeBase* GameMode;
 
+  EControllerHand GetOtherHand(EControllerHand Hand) {
+    return Hand == EControllerHand::Left ? EControllerHand::Right : EControllerHand::Left;
+  }
   AVRMotionController* GetControllerForHand(EControllerHand Hand) {
     return Hand == EControllerHand::Left ? LeftController : RightController;
+  }
+  AVRMotionController* GetControllerForOtherHand(EControllerHand Hand) {
+    return Hand == EControllerHand::Left ? RightController : LeftController;
   }
 
   // world manipulation
@@ -288,6 +294,7 @@ private:
   void HandleStartGrab(const FInputActionValue& _Value, EControllerHand Hand);
   void HandleGrab(const FInputActionValue& _Value, EControllerHand Hand);
   void HandleCompleteGrab(const FInputActionValue& _Value, EControllerHand Hand);
+  void MaybeSplitWeldment(EControllerHand AlreadyGrabbingHand);
 
   void HandleStartModuleSnapMode(const FInputActionValue& _Value, EControllerHand Hand);
   void HandleCompleteModuleSnapMode(const FInputActionValue& _Value, EControllerHand Hand);

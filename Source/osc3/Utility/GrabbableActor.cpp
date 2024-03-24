@@ -54,7 +54,7 @@ void AGrabbableActor::SetHighlighted(bool bHighlighted, FLinearColor OutlineColo
 void AGrabbableActor::EngageGrab(FVector GrabbedLocation, FRotator GrabbedRotation) {
   // UE_LOG(LogTemp, Warning, TEXT("%s: grab engage"), *GetActorNameOrLabel());
   bGrabEngaged = true;
-  SetHighlighted(false);
+  if (!IsInWeldment()) SetHighlighted(false);
 
   if (Weldment) {
     Weldment->EngageGrab(GrabbedLocation, GrabbedRotation);
