@@ -643,6 +643,38 @@ void Aosc3GameModeBase::SplitWeldment(AModuleWeldment* Weldment, int AfterIndex)
   if (rightIds.Num() > 1) WeldModules(rightIds, true);
 }
 
+void Aosc3GameModeBase::SplitWeldment(AModuleWeldment* Weldment, AVCVModule* OnModule) {
+  TArray<int64> moduleIds;
+  Weldment->GetModuleIds(moduleIds);
+  int32 indexOfModule = Weldment->IndexOf(OnModule);
+
+  bool bHitPivot{false};
+  TArray<int64> leftIds;
+  TArray<int64> rightIds;
+  for (int i = 0; i < moduleIds.Num(); i++) {
+    if (i == indexOfModule) {
+      bHitPivot = true;
+      continue;
+    }
+
+    if (bHitPivot) {
+      rightIds.Push(moduleIds[i]);
+    } else {
+      leftIds.Push(moduleIds[i]);
+    }
+  }
+
+  DestroyWeldment(Weldment);
+
+  if (!leftIds.IsEmpty())
+    OSCctrl->SendArrangeModules(leftIds[leftIds.Num() - 1], OnModule->Id, false);
+  if (leftIds.Num() > 1) WeldModules(leftIds, true);
+
+  if (!rightIds.IsEmpty())
+    OSCctrl->SendArrangeModules(OnModule->Id, rightIds[0], false);
+  if (rightIds.Num() > 1) WeldModules(rightIds, true);
+}
+
 void Aosc3GameModeBase::DestroyWeldment(AModuleWeldment* Weldment) {
   ModuleWeldments.RemoveSwap(Weldment);
   Weldment->Destroy();

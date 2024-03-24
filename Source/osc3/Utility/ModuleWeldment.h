@@ -32,6 +32,7 @@ public:
   void GetModules(TArray<AVCVModule*>& outModules);
   void GetModuleIds(TArray<int64>& outModuleIds);
   bool Contains(AActor* Actor);
+  int IndexOf(AActor* Actor);
 
   void EngageGrab(FVector GrabbedLocation, FRotator GrabbedRotation);
   void AlterGrab(FVector GrabbedLocation, FRotator GrabbedRotation);

@@ -101,6 +101,11 @@ bool AModuleWeldment::Contains(AActor* Actor) {
   return Modules.Contains(Actor);
 }
 
+int32 AModuleWeldment::IndexOf(AActor* Actor) {
+  if (!Contains(Actor)) return -1;
+  return Modules.IndexOfByPredicate([&](AVCVModule* module) { return module == Actor; });
+}
+
 void AModuleWeldment::ValidateModuleInclusion(AVCVModule* Module) {
   checkf(
     !Modules.Contains(Module),

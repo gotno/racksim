@@ -672,7 +672,16 @@ void AVRAvatar::HandleDestroyModule(const FInputActionValue& _Value, EController
     );
 
   if (grabbedModule) {
-    GameMode->DestroyModule(grabbedModule->Id);
+    if (grabbedModule->IsInWeldment()) {
+      GameMode->SplitWeldment(grabbedModule->GetWeldment(), grabbedModule);
+      // re-engage to fix module positioning
+      grabbedModule->EngageGrab(
+        controller->GetActorLocation(),
+        controller->GetActorRotation()
+      );
+    } else {
+      GameMode->DestroyModule(grabbedModule->Id);
+    }
     return;
   }
 

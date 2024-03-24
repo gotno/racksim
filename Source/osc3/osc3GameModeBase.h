@@ -90,6 +90,7 @@ public:
 
   void DestroyWeldment(AModuleWeldment* Weldment);
   void SplitWeldment(AModuleWeldment* Weldment, int AfterIndex);
+  void SplitWeldment(AModuleWeldment* Weldment, AVCVModule* OnModule);
   void WeldModules(TArray<int64>& ModuleIds, bool bShouldArrangeRackside = false);
   void WeldModules(AVCVModule* LeftModule, AVCVModule* RightModule, bool bShouldArrangeRackside = true);
 
