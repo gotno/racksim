@@ -701,7 +701,7 @@ void AVRAvatar::HandleDestroyModule(const FInputActionValue& _Value, EController
 
   if (library) {
     library->SetActorHiddenInGame(true);
-    library->AddActorWorldOffset(FVector(0.f, 0.f, -500.f));
+    library->SetActorLocation(FVector(0.f, 0.f, -500.f));
   }
 }
 
