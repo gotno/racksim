@@ -95,14 +95,9 @@ struct FModuleManipulationActions {
   UInputAction* DestroyModuleRight;
 
   UPROPERTY(EditDefaultsOnly)
-  UInputAction* ModuleContextMenuLeft;
+  UInputAction* ModuleContextMenuOrSnapModeLeft;
   UPROPERTY(EditDefaultsOnly)
-  UInputAction* ModuleContextMenuRight;
-
-  UPROPERTY(EditDefaultsOnly)
-  UInputAction* ModuleSnapModeLeft;
-  UPROPERTY(EditDefaultsOnly)
-  UInputAction* ModuleSnapModeRight;
+  UInputAction* ModuleContextMenuOrSnapModeRight;
 };
 
 USTRUCT()
@@ -296,12 +291,11 @@ private:
   void HandleCompleteGrab(const FInputActionValue& _Value, EControllerHand Hand);
   void MaybeSplitWeldment(EControllerHand AlreadyGrabbingHand);
 
-  void HandleStartModuleSnapMode(const FInputActionValue& _Value, EControllerHand Hand);
-  void HandleCompleteModuleSnapMode(const FInputActionValue& _Value, EControllerHand Hand);
+  void HandleSnapModeTriggered(const FInputActionValue& _Value, EControllerHand Hand);
+  void HandleContextMenuTriggeredOrSnapModeCancelled(const FInputActionValue& _Value, EControllerHand Hand);
 
   void HandleDuplicateModule(const FInputActionValue& _Value, EControllerHand Hand);
   void HandleDestroyModule(const FInputActionValue& _Value, EControllerHand Hand);
-  void HandleToggleContextMenu(const FInputActionValue& _Value, EControllerHand Hand);
 
   // param interaction
   AVCVParam* LeftHandParamActor{nullptr};

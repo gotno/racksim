@@ -291,6 +291,17 @@ void AVCVModule::AlterGrab(FVector GrabbedLocation, FRotator GrabbedRotation) {
   TriggerCableUpdates();
 }
 
+void AVCVModule::WeldSnap() {
+  AVCVModule* snapToModule = Cast<AVCVModule>(SnapToSide->GetOwner());
+  if (SnapToSide->GetCollisionObjectType() == LEFT_SNAP_OBJECT) {
+    GameMode->WeldModules(this, snapToModule);
+  } else {
+    GameMode->WeldModules(snapToModule, this);
+  }
+
+  SnapToSide = nullptr;
+}
+
 void AVCVModule::ReleaseGrab() {
   Super::ReleaseGrab();
 
@@ -302,15 +313,8 @@ void AVCVModule::ReleaseGrab() {
     GetSnapOffset(SnapToSide, offset, rotation);
     SetActorRotation(rotation);
     AddActorWorldOffset(offset);
-    
-    AVCVModule* snapToModule = Cast<AVCVModule>(SnapToSide->GetOwner());
-    if (SnapToSide->GetCollisionObjectType() == LEFT_SNAP_OBJECT) {
-      GameMode->WeldModules(this, snapToModule);
-    } else {
-      GameMode->WeldModules(snapToModule, this);
-    }
 
-    SnapToSide = nullptr;
+    WeldSnap();
   } else if (IsInWeldment()) {
     Weldment->ReleaseGrab();
   }
@@ -360,6 +364,17 @@ void AVCVModule::Tick(float DeltaTime) {
 
 void AVCVModule::SetSnapMode(bool inbSnapMode) {
   bSnapMode = inbSnapMode;
+
+  if (!bSnapMode && SnapToSide) {
+    ResetMeshPosition();
+
+    FVector offset;
+    FRotator rotation;
+    GetSnapOffset(SnapToSide, offset, rotation);
+    OffsetMesh(offset, rotation);
+
+    WeldSnap();
+  }
 }
 
 FHitResult AVCVModule::RunLeftSnapTrace() {

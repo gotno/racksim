@@ -156,15 +156,11 @@ void AVRAvatar::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
   Input->BindAction(ModuleManipulationActions.DestroyModuleLeft, ETriggerEvent::Started, this, &AVRAvatar::HandleDestroyModule, EControllerHand::Left);
   Input->BindAction(ModuleManipulationActions.DestroyModuleRight, ETriggerEvent::Started, this, &AVRAvatar::HandleDestroyModule, EControllerHand::Right);
 
-  // open module context menu
-  Input->BindAction(ModuleManipulationActions.ModuleContextMenuLeft, ETriggerEvent::Completed, this, &AVRAvatar::HandleToggleContextMenu, EControllerHand::Left);
-  Input->BindAction(ModuleManipulationActions.ModuleContextMenuRight, ETriggerEvent::Completed, this, &AVRAvatar::HandleToggleContextMenu, EControllerHand::Right);
-
-  // set snap mode
-  Input->BindAction(ModuleManipulationActions.ModuleSnapModeLeft, ETriggerEvent::Started, this, &AVRAvatar::HandleStartModuleSnapMode, EControllerHand::Left);
-  Input->BindAction(ModuleManipulationActions.ModuleSnapModeRight, ETriggerEvent::Started, this, &AVRAvatar::HandleStartModuleSnapMode, EControllerHand::Right);
-  Input->BindAction(ModuleManipulationActions.ModuleSnapModeLeft, ETriggerEvent::Completed, this, &AVRAvatar::HandleCompleteModuleSnapMode, EControllerHand::Left);
-  Input->BindAction(ModuleManipulationActions.ModuleSnapModeRight, ETriggerEvent::Completed, this, &AVRAvatar::HandleCompleteModuleSnapMode, EControllerHand::Right);
+  // module manipulation, trigger: toggle context menu OR set snap mode
+  Input->BindAction(ModuleManipulationActions.ModuleContextMenuOrSnapModeLeft, ETriggerEvent::Triggered, this, &AVRAvatar::HandleSnapModeTriggered, EControllerHand::Left);
+  Input->BindAction(ModuleManipulationActions.ModuleContextMenuOrSnapModeRight, ETriggerEvent::Triggered, this, &AVRAvatar::HandleSnapModeTriggered, EControllerHand::Right);
+  Input->BindAction(ModuleManipulationActions.ModuleContextMenuOrSnapModeLeft, ETriggerEvent::Canceled, this, &AVRAvatar::HandleContextMenuTriggeredOrSnapModeCancelled, EControllerHand::Left);
+  Input->BindAction(ModuleManipulationActions.ModuleContextMenuOrSnapModeRight, ETriggerEvent::Canceled, this, &AVRAvatar::HandleContextMenuTriggeredOrSnapModeCancelled, EControllerHand::Right);
 
   // param interaction
   // engage
@@ -630,7 +626,7 @@ void AVRAvatar::HandleCompleteGrab(const FInputActionValue& _Value, EControllerH
   }
 }
 
-void AVRAvatar::HandleStartModuleSnapMode(const FInputActionValue& _Value, EControllerHand Hand) {
+void AVRAvatar::HandleSnapModeTriggered(const FInputActionValue& _Value, EControllerHand Hand) {
   AGrabbableActor* grabbedActor =
     Hand == EControllerHand::Left
       ? LeftHandGrabbableActor
@@ -640,14 +636,25 @@ void AVRAvatar::HandleStartModuleSnapMode(const FInputActionValue& _Value, ECont
     Cast<AVCVModule>(grabbedActor)->SetSnapMode(true);
 }
 
-void AVRAvatar::HandleCompleteModuleSnapMode(const FInputActionValue& _Value, EControllerHand Hand) {
+void AVRAvatar::HandleContextMenuTriggeredOrSnapModeCancelled(const FInputActionValue& _Value, EControllerHand Hand) {
   AGrabbableActor* grabbedActor =
     Hand == EControllerHand::Left
       ? LeftHandGrabbableActor
       : RightHandGrabbableActor;
 
-  if (Cast<AVCVModule>(grabbedActor))
-    Cast<AVCVModule>(grabbedActor)->SetSnapMode(false);
+  AVCVModule* grabbedModule = Cast<AVCVModule>(grabbedActor);
+  if (grabbedModule) {
+    if (grabbedModule->IsInSnapMode()) {
+      grabbedModule->SetSnapMode(false);
+      // re-engage to reset centering and control weldment instead
+      if (grabbedModule->IsInWeldment()) {
+        AVRMotionController* controller = GetControllerForHand(Hand);
+        grabbedModule->EngageGrab(controller->GetActorLocation(), controller->GetActorRotation());
+      }
+    } else {
+      grabbedModule->ToggleContextMenu();
+    }
+  }
 }
 
 void AVRAvatar::HandleDuplicateModule(const FInputActionValue& _Value, EControllerHand Hand) {
@@ -696,18 +703,6 @@ void AVRAvatar::HandleDestroyModule(const FInputActionValue& _Value, EController
     library->SetActorHiddenInGame(true);
     library->AddActorWorldOffset(FVector(0.f, 0.f, -500.f));
   }
-}
-
-void AVRAvatar::HandleToggleContextMenu(const FInputActionValue& _Value, EControllerHand Hand) {
-  AVRMotionController* controller = GetControllerForHand(Hand);
-  AVCVModule* grabbedModule =
-    Cast<AVCVModule>(
-      Hand == EControllerHand::Left
-        ? LeftHandGrabbableActor
-        : RightHandGrabbableActor
-    );
-
-  if (grabbedModule) grabbedModule->ToggleContextMenu();
 }
 
 void AVRAvatar::HandleStartParamEngage(const FInputActionValue& _Value, EControllerHand Hand) {

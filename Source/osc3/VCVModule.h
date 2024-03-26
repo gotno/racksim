@@ -47,6 +47,7 @@ public:
 
   void TriggerCableUpdates();
 
+  bool IsInSnapMode() { return bSnapMode; };
   void SetSnapMode(bool inbSnapMode);
 
   UPROPERTY()
@@ -78,6 +79,8 @@ private:
   void GetSnapOffset(UBoxComponent* SideCollider, FVector& Offset, FRotator& Rotation);
   void OffsetMesh(FVector Offset, FRotator Rotation);
   void ResetMeshPosition();
+  // make the snap permanent
+  void WeldSnap();
 
   UPROPERTY()
   UMaterialInstanceDynamic* BaseMaterialInstance;
