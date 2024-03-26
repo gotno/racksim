@@ -345,7 +345,30 @@ void AVCVModule::Tick(float DeltaTime) {
     OffsetMesh(offset, rotation);
   }
 
-  // Snap Colliders
+  // centers
+  // DrawDebugSphere(
+  //   GetWorld(),
+  //   StaticMeshRoot->GetComponentLocation(),
+  //   1.f,
+  //   16,
+  //   FColor::Blue
+  // );
+  // DrawDebugSphere(
+  //   GetWorld(),
+  //   StaticMeshComponent->GetComponentLocation(),
+  //   1.1f,
+  //   16,
+  //   FColor::Red
+  // );
+  // DrawDebugSphere(
+  //   GetWorld(),
+  //   GetActorLocation(),
+  //   2.f,
+  //   16,
+  //   IsInWeldment() ? FColor::Purple : FColor::Black
+  // );
+
+  // snap colliders
   // DrawDebugBox(
   //   GetWorld(),
   //   SnapColliderLeft->GetComponentLocation(),
