@@ -33,10 +33,11 @@ void AModuleWeldment::Tick(float DeltaTime) {
   // DrawDebugSphere(
   //   GetWorld(),
   //   GetActorLocation(),
-  //   5.f,
+  //   2.f,
   //   16,
   //   FColor::Black
   // );
+
   if (SnapToSide) Snap();
 }
 
