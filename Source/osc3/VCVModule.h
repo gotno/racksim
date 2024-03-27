@@ -75,12 +75,28 @@ private:
   UPROPERTY()
   UBoxComponent* SnapColliderRight;
 
+  UPROPERTY()
+  UStaticMeshComponent* SnapIndicatorLeft;
+  UPROPERTY()
+  UStaticMeshComponent* SnapIndicatorExternalRight;
+
+  UPROPERTY()
+  UStaticMeshComponent* SnapIndicatorRight;
+  UPROPERTY()
+  UStaticMeshComponent* SnapIndicatorExternalLeft;
+
+  UPROPERTY()
+  UMaterialInstanceDynamic* SnapIndicatorMaterialInstance;
+  UPROPERTY()
+  UMaterialInterface* SnapIndicatorMaterialInterface;
+
   // get the offset and rotation necessary to move this static mesh to another location
   void GetSnapOffset(UBoxComponent* SideCollider, FVector& Offset, FRotator& Rotation);
   void OffsetMesh(FVector Offset, FRotator Rotation);
   void ResetMeshPosition();
   // make the snap permanent
   void WeldSnap();
+  float SnapTraceDistance{3.f};
 
   UPROPERTY()
   UMaterialInstanceDynamic* BaseMaterialInstance;
