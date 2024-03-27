@@ -43,29 +43,29 @@ AVCVModule::AVCVModule() {
   SnapIndicatorLeft->SetCollisionEnabled(ECollisionEnabled::NoCollision);
   SnapIndicatorLeft->SetupAttachment(StaticMeshComponent);
   SnapIndicatorLeft->SetVisibility(false);
-  SnapIndicatorExternalRight = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Snap Indicator External Right"));
-  SnapIndicatorExternalRight->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-  SnapIndicatorExternalRight->SetupAttachment(GetRootComponent());
-  SnapIndicatorExternalRight->SetVisibility(false);
+  SnapIndicatorLeftReflected = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Snap Indicator Left Reflected"));
+  SnapIndicatorLeftReflected->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+  SnapIndicatorLeftReflected->SetupAttachment(GetRootComponent());
+  SnapIndicatorLeftReflected->SetVisibility(false);
 
   SnapIndicatorRight = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Snap Indicator Right"));
   SnapIndicatorRight->SetCollisionEnabled(ECollisionEnabled::NoCollision);
   SnapIndicatorRight->SetupAttachment(StaticMeshComponent);
   SnapIndicatorRight->SetVisibility(false);
-  SnapIndicatorExternalLeft = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Snap Indicator External Left"));
-  SnapIndicatorExternalLeft->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-  SnapIndicatorExternalLeft->SetupAttachment(GetRootComponent());
-  SnapIndicatorExternalLeft->SetVisibility(false);
+  SnapIndicatorRightReflected = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Snap Indicator Right Reflected"));
+  SnapIndicatorRightReflected->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+  SnapIndicatorRightReflected->SetupAttachment(GetRootComponent());
+  SnapIndicatorRightReflected->SetVisibility(false);
 
   static ConstructorHelpers::FObjectFinder<UStaticMesh> SnapIndicatorLeftMeshReference(TEXT("/Script/Engine.StaticMesh'/Game/meshes/unit_snap_indicator_left.unit_snap_indicator_left'"));
   if (SnapIndicatorLeftMeshReference.Object) {
     SnapIndicatorLeft->SetStaticMesh(SnapIndicatorLeftMeshReference.Object);
-    SnapIndicatorExternalLeft->SetStaticMesh(SnapIndicatorLeftMeshReference.Object);
+    SnapIndicatorRightReflected->SetStaticMesh(SnapIndicatorLeftMeshReference.Object);
   }
   static ConstructorHelpers::FObjectFinder<UStaticMesh> SnapIndicatorRightMeshReference(TEXT("/Script/Engine.StaticMesh'/Game/meshes/unit_snap_indicator_right.unit_snap_indicator_right'"));
   if (SnapIndicatorRightMeshReference.Object) {
     SnapIndicatorRight->SetStaticMesh(SnapIndicatorRightMeshReference.Object);
-    SnapIndicatorExternalRight->SetStaticMesh(SnapIndicatorRightMeshReference.Object);
+    SnapIndicatorLeftReflected->SetStaticMesh(SnapIndicatorRightMeshReference.Object);
   }
 
   // snap indicator material
@@ -78,14 +78,14 @@ AVCVModule::AVCVModule() {
   SnapColliderLeft->AddWorldOffset(StaticMeshComponent->GetForwardVector() * 0.5f);
   SnapColliderLeft->SetupAttachment(StaticMeshComponent);
   SnapColliderLeft->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-  SnapColliderLeft->SetCollisionObjectType(LEFT_SNAP_OBJECT);
+  SnapColliderLeft->SetCollisionObjectType(LEFT_SNAP_COLLIDER_OBJECT);
 
   SnapColliderRight = CreateDefaultSubobject<UBoxComponent>(TEXT("Snap Collider Right"));
   SnapColliderRight->InitBoxExtent(FVector(0.5f, 0.005f, 0.5f));
   SnapColliderRight->AddWorldOffset(StaticMeshComponent->GetForwardVector() * 0.5f);
   SnapColliderRight->SetupAttachment(StaticMeshComponent);
   SnapColliderRight->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-  SnapColliderRight->SetCollisionObjectType(RIGHT_SNAP_OBJECT);
+  SnapColliderRight->SetCollisionObjectType(RIGHT_SNAP_COLLIDER_OBJECT);
 
   // OutlineMaterialInterface setup in GrabbableActor
 }
@@ -114,9 +114,9 @@ void AVCVModule::BeginPlay() {
   if (SnapIndicatorMaterialInterface) {
     SnapIndicatorMaterialInstance = UMaterialInstanceDynamic::Create(SnapIndicatorMaterialInterface, this);
     SnapIndicatorLeft->SetMaterial(0, SnapIndicatorMaterialInstance);
-    SnapIndicatorExternalRight->SetMaterial(0, SnapIndicatorMaterialInstance);
+    SnapIndicatorLeftReflected->SetMaterial(0, SnapIndicatorMaterialInstance);
     SnapIndicatorRight->SetMaterial(0, SnapIndicatorMaterialInstance);
-    SnapIndicatorExternalLeft->SetMaterial(0, SnapIndicatorMaterialInstance);
+    SnapIndicatorRightReflected->SetMaterial(0, SnapIndicatorMaterialInstance);
   }
 
   Tags.Add(TAG_INTERACTABLE);
@@ -178,10 +178,10 @@ void AVCVModule::Init(VCVModule vcv_module, TFunction<void ()> ReadyCallback) {
   SnapColliderRight->AddWorldOffset(StaticMeshComponent->GetRightVector() * halfWidth);
 
   SnapIndicatorLeft->SetWorldScale3D(FVector(RENDER_SCALE * MODULE_DEPTH, 1, Model.box.size.y));
-  SnapIndicatorExternalRight->SetWorldScale3D(FVector(RENDER_SCALE * MODULE_DEPTH, 1, Model.box.size.y));
+  SnapIndicatorLeftReflected->SetWorldScale3D(FVector(RENDER_SCALE * MODULE_DEPTH, 1, Model.box.size.y));
   SnapIndicatorLeft->AddWorldOffset(-StaticMeshComponent->GetRightVector() * halfWidth);
   SnapIndicatorRight->SetWorldScale3D(FVector(RENDER_SCALE * MODULE_DEPTH, 1, Model.box.size.y));
-  SnapIndicatorExternalLeft->SetWorldScale3D(FVector(RENDER_SCALE * MODULE_DEPTH, 1, Model.box.size.y));
+  SnapIndicatorRightReflected->SetWorldScale3D(FVector(RENDER_SCALE * MODULE_DEPTH, 1, Model.box.size.y));
   SnapIndicatorRight->AddWorldOffset(StaticMeshComponent->GetRightVector() * halfWidth);
 
   SpawnComponents();
@@ -343,7 +343,7 @@ void AVCVModule::AlterGrab(FVector GrabbedLocation, FRotator GrabbedRotation) {
 
 void AVCVModule::WeldSnap() {
   AVCVModule* snapToModule = Cast<AVCVModule>(SnapToSide->GetOwner());
-  if (SnapToSide->GetCollisionObjectType() == LEFT_SNAP_OBJECT) {
+  if (SnapToSide->GetCollisionObjectType() == LEFT_SNAP_COLLIDER_OBJECT) {
     GameMode->WeldModules(this, snapToModule);
   } else {
     GameMode->WeldModules(snapToModule, this);
@@ -442,8 +442,8 @@ void AVCVModule::SetSnapMode(bool inbSnapMode) {
   SnapIndicatorRight->SetVisibility(bSnapMode);
 
   if (!bSnapMode) {
-    SnapIndicatorExternalLeft->SetVisibility(false);
-    SnapIndicatorExternalRight->SetVisibility(false);
+    SnapIndicatorRightReflected->SetVisibility(false);
+    SnapIndicatorLeftReflected->SetVisibility(false);
 
     // weld existing snap if we're toggling snap mode off
     if (SnapToSide) {
@@ -459,7 +459,7 @@ void AVCVModule::SetSnapMode(bool inbSnapMode) {
   }
 }
 
-FHitResult AVCVModule::RunLeftSnapTrace() {
+FHitResult AVCVModule::RunRightwardSnapTrace() {
   float halfWidth = Model.box.size.x * 0.5f;
   FVector meshCenter =
     StaticMeshRoot->GetComponentLocation()
@@ -470,30 +470,30 @@ FHitResult AVCVModule::RunLeftSnapTrace() {
   FVector traceEnd =
     traceStart + StaticMeshRoot->GetRightVector() * SnapTraceDistance * RENDER_SCALE;
 
-  FHitResult leftHit;
-  FCollisionObjectQueryParams leftQueryParams;
-  leftQueryParams.AddObjectTypesToQuery(LEFT_SNAP_OBJECT);
-  GetWorld()->LineTraceSingleByObjectType(leftHit, traceStart, traceEnd, leftQueryParams);
-  // DrawDebugLine(GetWorld(), traceStart, traceEnd, FColor::Yellow);
+  FHitResult rightwardHit;
+  FCollisionObjectQueryParams queryParams;
+  queryParams.AddObjectTypesToQuery(LEFT_SNAP_COLLIDER_OBJECT);
+  GetWorld()->LineTraceSingleByObjectType(rightwardHit, traceStart, traceEnd, queryParams);
+  DrawDebugLine(GetWorld(), traceStart, traceEnd, FColor::Yellow);
 
   // give snappable target the indicator
-  if (leftHit.GetActor()) {
-    AVCVModule* module = Cast<AVCVModule>(leftHit.GetActor());
-    UBoxComponent* sideCollider = Cast<UBoxComponent>(leftHit.GetComponent());
+  if (rightwardHit.GetActor()) {
+    AVCVModule* module = Cast<AVCVModule>(rightwardHit.GetActor());
+    UBoxComponent* sideCollider = Cast<UBoxComponent>(rightwardHit.GetComponent());
     FVector location, vector;
     FRotator rotation;
     module->GetSnapPositioning(sideCollider, location, vector, rotation);
-    SnapIndicatorExternalLeft->SetWorldLocation(location);
-    SnapIndicatorExternalLeft->SetWorldRotation(rotation);
-    SnapIndicatorExternalLeft->SetVisibility(true);
+    SnapIndicatorRightReflected->SetWorldLocation(location);
+    SnapIndicatorRightReflected->SetWorldRotation(rotation);
+    SnapIndicatorRightReflected->SetVisibility(true);
   } else {
-    SnapIndicatorExternalLeft->SetVisibility(false);
+    SnapIndicatorRightReflected->SetVisibility(false);
   }
 
-  return leftHit;
+  return rightwardHit;
 }
 
-FHitResult AVCVModule::RunRightSnapTrace() {
+FHitResult AVCVModule::RunLeftwardSnapTrace() {
   float halfWidth = Model.box.size.x * 0.5f;
   FVector meshCenter =
     StaticMeshRoot->GetComponentLocation()
@@ -504,27 +504,27 @@ FHitResult AVCVModule::RunRightSnapTrace() {
   FVector traceEnd =
     traceStart - StaticMeshRoot->GetRightVector() * SnapTraceDistance * RENDER_SCALE;
 
-  FHitResult rightHit;
-  FCollisionObjectQueryParams rightQueryParams;
-  rightQueryParams.AddObjectTypesToQuery(RIGHT_SNAP_OBJECT);
-  GetWorld()->LineTraceSingleByObjectType(rightHit, traceStart, traceEnd, rightQueryParams);
-  // DrawDebugLine(GetWorld(), traceStart, traceEnd, FColor::Red);
+  FHitResult leftwardHit;
+  FCollisionObjectQueryParams queryParams;
+  queryParams.AddObjectTypesToQuery(RIGHT_SNAP_COLLIDER_OBJECT);
+  GetWorld()->LineTraceSingleByObjectType(leftwardHit, traceStart, traceEnd, queryParams);
+  DrawDebugLine(GetWorld(), traceStart, traceEnd, FColor::Red);
 
   // give snappable target the indicator
-  if (rightHit.GetActor()) {
-    AVCVModule* module = Cast<AVCVModule>(rightHit.GetActor());
-    UBoxComponent* sideCollider = Cast<UBoxComponent>(rightHit.GetComponent());
+  if (leftwardHit.GetActor()) {
+    AVCVModule* module = Cast<AVCVModule>(leftwardHit.GetActor());
+    UBoxComponent* sideCollider = Cast<UBoxComponent>(leftwardHit.GetComponent());
     FVector location, vector;
     FRotator rotation;
     module->GetSnapPositioning(sideCollider, location, vector, rotation);
-    SnapIndicatorExternalRight->SetWorldLocation(location);
-    SnapIndicatorExternalRight->SetWorldRotation(rotation);
-    SnapIndicatorExternalRight->SetVisibility(true);
+    SnapIndicatorLeftReflected->SetWorldLocation(location);
+    SnapIndicatorLeftReflected->SetWorldRotation(rotation);
+    SnapIndicatorLeftReflected->SetVisibility(true);
   } else {
-    SnapIndicatorExternalRight->SetVisibility(false);
+    SnapIndicatorLeftReflected->SetVisibility(false);
   }
 
-  return rightHit;
+  return leftwardHit;
 }
 
 void AVCVModule::GetSnapPositioning(UBoxComponent* SideCollider, FVector& OffsetLocation, FVector& Vector, FRotator& Rotation) {
@@ -565,39 +565,39 @@ void AVCVModule::SnapModeTick() {
     return;
   }
 
-  FHitResult leftHit = RunLeftSnapTrace();
-  FHitResult rightHit = RunRightSnapTrace();
+  FHitResult rightwardHit = RunRightwardSnapTrace();
+  FHitResult leftwardHit = RunLeftwardSnapTrace();
 
   UBoxComponent* newSnapTo{nullptr};
   float SnapDistance = SnapTraceDistance * 0.6f;
-  bool bHasLeftHit = leftHit.GetActor() && leftHit.Distance <= SnapDistance;
-  bool bHasRightHit = rightHit.GetActor() && rightHit.Distance <= SnapDistance;
-  if (bHasLeftHit && bHasRightHit) {
+  bool bHasRightwardHit = rightwardHit.GetActor() && rightwardHit.Distance <= SnapDistance;
+  bool bHasLeftwardHit = leftwardHit.GetActor() && leftwardHit.Distance <= SnapDistance;
+  if (bHasRightwardHit && bHasLeftwardHit) {
     float leftDistance = FVector::Dist(
-      leftHit.GetComponent()->GetComponentLocation(),
+      rightwardHit.GetComponent()->GetComponentLocation(),
       StaticMeshRoot->GetComponentLocation()
     );
     float rightDistance = FVector::Dist(
-      leftHit.GetComponent()->GetComponentLocation(),
+      rightwardHit.GetComponent()->GetComponentLocation(),
       StaticMeshRoot->GetComponentLocation()
     );
     if (leftDistance < rightDistance) {
-      newSnapTo = Cast<UBoxComponent>(leftHit.GetComponent());
+      newSnapTo = Cast<UBoxComponent>(rightwardHit.GetComponent());
       SnapIndicatorRight->SetVisibility(false);
-      SnapIndicatorExternalLeft->SetVisibility(false);
+      SnapIndicatorRightReflected->SetVisibility(false);
     } else {
-      newSnapTo = Cast<UBoxComponent>(rightHit.GetComponent());
+      newSnapTo = Cast<UBoxComponent>(leftwardHit.GetComponent());
       SnapIndicatorLeft->SetVisibility(false);
-      SnapIndicatorExternalRight->SetVisibility(false);
+      SnapIndicatorLeftReflected->SetVisibility(false);
     }
-  } else if (bHasLeftHit) {
-    newSnapTo = Cast<UBoxComponent>(leftHit.GetComponent());
+  } else if (bHasRightwardHit) {
+    newSnapTo = Cast<UBoxComponent>(rightwardHit.GetComponent());
     SnapIndicatorRight->SetVisibility(false);
-    SnapIndicatorExternalLeft->SetVisibility(false);
-  } else if (bHasRightHit) {
-    newSnapTo = Cast<UBoxComponent>(rightHit.GetComponent());
+    SnapIndicatorRightReflected->SetVisibility(false);
+  } else if (bHasLeftwardHit) {
+    newSnapTo = Cast<UBoxComponent>(leftwardHit.GetComponent());
     SnapIndicatorLeft->SetVisibility(false);
-    SnapIndicatorExternalRight->SetVisibility(false);
+    SnapIndicatorLeftReflected->SetVisibility(false);
   }
   
   if (newSnapTo != SnapToSide) {

@@ -42,14 +42,14 @@ void AModuleWeldment::Tick(float DeltaTime) {
 }
 
 void AModuleWeldment::SnapModeTick() {
-  FHitResult rightHit = Modules[0]->RunRightSnapTrace();
-  FHitResult leftHit = Modules[Modules.Num() - 1]->RunLeftSnapTrace();
+  FHitResult leftwardHit = Modules[0]->RunLeftwardSnapTrace();
+  FHitResult rightwardHit = Modules[Modules.Num() - 1]->RunRightwardSnapTrace();
 
   UBoxComponent* newSnapTo{nullptr};
-  if (leftHit.GetActor()) {
-    newSnapTo = Cast<UBoxComponent>(leftHit.GetComponent());
-  } else if (rightHit.GetActor()) {
-    newSnapTo = Cast<UBoxComponent>(rightHit.GetComponent());
+  if (rightwardHit.GetActor()) {
+    newSnapTo = Cast<UBoxComponent>(rightwardHit.GetComponent());
+  } else if (leftwardHit.GetActor()) {
+    newSnapTo = Cast<UBoxComponent>(leftwardHit.GetComponent());
   }
 
   if (newSnapTo != SnapToSide) {
@@ -66,7 +66,7 @@ void AModuleWeldment::Snap(bool bTemporarily) {
 
   for (int i = 0; i < Modules.Num(); i++) {
     moduleToSnap =
-      SnapToSide->GetCollisionObjectType() == RIGHT_SNAP_OBJECT
+      SnapToSide->GetCollisionObjectType() == RIGHT_SNAP_COLLIDER_OBJECT
         ? Modules[i]
         : Modules[Modules.Num() - (i + 1)];
 
@@ -80,7 +80,7 @@ void AModuleWeldment::Snap(bool bTemporarily) {
     }
 
     nextSide =
-      SnapToSide->GetCollisionObjectType() == RIGHT_SNAP_OBJECT
+      SnapToSide->GetCollisionObjectType() == RIGHT_SNAP_COLLIDER_OBJECT
         ? moduleToSnap->SnapColliderRight
         : moduleToSnap->SnapColliderLeft;
   }
@@ -147,7 +147,7 @@ void AModuleWeldment::Append(AModuleWeldment* OtherWeldment) {
   }
 }
 
-bool AModuleWeldment::MaybeSplit(AVCVModule* leftModule, AVCVModule* rightModule) {
+bool AModuleWeldment::SplitIfAdjacent(AVCVModule* leftModule, AVCVModule* rightModule) {
   int splitIndex;
   bool bAdjacent{false};
 
@@ -222,12 +222,12 @@ void AModuleWeldment::ReleaseGrab() {
     Snap(false);
 
     AVCVModule* leader =
-      SnapToSide->GetCollisionObjectType() == RIGHT_SNAP_OBJECT
+      SnapToSide->GetCollisionObjectType() == RIGHT_SNAP_COLLIDER_OBJECT
         ? Modules[0]
         : Modules[Modules.Num() - 1];
     AVCVModule* snapToModule = Cast<AVCVModule>(SnapToSide->GetOwner());
 
-    if (SnapToSide->GetCollisionObjectType() == RIGHT_SNAP_OBJECT) {
+    if (SnapToSide->GetCollisionObjectType() == RIGHT_SNAP_COLLIDER_OBJECT) {
       GameMode->WeldModules(snapToModule, leader);
     } else {
       GameMode->WeldModules(leader, snapToModule);

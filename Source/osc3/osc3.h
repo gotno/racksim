@@ -30,8 +30,8 @@
 #define PORT_OBJECT ECC_GameTraceChannel7
 #define CABLE_END_OBJECT ECC_GameTraceChannel8
 #define DISPLAY_OBJECT ECC_GameTraceChannel6
-#define LEFT_SNAP_OBJECT ECC_GameTraceChannel5
-#define RIGHT_SNAP_OBJECT ECC_GameTraceChannel9
+#define LEFT_SNAP_COLLIDER_OBJECT ECC_GameTraceChannel5
+#define RIGHT_SNAP_COLLIDER_OBJECT ECC_GameTraceChannel9
 
 #define PARAM_TRACE ECC_GameTraceChannel3
 #define TELEPORT_TRACE ECC_GameTraceChannel4

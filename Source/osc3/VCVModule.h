@@ -78,12 +78,12 @@ private:
   UPROPERTY()
   UStaticMeshComponent* SnapIndicatorLeft;
   UPROPERTY()
-  UStaticMeshComponent* SnapIndicatorExternalRight;
+  UStaticMeshComponent* SnapIndicatorLeftReflected;
 
   UPROPERTY()
   UStaticMeshComponent* SnapIndicatorRight;
   UPROPERTY()
-  UStaticMeshComponent* SnapIndicatorExternalLeft;
+  UStaticMeshComponent* SnapIndicatorRightReflected;
 
   UPROPERTY()
   UMaterialInstanceDynamic* SnapIndicatorMaterialInstance;
@@ -117,8 +117,8 @@ private:
 
   VCVModule Model;
 
-  FHitResult RunLeftSnapTrace();
-  FHitResult RunRightSnapTrace();
+  FHitResult RunRightwardSnapTrace();
+  FHitResult RunLeftwardSnapTrace();
   void SnapModeTick();
   bool bSnapMode{false};
   UBoxComponent* SnapToSide{nullptr};

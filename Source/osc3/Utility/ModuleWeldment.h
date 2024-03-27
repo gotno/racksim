@@ -27,7 +27,7 @@ public:
   void AddModuleFront(AVCVModule* Module);
 
   void Append(AModuleWeldment* OtherWeldment);
-  bool MaybeSplit(AVCVModule* leftModule, AVCVModule* rightModule);
+  bool SplitIfAdjacent(AVCVModule* leftModule, AVCVModule* rightModule);
 
   void GetModules(TArray<AVCVModule*>& outModules);
   void GetModuleIds(TArray<int64>& outModuleIds);

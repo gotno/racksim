@@ -560,7 +560,7 @@ void AVRAvatar::MaybeSplitWeldment(EControllerHand AlreadyGrabbingHand) {
   if (leftModule->GetWeldment() != rightModule->GetWeldment()) return;
 
   bool didSplit =
-    leftModule->GetWeldment()->MaybeSplit(leftModule, rightModule);
+    leftModule->GetWeldment()->SplitIfAdjacent(leftModule, rightModule);
   if (didSplit) { // re-trigger EngageGrab to reset center on hand that was already grabbing
     AVRMotionController* controller = GetControllerForHand(AlreadyGrabbingHand);
     AGrabbableActor* grabbable =
