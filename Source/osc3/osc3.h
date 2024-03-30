@@ -47,4 +47,12 @@ enum class PortType : int32 {
   Any
 };
 
+UENUM()
+enum class FSnapModeSide : int32 {
+  Left,
+  Right,
+  Both,
+  None
+};
+
 #define ODB(Format, ...) if(GEngine){ GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Yellow, FString::Printf(TEXT(Format), ##__VA_ARGS__), false); }

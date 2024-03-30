@@ -633,7 +633,7 @@ void AVRAvatar::HandleSnapModeTriggered(const FInputActionValue& _Value, EContro
       : RightHandGrabbableActor;
 
   if (Cast<AVCVModule>(grabbedActor))
-    Cast<AVCVModule>(grabbedActor)->SetSnapMode(true);
+    Cast<AVCVModule>(grabbedActor)->InitSnapMode();
 }
 
 void AVRAvatar::HandleContextMenuTriggeredOrSnapModeCancelled(const FInputActionValue& _Value, EControllerHand Hand) {
@@ -645,7 +645,8 @@ void AVRAvatar::HandleContextMenuTriggeredOrSnapModeCancelled(const FInputAction
   AVCVModule* grabbedModule = Cast<AVCVModule>(grabbedActor);
   if (grabbedModule) {
     if (grabbedModule->IsInSnapMode()) {
-      grabbedModule->SetSnapMode(false);
+      grabbedModule->CancelSnapMode();
+
       // re-engage to reset centering and control weldment instead
       if (grabbedModule->IsInWeldment()) {
         AVRMotionController* controller = GetControllerForHand(Hand);

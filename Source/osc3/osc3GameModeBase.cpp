@@ -577,27 +577,57 @@ void Aosc3GameModeBase::WeldModules(TArray<int64>& ModuleIds, bool bShouldArrang
     WeldModules(
       ModuleActors[ModuleIds[i - 1]],
       ModuleActors[ModuleIds[i]],
+      true, // bLeftIsAnchor doesn't really matter here
       bShouldArrangeRackside
     );
   }
 }
 
-void Aosc3GameModeBase::WeldModules(AVCVModule* LeftModule, AVCVModule* RightModule, bool bShouldArrangeRackside) {
+void Aosc3GameModeBase::WeldModules(AVCVModule* LeftModule, AVCVModule* RightModule, bool bLeftIsAnchor, bool bShouldArrangeRackside) {
   AModuleWeldment* affectedWeldment;
+
   if (LeftModule->IsInWeldment() && RightModule->IsInWeldment()) {
-    // TODO: [x] combine weldments
-    AModuleWeldment* weldment = LeftModule->GetWeldment();
-    weldment->Append(RightModule->GetWeldment());
-    // [ ] but this requires snapping weldments like modules can
-    affectedWeldment = weldment;
+    if (bLeftIsAnchor) {
+      LeftModule->GetWeldment()->Append(RightModule->GetWeldment());
+      affectedWeldment = LeftModule->GetWeldment();
+    } else {
+      RightModule->GetWeldment()->Prepend(LeftModule->GetWeldment());
+      affectedWeldment = RightModule->GetWeldment();
+    }
   } else if (LeftModule->IsInWeldment()) {
-    AModuleWeldment* weldment = LeftModule->GetWeldment();
-    weldment->AddModuleBack(RightModule);
-    affectedWeldment = weldment;
+    if (bLeftIsAnchor) {
+      LeftModule->GetWeldment()->AddModuleBack(RightModule);
+      affectedWeldment = LeftModule->GetWeldment();
+    } else {
+      AModuleWeldment* newWeldment =
+        GetWorld()->SpawnActor<AModuleWeldment>(
+          AModuleWeldment::StaticClass(),
+          FVector(0.f),
+          FRotator(0.f)
+        );
+      ModuleWeldments.Add(newWeldment);
+
+      newWeldment->AddModuleBack(RightModule);
+      newWeldment->Prepend(LeftModule->GetWeldment());
+      affectedWeldment = newWeldment;
+    }
   } else if (RightModule->IsInWeldment()) {
-    AModuleWeldment* weldment = RightModule->GetWeldment();
-    weldment->AddModuleFront(LeftModule);
-    affectedWeldment = weldment;
+    if (bLeftIsAnchor) {
+      AModuleWeldment* newWeldment =
+        GetWorld()->SpawnActor<AModuleWeldment>(
+          AModuleWeldment::StaticClass(),
+          FVector(0.f),
+          FRotator(0.f)
+        );
+      ModuleWeldments.Add(newWeldment);
+
+      newWeldment->AddModuleBack(LeftModule);
+      newWeldment->Append(RightModule->GetWeldment());
+      affectedWeldment = newWeldment;
+    } else {
+      RightModule->GetWeldment()->AddModuleFront(LeftModule);
+      affectedWeldment = RightModule->GetWeldment();
+    }
   } else {
     AModuleWeldment* newWeldment =
       GetWorld()->SpawnActor<AModuleWeldment>(
@@ -607,8 +637,13 @@ void Aosc3GameModeBase::WeldModules(AVCVModule* LeftModule, AVCVModule* RightMod
       );
     ModuleWeldments.Add(newWeldment);
 
-    newWeldment->AddModuleBack(LeftModule);
-    newWeldment->AddModuleBack(RightModule);
+    if (bLeftIsAnchor) {
+      newWeldment->AddModuleBack(LeftModule);
+      newWeldment->AddModuleBack(RightModule);
+    } else {
+      newWeldment->AddModuleBack(RightModule);
+      newWeldment->AddModuleFront(LeftModule);
+    }
     affectedWeldment = newWeldment;
   }
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "osc3.h"
 #include "VCVData/VCV.h"
 #include "Utility/GrabbableActor.h"
 
@@ -47,8 +48,9 @@ public:
 
   void TriggerCableUpdates();
 
-  bool IsInSnapMode() { return bSnapMode; };
-  void SetSnapMode(bool inbSnapMode);
+  void InitSnapMode();
+  void CancelSnapMode();
+  bool IsInSnapMode(bool bActual = false);
 
   UPROPERTY()
   TMap<int32, AVCVLight*> LightActors;
@@ -62,13 +64,21 @@ public:
   FString Name;
 
   void AlterGrab(FVector GrabbedLocation, FRotator GrabbedRotation) override;
-  void ReleaseGrab() override;
 
   void SetWeldment(AModuleWeldment* inWeldment) {
     Weldment = inWeldment;
   }
-  // get the location, rotation and vector of another module to snap this one to
-  void GetSnapPositioning(UBoxComponent* SideCollider, FVector& OffsetLocation, FVector& Vector, FRotator& Rotation);
+
+  // get the location of the edge of this module,
+  // the vector pointing from the center through that edge,
+  // and the rotation of the module
+  void GetAlignToMeshInfo(FSnapModeSide AlignToSide, FVector& outLocation, FVector& outVector, FRotator& outRotation);
+
+  // align the static mesh to the side of another module with optional offset
+  void AlignMeshTo(AVCVModule* Module, FSnapModeSide AlignToSide, float Offset = 0.f);
+
+  // fully align the actor to the side of another module
+  void AlignActorTo(AVCVModule* Module, FSnapModeSide AlignToSide);
 private:
   UPROPERTY()
   UBoxComponent* SnapColliderLeft;
@@ -90,14 +100,6 @@ private:
   UPROPERTY()
   UMaterialInterface* SnapIndicatorMaterialInterface;
 
-  // get the offset and rotation necessary to move this static mesh to another location
-  void GetSnapOffset(UBoxComponent* SideCollider, FVector& Offset, FRotator& Rotation);
-  void OffsetMesh(FVector Offset, FRotator Rotation);
-  void ResetMeshPosition();
-  // make the snap permanent
-  void WeldSnap();
-  float SnapTraceDistance{3.f};
-
   UPROPERTY()
   UMaterialInstanceDynamic* BaseMaterialInstance;
   UPROPERTY()
@@ -117,11 +119,24 @@ private:
 
   VCVModule Model;
 
+  void SetSnapMode(FSnapModeSide inSnapModeSide);
+  FSnapModeSide SnapModeSide{FSnapModeSide::None};
+
+  void SnapModeTick();
   FHitResult RunRightwardSnapTrace();
   FHitResult RunLeftwardSnapTrace();
-  void SnapModeTick();
-  bool bSnapMode{false};
+  float SnapTraceDistance{3.f};
+
+  // the collider of the module to snap to,
+  // from which left/right side can be determined
   UBoxComponent* SnapToSide{nullptr};
+
+  float SnapIndicatorThickness = 0.2f;
+
+  // snap the static mesh to the module owned by SnapToSide
+  void SnapMesh();
+  // make the snap permanent
+  void WeldSnap();
   
   Aosc3GameModeBase* GameMode;
 

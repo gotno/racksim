@@ -57,6 +57,9 @@ protected:
   FRotator LastGrabbedRotation;
 
   AModuleWeldment* Weldment{nullptr};
+
+  void ResetMeshPosition();
+  void CenterActorOnMesh();
 public:
   // delegate stuff
   void HighlightIfTargeted(AActor* GrabbableTarget, EControllerHand Hand);

@@ -1,6 +1,5 @@
 #include "VCVModule.h"
 
-#include "osc3.h"
 #include "osc3GameModeBase.h"
 #include "CableEnd.h"
 #include "VCVData/VCV.h"
@@ -344,30 +343,12 @@ void AVCVModule::AlterGrab(FVector GrabbedLocation, FRotator GrabbedRotation) {
 void AVCVModule::WeldSnap() {
   AVCVModule* snapToModule = Cast<AVCVModule>(SnapToSide->GetOwner());
   if (SnapToSide->GetCollisionObjectType() == LEFT_SNAP_COLLIDER_OBJECT) {
-    GameMode->WeldModules(this, snapToModule);
+    GameMode->WeldModules(this, snapToModule, false);
   } else {
-    GameMode->WeldModules(snapToModule, this);
+    GameMode->WeldModules(snapToModule, this, true);
   }
 
   SnapToSide = nullptr;
-}
-
-void AVCVModule::ReleaseGrab() {
-  Super::ReleaseGrab();
-
-  if (SnapToSide) {
-    ResetMeshPosition();
-
-    FVector offset;
-    FRotator rotation;
-    GetSnapOffset(SnapToSide, offset, rotation);
-    SetActorRotation(rotation);
-    AddActorWorldOffset(offset);
-
-    WeldSnap();
-  } else if (IsInWeldment()) {
-    Weldment->ReleaseGrab();
-  }
 }
 
 void AVCVModule::TriggerCableUpdates() {
@@ -388,12 +369,6 @@ void AVCVModule::Tick(float DeltaTime) {
   }
 
   SnapModeTick();
-  if (SnapToSide) {
-    FVector offset;
-    FRotator rotation;
-    GetSnapOffset(SnapToSide, offset, rotation);
-    OffsetMesh(offset, rotation);
-  }
 
   // centers
   // DrawDebugSphere(
@@ -435,31 +410,44 @@ void AVCVModule::Tick(float DeltaTime) {
   // );
 }
 
-void AVCVModule::SetSnapMode(bool inbSnapMode) {
-  bSnapMode = inbSnapMode;
+void AVCVModule::InitSnapMode() {
+  if (IsInWeldment()) {
+    Weldment->InitSnapMode();
+  } else {
+    SetSnapMode(FSnapModeSide::Both);
+  }
+}
 
-  SnapIndicatorLeft->SetVisibility(bSnapMode);
-  SnapIndicatorRight->SetVisibility(bSnapMode);
+void AVCVModule::CancelSnapMode() {
+  if (IsInWeldment()) {
+    Weldment->CancelSnapMode();
+  } else {
+    SetSnapMode(FSnapModeSide::None);
+  }
+}
 
-  if (!bSnapMode) {
-    SnapIndicatorRightReflected->SetVisibility(false);
+bool AVCVModule::IsInSnapMode(bool bActual) {
+  if (IsInWeldment() && !bActual) return Weldment->IsInSnapMode();
+  return SnapModeSide != FSnapModeSide::None;
+};
+
+void AVCVModule::SetSnapMode(FSnapModeSide inSnapModeSide) {
+  SnapModeSide = inSnapModeSide;
+
+  if (SnapModeSide == FSnapModeSide::None) {
+    SnapIndicatorLeft->SetVisibility(false);
     SnapIndicatorLeftReflected->SetVisibility(false);
+    SnapIndicatorRight->SetVisibility(false);
+    SnapIndicatorRightReflected->SetVisibility(false);
 
-    // weld existing snap if we're toggling snap mode off
-    if (SnapToSide) {
-      ResetMeshPosition();
-
-      FVector offset;
-      FRotator rotation;
-      GetSnapOffset(SnapToSide, offset, rotation);
-      OffsetMesh(offset, rotation);
-
-      WeldSnap();
-    }
+    // toggling snap mode off, weld existing snap
+    if (SnapToSide) WeldSnap();
   }
 }
 
 FHitResult AVCVModule::RunRightwardSnapTrace() {
+  SnapIndicatorRight->SetVisibility(true);
+
   float halfWidth = Model.box.size.x * 0.5f;
   FVector meshCenter =
     StaticMeshRoot->GetComponentLocation()
@@ -474,7 +462,7 @@ FHitResult AVCVModule::RunRightwardSnapTrace() {
   FCollisionObjectQueryParams queryParams;
   queryParams.AddObjectTypesToQuery(LEFT_SNAP_COLLIDER_OBJECT);
   GetWorld()->LineTraceSingleByObjectType(rightwardHit, traceStart, traceEnd, queryParams);
-  DrawDebugLine(GetWorld(), traceStart, traceEnd, FColor::Yellow);
+  // DrawDebugLine(GetWorld(), traceStart, traceEnd, FColor::Yellow);
 
   // give snappable target the indicator
   if (rightwardHit.GetActor()) {
@@ -482,7 +470,11 @@ FHitResult AVCVModule::RunRightwardSnapTrace() {
     UBoxComponent* sideCollider = Cast<UBoxComponent>(rightwardHit.GetComponent());
     FVector location, vector;
     FRotator rotation;
-    module->GetSnapPositioning(sideCollider, location, vector, rotation);
+    FSnapModeSide alignToSide =
+      sideCollider->GetCollisionObjectType() == LEFT_SNAP_COLLIDER_OBJECT
+        ? FSnapModeSide::Left
+        : FSnapModeSide::Right;
+    module->GetAlignToMeshInfo(alignToSide, location, vector, rotation);
     SnapIndicatorRightReflected->SetWorldLocation(location);
     SnapIndicatorRightReflected->SetWorldRotation(rotation);
     SnapIndicatorRightReflected->SetVisibility(true);
@@ -494,6 +486,8 @@ FHitResult AVCVModule::RunRightwardSnapTrace() {
 }
 
 FHitResult AVCVModule::RunLeftwardSnapTrace() {
+  SnapIndicatorLeft->SetVisibility(true);
+
   float halfWidth = Model.box.size.x * 0.5f;
   FVector meshCenter =
     StaticMeshRoot->GetComponentLocation()
@@ -508,7 +502,7 @@ FHitResult AVCVModule::RunLeftwardSnapTrace() {
   FCollisionObjectQueryParams queryParams;
   queryParams.AddObjectTypesToQuery(RIGHT_SNAP_COLLIDER_OBJECT);
   GetWorld()->LineTraceSingleByObjectType(leftwardHit, traceStart, traceEnd, queryParams);
-  DrawDebugLine(GetWorld(), traceStart, traceEnd, FColor::Red);
+  // DrawDebugLine(GetWorld(), traceStart, traceEnd, FColor::Red);
 
   // give snappable target the indicator
   if (leftwardHit.GetActor()) {
@@ -516,7 +510,11 @@ FHitResult AVCVModule::RunLeftwardSnapTrace() {
     UBoxComponent* sideCollider = Cast<UBoxComponent>(leftwardHit.GetComponent());
     FVector location, vector;
     FRotator rotation;
-    module->GetSnapPositioning(sideCollider, location, vector, rotation);
+    FSnapModeSide alignToSide =
+      sideCollider->GetCollisionObjectType() == LEFT_SNAP_COLLIDER_OBJECT
+        ? FSnapModeSide::Left
+        : FSnapModeSide::Right;
+    module->GetAlignToMeshInfo(alignToSide, location, vector, rotation);
     SnapIndicatorLeftReflected->SetWorldLocation(location);
     SnapIndicatorLeftReflected->SetWorldRotation(rotation);
     SnapIndicatorLeftReflected->SetVisibility(true);
@@ -527,52 +525,64 @@ FHitResult AVCVModule::RunLeftwardSnapTrace() {
   return leftwardHit;
 }
 
-void AVCVModule::GetSnapPositioning(UBoxComponent* SideCollider, FVector& OffsetLocation, FVector& Vector, FRotator& Rotation) {
-  int direction = SideCollider == SnapColliderLeft ? -1 : 1;
+// new
+void AVCVModule::GetAlignToMeshInfo(FSnapModeSide AlignToSide, FVector& outLocation, FVector& outVector, FRotator& outRotation) {
+  checkf(
+    AlignToSide == FSnapModeSide::Left || AlignToSide == FSnapModeSide::Right,
+    TEXT("must align with Left or Right side")
+  );
+
+  int direction = AlignToSide == FSnapModeSide::Left ? -1 : 1;
   float halfWidth = Model.box.size.x * 0.5f;
 
-  Rotation = StaticMeshComponent->GetComponentRotation();
-  Vector = direction * StaticMeshComponent->GetRightVector();
-  OffsetLocation = StaticMeshComponent->GetComponentLocation() + Vector * halfWidth;
+  outVector = StaticMeshComponent->GetRightVector() * direction;
+  outLocation = StaticMeshComponent->GetComponentLocation() + outVector * halfWidth;
+  outRotation = StaticMeshComponent->GetComponentRotation();
 }
 
-void AVCVModule::GetSnapOffset(UBoxComponent* SideCollider, FVector& Offset, FRotator& Rotation) {
-  AVCVModule* module = Cast<AVCVModule>(SideCollider->GetOwner());
-  FVector location, vector;
+void AVCVModule::SnapMesh() {
+  checkf(!!SnapToSide, TEXT("cannot SnapMesh without SnapToSide"));
+
+  AVCVModule* alignToModule = Cast<AVCVModule>(SnapToSide->GetOwner());
+  FSnapModeSide alignToSide = 
+    SnapToSide->GetCollisionObjectType() == LEFT_SNAP_COLLIDER_OBJECT
+      ? FSnapModeSide::Left
+      : FSnapModeSide::Right;
+  AlignMeshTo(alignToModule, alignToSide, SnapIndicatorThickness);
+  
+  if (IsInWeldment()) Weldment->FollowSnap(this);
+}
+
+void AVCVModule::AlignMeshTo(AVCVModule* Module, FSnapModeSide AlignToSide, float Offset) {
+  FVector edgeLocation, vector;
   FRotator rotation;
-  module->GetSnapPositioning(SideCollider, location, vector, rotation);
+  Module->GetAlignToMeshInfo(AlignToSide, edgeLocation, vector, rotation);
 
-  Rotation = rotation;
-  FVector newLocation = location + vector * Model.box.size.x * 0.5f;
-  Offset = newLocation - StaticMeshRoot->GetComponentLocation();
+  FVector location = edgeLocation + vector * (Model.box.size.x * 0.5f + Offset);
+  StaticMeshComponent->SetWorldLocation(location);
+  StaticMeshComponent->SetWorldRotation(rotation);
 }
 
-void AVCVModule::OffsetMesh(FVector Offset, FRotator Rotation) {
-  ResetMeshPosition();
-  StaticMeshComponent->AddWorldOffset(Offset);
-  StaticMeshComponent->SetWorldRotation(Rotation);
-}
-
-void AVCVModule::ResetMeshPosition() {
-  StaticMeshComponent->SetWorldRotation(StaticMeshRoot->GetComponentRotation());
-  StaticMeshComponent->SetWorldLocation(StaticMeshRoot->GetComponentLocation());
+void AVCVModule::AlignActorTo(AVCVModule* Module, FSnapModeSide AlignToSide) {
+  AlignMeshTo(Module, AlignToSide);
+  CenterActorOnMesh();
 }
 
 void AVCVModule::SnapModeTick() {
-  if (!bSnapMode) return;
-  if (IsInWeldment()) {
-    Weldment->SnapModeTick();
-    return;
-  }
+  if (SnapModeSide == FSnapModeSide::None) return;
 
-  FHitResult rightwardHit = RunRightwardSnapTrace();
-  FHitResult leftwardHit = RunLeftwardSnapTrace();
+  FHitResult rightwardHit;
+  if (SnapModeSide == FSnapModeSide::Both || SnapModeSide == FSnapModeSide::Right)
+    rightwardHit = RunRightwardSnapTrace();
+  FHitResult leftwardHit;
+  if (SnapModeSide == FSnapModeSide::Both || SnapModeSide == FSnapModeSide::Left)
+    leftwardHit = RunLeftwardSnapTrace();
 
   UBoxComponent* newSnapTo{nullptr};
-  float SnapDistance = SnapTraceDistance * 0.6f;
-  bool bHasRightwardHit = rightwardHit.GetActor() && rightwardHit.Distance <= SnapDistance;
-  bool bHasLeftwardHit = leftwardHit.GetActor() && leftwardHit.Distance <= SnapDistance;
-  if (bHasRightwardHit && bHasLeftwardHit) {
+  float SnapDistance = SnapTraceDistance * 0.75f;
+  bool bCouldSnapRightward = rightwardHit.GetActor() && rightwardHit.Distance <= SnapDistance;
+  bool bCouldSnapLeftward = leftwardHit.GetActor() && leftwardHit.Distance <= SnapDistance;
+  if (bCouldSnapRightward && bCouldSnapLeftward) {
     float leftDistance = FVector::Dist(
       rightwardHit.GetComponent()->GetComponentLocation(),
       StaticMeshRoot->GetComponentLocation()
@@ -584,26 +594,27 @@ void AVCVModule::SnapModeTick() {
     if (leftDistance < rightDistance) {
       newSnapTo = Cast<UBoxComponent>(rightwardHit.GetComponent());
       SnapIndicatorRight->SetVisibility(false);
-      SnapIndicatorRightReflected->SetVisibility(false);
     } else {
       newSnapTo = Cast<UBoxComponent>(leftwardHit.GetComponent());
       SnapIndicatorLeft->SetVisibility(false);
-      SnapIndicatorLeftReflected->SetVisibility(false);
     }
-  } else if (bHasRightwardHit) {
+  } else if (bCouldSnapRightward) {
     newSnapTo = Cast<UBoxComponent>(rightwardHit.GetComponent());
-    SnapIndicatorRight->SetVisibility(false);
-    SnapIndicatorRightReflected->SetVisibility(false);
-  } else if (bHasLeftwardHit) {
-    newSnapTo = Cast<UBoxComponent>(leftwardHit.GetComponent());
     SnapIndicatorLeft->SetVisibility(false);
-    SnapIndicatorLeftReflected->SetVisibility(false);
+  } else if (bCouldSnapLeftward) {
+    newSnapTo = Cast<UBoxComponent>(leftwardHit.GetComponent());
+    SnapIndicatorRight->SetVisibility(false);
   }
   
   if (newSnapTo != SnapToSide) {
     SnapToSide = newSnapTo;
-    if (!SnapToSide) ResetMeshPosition();
+    if (!SnapToSide) {
+      ResetMeshPosition();
+      if (IsInWeldment()) Weldment->FollowSnap(nullptr);
+    }
   }
+
+  if (SnapToSide) SnapMesh();
 }
 
 void AVCVModule::GetModulePosition(FVector& Location, FRotator& Rotation) {

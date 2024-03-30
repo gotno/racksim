@@ -101,14 +101,8 @@ void AGrabbableActor::AlterGrab(FVector GrabbedLocation, FRotator GrabbedRotatio
 void AGrabbableActor::ReleaseGrab() {
   // UE_LOG(LogTemp, Warning, TEXT("%s: grab release"), *GetActorNameOrLabel());
   bGrabEngaged = false;
+  CenterActorOnMesh();
   SetHighlighted(true);
-
-  FVector staticMeshLocation = StaticMeshRoot->GetComponentLocation();
-  FVector finalOffset = GetActorLocation() - staticMeshLocation;
-  SetActorLocation(staticMeshLocation);
-  StaticMeshRoot->AddWorldOffset(finalOffset);
-
-  GrabOffset = FVector(0.f);
 }
 
 void AGrabbableActor::HighlightIfTargeted(AActor* GrabbableTarget, EControllerHand Hand) {
@@ -121,4 +115,21 @@ void AGrabbableActor::HighlightIfTargeted(AActor* GrabbableTarget, EControllerHa
   }
 
   SetHighlighted(bTargetGrabOfLeftHand || bTargetGrabOfRightHand);
+}
+
+void AGrabbableActor::ResetMeshPosition() {
+  StaticMeshComponent->SetWorldLocation(StaticMeshRoot->GetComponentLocation());
+  StaticMeshComponent->SetWorldRotation(StaticMeshRoot->GetComponentRotation());
+}
+
+void AGrabbableActor::CenterActorOnMesh() {
+  FVector location = StaticMeshComponent->GetComponentLocation();
+  FRotator rotation = StaticMeshComponent->GetComponentRotation();
+
+  ResetMeshPosition();
+  StaticMeshRoot->SetWorldLocation(GetActorLocation());
+  StaticMeshRoot->SetWorldRotation(GetActorRotation());
+
+  SetActorLocation(location);
+  SetActorRotation(rotation);
 }
