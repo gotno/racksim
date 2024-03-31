@@ -167,6 +167,32 @@ void AVRMotionController::GrabbableTargetTick() {
   }
 }
 
+void AVRMotionController::NullifyInteractionTargets(AActor* Except) {
+  if (TargetedParam && Except != TargetedParam) {
+    TargetedParam = nullptr;
+    OnParamTargetedDelegate.Broadcast(
+      TargetedParam,
+      MotionController->GetTrackingSource()
+    );
+  }
+
+  if (TargetedOriginPort && Except != TargetedOriginPort) {
+    TargetedOriginPort = nullptr;
+    OnOriginPortTargetedDelegate.Broadcast(
+      TargetedOriginPort,
+      MotionController->GetTrackingSource()
+    );
+  }
+
+  if (TargetedCableEnd && Except != TargetedCableEnd) {
+    TargetedCableEnd = nullptr;
+    OnCableTargetedDelegate.Broadcast(
+      TargetedCableEnd,
+      MotionController->GetTrackingSource()
+    );
+  }
+}
+
 void AVRMotionController::ParamTargetTick() {
   if (ControllerIsBusy()) return;
 
@@ -179,6 +205,7 @@ void AVRMotionController::ParamTargetTick() {
   if (hit.GetActor() != TargetedParam) {
     TargetedParam = hit.GetActor();
 
+    NullifyInteractionTargets(TargetedParam);
     OnParamTargetedDelegate.Broadcast(
       TargetedParam,
       MotionController->GetTrackingSource()
@@ -202,6 +229,7 @@ void AVRMotionController::PortTargetTick() {
   if (hitPort != TargetedOriginPort) {
     TargetedOriginPort = hitPort;
 
+    NullifyInteractionTargets(TargetedOriginPort);
     OnOriginPortTargetedDelegate.Broadcast(
       TargetedOriginPort,
       MotionController->GetTrackingSource()
@@ -235,6 +263,7 @@ void AVRMotionController::CableTargetTick() {
   if (hitCableEnd != TargetedCableEnd) {
     TargetedCableEnd = hitCableEnd;
 
+    NullifyInteractionTargets(TargetedCableEnd);
     OnCableTargetedDelegate.Broadcast(
       TargetedCableEnd,
       MotionController->GetTrackingSource()
@@ -320,12 +349,10 @@ void AVRMotionController::SetWorldInteract(bool bActive) {
 }
 
 void AVRMotionController::StartParamInteract() {
-  // UE_LOG(LogTemp, Display, TEXT("%s hand AVRMotionController::StartParamInteract"), *HandName);
   bIsParamInteracting = true;
 }
 
 void AVRMotionController::EndParamInteract() {
-  // UE_LOG(LogTemp, Display, TEXT("%s hand AVRMotionController::EndParamInteract"), *HandName);
   bIsParamInteracting = false;
 }
 
@@ -335,7 +362,7 @@ void AVRMotionController::StartPortInteract() {
   if (TargetedCableEnd) {
     HeldCableEnd = Cast<ACableEnd>(TargetedCableEnd);
     if (HeldCableEnd->IsConnected()) HeldCableEnd->Disconnect();
-  } else {
+  } else if (TargetedOriginPort) {
     AVCVPort* port = Cast<AVCVPort>(TargetedOriginPort);
     AVCVCable* newCable = GameMode->SpawnCable(port);
     HeldCableEnd = newCable->GetOtherEnd(port);
@@ -363,8 +390,6 @@ void AVRMotionController::HandleDestinationPortTargeted(AVCVPort* Port) {
 }
 
 void AVRMotionController::EndPortInteract() {
-  // UE_LOG(LogTemp, Display, TEXT("%s end port interact"), *HandName);
-
   OnCableHeldDelegate.Broadcast(
     nullptr,
     MotionController->GetTrackingSource()
@@ -385,6 +410,12 @@ void AVRMotionController::StartGrab() {
   bIsGrabbing = true;
   SetTooltipVisibility(false);
   HapticBump();
+
+  // don't let param/port targets interfere with
+  // trigger for snapping/context menu,
+  // but allow holding cable end and grabbing at the same time
+  if (TargetedOriginPort || TargetedParam)
+    NullifyInteractionTargets(TargetedCableEnd);
 }
 
 void AVRMotionController::EndGrab() {

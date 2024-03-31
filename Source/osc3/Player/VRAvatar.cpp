@@ -184,8 +184,8 @@ void AVRAvatar::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
   Input->BindAction(PortInteractionActions.PortEngageLeft, ETriggerEvent::Completed, this, &AVRAvatar::HandleCompletePortEngage, EControllerHand::Left);
   Input->BindAction(PortInteractionActions.PortEngageRight, ETriggerEvent::Completed, this, &AVRAvatar::HandleCompletePortEngage, EControllerHand::Right);
   // toggle latched (allow cable to exist unconnected)
-  Input->BindAction(PortInteractionActions.CableLatchLeft, ETriggerEvent::Completed, this, &AVRAvatar::HandleCableLatch, EControllerHand::Left);
-  Input->BindAction(PortInteractionActions.CableLatchRight, ETriggerEvent::Completed, this, &AVRAvatar::HandleCableLatch, EControllerHand::Right);
+  Input->BindAction(PortInteractionActions.CableLatchLeft, ETriggerEvent::Started, this, &AVRAvatar::HandleCableLatch, EControllerHand::Left);
+  Input->BindAction(PortInteractionActions.CableLatchRight, ETriggerEvent::Started, this, &AVRAvatar::HandleCableLatch, EControllerHand::Right);
 
   // general
   // toggle main menu
@@ -530,6 +530,7 @@ void AVRAvatar::HandleHeldCableSet(AActor* CableEnd, EControllerHand Hand) {
     } else {
       RightHandHeldCableEnd = nullptr;
     }
+    SetControllerPortInteracting(Hand, false);
   }
 }
 

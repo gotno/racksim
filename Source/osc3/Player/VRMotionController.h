@@ -128,6 +128,8 @@ private:
 
   bool bIsWidgetInteracting{false};
 
+  void NullifyInteractionTargets(AActor* Except = nullptr);
+
   bool ControllerIsBusy() {
     return bIsWorldInteracting
       || bIsGrabbing
