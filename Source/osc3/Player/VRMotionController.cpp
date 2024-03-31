@@ -358,7 +358,8 @@ void AVRMotionController::StartPortInteract() {
 void AVRMotionController::HandleDestinationPortTargeted(AVCVPort* Port) {
   TargetedDestinationPort = Port;
   RefreshTooltip();
-  HapticBump();
+  if (Port && HeldCableEnd && Port->CanConnect(HeldCableEnd->GetType()))
+    HapticBump();
 }
 
 void AVRMotionController::EndPortInteract() {
