@@ -137,6 +137,7 @@ private:
   int currentReturnModuleId{0};
   TMap<int32, ReturnModulePosition> ReturnModulePositions;
 
+  UPROPERTY()
   Uosc3SaveGame* SaveData{nullptr};
 
   FDPSVGImporter SVGImporter;
