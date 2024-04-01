@@ -508,6 +508,7 @@ void Aosc3GameModeBase::SpawnLibrary() {
 }
 
 void Aosc3GameModeBase::SummonLibrary(FVector Location, FRotator Rotation) {
+  if (!osc3GameState->IsPatchLoaded()) return;
   LibraryActor->Summon(Location, Rotation);
 }
 
