@@ -30,6 +30,8 @@ public:
   void SyncPorts();
 
   bool IsRunning() { return bRunning; }
+  void PauseSending() { bSendingPaused = true; }
+  void UnpauseSending() { bSendingPaused = false; }
 
   UFUNCTION()
   void NotifyResync();
@@ -64,6 +66,7 @@ private:
   int MinRackClientPort{7000}, RackClientPort{7000}, MaxRackClientPort{7020};
   int ServerPort{7001};
   bool bRunning{false};
+  bool bSendingPaused{false};
 
   UPROPERTY()
   class Aosc3GameModeBase* GameMode;

@@ -202,6 +202,8 @@ void AOSCController::DestroyModule(const FOSCAddress& AddressPattern, const FOSC
 }
 
 void AOSCController::NotifyReceived(FString Type, int64 OuterId, int InnerId) {
+  if (bSendingPaused) return;
+
   // UE_LOG(LogTemp, Warning, TEXT("Sending NotifyReceived %s %lld:%d"), *Type, OuterId, InnerId);
   FOSCAddress address = UOSCManager::ConvertStringToOSCAddress(FString(TEXT("/rx/")) + Type);
   FOSCMessage message;
@@ -213,6 +215,8 @@ void AOSCController::NotifyReceived(FString Type, int64 OuterId, int InnerId) {
 }
 
 void AOSCController::NotifyResync() {
+  if (bSendingPaused) return;
+
   UE_LOG(LogTemp, Warning, TEXT("Sending NotifyResync"));
   FOSCAddress address = UOSCManager::ConvertStringToOSCAddress(FString(TEXT("/sync")));
   FOSCMessage message;
@@ -222,6 +226,8 @@ void AOSCController::NotifyResync() {
 }
 
 void AOSCController::SendParamUpdate(int64 ModuleId, int ParamId, float Value) {
+  if (bSendingPaused) return;
+
   FOSCAddress address = UOSCManager::ConvertStringToOSCAddress(FString(TEXT("/update/param")));
   FOSCMessage message;
   UOSCManager::SetOSCMessageAddress(message, address);
@@ -233,6 +239,8 @@ void AOSCController::SendParamUpdate(int64 ModuleId, int ParamId, float Value) {
 }
 
 void AOSCController::SendCreateModule(const FString& PluginSlug, const FString& ModuleSlug, const int& ReturnId) {
+  if (bSendingPaused) return;
+
   UE_LOG(LogTemp, Warning, TEXT("Sending /create/module %s:%s"), *PluginSlug, *ModuleSlug);
   FOSCAddress address = UOSCManager::ConvertStringToOSCAddress(FString(TEXT("/create/module")));
   FOSCMessage message;
@@ -245,6 +253,8 @@ void AOSCController::SendCreateModule(const FString& PluginSlug, const FString& 
 }
 
 void AOSCController::SendSetModuleFavorite(FString PluginSlug, FString ModuleSlug, bool bFavorite) {
+  if (bSendingPaused) return;
+
   UE_LOG(LogTemp, Warning, TEXT("Sending /favorite %s:%s-%d"), *PluginSlug, *ModuleSlug, bFavorite);
   FOSCAddress address = UOSCManager::ConvertStringToOSCAddress(FString(TEXT("/favorite")));
   FOSCMessage message;
@@ -257,6 +267,8 @@ void AOSCController::SendSetModuleFavorite(FString PluginSlug, FString ModuleSlu
 }
 
 void AOSCController::SendDestroyModule(int64 ModuleId) {
+  if (bSendingPaused) return;
+
   UE_LOG(LogTemp, Warning, TEXT("Sending /destroy/module %lld"), ModuleId);
   FOSCAddress address = UOSCManager::ConvertStringToOSCAddress(FString(TEXT("/destroy/module")));
   FOSCMessage message;
@@ -267,6 +279,8 @@ void AOSCController::SendDestroyModule(int64 ModuleId) {
 }
 
 void AOSCController::SendModuleDiffRequest(const int64_t& ModuleId) const {
+  if (bSendingPaused) return;
+
   UE_LOG(LogTemp, Warning, TEXT("Sending /diff/module %lld"), ModuleId);
   FOSCAddress address = UOSCManager::ConvertStringToOSCAddress(FString(TEXT("/diff/module")));
   FOSCMessage message;
@@ -274,9 +288,11 @@ void AOSCController::SendModuleDiffRequest(const int64_t& ModuleId) const {
   UOSCManager::AddInt64(message, ModuleId);
 
   OSCClient->SendOSCMessage(message);
-};
+}
 
 void AOSCController::SendCreateCable(int64 InputModuleId, int64 OutputModuleId, int InputPortId, int OutputPortId) {
+  if (bSendingPaused) return;
+
   FOSCAddress address = UOSCManager::ConvertStringToOSCAddress(FString(TEXT("/create/cable")));
   FOSCMessage message;
   UOSCManager::SetOSCMessageAddress(message, address);
@@ -289,6 +305,8 @@ void AOSCController::SendCreateCable(int64 InputModuleId, int64 OutputModuleId, 
 }
 
 void AOSCController::SendAutosaveAndExit() {
+  if (bSendingPaused) return;
+
   FOSCAddress address = UOSCManager::ConvertStringToOSCAddress(FString(TEXT("/autosave_and_exit")));
   FOSCMessage message;
   UOSCManager::SetOSCMessageAddress(message, address);
@@ -296,6 +314,8 @@ void AOSCController::SendAutosaveAndExit() {
 }
 
 void AOSCController::SendArrangeModules(int64 LeftModuleId, int64 RightModuleId, bool bAttach) {
+  if (bSendingPaused) return;
+
   FOSCAddress address = UOSCManager::ConvertStringToOSCAddress(FString(TEXT("/arrange_modules")));
   FOSCMessage message;
   UOSCManager::SetOSCMessageAddress(message, address);
@@ -308,6 +328,8 @@ void AOSCController::SendArrangeModules(int64 LeftModuleId, int64 RightModuleId,
 }
 
 void AOSCController::SendDestroyCable(int64 CableId) {
+  if (bSendingPaused) return;
+
   FOSCAddress address = UOSCManager::ConvertStringToOSCAddress(FString(TEXT("/destroy/cable")));
   FOSCMessage message;
   UOSCManager::SetOSCMessageAddress(message, address);
@@ -317,6 +339,8 @@ void AOSCController::SendDestroyCable(int64 CableId) {
 }
 
 void AOSCController::SendMenuRequest(const FVCVMenu& Menu) const {
+  if (bSendingPaused) return;
+
   UE_LOG(LogTemp, Warning, TEXT("Sending /get_menu %lld"), Menu.moduleId);
   FOSCAddress address = UOSCManager::ConvertStringToOSCAddress(FString(TEXT("/get_menu")));
   FOSCMessage message;
@@ -331,6 +355,8 @@ void AOSCController::SendMenuRequest(const FVCVMenu& Menu) const {
 }
 
 void AOSCController::SendMenuItemClick(const FVCVMenuItem& MenuItem) const {
+  if (bSendingPaused) return;
+
   UE_LOG(LogTemp, Warning, TEXT("Sending /click_menu_item %lld"), MenuItem.moduleId);
   FOSCAddress address = UOSCManager::ConvertStringToOSCAddress(FString(TEXT("/click_menu_item")));
   FOSCMessage message;
@@ -344,6 +370,8 @@ void AOSCController::SendMenuItemClick(const FVCVMenuItem& MenuItem) const {
 }
 
 void AOSCController::SendMenuItemQuantityUpdate(const FVCVMenuItem& MenuItem, const float& Value) const {
+  if (bSendingPaused) return;
+
   UE_LOG(LogTemp, Warning, TEXT("Sending /update_menu_item_quantity %lld"), MenuItem.moduleId);
   FOSCAddress address = UOSCManager::ConvertStringToOSCAddress(FString(TEXT("/update_menu_item_quantity")));
   FOSCMessage message;
