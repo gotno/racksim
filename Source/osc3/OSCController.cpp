@@ -47,13 +47,7 @@ void AOSCController::Init() {
 
   OSCServer->Listen();
 
-  GetWorld()->GetTimerManager().SetTimer(
-    hSyncPortTimer,
-    this,
-    &AOSCController::SyncPorts,
-    0.05f, // 50 milliseconds
-    true // loop
-  );
+  SyncPorts();
 
   bRunning = true;
 }
@@ -68,6 +62,18 @@ void AOSCController::AddRoute(const FString &AddressPattern, const FName &Method
 }
 
 void AOSCController::SyncPorts() {
+  RackClientPort = MinRackClientPort;
+
+  GetWorld()->GetTimerManager().SetTimer(
+    hSyncPortTimer,
+    this,
+    &AOSCController::SendServerPort,
+    0.05f, // 50 milliseconds
+    true // loop
+  );
+}
+
+void AOSCController::SendServerPort() {
   FOSCAddress address = UOSCManager::ConvertStringToOSCAddress(FString("/set_unreal_server_port"));
   FOSCMessage message;
   UOSCManager::SetOSCMessageAddress(message, address);

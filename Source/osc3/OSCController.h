@@ -26,6 +26,9 @@ public:
   UFUNCTION()
   void Init();
 
+  UFUNCTION()
+  void SyncPorts();
+
   bool IsRunning() { return bRunning; }
 
   UFUNCTION()
@@ -54,7 +57,6 @@ public:
   void ClickMenuItem(const FVCVMenuItem& MenuItem) const;
   void UpdateMenuItemQuantity(const FVCVMenuItem& MenuItem, const float& Value) const;
   void SendModuleDiffRequest(const int64_t& ModuleId) const;
-
 private:
   FTimerHandle hSyncPortTimer;
   int MinRackClientPort{7000}, RackClientPort{7000}, MaxRackClientPort{7020};
@@ -74,7 +76,7 @@ private:
   bool ModuleGuard(const FOSCMessage &Message, int64_t &ModuleId);
 
   UFUNCTION()
-  void SyncPorts();
+  void SendServerPort();
 
   UFUNCTION()
   void LogOSC(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port);
