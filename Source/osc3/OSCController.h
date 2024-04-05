@@ -39,23 +39,25 @@ public:
   UFUNCTION()
   void SendCreateModule(const FString& PluginSlug, const FString& ModuleSlug, const int& ReturnId);
   UFUNCTION()
-  void SetModuleFavorite(FString PluginSlug, FString ModuleSlug, bool bFavorite);
+  void SendSetModuleFavorite(FString PluginSlug, FString ModuleSlug, bool bFavorite);
   UFUNCTION()
   void SendDestroyModule(int64 ModuleId);
   UFUNCTION()
-  void CreateCable(int64 InputModuleId, int64 OuputModuleId, int InputPortId, int OutputPortId);
+  void SendCreateCable(int64 InputModuleId, int64 OuputModuleId, int InputPortId, int OutputPortId);
   UFUNCTION()
-  void DestroyCable(int64 CableId);
+  void SendDestroyCable(int64 CableId);
   UFUNCTION()
   void SendAutosaveAndExit();
+  UFUNCTION()
+  void SendLoadPatch(FString PatchPath);
   UFUNCTION()
   void SendArrangeModules(int64 LeftModuleId, int64 RightModuleId, bool bAttach);
   UFUNCTION()
   void NotifyReceived(FString Type, int64 OuterId, int InnerId = -1);
 
-  void RequestMenu(const FVCVMenu& Menu) const;
-  void ClickMenuItem(const FVCVMenuItem& MenuItem) const;
-  void UpdateMenuItemQuantity(const FVCVMenuItem& MenuItem, const float& Value) const;
+  void SendMenuRequest(const FVCVMenu& Menu) const;
+  void SendMenuItemClick(const FVCVMenuItem& MenuItem) const;
+  void SendMenuItemQuantityUpdate(const FVCVMenuItem& MenuItem, const float& Value) const;
   void SendModuleDiffRequest(const int64_t& ModuleId) const;
 private:
   FTimerHandle hSyncPortTimer;

@@ -370,11 +370,11 @@ void Aosc3GameModeBase::SpawnCable(int64_t& Id, AVCVPort* InputPort, AVCVPort* O
 }
 
 void Aosc3GameModeBase::RegisterCableConnect(AVCVPort* InputPort, AVCVPort* OutputPort) {
-  OSCctrl->CreateCable(InputPort->Module->Id, OutputPort->Module->Id, InputPort->Id, OutputPort->Id);
+  OSCctrl->SendCreateCable(InputPort->Module->Id, OutputPort->Module->Id, InputPort->Id, OutputPort->Id);
 }
 
 void Aosc3GameModeBase::RegisterCableDisconnect(AVCVCable* Cable) {
-  OSCctrl->DestroyCable(Cable->Id);
+  OSCctrl->SendDestroyCable(Cable->Id);
   Cable->SetId(-1);
 }
 
@@ -409,7 +409,7 @@ void Aosc3GameModeBase::RequestModuleDiff(const int64_t& ModuleId) const {
 };
 
 void Aosc3GameModeBase::SetModuleFavorite(FString PluginSlug, FString ModuleSlug, bool bFavorite) {
-  OSCctrl->SetModuleFavorite(PluginSlug, ModuleSlug, bFavorite);
+  OSCctrl->SendSetModuleFavorite(PluginSlug, ModuleSlug, bFavorite);
   LibraryActor->SetModuleFavorite(PluginSlug, ModuleSlug, bFavorite);
 }
 
@@ -426,16 +426,16 @@ void Aosc3GameModeBase::DestroyModule(int64_t ModuleId, bool bSync) {
 }
 
 void Aosc3GameModeBase::RequestMenu(const FVCVMenu& Menu) const {
-  OSCctrl->RequestMenu(Menu);
+  OSCctrl->SendMenuRequest(Menu);
 }
 
 void Aosc3GameModeBase::ClickMenuItem(const FVCVMenuItem& MenuItem) {
   LastClickedMenuModuleId = MenuItem.moduleId;
-  OSCctrl->ClickMenuItem(MenuItem);
+  OSCctrl->SendMenuItemClick(MenuItem);
 }
 
 void Aosc3GameModeBase::UpdateMenuItemQuantity(const FVCVMenuItem& MenuItem, const float& Value) const {
-  OSCctrl->UpdateMenuItemQuantity(MenuItem, Value);
+  OSCctrl->SendMenuItemQuantityUpdate(MenuItem, Value);
 }
 
 void Aosc3GameModeBase::UpdateLight(int64_t ModuleId, int32 LightId, FLinearColor Color) {
