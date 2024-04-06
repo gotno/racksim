@@ -30,6 +30,8 @@ void AMainMenu::BeginPlay() {
   Super::BeginPlay();
 	
   GameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(this));
+  PlayerPawn = Cast<AVRAvatar>(UGameplayStatics::GetPlayerPawn(this, 0));
+  GameState = Cast<Aosc3GameState>(UGameplayStatics::GetGameState(this));
 	
   MainMenuWidget = Cast<UMainMenuWidget>(MainMenuWidgetComponent->GetUserWidgetObject());
   
@@ -42,14 +44,10 @@ void AMainMenu::BeginPlay() {
 }
 
 void AMainMenu::Init(
-  AVRAvatar* inPlayerPawn,
-  Aosc3GameState* inGameState,
   TFunction<void ()> ExitFunction,
   TFunction<void ()> NewFunction,
   TFunction<void ()> ContinueFunction
 ) {
-  PlayerPawn = inPlayerPawn;
-  GameState = inGameState;
   MainMenuWidget->SetExitFunction(ExitFunction);
   MainMenuWidget->SetNewFunction(NewFunction);
   MainMenuWidget->SetContinueFunction(ContinueFunction);

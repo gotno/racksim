@@ -25,8 +25,6 @@ public:
 	virtual void Tick(float DeltaTime) override;
   
   void Init(
-    AVRAvatar* inPlayerPawn,
-    Aosc3GameState* inGameState,
     TFunction<void ()> ExitFunction,
     TFunction<void ()> NewFunction,
     TFunction<void ()> ContinueFunction

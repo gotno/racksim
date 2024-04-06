@@ -541,8 +541,6 @@ void Aosc3GameModeBase::SpawnMainMenu() {
       spawnParams
     );
   MainMenu->Init(
-    PlayerPawn,
-    osc3GameState,
     [&]() { RequestExit(); }, // 'exit' button callback
     [&]() { NewPatch(); }, // 'new patch' button callback
     [&]() { ContinueAutosave(); } // 'continue with autosave' button callback
