@@ -66,9 +66,10 @@ void Aosc3GameModeBase::NewPatch() {
   SaveData = nullptr;
 
   if (rackman->RackIsRunning()) {
-    // reset GameState
-    // clear Modules/Cables
-    // tell rack to load bootstrap
+    Reset();
+    LoadPatch(rackman->GetBootstrapPath());
+    OSCctrl->SyncPorts();
+    MainMenu->Hide();
   } else {
     StartRack(true);
   }

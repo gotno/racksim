@@ -14,6 +14,7 @@ public:
   void Cleanup();
   bool RackIsRunning() { return bRunning; }
   bool DoesAutosaveExist();
+  FString GetBootstrapPath() { return OSCctrlBootstrapPath; }
   
 private:
   void SetupPlugin();

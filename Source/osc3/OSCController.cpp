@@ -327,6 +327,18 @@ void AOSCController::SendArrangeModules(int64 LeftModuleId, int64 RightModuleId,
   OSCClient->SendOSCMessage(message);
 }
 
+void AOSCController::SendLoadPatch(FString PatchPath) {
+  if (bSendingPaused) return;
+
+  FOSCAddress address = UOSCManager::ConvertStringToOSCAddress(FString(TEXT("/load_patch")));
+  FOSCMessage message;
+  UOSCManager::SetOSCMessageAddress(message, address);
+
+  UOSCManager::AddString(message, PatchPath);
+
+  OSCClient->SendOSCMessage(message);
+}
+
 void AOSCController::SendDestroyCable(int64 CableId) {
   if (bSendingPaused) return;
 
