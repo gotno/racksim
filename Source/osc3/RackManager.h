@@ -15,6 +15,7 @@ public:
   bool RackIsRunning() { return bRunning; }
   bool DoesAutosaveExist();
   FString GetBootstrapPath() { return OSCctrlBootstrapPath; }
+  TArray<FString> GetRecentPatchPaths();
   
 private:
   void SetupPlugin();
@@ -24,6 +25,7 @@ private:
   
   bool bRunning{false};
 
+  FString RackUserPath{""};
   FString RackPluginsPath{""};
   FString gtnosftPluginFilename{"gtnosft-2.0.1-win-x64.vcvplugin"};
   FString RackPath{""};

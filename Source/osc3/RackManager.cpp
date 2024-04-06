@@ -8,6 +8,7 @@ THIRD_PARTY_INCLUDES_START
 THIRD_PARTY_INCLUDES_END
 #include "Windows/HideWindowsPlatformTypes.h"
 
+#include "Json.h"
 #include "Misc/Paths.h"
 
 void URackManager::Init() {
@@ -19,7 +20,8 @@ void URackManager::Init() {
   RackExecutablePath = RackPath + "Rack.exe";
   OSCctrlBootstrapPath = RackPath + "oscctrl-bootstrap.vcv";
   AutosavePath = RackPath + "autosave/patch.json";
-  RackPluginsPath = FString(FPlatformProcess::UserDir()) + "Rack2/plugins-win-x64/";
+  RackUserPath = FString(FPlatformProcess::UserDir()) + "Rack2/";
+  RackPluginsPath = RackUserPath + "plugins-win-x64/";
 }
 
 void URackManager::Run(bool bNewPatch, TFunction<void ()> inFinishRunCallback) {
@@ -109,4 +111,26 @@ void URackManager::Cleanup() {
   FPlatformFileManager::Get()
     .GetPlatformFile()
     .DeleteDirectoryRecursively(*(RackPluginsPath + "/gtnosft"));
+}
+
+TArray<FString> URackManager::GetRecentPatchPaths() {
+  TArray<FString> recentPaths;
+
+  FString JsonStr;
+	if (!FFileHelper::LoadFileToString(JsonStr, *(RackUserPath + "settings.json")))
+    return recentPaths;
+
+  TSharedRef<TJsonReader<TCHAR>> JsonReader = TJsonReaderFactory<TCHAR>::Create(*JsonStr);
+  TSharedPtr<FJsonValue> OutJson;
+
+  if (!FJsonSerializer::Deserialize(JsonReader, OutJson))
+    return recentPaths;
+
+  TSharedPtr<FJsonObject> rootJ = OutJson->AsObject();
+
+  IFileManager& FileManager = IFileManager::Get();
+  for (auto& path : rootJ->GetArrayField(FString("recentPatchPaths")))
+    if (FileManager.FileExists(*path->AsString())) recentPaths.Push(path->AsString());
+
+  return recentPaths;
 }
