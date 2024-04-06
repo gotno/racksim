@@ -69,7 +69,6 @@ public:
   void UpdateLight(int64_t ModuleId, int32 LightId, FLinearColor Color);
   void UpdateParam(int64_t ModuleId, VCVParam& Param);
 
-  void LoadPatch(FString PatchPath);
   void SendParamUpdate(int64_t ModuleId, int32 ParamId, float Value);
   void DuplicateModule(AVCVModule* Module);
   void DestroyModule(int64_t ModuleId, bool bSync = true);
@@ -152,6 +151,7 @@ private:
   TMap<FString, UTexture2D*> SVGTextures;
   
   void NewPatch();
+  void LoadPatch(FString PatchPath);
   void ContinueAutosave();
   void StartRack(bool bNewPatch);
 public:

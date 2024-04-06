@@ -75,6 +75,10 @@ void Aosc3GameModeBase::NewPatch() {
   }
 }
 
+void Aosc3GameModeBase::LoadPatch(FString PatchPath) {
+  OSCctrl->SendLoadPatch(PatchPath);
+}
+
 void Aosc3GameModeBase::Reset() {
   OSCctrl->PauseSending();
 
