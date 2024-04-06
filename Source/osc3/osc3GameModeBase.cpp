@@ -56,12 +56,11 @@ void Aosc3GameModeBase::BeginPlay() {
   SpawnMainMenu();
 }
 
-// new
-//   RackIsRunning?
-//   else
-//     load rack with bootstrap
-// continue (TODO: only if autosave dir exists)
-//   load rack without bootstrap
+void Aosc3GameModeBase::EndPlay(const EEndPlayReason::Type EndPlayReason) {
+  Super::EndPlay(EndPlayReason);
+
+  rackman->Cleanup();
+}
 
 void Aosc3GameModeBase::NewPatch() {
   SaveData = nullptr;
@@ -162,12 +161,6 @@ void Aosc3GameModeBase::RequestExit() {
 
 void Aosc3GameModeBase::ToggleMainMenu() {
   MainMenu->Toggle();
-}
-
-void Aosc3GameModeBase::EndPlay(const EEndPlayReason::Type EndPlayReason) {
-  Super::EndPlay(EndPlayReason);
-
-  rackman->Cleanup();
 }
 
 Uosc3SaveGame* Aosc3GameModeBase::MakeSaveGame() {
