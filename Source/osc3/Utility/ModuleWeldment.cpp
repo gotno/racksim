@@ -122,7 +122,7 @@ void AModuleWeldment::Prepend(AModuleWeldment* OtherWeldment) {
 }
 
 bool AModuleWeldment::SplitIfAdjacent(AVCVModule* leftModule, AVCVModule* rightModule) {
-  int splitIndex;
+  int splitIndex{-1};
   bool bAdjacent{false};
 
   for (int i = 0; i < Modules.Num() - 1; i++) {
