@@ -75,6 +75,23 @@ void Aosc3GameModeBase::NewPatch() {
   }
 }
 
+void Aosc3GameModeBase::Reset() {
+  OSCctrl->PauseSending();
+
+  // modules/weldments
+  for (AModuleWeldment* weldment : ModuleWeldments) weldment->Destroy();
+  ModulesSeekingWeldment.Empty();
+  for (auto& pair : ModuleActors) pair.Value->Destroy();
+  ModuleActors.Empty();
+
+  // cables
+  for (AVCVCable* cable : CableActors) cable->Destroy();
+  CableActors.Empty();
+  CableQueue.Empty();
+
+  OSCctrl->UnpauseSending();
+}
+
 void Aosc3GameModeBase::ContinueAutosave() {
   if (!UGameplayStatics::DoesSaveGameExist(TEXT("autosave"), 0)) {
     StartRack(false);

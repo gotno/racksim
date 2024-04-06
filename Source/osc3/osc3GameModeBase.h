@@ -96,6 +96,8 @@ public:
 
 private:
   UFUNCTION()
+  void Reset();
+  UFUNCTION()
   void Exit();
 
   UFUNCTION()
