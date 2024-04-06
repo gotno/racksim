@@ -97,7 +97,9 @@ void Aosc3GameModeBase::Reset() {
 }
 
 void Aosc3GameModeBase::ContinueAutosave() {
-  if (!UGameplayStatics::DoesSaveGameExist(TEXT("autosave"), 0)) {
+  osc3GameState->SetPatchPath(TEXT("autosave"));
+
+  if (!UGameplayStatics::DoesSaveGameExist(osc3GameState->GetSaveName(), 0)) {
     StartRack(false);
     return;
   }
@@ -114,22 +116,18 @@ void Aosc3GameModeBase::ContinueAutosave() {
     } else {
       UE_LOG(LogTemp, Warning, TEXT("%s savegame load fail"), *SlotName);
       SaveData = nullptr;
+      PlayerPawn->SetActorLocation(DefaultInPatchPlayerLocation);
     }
+    PlayerPawn->EnableWorldManipulation();
+    osc3GameState->SetPatchLoaded(true);
     StartRack(false);
   });
-  UGameplayStatics::AsyncLoadGameFromSlot(TEXT("autosave"), 0, LoadedDelegate);
+  UGameplayStatics::AsyncLoadGameFromSlot(osc3GameState->GetSaveName(), 0, LoadedDelegate);
 }
 
 void Aosc3GameModeBase::StartRack(bool bNewPatch) {
   rackman->Run(bNewPatch, [&]() {
     OSCctrl->Init();
-
-    osc3GameState->SetPatchLoaded(true);
-    osc3GameState->SetIsAutosave(!bNewPatch);
-
-    if (!SaveData) PlayerPawn->SetActorLocation(DefaultInPatchPlayerLocation);
-    PlayerPawn->EnableWorldManipulation();
-
     MainMenu->Hide();
   });
 }
@@ -160,8 +158,7 @@ void Aosc3GameModeBase::RequestExit() {
     );
   });
 
-  // TODO GameState->patch path or something
-  UGameplayStatics::AsyncSaveGameToSlot(SaveGame, TEXT("autosave"), 0, SavedDelegate);
+  UGameplayStatics::AsyncSaveGameToSlot(SaveGame, osc3GameState->GetSaveName(), 0, SavedDelegate);
 }
 
 void Aosc3GameModeBase::ToggleMainMenu() {
