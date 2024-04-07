@@ -99,7 +99,7 @@ void Aosc3GameModeBase::Reset() {
 void Aosc3GameModeBase::ContinueAutosave() {
   osc3GameState->SetPatchPath(TEXT("autosave"));
 
-  if (!UGameplayStatics::DoesSaveGameExist(osc3GameState->GetSaveName(), 0)) {
+  if (!UGameplayStatics::DoesSaveGameExist(osc3GameState->GetAutosaveName(), 0)) {
     StartRack(false);
     return;
   }
@@ -122,7 +122,7 @@ void Aosc3GameModeBase::ContinueAutosave() {
     osc3GameState->SetPatchLoaded(true);
     StartRack(false);
   });
-  UGameplayStatics::AsyncLoadGameFromSlot(osc3GameState->GetSaveName(), 0, LoadedDelegate);
+  UGameplayStatics::AsyncLoadGameFromSlot(osc3GameState->GetAutosaveName(), 0, LoadedDelegate);
 }
 
 void Aosc3GameModeBase::StartRack(bool bNewPatch) {
@@ -158,7 +158,7 @@ void Aosc3GameModeBase::RequestExit() {
     );
   });
 
-  UGameplayStatics::AsyncSaveGameToSlot(SaveGame, osc3GameState->GetSaveName(), 0, SavedDelegate);
+  UGameplayStatics::AsyncSaveGameToSlot(SaveGame, osc3GameState->GetAutosaveName(), 0, SavedDelegate);
 }
 
 void Aosc3GameModeBase::ToggleMainMenu() {

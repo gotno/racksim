@@ -32,4 +32,5 @@ private:
   bool bCanContinueAutosave;
   FString PatchPath{""};
   FString SaveName{""};
+  FString AutosaveName{"autosave"};
 };
