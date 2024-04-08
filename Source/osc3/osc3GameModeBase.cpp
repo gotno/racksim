@@ -162,6 +162,7 @@ void Aosc3GameModeBase::RequestExit() {
 }
 
 void Aosc3GameModeBase::ToggleMainMenu() {
+  if (!osc3GameState->IsPatchLoaded()) return;
   MainMenu->Toggle();
 }
 

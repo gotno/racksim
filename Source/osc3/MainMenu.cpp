@@ -67,8 +67,6 @@ void AMainMenu::Show() {
 }
 
 void AMainMenu::Toggle() {
-  if (!GameState->IsPatchLoaded()) return;
-
   if (IsHidden()) Show();
   else Hide();
 }
@@ -88,4 +86,3 @@ void AMainMenu::Tick(float DeltaTime) {
     );
   }
 }
-
