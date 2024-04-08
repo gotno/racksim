@@ -96,15 +96,8 @@ void AOSCController::SetClientPort(const FOSCAddress& AddressPattern, const FOSC
   RackClientPort = clientPort;
   OSCClient->SetSendIPAddress(TEXT("127.0.0.1"), RackClientPort);
 
-  // wait a moment, request sync
-  FTimerHandle resyncHandle;
-  GetWorld()->GetTimerManager().SetTimer(
-    resyncHandle,
-    this,
-    &AOSCController::NotifyResync,
-    1.f, // 1 second
-    false // loop
-  );
+  GameMode->RackConnectionEstablished();
+  AOSCController::NotifyResync();
 }
 
 // void AOSCController::TestBundle(const FOSCBundle& InBundle, const FString& InIPAddress, int32 InPort) {
@@ -337,6 +330,16 @@ void AOSCController::SendLoadPatch(FString PatchPath) {
   UOSCManager::AddString(message, PatchPath);
 
   OSCClient->SendOSCMessage(message);
+
+  // new patch, new rack client/server, re-sync ports
+  FTimerHandle hSyncPorts;
+  GetWorld()->GetTimerManager().SetTimer(
+    hSyncPorts,
+    this,
+    &AOSCController::SyncPorts,
+    0.4f, // seconds
+    false // loop
+  );
 }
 
 void AOSCController::SendDestroyCable(int64 CableId) {

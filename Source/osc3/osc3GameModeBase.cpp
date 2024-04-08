@@ -62,25 +62,40 @@ void Aosc3GameModeBase::EndPlay(const EEndPlayReason::Type EndPlayReason) {
   rackman->Cleanup();
 }
 
-void Aosc3GameModeBase::NewPatch() {
-  SaveData = nullptr;
-
-  if (rackman->RackIsRunning()) {
-    Reset();
-    LoadPatch(rackman->GetBootstrapPath());
-    OSCctrl->SyncPorts();
-    MainMenu->Hide();
-  } else {
-    StartRack(true);
-  }
-}
-
 void Aosc3GameModeBase::LoadPatch(FString PatchPath) {
-  OSCctrl->SendLoadPatch(PatchPath);
+  Reset();
+
+  osc3GameState->SetPatchPath(PatchPath);
+
+  FAsyncLoadGameFromSlotDelegate LoadedDelegate;
+  LoadedDelegate.BindLambda([&](const FString& SlotName, const int32 UserIndex, USaveGame* LoadedGameData) {
+    if (LoadedGameData) {
+      UE_LOG(LogTemp, Warning, TEXT("savegame successfully loaded for slot \"%s\""), *SlotName);
+      SaveData = Cast<Uosc3SaveGame>(LoadedGameData);
+    } else {
+      UE_LOG(LogTemp, Warning, TEXT("no savegame data to load for slot \"%s\""), *SlotName);
+    }
+
+    if (rackman->RackIsRunning()) {
+      UE_LOG(LogTemp, Warning, TEXT("savegame load attempted, rack is running, sending load_patch"));
+      OSCctrl->SendLoadPatch(
+        PatchPath == "new"
+          ? rackman->GetBootstrapPath()
+          : PatchPath
+      );
+    } else {
+      UE_LOG(LogTemp, Warning, TEXT("savegame load attempted, rack is not running, starting rack"));
+      StartRack(PatchPath.Equals(FString("new")));
+    }
+  });
+  UGameplayStatics::AsyncLoadGameFromSlot(osc3GameState->GetSaveName(), 0, LoadedDelegate);
 }
 
 void Aosc3GameModeBase::Reset() {
   OSCctrl->PauseSending();
+
+  osc3GameState->SetPatchLoaded(false);
+  SaveData = nullptr;
 
   // modules/weldments
   for (AModuleWeldment* weldment : ModuleWeldments) weldment->Destroy();
@@ -93,42 +108,34 @@ void Aosc3GameModeBase::Reset() {
   CableActors.Empty();
   CableQueue.Empty();
 
+  // TODO dry with avatar:destroymodule
+  LibraryActor->SetActorHiddenInGame(true);
+  LibraryActor->SetActorLocation(FVector(0.f, 0.f, -500.f));
+  // TuckLibrary();
+
   OSCctrl->UnpauseSending();
 }
 
-void Aosc3GameModeBase::ContinueAutosave() {
-  osc3GameState->SetPatchPath(TEXT("autosave"));
+void Aosc3GameModeBase::RackConnectionEstablished() {
+  osc3GameState->SetPatchLoaded(true);
 
-  if (!UGameplayStatics::DoesSaveGameExist(osc3GameState->GetAutosaveName(), 0)) {
-    StartRack(false);
-    return;
+  if (SaveData) {
+    PlayerPawn->SetActorLocation(SaveData->PlayerLocation);
+    LibraryActor->SetActorLocation(SaveData->LibraryPosition.Location);
+    LibraryActor->SetActorRotation(SaveData->LibraryPosition.Rotation);
+    LibraryActor->SetActorHiddenInGame(SaveData->bLibraryHidden);
+  } else {
+    PlayerPawn->SetActorLocation(DefaultInPatchPlayerLocation);
   }
 
-  FAsyncLoadGameFromSlotDelegate LoadedDelegate;
-  LoadedDelegate.BindLambda([&](const FString& SlotName, const int32 UserIndex, USaveGame* LoadedGameData) {
-    if (LoadedGameData) {
-      UE_LOG(LogTemp, Warning, TEXT("%s savegame load success"), *SlotName);
-      SaveData = Cast<Uosc3SaveGame>(LoadedGameData);
-      PlayerPawn->SetActorLocation(SaveData->PlayerLocation);
-      LibraryActor->SetActorLocation(SaveData->LibraryPosition.Location);
-      LibraryActor->SetActorRotation(SaveData->LibraryPosition.Rotation);
-      LibraryActor->SetActorHiddenInGame(SaveData->bLibraryHidden);
-    } else {
-      UE_LOG(LogTemp, Warning, TEXT("%s savegame load fail"), *SlotName);
-      SaveData = nullptr;
-      PlayerPawn->SetActorLocation(DefaultInPatchPlayerLocation);
-    }
-    PlayerPawn->EnableWorldManipulation();
-    osc3GameState->SetPatchLoaded(true);
-    StartRack(false);
-  });
-  UGameplayStatics::AsyncLoadGameFromSlot(osc3GameState->GetAutosaveName(), 0, LoadedDelegate);
+  PlayerPawn->EnableWorldManipulation();
+  MainMenu->Hide();
 }
 
 void Aosc3GameModeBase::StartRack(bool bNewPatch) {
   rackman->Run(bNewPatch, [&]() {
+    UE_LOG(LogTemp, Warning, TEXT("started rack, initializing oscctrl"));
     OSCctrl->Init();
-    MainMenu->Hide();
   });
 }
 
@@ -538,8 +545,9 @@ void Aosc3GameModeBase::SpawnMainMenu() {
     );
   MainMenu->Init(
     [&]() { RequestExit(); }, // 'exit' button callback
-    [&]() { NewPatch(); }, // 'new patch' button callback
-    [&]() { ContinueAutosave(); } // 'continue with autosave' button callback
+    [&]() { LoadPatch(TEXT("new")); }, // 'new patch' button callback
+    [&]() { LoadPatch(TEXT("autosave")); } // 'continue with autosave' button callback
+    // [&](FString PatchPath) { LoadPatch(PatchPath); } // general load patch callback
   );
 }
 

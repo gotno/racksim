@@ -19,16 +19,25 @@ public:
 
   void SetPatchPath(FString inPatchPath) {
     PatchPath = inPatchPath;
-    SaveName = FMD5::HashAnsiString(*PatchPath);
+    if (PatchPath == "new") {
+      SaveName = "";
+    } else if (PatchPath == AutosaveName) {
+      SaveName = AutosaveName;
+    } else {
+      SaveName = FMD5::HashAnsiString(*PatchPath);
+    }
   }
 
   FString GetSaveName() {
     return SaveName;
   }
 
+  FString GetAutosaveName() {
+    return AutosaveName;
+  }
+
 private:
   bool bPatchLoaded;
-  bool bIsAutosave;
   bool bCanContinueAutosave;
   FString PatchPath{""};
   FString SaveName{""};

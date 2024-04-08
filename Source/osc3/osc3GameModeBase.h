@@ -54,6 +54,8 @@ protected:
   virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 public:
+  void RackConnectionEstablished();
+
   void SpawnModule(VCVModule vcv_module);
   void QueueCableSpawn(VCVCable vcv_cable);
   void RequestExit();
@@ -150,9 +152,7 @@ private:
   UPROPERTY()
   TMap<FString, UTexture2D*> SVGTextures;
   
-  void NewPatch();
   void LoadPatch(FString PatchPath);
-  void ContinueAutosave();
   void StartRack(bool bNewPatch);
 public:
   // delegate stuff
