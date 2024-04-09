@@ -49,7 +49,7 @@ public:
   UFUNCTION()
   void SendDestroyCable(int64 CableId);
   UFUNCTION()
-  void SendAutosaveAndExit();
+  void SendAutosaveAndExit(FString NextPatchPath = TEXT(""));
   UFUNCTION()
   void SendLoadPatch(FString PatchPath);
   UFUNCTION()

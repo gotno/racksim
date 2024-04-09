@@ -10,16 +10,17 @@ class OSC3_API URackManager : public UObject {
     
 public:
   void Init();
-  void Run(bool bNewPatch, TFunction<void ()> inFinishRunCallback);
+  void Run(FString PatchPath, TFunction<void ()> inFinishRunCallback);
   void Cleanup();
   bool RackIsRunning() { return bRunning; }
   bool DoesAutosaveExist();
   FString GetBootstrapPath() { return OSCctrlBootstrapPath; }
   TArray<FString> GetRecentPatchPaths();
+  void CallOnExit(TFunction<void ()> inOnExitCallback);
   
 private:
   void SetupPlugin();
-  void LaunchRack(bool bNewPatch);
+  void LaunchRack(FString PatchPath);
   void FinishRun();
   TFunction<void ()> FinishRunCallback;
   
@@ -36,5 +37,10 @@ private:
 
   FProcHandle hRackProc;
   FTimerHandle hFinishRunTimer;
+  FTimerHandle hOnExitTimer;
   void BringViewportToFront();
+
+  TFunction<void ()> OnExitCallback;
+  UFUNCTION()
+  void CheckForExit();
 };

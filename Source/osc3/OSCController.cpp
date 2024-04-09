@@ -10,6 +10,12 @@ AOSCController::AOSCController() {
 }
 
 void AOSCController::Init() {
+  if (IsRunning()) {
+    UE_LOG(LogTemp, Warning, TEXT("attempting to re-init OSCctrl, skipping to SyncPorts"));
+    SyncPorts();
+    return;
+  }
+
   OSCClient = UOSCManager::CreateOSCClient(TEXT("127.0.0.1"), RackClientPort, TEXT("OSCCtrlClient"), this);
   OSCServer = UOSCManager::CreateOSCServer(TEXT("127.0.0.1"), ServerPort, false, false, TEXT("OSCCtrlServer"), this);
 
@@ -97,7 +103,6 @@ void AOSCController::SetClientPort(const FOSCAddress& AddressPattern, const FOSC
   OSCClient->SetSendIPAddress(TEXT("127.0.0.1"), RackClientPort);
 
   GameMode->RackConnectionEstablished();
-  AOSCController::NotifyResync();
 }
 
 // void AOSCController::TestBundle(const FOSCBundle& InBundle, const FString& InIPAddress, int32 InPort) {
@@ -297,12 +302,15 @@ void AOSCController::SendCreateCable(int64 InputModuleId, int64 OutputModuleId, 
   OSCClient->SendOSCMessage(message);
 }
 
-void AOSCController::SendAutosaveAndExit() {
+void AOSCController::SendAutosaveAndExit(FString NextPatchPath) {
   if (bSendingPaused) return;
 
   FOSCAddress address = UOSCManager::ConvertStringToOSCAddress(FString(TEXT("/autosave_and_exit")));
   FOSCMessage message;
   UOSCManager::SetOSCMessageAddress(message, address);
+
+  UOSCManager::AddString(message, NextPatchPath);
+
   OSCClient->SendOSCMessage(message);
 }
 

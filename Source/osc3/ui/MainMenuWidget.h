@@ -27,6 +27,9 @@ public:
   void SetContinueFunction(TFunction<void ()> inContinueFunction) {
     ContinueFunction = inContinueFunction;
   }
+  void SetLoadFunction(TFunction<void (FString)> inLoadFunction) {
+    LoadFunction = inLoadFunction;
+  }
 	
 protected:
 	virtual void NativeConstruct() override;	
@@ -62,5 +65,12 @@ private:
   void HandleContinueClick() {
     GotoLoading();
     ContinueFunction();
+  }
+
+  TFunction<void (FString)> LoadFunction;
+  UFUNCTION()
+  void HandleLoadClick(FString PatchPath) {
+    GotoLoading();
+    LoadFunction(PatchPath);
   }
 };

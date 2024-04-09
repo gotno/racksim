@@ -19,9 +19,9 @@ public:
 
   void SetPatchPath(FString inPatchPath) {
     PatchPath = inPatchPath;
-    if (PatchPath == "new") {
+    if (PatchPath.Equals("new")) {
       SaveName = "";
-    } else if (PatchPath == AutosaveName) {
+    } else if (PatchPath.Equals(AutosaveName)) {
       SaveName = AutosaveName;
     } else {
       SaveName = FMD5::HashAnsiString(*PatchPath);

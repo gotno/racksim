@@ -24,31 +24,21 @@ void URackManager::Init() {
   RackPluginsPath = RackUserPath + "plugins-win-x64/";
 }
 
-void URackManager::Run(bool bNewPatch, TFunction<void ()> inFinishRunCallback) {
+void URackManager::Run(FString PatchPath, TFunction<void ()> inFinishRunCallback) {
   SetupPlugin();
   FinishRunCallback = inFinishRunCallback;
-  LaunchRack(bNewPatch);
+  LaunchRack(PatchPath);
 }
 
-void URackManager::SetupPlugin() {
-  IFileManager& FileManager = IFileManager::Get();
-  FileManager.Copy(
-    *(RackPluginsPath + gtnosftPluginFilename),
-    *(RackPath + gtnosftPluginFilename)
-  );
-}
-
-bool URackManager::DoesAutosaveExist() {
-  // TODO?: check for OSCctrl module in autosave
-  //        definitely if ever we share the autosave with system rack
-  return FPaths::FileExists(AutosavePath);
-}
-
-void URackManager::LaunchRack(bool bNewPatch) {
-  FString params =
-    bNewPatch
-      ? OSCctrlBootstrapPath
-      : "";
+void URackManager::LaunchRack(FString PatchPath) {
+  FString params;
+  if (PatchPath.Equals("new")) {
+    params = OSCctrlBootstrapPath;
+  } else if (PatchPath.Equals("autosave")) {
+    params = "";
+  } else {
+    params = PatchPath;
+  }
 
   hRackProc = FPlatformProcess::CreateProc(
     *RackExecutablePath,
@@ -72,6 +62,40 @@ void URackManager::LaunchRack(bool bNewPatch) {
       true // loop
     );
   }
+}
+
+void URackManager::CallOnExit(TFunction<void ()> inOnExitCallback) {
+  OnExitCallback = inOnExitCallback;
+
+  GetWorld()->GetTimerManager().SetTimer(
+    hOnExitTimer,
+    this,
+    &URackManager::CheckForExit,
+    0.1f, // 100 ms
+    true // loop
+  );
+}
+
+void URackManager::CheckForExit() {
+  if (hRackProc.IsValid() && FPlatformProcess::IsProcRunning(hRackProc))
+    return;
+
+  GetWorld()->GetTimerManager().ClearTimer(hOnExitTimer);
+  OnExitCallback();
+}
+
+void URackManager::SetupPlugin() {
+  IFileManager& FileManager = IFileManager::Get();
+  FileManager.Copy(
+    *(RackPluginsPath + gtnosftPluginFilename),
+    *(RackPath + gtnosftPluginFilename)
+  );
+}
+
+bool URackManager::DoesAutosaveExist() {
+  // TODO?: check for OSCctrl module in autosave
+  //        definitely if ever we share the autosave with system rack
+  return FPaths::FileExists(AutosavePath);
 }
 
 void URackManager::FinishRun() {

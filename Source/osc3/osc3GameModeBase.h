@@ -153,7 +153,9 @@ private:
   TMap<FString, UTexture2D*> SVGTextures;
   
   void LoadPatch(FString PatchPath);
-  void StartRack(bool bNewPatch);
+  void StartRack(FString PatchPath);
+  void RestartRack(FString PatchPath);
+  FString PatchPathToBootstrap{""};
 public:
   // delegate stuff
   void SubscribeMenuItemSyncedDelegate(AContextMenu* ContextMenu);

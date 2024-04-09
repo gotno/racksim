@@ -46,11 +46,13 @@ void AMainMenu::BeginPlay() {
 void AMainMenu::Init(
   TFunction<void ()> ExitFunction,
   TFunction<void ()> NewFunction,
-  TFunction<void ()> ContinueFunction
+  TFunction<void ()> ContinueFunction,
+  TFunction<void (FString)> LoadFunction
 ) {
   MainMenuWidget->SetExitFunction(ExitFunction);
   MainMenuWidget->SetNewFunction(NewFunction);
   MainMenuWidget->SetContinueFunction(ContinueFunction);
+  MainMenuWidget->SetLoadFunction(LoadFunction);
   MainMenuWidget->UpdateState(GameState);
 }
 

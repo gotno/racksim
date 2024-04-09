@@ -27,7 +27,8 @@ public:
   void Init(
     TFunction<void ()> ExitFunction,
     TFunction<void ()> NewFunction,
-    TFunction<void ()> ContinueFunction
+    TFunction<void ()> ContinueFunction,
+    TFunction<void (FString)> LoadFunction
   );
   void Hide();
   void Show();
