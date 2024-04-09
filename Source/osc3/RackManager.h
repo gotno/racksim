@@ -23,8 +23,11 @@ private:
   void LaunchRack(FString PatchPath);
   void FinishRun();
   TFunction<void ()> FinishRunCallback;
-  
   bool bRunning{false};
+
+  void LoadConfigurationData();
+  float AutosaveInterval{15.f};
+  TArray<FColor> CableColors;
 
   FString RackUserPath{""};
   FString RackPluginsPath{""};

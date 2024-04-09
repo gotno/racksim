@@ -22,6 +22,8 @@ void URackManager::Init() {
   AutosavePath = RackPath + "autosave/patch.json";
   RackUserPath = FString(FPlatformProcess::UserDir()) + "Rack2/";
   RackPluginsPath = RackUserPath + "plugins-win-x64/";
+
+  LoadConfigurationData();
 }
 
 void URackManager::Run(FString PatchPath, TFunction<void ()> inFinishRunCallback) {
@@ -135,6 +137,25 @@ void URackManager::Cleanup() {
   FPlatformFileManager::Get()
     .GetPlatformFile()
     .DeleteDirectoryRecursively(*(RackPluginsPath + "/gtnosft"));
+}
+
+void URackManager::LoadConfigurationData() {
+  FString JsonStr;
+	if (!FFileHelper::LoadFileToString(JsonStr, *(RackUserPath + "settings.json")))
+    return;
+
+  TSharedRef<TJsonReader<TCHAR>> JsonReader = TJsonReaderFactory<TCHAR>::Create(*JsonStr);
+  TSharedPtr<FJsonValue> OutJson;
+
+  if (!FJsonSerializer::Deserialize(JsonReader, OutJson))
+    return;
+
+  TSharedPtr<FJsonObject> rootJ = OutJson->AsObject();
+
+  for (auto& colorHex : rootJ->GetArrayField(TEXT("cableColors")))
+    CableColors.Push(FColor::FromHex(colorHex->AsString()));
+
+  AutosaveInterval = rootJ->GetNumberField(TEXT("autosaveInterval"));
 }
 
 TArray<FString> URackManager::GetRecentPatchPaths() {
