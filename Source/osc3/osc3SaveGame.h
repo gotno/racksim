@@ -41,13 +41,6 @@ class OSC3_API Uosc3SaveGame : public USaveGame {
 	GENERATED_BODY()
 	
 public:
-  Uosc3SaveGame();
-
-  UPROPERTY(VisibleAnywhere, Category = Base)
-  FString SaveSlotName;
-  UPROPERTY(VisibleAnywhere, Category = Base)
-  uint32 UserIndex;
-  
   UPROPERTY(VisibleAnywhere, Category = Base)
   TMap<int64, FVCVModuleInfo> ModuleInfos;
   UPROPERTY(VisibleAnywhere, Category = Base)

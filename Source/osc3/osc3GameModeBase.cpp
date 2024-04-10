@@ -153,6 +153,7 @@ void Aosc3GameModeBase::RestartRack(FString PatchPath) {
 // TODO break into save/save+exit/exit
 void Aosc3GameModeBase::RequestExit() {
   Uosc3SaveGame* SaveGame = MakeSaveGame();
+  if (!SaveGame) return;
 
   FAsyncSaveGameToSlotDelegate SavedDelegate;
 
@@ -185,7 +186,11 @@ void Aosc3GameModeBase::ToggleMainMenu() {
 }
 
 Uosc3SaveGame* Aosc3GameModeBase::MakeSaveGame() {
-  if (Uosc3SaveGame* SaveGameInstance = Cast<Uosc3SaveGame>(UGameplayStatics::CreateSaveGameObject(Uosc3SaveGame::StaticClass()))) {
+  Uosc3SaveGame* SaveGameInstance =
+    Cast<Uosc3SaveGame>(
+      UGameplayStatics::CreateSaveGameObject(Uosc3SaveGame::StaticClass())
+    );
+  if (SaveGameInstance) {
     for (const TPair<int64, AVCVModule*>& pair : ModuleActors) {
       FVCVModuleInfo info;
       AVCVModule* module = pair.Value;
@@ -204,7 +209,6 @@ Uosc3SaveGame* Aosc3GameModeBase::MakeSaveGame() {
     LibraryActor->GetPosition(SaveGameInstance->LibraryPosition.Location, SaveGameInstance->LibraryPosition.Rotation);
     SaveGameInstance->bLibraryHidden = LibraryActor->IsHidden();
     SaveGameInstance->PlayerLocation = PlayerPawn->GetActorLocation();
-    SaveGameInstance->SaveSlotName = osc3GameState->GetSaveName();
 
     return SaveGameInstance;
   }
