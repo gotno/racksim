@@ -40,6 +40,7 @@ void Aosc3GameModeBase::BeginPlay() {
   if (osc3GameState) UE_LOG(LogTemp, Warning, TEXT("GameState exists"));
   
   rackman->Init();
+  AVCVCable::CableColors = rackman->CableColors;
   osc3GameState->SetCanContinueAutosave(rackman->DoesAutosaveExist());
 
   PlayerController = Cast<Aosc3PlayerController>(UGameplayStatics::GetPlayerController(this, 0));

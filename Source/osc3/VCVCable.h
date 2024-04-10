@@ -42,11 +42,22 @@ public:
 
   void HandleRegistration();
 
+  // wake for WakeSeconds
   void Stir(float WakeSeconds = 2.f);
   
   void ToggleLatched() {
     bLatched = !bLatched;
   }
+
+  // rack's default cable colors, will be replaced with colors
+  // from settings.json after rackman->Init grabs them
+  static inline TArray<FColor> CableColors{
+    FColor::FromHex(FString("#f3374b")),
+    FColor::FromHex(FString("#ffb437")),
+    FColor::FromHex(FString("#00b56e")),
+    FColor::FromHex(FString("#3695ef")),
+    FColor::FromHex(FString("#8b4ade"))
+  };
 private:
   UPROPERTY(VisibleAnywhere)
   USceneComponent* RootSceneComponent;
@@ -65,14 +76,6 @@ private:
   ACableEnd* CableEndB{nullptr};
 
   FColor CableColor;
-  // TODO: replace these with colors from potentially-user-overridden rack settings
-  TArray<FColor> CableColors{
-    FColor::FromHex(FString("#f3374b")),
-    FColor::FromHex(FString("#ffb437")),
-    FColor::FromHex(FString("#00b56e")),
-    FColor::FromHex(FString("#3695ef")),
-    FColor::FromHex(FString("#8b4ade"))
-  };
   static inline int CurrentCableColorIndex{0};
 
   FTimerHandle CableSleepHandle;
