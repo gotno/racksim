@@ -104,6 +104,11 @@ private:
 
   UFUNCTION()
   Uosc3SaveGame* MakeSaveGame();
+  UFUNCTION()
+  void Autosave();
+  void StartAutosaving();
+  void StopAutosaving();
+  FTimerHandle hAutosaveTimer;
 
   UPROPERTY()
   URackManager* rackman;

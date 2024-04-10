@@ -17,6 +17,9 @@ public:
   FString GetBootstrapPath() { return OSCctrlBootstrapPath; }
   TArray<FString> GetRecentPatchPaths();
   void CallOnExit(TFunction<void ()> inOnExitCallback);
+
+  float AutosaveInterval{15.f};
+  TArray<FColor> CableColors;
   
 private:
   void SetupPlugin();
@@ -26,8 +29,6 @@ private:
   bool bRunning{false};
 
   void LoadConfigurationData();
-  float AutosaveInterval{15.f};
-  TArray<FColor> CableColors;
 
   FString RackUserPath{""};
   FString RackPluginsPath{""};

@@ -86,6 +86,7 @@ void Aosc3GameModeBase::LoadPatch(FString PatchPath) {
 }
 
 void Aosc3GameModeBase::Reset() {
+  StopAutosaving();
   OSCctrl->PauseSending();
 
   osc3GameState->SetPatchLoaded(false);
@@ -133,6 +134,7 @@ void Aosc3GameModeBase::RackConnectionEstablished() {
 
   PlayerPawn->EnableWorldManipulation();
   MainMenu->Hide();
+  StartAutosaving();
 }
 
 void Aosc3GameModeBase::StartRack(FString PatchPath) {
@@ -175,6 +177,33 @@ void Aosc3GameModeBase::RequestExit() {
       exitDelay,
       false // loop
     );
+  });
+
+  UGameplayStatics::AsyncSaveGameToSlot(SaveGame, osc3GameState->GetAutosaveName(), 0, SavedDelegate);
+}
+
+void Aosc3GameModeBase::StartAutosaving() {
+  GetWorld()->GetTimerManager().SetTimer(
+    hAutosaveTimer,
+    this,
+    &Aosc3GameModeBase::Autosave,
+    rackman->AutosaveInterval,
+    true // loop
+  );
+}
+
+void Aosc3GameModeBase::StopAutosaving() {
+  GetWorld()->GetTimerManager().ClearTimer(hAutosaveTimer);
+}
+
+void Aosc3GameModeBase::Autosave() {
+  Uosc3SaveGame* SaveGame = MakeSaveGame();
+  if (!SaveGame) return;
+
+  FAsyncSaveGameToSlotDelegate SavedDelegate;
+
+  SavedDelegate.BindLambda([](const FString& SlotName, const int32 UserIndex, bool bSuccess) {
+    UE_LOG(LogTemp, Display, TEXT("autosave: %s"), bSuccess ? TEXT("success") : TEXT("fail"));
   });
 
   UGameplayStatics::AsyncSaveGameToSlot(SaveGame, osc3GameState->GetAutosaveName(), 0, SavedDelegate);
