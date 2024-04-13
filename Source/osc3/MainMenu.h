@@ -7,6 +7,7 @@
 class Aosc3GameModeBase;
 class Aosc3GameState;
 class AVRAvatar;
+class UFileListEntryData;
 
 class UWidgetComponent;
 class UMainMenuWidget;
@@ -45,4 +46,6 @@ private:
   TCHAR* WidgetBlueprintReference =
     TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/widgets/BP_MainMenuWidget.BP_MainMenuWidget_C'");
   UMainMenuWidget* MainMenuWidget;
+
+  TArray<UFileListEntryData*> GenerateRecentPatchesEntries();
 };

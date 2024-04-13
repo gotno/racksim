@@ -783,3 +783,7 @@ void Aosc3GameModeBase::DestroyWeldment(AModuleWeldment* Weldment) {
   ModuleWeldments.RemoveSwap(Weldment);
   Weldment->Destroy();
 }
+
+TArray<FString> Aosc3GameModeBase::GetRecentPatchPaths() {
+  return rackman->GetRecentPatchPaths();
+}

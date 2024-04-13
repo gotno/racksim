@@ -4,6 +4,7 @@
 #include "osc3GameState.h"
 #include "Player/VRAvatar.h"
 #include "UI/MainMenuWidget.h"
+#include "UI/FileListEntryData.h"
 
 #include "UObject/ConstructorHelpers.h"
 #include "Kismet/GameplayStatics.h"
@@ -53,7 +54,9 @@ void AMainMenu::Init(
   MainMenuWidget->SetNewFunction(NewFunction);
   MainMenuWidget->SetContinueFunction(ContinueFunction);
   MainMenuWidget->SetLoadFunction(LoadFunction);
+
   MainMenuWidget->UpdateState(GameState);
+  MainMenuWidget->SetRecentPatchesListItems(GenerateRecentPatchesEntries());
 }
 
 void AMainMenu::Hide() {
@@ -65,6 +68,7 @@ void AMainMenu::Show() {
   MainMenuWidget->GotoMain();
   MainMenuWidget->UpdateState(GameState);
   MainMenuWidget->SetVisibility(ESlateVisibility::Visible);
+  MainMenuWidget->SetRecentPatchesListItems(GenerateRecentPatchesEntries());
   SetActorHiddenInGame(false);
 }
 
@@ -87,4 +91,17 @@ void AMainMenu::Tick(float DeltaTime) {
       )
     );
   }
+}
+
+TArray<UFileListEntryData*> AMainMenu::GenerateRecentPatchesEntries() {
+  TArray<UFileListEntryData*> entries;
+
+  for (FString path : GameMode->GetRecentPatchPaths()) {
+    UFileListEntryData* entry = NewObject<UFileListEntryData>(this);
+    entry->Label = path;
+    entry->Path = path;
+    entries.Add(entry);
+  }
+
+  return entries;
 }

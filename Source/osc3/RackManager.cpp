@@ -160,6 +160,7 @@ void URackManager::LoadConfigurationData() {
 
 TArray<FString> URackManager::GetRecentPatchPaths() {
   TArray<FString> recentPaths;
+  recentPaths.Reserve(10);
 
   FString JsonStr;
 	if (!FFileHelper::LoadFileToString(JsonStr, *(RackUserPath + "settings.json")))
@@ -176,6 +177,8 @@ TArray<FString> URackManager::GetRecentPatchPaths() {
   IFileManager& FileManager = IFileManager::Get();
   for (auto& path : rootJ->GetArrayField(FString("recentPatchPaths")))
     if (FileManager.FileExists(*path->AsString())) recentPaths.Push(path->AsString());
+
+  while (recentPaths.Num() < 10) recentPaths.Emplace("");
 
   return recentPaths;
 }

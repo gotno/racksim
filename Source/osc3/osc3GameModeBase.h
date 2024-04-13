@@ -80,7 +80,9 @@ public:
   void RequestMenu(const FVCVMenu& Menu) const;
   void ClickMenuItem(const FVCVMenuItem& MenuItem);
   void UpdateMenuItemQuantity(const FVCVMenuItem& MenuItem, const float& Value) const;
-  
+
+  TArray<FString> GetRecentPatchPaths();
+
   void RegisterSVG(FString Filepath, Vec2 Size);
   void RegisterTexture(FString Filepath, UTexture2D* Texture);
   UTexture2D* GetTexture(FString Filepath);

@@ -1,9 +1,11 @@
 #include "UI/MainMenuWidget.h"
 
 #include "osc3GameState.h"
+#include "UI/FileListEntryData.h"
 
 #include "Components/Border.h"
 #include "Components/Button.h"
+#include "Components/ListView.h"
 
 void UMainMenuWidget::NativeConstruct() {
   Super::NativeConstruct();
@@ -34,4 +36,14 @@ void UMainMenuWidget::GotoMain() {
 void UMainMenuWidget::HideAll() {
   MainSection->SetVisibility(ESlateVisibility::Hidden);
   LoadingSection->SetVisibility(ESlateVisibility::Hidden);
+}
+
+void UMainMenuWidget::SetRecentPatchesListItems(TArray<UFileListEntryData*> Entries) {
+  for (UFileListEntryData* entry : Entries) {
+    entry->ClickCallback = [this](FString PatchPath) {
+      GotoLoading();
+      LoadFunction(PatchPath);
+    };
+  }
+  RecentPatchesList->SetListItems(Entries);
 }

@@ -7,6 +7,8 @@
 class Aosc3GameState;
 class UBorder;
 class UButton;
+class UListView;
+class UFileListEntryData;
 
 UCLASS()
 class OSC3_API UMainMenuWidget : public UUserWidget
@@ -30,6 +32,7 @@ public:
   void SetLoadFunction(TFunction<void (FString)> inLoadFunction) {
     LoadFunction = inLoadFunction;
   }
+  void SetRecentPatchesListItems(TArray<UFileListEntryData*> Entries);
 	
 protected:
 	virtual void NativeConstruct() override;	
@@ -37,11 +40,20 @@ protected:
   UPROPERTY(meta = (BindWidget))
   UBorder* MainSection;
   UPROPERTY(meta = (BindWidget))
+  UButton* ContinueButton;
+  // UPROPERTY(meta = (BindWidget))
+  // UButton* SaveButton;
+  // UPROPERTY(meta = (BindWidget))
+  // UButton* SaveAsButton;
+  UPROPERTY(meta = (BindWidget))
   UButton* NewButton;
   UPROPERTY(meta = (BindWidget))
-  UButton* ContinueButton;
+  UButton* LoadButton;
   UPROPERTY(meta = (BindWidget))
   UButton* ExitButton;
+
+  UPROPERTY(meta = (BindWidget))
+	UListView* RecentPatchesList;
 
   UPROPERTY(meta = (BindWidget))
   UBorder* LoadingSection;
@@ -68,9 +80,4 @@ private:
   }
 
   TFunction<void (FString)> LoadFunction;
-  UFUNCTION()
-  void HandleLoadClick(FString PatchPath) {
-    GotoLoading();
-    LoadFunction(PatchPath);
-  }
 };
