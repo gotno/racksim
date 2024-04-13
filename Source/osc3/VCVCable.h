@@ -49,8 +49,8 @@ public:
     bLatched = !bLatched;
   }
 
-  // rack's default cable colors, will be replaced with colors
-  // from settings.json after rackman->Init grabs them
+  // rack's default cable colors. these will be replaced with
+  // colors from settings.json after rackman->Init grabs them
   static inline TArray<FColor> CableColors{
     FColor::FromHex(FString("#f3374b")),
     FColor::FromHex(FString("#ffb437")),
