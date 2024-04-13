@@ -1,6 +1,6 @@
-#include "UI/BasicListEntryWidget.h"
+#include "UI/FilterListEntryWidget.h"
 
-#include "UI/BasicListEntryData.h"
+#include "UI/FilterListEntryData.h"
 #include "osc3GameModeBase.h"
 #include "library.h"
 
@@ -9,22 +9,22 @@
 
 #include "Kismet/GameplayStatics.h"
 
-void UBasicListEntryWidget::NativeConstruct() {
+void UFilterListEntryWidget::NativeConstruct() {
   Super::NativeConstruct();
 
   GameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(this));
 
-  Button->OnReleased.AddDynamic(this, &UBasicListEntryWidget::HandleClick);
+  Button->OnReleased.AddDynamic(this, &UFilterListEntryWidget::HandleClick);
 }
 
-void UBasicListEntryWidget::NativeOnListItemObjectSet(UObject* ListItemObject) {
-	EntryData = Cast<UBasicListEntryData>(ListItemObject);
+void UFilterListEntryWidget::NativeOnListItemObjectSet(UObject* ListItemObject) {
+	EntryData = Cast<UFilterListEntryData>(ListItemObject);
 
   Label->SetText(FText::FromString(EntryData->Label));
   SetSelected(EntryData->bSelected);
 }
 
-void UBasicListEntryWidget::SetSelected(bool inSelected) {
+void UFilterListEntryWidget::SetSelected(bool inSelected) {
   bSelected = inSelected;
 
   SelectedIndicator->SetVisibility(
@@ -32,7 +32,7 @@ void UBasicListEntryWidget::SetSelected(bool inSelected) {
   );
 }
 
-void UBasicListEntryWidget::HandleClick() {
+void UFilterListEntryWidget::HandleClick() {
   SetSelected(!bSelected);
   
   if (bSelected) {

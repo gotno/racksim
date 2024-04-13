@@ -3,16 +3,16 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "Blueprint/IUserObjectListEntry.h"
-#include "BasicListEntryWidget.generated.h"
+#include "FilterListEntryWidget.generated.h"
 
 class Aosc3GameModeBase;
-class UBasicListEntryData;
+class UFilterListEntryData;
 
 class UTextBlock;
 class UButton;
 
 UCLASS()
-class OSC3_API UBasicListEntryWidget : public UUserWidget, public IUserObjectListEntry {
+class OSC3_API UFilterListEntryWidget : public UUserWidget, public IUserObjectListEntry {
 	GENERATED_BODY()
 	
 protected:
@@ -26,7 +26,7 @@ protected:
   UPROPERTY(meta = (BindWidget))
 	UButton* Button;
 private:
-  UBasicListEntryData* EntryData;
+  UFilterListEntryData* EntryData;
   Aosc3GameModeBase* GameMode;
   
   bool bSelected{false};

@@ -3,7 +3,7 @@
 #include "osc3GameModeBase.h"
 #include "Library.h"
 #include "UI/LibraryEntry.h"
-#include "UI/BasicListEntryData.h"
+#include "UI/FilterListEntryData.h"
 
 #include "Components/ListView.h"
 #include "Components/TextBlock.h"
@@ -30,11 +30,11 @@ void ULibraryWidget::SetLibraryListItems(TArray<ULibraryEntry*> Entries) {
   LibraryListView->SetScrollbarVisibility(ESlateVisibility::Visible);
 }
 
-void ULibraryWidget::SetBrandFilterListItems(TArray<UBasicListEntryData*> Entries) {
+void ULibraryWidget::SetBrandFilterListItems(TArray<UFilterListEntryData*> Entries) {
   BrandFilterListView->SetListItems(Entries);
 }
 
-void ULibraryWidget::SetTagsFilterListItems(TArray<UBasicListEntryData*> Entries) {
+void ULibraryWidget::SetTagsFilterListItems(TArray<UFilterListEntryData*> Entries) {
   TagsFilterListView->SetListItems(Entries);
 }
 

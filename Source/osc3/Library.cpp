@@ -2,7 +2,7 @@
 
 #include "UI/LibraryWidget.h"
 #include "UI/LibraryEntry.h"
-#include "UI/BasicListEntryData.h"
+#include "UI/FilterListEntryData.h"
 
 #include "UObject/ConstructorHelpers.h"
 #include "Components/PrimitiveComponent.h"
@@ -224,8 +224,8 @@ TArray<ULibraryEntry*> ALibrary::GenerateLibraryEntries() {
   return entries;
 }
 
-TArray<UBasicListEntryData*> ALibrary::GenerateBrandFilterEntries() {
-  TArray<UBasicListEntryData*> brandFilterEntries;
+TArray<UFilterListEntryData*> ALibrary::GenerateBrandFilterEntries() {
+  TArray<UFilterListEntryData*> brandFilterEntries;
   TArray<FString> addedBrands;
 
   for (auto& pluginPair : Model.Plugins) {
@@ -235,18 +235,18 @@ TArray<UBasicListEntryData*> ALibrary::GenerateBrandFilterEntries() {
     if (addedBrands.Contains(pluginInfo.Name)) continue;
     addedBrands.Add(pluginInfo.Name);
     
-    UBasicListEntryData* entry = NewObject<UBasicListEntryData>(this);
+    UFilterListEntryData* entry = NewObject<UFilterListEntryData>(this);
 
     entry->Label = pluginInfo.Name;
     entry->StringValue = pluginInfo.Name;
-    entry->Type = BasicListEntryType::BRAND_FILTER;
+    entry->Type = EFilterType::BRAND;
 
     if (BrandFilter.Equals(entry->StringValue)) entry->bSelected = true;
 
     brandFilterEntries.Add(entry);
   }
 
-  brandFilterEntries.Sort([](const UBasicListEntryData& a, const UBasicListEntryData& b) {
+  brandFilterEntries.Sort([](const UFilterListEntryData& a, const UFilterListEntryData& b) {
     if (a.Label < b.Label) return true;
     return false;
   });
@@ -254,24 +254,24 @@ TArray<UBasicListEntryData*> ALibrary::GenerateBrandFilterEntries() {
   return brandFilterEntries;
 }
 
-TArray<UBasicListEntryData*> ALibrary::GenerateTagsFilterEntries() {
-  TArray<UBasicListEntryData*> tagsFilterEntries;
+TArray<UFilterListEntryData*> ALibrary::GenerateTagsFilterEntries() {
+  TArray<UFilterListEntryData*> tagsFilterEntries;
 
   for (auto& tagPair : Model.TagNames) {
     FString& tagName = tagPair.Value;
     int& tagIndex = tagPair.Key;
 
-    UBasicListEntryData* entry = NewObject<UBasicListEntryData>(this);
+    UFilterListEntryData* entry = NewObject<UFilterListEntryData>(this);
     entry->Label = tagName;
     entry->IntValue = tagIndex;
-    entry->Type = BasicListEntryType::TAGS_FILTER;
+    entry->Type = EFilterType::TAGS;
 
     if (TagFilters.Contains(entry->IntValue)) entry->bSelected = true;
 
     tagsFilterEntries.Add(entry);
   }
 
-  tagsFilterEntries.Sort([](const UBasicListEntryData& a, const UBasicListEntryData& b) {
+  tagsFilterEntries.Sort([](const UFilterListEntryData& a, const UFilterListEntryData& b) {
     if (a.Label < b.Label) return true;
     return false;
   });
@@ -279,16 +279,16 @@ TArray<UBasicListEntryData*> ALibrary::GenerateTagsFilterEntries() {
   return tagsFilterEntries;
 }
 
-void ALibrary::AddFilter(UBasicListEntryData* BasicListEntryData) {
-  switch (BasicListEntryData->Type) {
-    case BasicListEntryType::BRAND_FILTER:
-      BrandFilter = BasicListEntryData->StringValue;
+void ALibrary::AddFilter(UFilterListEntryData* FilterListEntryData) {
+  switch (FilterListEntryData->Type) {
+    case EFilterType::BRAND:
+      BrandFilter = FilterListEntryData->StringValue;
       LibraryWidget->SetBrandFilterButtonLabel(BrandFilter, true);
       RefreshBrandFilterList();
       RefreshLibraryList();
       break;
-    case BasicListEntryType::TAGS_FILTER:
-      TagFilters.Add(BasicListEntryData->IntValue);
+    case EFilterType::TAGS:
+      TagFilters.Add(FilterListEntryData->IntValue);
       {
         TArray<FString> tagNames;
         for (int& tagId : TagFilters) {
@@ -306,16 +306,16 @@ void ALibrary::AddFilter(UBasicListEntryData* BasicListEntryData) {
   }
 }
 
-void ALibrary::RemoveFilter(UBasicListEntryData* BasicListEntryData) {
-  switch (BasicListEntryData->Type) {
-    case BasicListEntryType::BRAND_FILTER:
+void ALibrary::RemoveFilter(UFilterListEntryData* FilterListEntryData) {
+  switch (FilterListEntryData->Type) {
+    case EFilterType::BRAND:
       BrandFilter.Empty();
       LibraryWidget->SetBrandFilterButtonLabel(FString("All Brands"), false);
       RefreshBrandFilterList();
       RefreshLibraryList();
       break;
-    case BasicListEntryType::TAGS_FILTER:
-      TagFilters.Remove(BasicListEntryData->IntValue);
+    case EFilterType::TAGS:
+      TagFilters.Remove(FilterListEntryData->IntValue);
       if (TagFilters.IsEmpty()) {
         LibraryWidget->SetTagsFilterButtonLabel(FString("All Tags"), false);
       } else {

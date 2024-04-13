@@ -12,7 +12,7 @@ class UTextBlock;
 
 class Aosc3GameModeBase;
 class ULibraryEntry;
-class UBasicListEntryData;
+class UFilterListEntryData;
 
 UCLASS()
 class OSC3_API ULibraryWidget : public UUserWidget {
@@ -20,8 +20,8 @@ class OSC3_API ULibraryWidget : public UUserWidget {
 
 public:
   void SetLibraryListItems(TArray<ULibraryEntry*> Entries);
-  void SetBrandFilterListItems(TArray<UBasicListEntryData*> Entries);
-  void SetTagsFilterListItems(TArray<UBasicListEntryData*> Entries);
+  void SetBrandFilterListItems(TArray<UFilterListEntryData*> Entries);
+  void SetTagsFilterListItems(TArray<UFilterListEntryData*> Entries);
   void SetBrandFilterButtonLabel(const FString& inLabel, const bool& bClearable) const;
   void SetTagsFilterButtonLabel(const FString& inLabel, const bool& bClearable) const;
 

@@ -10,7 +10,7 @@ class UWidgetComponent;
 class ULibraryWidget;
 class ULibraryEntryWidget;
 class ULibraryEntry;
-class UBasicListEntryData;
+class UFilterListEntryData;
 
 UCLASS()
 class OSC3_API ALibrary : public AGrabbableActor {
@@ -29,8 +29,8 @@ public:
   void RefreshLibraryList();
   void RefreshBrandFilterList();
   void RefreshTagsFilterList();
-  void AddFilter(UBasicListEntryData* BasicListEntryData);
-  void RemoveFilter(UBasicListEntryData* BasicListEntryData);
+  void AddFilter(UFilterListEntryData* FilterListEntryData);
+  void RemoveFilter(UFilterListEntryData* FilterListEntryData);
   void SetFavoritesFilterActive(bool bActive);
   void SetModuleFavorite(FString PluginSlug, FString ModuleSlug, bool bFavorite);
   void ClearBrandFilter();
@@ -54,8 +54,8 @@ private:
   VCVLibrary Model;
 
   TArray<ULibraryEntry*> GenerateLibraryEntries();
-  TArray<UBasicListEntryData*> GenerateBrandFilterEntries();
-  TArray<UBasicListEntryData*> GenerateTagsFilterEntries();
+  TArray<UFilterListEntryData*> GenerateBrandFilterEntries();
+  TArray<UFilterListEntryData*> GenerateTagsFilterEntries();
   FString BrandFilter;
   TSet<int> TagFilters;
   bool bFavoritesFilterActive;

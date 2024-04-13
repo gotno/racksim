@@ -2,15 +2,15 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
-#include "BasicListEntryData.generated.h"
+#include "FilterListEntryData.generated.h"
 
-enum BasicListEntryType {
-  BRAND_FILTER,
-  TAGS_FILTER
+enum EFilterType {
+  BRAND,
+  TAGS
 };
 
 UCLASS()
-class OSC3_API UBasicListEntryData : public UObject {
+class OSC3_API UFilterListEntryData : public UObject {
 	GENERATED_BODY()
 	
 public:
@@ -18,5 +18,5 @@ public:
   FString StringValue;
   int IntValue;
   bool bSelected{false};
-  BasicListEntryType Type;
+  EFilterType Type;
 };
