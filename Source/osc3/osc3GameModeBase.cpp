@@ -95,6 +95,7 @@ void Aosc3GameModeBase::Reset() {
 
   // modules/weldments
   for (AModuleWeldment* weldment : ModuleWeldments) weldment->Destroy();
+  ModuleWeldments.Empty();
   ModulesSeekingWeldment.Empty();
   for (auto& pair : ModuleActors) pair.Value->Destroy();
   ModuleActors.Empty();
