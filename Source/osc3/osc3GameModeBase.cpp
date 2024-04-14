@@ -72,7 +72,7 @@ void Aosc3GameModeBase::SavePatch() {
   savedDelegate.BindLambda([this](const FString& SlotName, const int32 UserIndex, bool bSuccess) {
     OSCctrl->SendSavePatch();
     osc3GameState->SetSaved();
-    MainMenu->Hide();
+    MainMenu->Show();
   });
 
   UGameplayStatics::AsyncSaveGameToSlot(saveGame, osc3GameState->GetSaveName(), 0, savedDelegate);
