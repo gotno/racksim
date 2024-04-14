@@ -67,11 +67,15 @@ void AMainMenu::Hide() {
 }
 
 void AMainMenu::Show() {
+  Refresh();
   MainMenuWidget->GotoMain();
-  MainMenuWidget->UpdateState(GameState);
   MainMenuWidget->SetVisibility(ESlateVisibility::Visible);
-  MainMenuWidget->SetRecentPatchesListItems(GenerateRecentPatchesEntries());
   SetActorHiddenInGame(false);
+}
+
+void AMainMenu::Refresh() {
+  MainMenuWidget->UpdateState(GameState);
+  MainMenuWidget->SetRecentPatchesListItems(GenerateRecentPatchesEntries());
 }
 
 void AMainMenu::Toggle() {

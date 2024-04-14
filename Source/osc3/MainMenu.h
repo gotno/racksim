@@ -34,6 +34,7 @@ public:
   );
   void Hide();
   void Show();
+  void Refresh();
   void Toggle();
 
 private:
