@@ -7,6 +7,7 @@
 #include "VCVModule.generated.h"
 
 class Aosc3GameModeBase;
+class Aosc3GameState;
 class AVCVLight;
 class AVCVPort;
 class AVCVParam;
@@ -64,6 +65,7 @@ public:
   FString Name;
 
   void AlterGrab(FVector GrabbedLocation, FRotator GrabbedRotation) override;
+  void ReleaseGrab() override;
 
   void SetWeldment(AModuleWeldment* inWeldment) {
     Weldment = inWeldment;
@@ -80,6 +82,8 @@ public:
   // fully align the actor to the side of another module
   void AlignActorTo(AVCVModule* Module, FSnapModeSide AlignToSide);
 private:
+  Aosc3GameState* GameState;
+
   UPROPERTY()
   UBoxComponent* SnapColliderLeft;
   UPROPERTY()

@@ -8,6 +8,7 @@
 #include "VCVParam.generated.h"
 
 class Aosc3GameModeBase;
+class Aosc3GameState;
 
 UCLASS()
 class OSC3_API AVCVParam : public AActor {
@@ -30,6 +31,8 @@ private:
   mutable FCriticalSection DataGuard;
 
   Aosc3GameModeBase* GameMode;
+  Aosc3GameState* GameState;
+  float OldValue;
 public:	
 	virtual void Tick(float DeltaTime) override;
 

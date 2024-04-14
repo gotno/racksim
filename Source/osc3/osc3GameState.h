@@ -14,8 +14,13 @@ class OSC3_API Aosc3GameState : public AGameStateBase {
 public:
   bool IsPatchLoaded() { return bPatchLoaded; }
   void SetPatchLoaded(bool inbPatchLoaded) { bPatchLoaded = inbPatchLoaded; }
-  void SetCanContinueAutosave(bool inbCanContinueAutosave) { bCanContinueAutosave = inbCanContinueAutosave; }
+
+  bool IsUnsaved() { return bUnsaved; }
+  void SetSaved() { bUnsaved = false; }
+  void SetUnsaved() { if (IsPatchLoaded()) bUnsaved = true; }
+
   bool CanContinueAutosave() { return bCanContinueAutosave; }
+  void SetCanContinueAutosave(bool inbCanContinueAutosave) { bCanContinueAutosave = inbCanContinueAutosave; }
 
   void SetPatchPath(FString inPatchPath) {
     PatchPath = inPatchPath;
@@ -37,8 +42,9 @@ public:
   }
 
 private:
-  bool bPatchLoaded;
-  bool bCanContinueAutosave;
+  bool bPatchLoaded{false};
+  bool bUnsaved{false};
+  bool bCanContinueAutosave{false};
   FString PatchPath{""};
   FString SaveName{""};
   FString AutosaveName{"autosave"};

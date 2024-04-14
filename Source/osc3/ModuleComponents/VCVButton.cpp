@@ -99,11 +99,11 @@ void AVCVButton::Engage() {
 }
 
 void AVCVButton::Release() {
-  Super::Release();
   if (Model->momentary) {
     SetValue(Model->minValue);
     FaceMaterialInstance->SetTextureParameterValue(FName("texture"), Frames[Model->value]);
   }
+  Super::Release();
 }
 
 void AVCVButton::Update(VCVParam& vcv_param) {

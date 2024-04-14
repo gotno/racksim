@@ -63,6 +63,21 @@ void Aosc3GameModeBase::EndPlay(const EEndPlayReason::Type EndPlayReason) {
   rackman->Cleanup();
 }
 
+void Aosc3GameModeBase::SavePatch() {
+  Uosc3SaveGame* saveGame = MakeSaveGame();
+  if (!saveGame) return;
+
+  FAsyncSaveGameToSlotDelegate savedDelegate;
+
+  savedDelegate.BindLambda([this](const FString& SlotName, const int32 UserIndex, bool bSuccess) {
+    OSCctrl->SendSavePatch();
+    osc3GameState->SetSaved();
+    MainMenu->Hide();
+  });
+
+  UGameplayStatics::AsyncSaveGameToSlot(saveGame, osc3GameState->GetSaveName(), 0, savedDelegate);
+}
+
 void Aosc3GameModeBase::LoadPatch(FString PatchPath) {
   Reset();
   osc3GameState->SetPatchPath(PatchPath);
@@ -438,11 +453,13 @@ void Aosc3GameModeBase::SpawnCable(int64_t& Id, AVCVPort* InputPort, AVCVPort* O
 
 void Aosc3GameModeBase::RegisterCableConnect(AVCVPort* InputPort, AVCVPort* OutputPort) {
   OSCctrl->SendCreateCable(InputPort->Module->Id, OutputPort->Module->Id, InputPort->Id, OutputPort->Id);
+  osc3GameState->SetUnsaved();
 }
 
 void Aosc3GameModeBase::RegisterCableDisconnect(AVCVCable* Cable) {
   OSCctrl->SendDestroyCable(Cable->Id);
   Cable->SetId(-1);
+  osc3GameState->SetUnsaved();
 }
 
 void Aosc3GameModeBase::DestroyCableActor(AVCVCable* Cable) {
@@ -592,6 +609,7 @@ void Aosc3GameModeBase::SpawnMainMenu() {
     );
   MainMenu->Init(
     [&]() { RequestExit(); }, // 'exit' button callback
+    [&]() { SavePatch(); }, // 'save patch' button callback
     [&]() { LoadPatch(FString("new")); }, // 'new patch' button callback
     [&]() { LoadPatch(FString("autosave")); }, // 'continue with autosave' button callback
     [&](FString PatchPath) { LoadPatch(PatchPath); } // general load patch callback

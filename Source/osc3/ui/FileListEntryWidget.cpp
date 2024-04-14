@@ -20,7 +20,7 @@ void UFileListEntryWidget::NativeConstruct() {
 void UFileListEntryWidget::NativeOnListItemObjectSet(UObject* ListItemObject) {
 	EntryData = Cast<UFileListEntryData>(ListItemObject);
   Label->SetText(FText::FromString(EntryData->Label));
-  if (EntryData->Path == "") Button->SetIsEnabled(false);
+  Button->SetIsEnabled(!EntryData->Path.Equals(""));
 }
 
 void UFileListEntryWidget::HandleClick() {

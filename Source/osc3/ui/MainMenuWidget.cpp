@@ -11,16 +11,26 @@ void UMainMenuWidget::NativeConstruct() {
   Super::NativeConstruct();
   
   ExitButton->OnReleased.AddDynamic(this, &UMainMenuWidget::HandleExitClick);
+  SaveButton->OnReleased.AddDynamic(this, &UMainMenuWidget::HandleSaveClick);
   NewButton->OnReleased.AddDynamic(this, &UMainMenuWidget::HandleNewClick);
   ContinueButton->OnReleased.AddDynamic(this, &UMainMenuWidget::HandleContinueClick);
 }
 
 void UMainMenuWidget::UpdateState(Aosc3GameState* GameState) {
-  if (GameState->IsPatchLoaded() || !GameState->CanContinueAutosave()) {
-    ContinueButton->SetVisibility(ESlateVisibility::Collapsed);
-  } else {
-    ContinueButton->SetVisibility(ESlateVisibility::Visible);
-  }
+  // Continue with Autosave button
+  ContinueButton->SetVisibility(
+    !GameState->IsPatchLoaded() && GameState->CanContinueAutosave()
+      ? ESlateVisibility::Visible
+      : ESlateVisibility::Collapsed
+  );
+
+  // Save button
+  SaveButton->SetVisibility(
+    GameState->IsPatchLoaded()
+      ? ESlateVisibility::Visible
+      : ESlateVisibility::Collapsed
+  );
+  SaveButton->SetIsEnabled(GameState->IsUnsaved());
 }
 
 void UMainMenuWidget::GotoLoading() {

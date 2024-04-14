@@ -2,6 +2,7 @@
 
 #include "osc3.h"
 #include "osc3GameModeBase.h"
+#include "osc3GameState.h"
 #include "VCVModule.h"
 #include "ModuleComponents/VCVLight.h"
 
@@ -17,6 +18,7 @@ AVCVParam::AVCVParam() {
 void AVCVParam::BeginPlay() {
 	Super::BeginPlay();
   GameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(this));
+  GameState = Cast<Aosc3GameState>(UGameplayStatics::GetGameState(this));
 }
 
 void AVCVParam::Tick(float DeltaTime) {
@@ -81,16 +83,19 @@ void AVCVParam::SetValue(float inValue) {
 void AVCVParam::Engage() {
   // UE_LOG(LogTemp, Warning, TEXT("param engage"));
   bEngaged = true;
+  OldValue = Model->value;
 }
 
 void AVCVParam::Engage(float _value) {
   // UE_LOG(LogTemp, Warning, TEXT("param engage"));
   bEngaged = true;
+  OldValue = Model->value;
 }
 
 void AVCVParam::Engage(FVector _value) {
   // UE_LOG(LogTemp, Warning, TEXT("param engage"));
   bEngaged = true;
+  OldValue = Model->value;
 }
 
 void AVCVParam::Alter(float amount) {
@@ -105,6 +110,7 @@ void AVCVParam::Release() {
   // UE_LOG(LogTemp, Warning, TEXT("param release"));
   bEngaged = false;
   GameMode->RequestModuleDiff(Module->Id);
+  if (OldValue != Model->value) GameState->SetUnsaved();
 }
 
 void AVCVParam::ResetValue() {

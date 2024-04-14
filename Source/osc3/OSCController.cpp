@@ -302,6 +302,16 @@ void AOSCController::SendCreateCable(int64 InputModuleId, int64 OutputModuleId, 
   OSCClient->SendOSCMessage(message);
 }
 
+void AOSCController::SendSavePatch() {
+  if (bSendingPaused) return;
+
+  FOSCAddress address = UOSCManager::ConvertStringToOSCAddress(FString(TEXT("/save_patch")));
+  FOSCMessage message;
+  UOSCManager::SetOSCMessageAddress(message, address);
+
+  OSCClient->SendOSCMessage(message);
+}
+
 void AOSCController::SendAutosaveAndExit(FString NextPatchPath) {
   if (bSendingPaused) return;
 

@@ -159,6 +159,7 @@ private:
   UPROPERTY()
   TMap<FString, UTexture2D*> SVGTextures;
   
+  void SavePatch();
   void LoadPatch(FString PatchPath);
   void StartRack(FString PatchPath);
   void RestartRack(FString PatchPath);

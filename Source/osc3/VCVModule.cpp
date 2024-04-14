@@ -1,6 +1,7 @@
 #include "VCVModule.h"
 
 #include "osc3GameModeBase.h"
+#include "osc3GameState.h"
 #include "CableEnd.h"
 #include "VCVData/VCV.h"
 #include "VCVData/VCVOverrides.h"
@@ -93,7 +94,8 @@ void AVCVModule::BeginPlay() {
 	Super::BeginPlay();
 
   GameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(this));
-  
+  GameState = Cast<Aosc3GameState>(UGameplayStatics::GetGameState(this));
+
   // hide module until init'd
   SetHidden(true);
 
@@ -338,6 +340,11 @@ void AVCVModule::AlterGrab(FVector GrabbedLocation, FRotator GrabbedRotation) {
   Super::AlterGrab(GrabbedLocation, GrabbedRotation);
 
   TriggerCableUpdates();
+}
+
+void AVCVModule::ReleaseGrab() {
+  Super::ReleaseGrab();
+  GameState->SetUnsaved();
 }
 
 void AVCVModule::WeldSnap() {

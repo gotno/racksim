@@ -162,8 +162,6 @@ void AVCVSlider::Alter(FVector ControllerPosition) {
 }
 
 void AVCVSlider::Release() {
-  Super::Release();
-  
   // treat snapping sliders like a switch and increment
   // if they haven't been dragged enough to change value
   if (Model->snap && Model->value == LastValue) {
@@ -179,6 +177,8 @@ void AVCVSlider::Release() {
 
   LastValue = Model->value;
   ShadowOffset = WorldOffset;
+
+  Super::Release();
 }
 
 void AVCVSlider::ResetValue() {

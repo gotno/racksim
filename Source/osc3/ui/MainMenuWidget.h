@@ -23,6 +23,9 @@ public:
   void SetExitFunction(TFunction<void ()> inExitFunction) {
     ExitFunction = inExitFunction;
   }
+  void SetSaveFunction(TFunction<void ()> inSaveFunction) {
+    SaveFunction = inSaveFunction;
+  }
   void SetNewFunction(TFunction<void ()> inNewFunction) {
     NewFunction = inNewFunction;
   }
@@ -41,8 +44,8 @@ protected:
   UBorder* MainSection;
   UPROPERTY(meta = (BindWidget))
   UButton* ContinueButton;
-  // UPROPERTY(meta = (BindWidget))
-  // UButton* SaveButton;
+  UPROPERTY(meta = (BindWidget))
+  UButton* SaveButton;
   // UPROPERTY(meta = (BindWidget))
   // UButton* SaveAsButton;
   UPROPERTY(meta = (BindWidget))
@@ -64,6 +67,13 @@ private:
   TFunction<void ()> ExitFunction;
   UFUNCTION()
   void HandleExitClick() { ExitFunction(); }
+
+  TFunction<void ()> SaveFunction;
+  UFUNCTION()
+  void HandleSaveClick() {
+    GotoLoading();
+    SaveFunction();
+  }
 
   TFunction<void ()> NewFunction;
   UFUNCTION()

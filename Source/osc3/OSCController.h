@@ -51,6 +51,8 @@ public:
   UFUNCTION()
   void SendAutosaveAndExit(FString NextPatchPath = TEXT(""));
   UFUNCTION()
+  void SendSavePatch();
+  UFUNCTION()
   void SendLoadPatch(FString PatchPath);
   UFUNCTION()
   void SendArrangeModules(int64 LeftModuleId, int64 RightModuleId, bool bAttach);
