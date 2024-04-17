@@ -8,6 +8,9 @@
 #include "UObject/ConstructorHelpers.h"
 #include "Kismet/GameplayStatics.h"
 
+// #include "NiagaraFunctionLibrary.h"
+// #include "NiagaraComponent.h"
+
 AVCVCable::AVCVCable() {
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -16,6 +19,9 @@ AVCVCable::AVCVCable() {
 
   static ConstructorHelpers::FObjectFinder<UMaterial> CableMaterial(CableMaterialReference);
   if (CableMaterial.Object) CableMaterialInterface = Cast<UMaterial>(CableMaterial.Object);
+
+  // static ConstructorHelpers::FObjectFinder<UNiagaraSystem> NiagaraRef(TEXT("/Script/Niagara.NiagaraSystem'/Game/NewNiagaraSystem.NewNiagaraSystem'"));
+  // if (NiagaraRef.Object) NiaSys = Cast<UNiagaraSystem>(NiagaraRef.Object);
   
   CableComponent = CreateDefaultSubobject<UCableComponent>(TEXT("Cable Component"));
   CableComponent->EndLocation = FVector(0.f);
@@ -33,6 +39,18 @@ AVCVCable::AVCVCable() {
 
 void AVCVCable::BeginPlay() {
 	Super::BeginPlay();
+  
+  // if (NiaSys) {
+  //   UNiagaraFunctionLibrary::SpawnSystemAttached(
+  //     NiaSys,
+  //     RootSceneComponent,
+  //     NAME_None,
+  //     FVector(0.f),
+  //     FRotator(0.f),
+  //     EAttachLocation::KeepRelativeOffset,
+  //     true
+  //   );
+  // }
 
   GameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
 

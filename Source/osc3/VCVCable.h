@@ -15,6 +15,8 @@ class Aosc3GameModeBase;
 class AVCVPort;
 class ACableEnd;
 
+// class UNiagaraSystem;
+
 UCLASS()
 class OSC3_API AVCVCable : public AActor {
 	GENERATED_BODY()
@@ -59,6 +61,8 @@ public:
     FColor::FromHex(FString("#8b4ade"))
   };
 private:
+  // UNiagaraSystem* NiaSys;
+
   UPROPERTY(VisibleAnywhere)
   USceneComponent* RootSceneComponent;
   
