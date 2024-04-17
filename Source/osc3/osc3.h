@@ -55,4 +55,10 @@ enum class FSnapModeSide : int32 {
   None
 };
 
+UENUM()
+enum class EFileType : int32 {
+  File,
+  Directory
+};
+
 #define ODB(Format, ...) if(GEngine){ GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Yellow, FString::Printf(TEXT(Format), ##__VA_ARGS__), false); }

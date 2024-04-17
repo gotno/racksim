@@ -14,6 +14,9 @@ class OSC3_API Aosc3GameState : public AGameStateBase {
 public:
   bool IsPatchLoaded() { return bPatchLoaded; }
   void SetPatchLoaded(bool inbPatchLoaded) { bPatchLoaded = inbPatchLoaded; }
+  bool HasSaveFile() {
+    return !PatchPath.Equals("new") && !PatchPath.Equals(AutosaveName);
+  }
 
   bool IsUnsaved() { return bUnsaved; }
   void SetSaved() { bUnsaved = false; }
@@ -24,6 +27,7 @@ public:
 
   void SetPatchPath(FString inPatchPath) {
     PatchPath = inPatchPath;
+
     if (PatchPath.Equals("new")) {
       SaveName = "";
     } else if (PatchPath.Equals(AutosaveName)) {

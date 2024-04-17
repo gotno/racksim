@@ -50,4 +50,7 @@ private:
   UMainMenuWidget* MainMenuWidget;
 
   TArray<UFileListEntryData*> GenerateRecentPatchesEntries();
+  TArray<UFileListEntryData*> GenerateFMDrivesEntries();
+  TArray<UFileListEntryData*> GenerateFMShortcutsEntries();
+  TArray<UFileListEntryData*> GenerateFMFileBrowserEntries(FString& Directory);
 };
