@@ -1,5 +1,6 @@
 #include "MainMenu.h"
 
+#include "osc3.h"
 #include "osc3GameModeBase.h"
 #include "osc3GameState.h"
 #include "Player/VRAvatar.h"
@@ -57,8 +58,10 @@ void AMainMenu::Init(
   MainMenuWidget->SetContinueFunction(ContinueFunction);
   MainMenuWidget->SetLoadFunction(LoadFunction);
 
-  MainMenuWidget->UpdateState(GameState);
-  MainMenuWidget->SetRecentPatchesListItems(GenerateRecentPatchesEntries());
+  // these don't change, so they don't need to be in Refresh,
+  // but they do need to be set before we Refresh
+  MainMenuWidget->SetFMShortcutsListItems(GenerateFMShortcutsEntries());
+  Refresh();
 }
 
 void AMainMenu::Hide() {
@@ -76,6 +79,7 @@ void AMainMenu::Show() {
 void AMainMenu::Refresh() {
   MainMenuWidget->UpdateState(GameState);
   MainMenuWidget->SetRecentPatchesListItems(GenerateRecentPatchesEntries());
+  MainMenuWidget->SetFMDrivesListItems(GenerateFMDrivesEntries());
 }
 
 void AMainMenu::Toggle() {
@@ -108,6 +112,83 @@ TArray<UFileListEntryData*> AMainMenu::GenerateRecentPatchesEntries() {
     entry->Path = path;
     entries.Add(entry);
   }
+
+  return entries;
+}
+
+TArray<UFileListEntryData*> AMainMenu::GenerateFMDrivesEntries() {
+  TArray<UFileListEntryData*> entries;
+
+  TArray<TCHAR> driveLetters{'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'};
+  FString drivePath;
+  for (TCHAR letter : driveLetters) {
+    drivePath.Empty();
+    drivePath.AppendChar(letter).Append(TEXT(":\\"));
+
+    if (FPaths::DirectoryExists(drivePath)) {
+      UFileListEntryData* entry = NewObject<UFileListEntryData>(this);
+      entry->Label = drivePath;
+      entry->Path = drivePath;
+      entries.Add(entry);
+    }
+  }
+
+  return entries;
+}
+
+TArray<UFileListEntryData*> AMainMenu::GenerateFMShortcutsEntries() {
+  TArray<UFileListEntryData*> entries;
+
+  FString homePath{"C:/Users/"};
+  homePath.Append(FPlatformProcess::UserName()).Append(TEXT("/"));
+
+  MainMenuWidget->LoadDirectoryInFileManager(homePath);
+
+  FString desktopPath{homePath};
+  desktopPath.Append(TEXT("Desktop/"));
+  FString downloadsPath{homePath};
+  downloadsPath.Append(TEXT("Downloads/"));
+
+  FString documentsPath{FPlatformProcess::UserDir()};
+  FString patchesPath{documentsPath};
+  patchesPath.Append(TEXT("Rack2/patches/"));
+
+  UFileListEntryData* homeEntry = NewObject<UFileListEntryData>(this);
+  homeEntry->Label = TEXT("Home");
+  homeEntry->Path = homePath;
+  entries.Add(homeEntry);
+
+  UFileListEntryData* patchesEntry = NewObject<UFileListEntryData>(this);
+  patchesEntry->Label = TEXT("Rack2/Patches");
+  patchesEntry->Path = patchesPath;
+  entries.Add(patchesEntry);
+
+  UFileListEntryData* desktopEntry = NewObject<UFileListEntryData>(this);
+  desktopEntry->Label = TEXT("Desktop");
+  desktopEntry->Path = desktopPath;
+  entries.Add(desktopEntry);
+
+  UFileListEntryData* documentsEntry = NewObject<UFileListEntryData>(this);
+  documentsEntry->Label = TEXT("Documents");
+  documentsEntry->Path = documentsPath;
+  entries.Add(documentsEntry);
+
+  UFileListEntryData* downloadsEntry = NewObject<UFileListEntryData>(this);
+  downloadsEntry->Label = TEXT("Downloads");
+  downloadsEntry->Path = downloadsPath;
+  entries.Add(downloadsEntry);
+
+  // rack patch/plugin dir proposed
+  // UE_LOG(LogTemp, Warning, TEXT("FPlatformProcess::UserSettingsDir() %s"), FPlatformProcess::UserSettingsDir());
+  // LogTemp: Warning: FPlatformProcess::UserSettingsDir() C:/Users/floyd/AppData/Local/
+  // + "Rack2/patches/"
+
+  return entries;
+}
+
+TArray<UFileListEntryData*> AMainMenu::GenerateFMFileBrowserEntries(FString& Directory) {
+  TArray<UFileListEntryData*> entries;
+
 
   return entries;
 }

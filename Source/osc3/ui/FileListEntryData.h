@@ -2,6 +2,9 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
+
+#include "osc3.h"
+
 #include "FileListEntryData.generated.h"
 
 UCLASS()
@@ -11,5 +14,6 @@ class OSC3_API UFileListEntryData : public UObject {
 public:
   FString Label;
   FString Path;
+  EFileType Type{EFileType::File};
   TFunction<void (FString)> ClickCallback;
 };

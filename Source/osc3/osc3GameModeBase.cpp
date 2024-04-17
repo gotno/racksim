@@ -80,6 +80,8 @@ void Aosc3GameModeBase::SavePatch() {
 
 void Aosc3GameModeBase::LoadPatch(FString PatchPath) {
   Reset();
+
+  PatchPath.ReplaceInline(TEXT("/"), TEXT("\\"), ESearchCase::CaseSensitive);
   osc3GameState->SetPatchPath(PatchPath);
 
   FAsyncLoadGameFromSlotDelegate LoadedDelegate;
