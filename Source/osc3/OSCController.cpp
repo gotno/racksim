@@ -96,7 +96,7 @@ void AOSCController::SetClientPort(const FOSCAddress& AddressPattern, const FOSC
   int clientPort;
   UOSCManager::GetInt32(message, 0, clientPort);
 
-  // UE_LOG(LogTemp, Warning, TEXT("received SetClientPort %d"), clientPort);
+  UE_LOG(LogTemp, Warning, TEXT("received SetClientPort %d"), clientPort);
   GetWorld()->GetTimerManager().ClearTimer(hSyncPortTimer);
 
   RackClientPort = clientPort;
