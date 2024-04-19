@@ -52,6 +52,9 @@ public:
     bLatched = !bLatched;
   }
 
+  void SetTension(float inTension);
+  void SetOpacity(float Opacity);
+
   void RecalculatePosition();
 
   // rack's default cable colors. these will be replaced with
@@ -96,4 +99,5 @@ private:
   
   // allowed to exist even if unattached (IsIncomplete)
   bool bLatched{false};
+  float Tension{0.f};
 };

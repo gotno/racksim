@@ -7,6 +7,7 @@
 #include "CableComponent.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
@@ -112,9 +113,28 @@ void AVCVCable::Tick(float DeltaTime) {
 void AVCVCable::RecalculatePosition() {
   if (!CableFXComponent) return;
 
-  CableFXComponent->SetVectorParameter(FName("start_tangent"), -CableEndA->GetActorForwardVector());
-  CableFXComponent->SetVectorParameter(FName("end_tangent"), -CableEndB->GetActorForwardVector());
-  CableFXComponent->SetVectorParameter(FName("cable_end"), CableEndB->GetMesh()->GetSocketLocation(TEXT("wire")));
+  if (FMath::IsNearlyZero(Tension)) {
+    CableFXComponent->SetVectorParameter(FName("start_tangent"), -CableEndA->GetActorForwardVector());
+    CableFXComponent->SetVectorParameter(FName("end_tangent"), -CableEndB->GetActorForwardVector());
+    CableFXComponent->SetVectorParameter(FName("cable_end"), CableEndB->GetMesh()->GetSocketLocation(TEXT("wire")));
+  } else {
+    FVector socketLocationA = CableEndA->GetMesh()->GetSocketLocation(TEXT("wire"));
+    FVector socketLocationB = CableEndB->GetMesh()->GetSocketLocation(TEXT("wire"));
+    FVector abLookAtVector =
+      UKismetMathLibrary::FindLookAtRotation(
+        socketLocationA,
+        socketLocationB
+      ).Vector();
+    CableFXComponent->SetVectorParameter(
+      FName("start_tangent"),
+      FMath::Lerp(-CableEndA->GetActorForwardVector(), abLookAtVector, Tension)
+    );
+    CableFXComponent->SetVectorParameter(
+      FName("end_tangent"),
+      FMath::Lerp(-CableEndB->GetActorForwardVector(), -abLookAtVector, Tension)
+    );
+    CableFXComponent->SetVectorParameter(FName("cable_end"), socketLocationB);
+  }
 }
 
 // void AVCVCable::Sleep() {
@@ -220,4 +240,13 @@ bool AVCVCable::IsRegistered() {
 
 bool AVCVCable::IsComplete() {
   return CableEndA->IsConnected() && CableEndB->IsConnected();
+}
+
+void AVCVCable::SetTension(float inTension) {
+  Tension = inTension;
+  RecalculatePosition();
+}
+
+void AVCVCable::SetOpacity(float Opacity) {
+  CableFXComponent->SetFloatParameter(FName("alpha"), Opacity);
 }

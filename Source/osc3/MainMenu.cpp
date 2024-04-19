@@ -50,13 +50,17 @@ void AMainMenu::Init(
   TFunction<void ()> SaveFunction,
   TFunction<void ()> NewFunction,
   TFunction<void ()> ContinueFunction,
-  TFunction<void (FString)> LoadFunction
+  TFunction<void (FString)> LoadFunction,
+  TFunction<void (float)> CableOpacityUpdateFunction,
+  TFunction<void (float)> CableTensionUpdateFunction
 ) {
   MainMenuWidget->SetExitFunction(ExitFunction);
   MainMenuWidget->SetSaveFunction(SaveFunction);
   MainMenuWidget->SetNewFunction(NewFunction);
   MainMenuWidget->SetContinueFunction(ContinueFunction);
   MainMenuWidget->SetLoadFunction(LoadFunction);
+  MainMenuWidget->SetCableOpacityUpdateFunction(CableOpacityUpdateFunction);
+  MainMenuWidget->SetCableTensionUpdateFunction(CableTensionUpdateFunction);
 
   // these don't change, so they don't need to be in Refresh,
   // but they do need to be set before we Refresh

@@ -30,7 +30,9 @@ public:
     TFunction<void ()> SaveFunction,
     TFunction<void ()> NewFunction,
     TFunction<void ()> ContinueFunction,
-    TFunction<void (FString)> LoadFunction
+    TFunction<void (FString)> LoadFunction,
+    TFunction<void (float)> CableOpacityUpdateFunction,
+    TFunction<void (float)> CableTensionUpdateFunction
   );
   void Hide();
   void Show();

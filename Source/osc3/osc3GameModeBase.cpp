@@ -614,7 +614,17 @@ void Aosc3GameModeBase::SpawnMainMenu() {
     [&]() { SavePatch(); }, // 'save patch' button callback
     [&]() { LoadPatch(FString("new")); }, // 'new patch' button callback
     [&]() { LoadPatch(FString("autosave")); }, // 'continue with autosave' button callback
-    [&](FString PatchPath) { LoadPatch(PatchPath); } // general load patch callback
+    [&](FString PatchPath) { LoadPatch(PatchPath); }, // general load patch callback
+    [&](float CableOpacity) { // set cable opacity callback
+      for (AVCVCable* cable : CableActors) {
+        cable->SetOpacity(CableOpacity);
+      }
+    },
+    [&](float CableTension) { // set cable tension callback
+      for (AVCVCable* cable : CableActors) {
+        cable->SetTension(CableTension);
+      }
+    }
   );
 }
 

@@ -7,6 +7,7 @@
 #include "Components/Button.h"
 #include "Components/ListView.h"
 #include "Components/TextBlock.h"
+#include "Components/Slider.h"
 
 void UMainMenuWidget::NativeConstruct() {
   Super::NativeConstruct();
@@ -15,8 +16,15 @@ void UMainMenuWidget::NativeConstruct() {
   SaveButton->OnReleased.AddDynamic(this, &UMainMenuWidget::HandleSaveClick);
   NewButton->OnReleased.AddDynamic(this, &UMainMenuWidget::HandleNewClick);
   ContinueButton->OnReleased.AddDynamic(this, &UMainMenuWidget::HandleContinueClick);
+  ConfigurationButton->OnReleased.AddDynamic(this, &UMainMenuWidget::GotoConfiguration);
   LoadButton->OnReleased.AddDynamic(this, &UMainMenuWidget::GotoFileManager);
   FileManagerCancelButton->OnReleased.AddDynamic(this, &UMainMenuWidget::GotoMain);
+
+  CableOpacitySlider->OnValueChanged.AddDynamic(this, &UMainMenuWidget::HandleCableOpacitySliderChange);
+  CableOpacitySlider->OnMouseCaptureEnd.AddDynamic(this, &UMainMenuWidget::HandleCableOpacitySliderRelease);
+  CableTensionSlider->OnValueChanged.AddDynamic(this, &UMainMenuWidget::HandleCableTensionSliderChange);
+  CableTensionSlider->OnMouseCaptureEnd.AddDynamic(this, &UMainMenuWidget::HandleCableTensionSliderRelease);
+  ConfigurationBackButton->OnReleased.AddDynamic(this, &UMainMenuWidget::GotoMain);
 }
 
 void UMainMenuWidget::UpdateState(Aosc3GameState* GameState) {
@@ -51,10 +59,16 @@ void UMainMenuWidget::GotoFileManager() {
   FileManagerSection->SetVisibility(ESlateVisibility::Visible);
 }
 
+void UMainMenuWidget::GotoConfiguration() {
+  HideAll();
+  ConfigurationSection->SetVisibility(ESlateVisibility::Visible);
+}
+
 void UMainMenuWidget::HideAll() {
   MainSection->SetVisibility(ESlateVisibility::Hidden);
   FileManagerSection->SetVisibility(ESlateVisibility::Hidden);
   LoadingSection->SetVisibility(ESlateVisibility::Hidden);
+  ConfigurationSection->SetVisibility(ESlateVisibility::Hidden);
 }
 
 void UMainMenuWidget::SetRecentPatchesListItems(TArray<UFileListEntryData*> Entries) {
@@ -132,4 +146,24 @@ void UMainMenuWidget::LoadDirectoryInFileManager(FString Directory) {
 
   FileBrowserList->SetListItems(entries);
   FPaths::NormalizeDirectoryName(Directory);
+}
+
+void UMainMenuWidget::HandleCableOpacitySliderChange(float Value) {
+  CableOpacitySliderLabel->SetText(
+    FText::FromString(FString("Cable opacity: ") + FString::SanitizeFloat(Value * 100.f) + FString("%"))
+  );
+}
+
+void UMainMenuWidget::HandleCableOpacitySliderRelease() {
+  CableOpacityUpdateFunction(CableOpacitySlider->GetValue());
+}
+
+void UMainMenuWidget::HandleCableTensionSliderChange(float Value) {
+  CableTensionSliderLabel->SetText(
+    FText::FromString(FString("Cable tension: ") + FString::SanitizeFloat(Value * 100.f) + FString("%"))
+  );
+}
+
+void UMainMenuWidget::HandleCableTensionSliderRelease() {
+  CableTensionUpdateFunction(CableTensionSlider->GetValue());
 }
