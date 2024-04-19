@@ -15,7 +15,8 @@ class Aosc3GameModeBase;
 class AVCVPort;
 class ACableEnd;
 
-// class UNiagaraSystem;
+class UNiagaraSystem;
+class UNiagaraComponent;
 
 UCLASS()
 class OSC3_API AVCVCable : public AActor {
@@ -61,18 +62,18 @@ public:
     FColor::FromHex(FString("#8b4ade"))
   };
 private:
-  // UNiagaraSystem* NiaSys;
-
   UPROPERTY(VisibleAnywhere)
   USceneComponent* RootSceneComponent;
-  
-  UPROPERTY(VisibleAnywhere)
-  UCableComponent* CableComponent;
-  TCHAR* CableMaterialReference = TEXT("/Script/Engine.Material'/Game/materials/cable.cable'");
-  UPROPERTY()
-  UMaterialInstanceDynamic* CableMaterialInstance;
-  UPROPERTY()
-  UMaterialInterface* CableMaterialInterface;
+
+  // UPROPERTY(VisibleAnywhere)
+  // UCableComponent* CableComponent;
+  // TCHAR* CableMaterialReference = TEXT("/Script/Engine.Material'/Game/materials/cable.cable'");
+  // UPROPERTY()
+  // UMaterialInstanceDynamic* CableMaterialInstance;
+  // UPROPERTY()
+  // UMaterialInterface* CableMaterialInterface;
+  UNiagaraSystem* CableFXSystem;
+  UNiagaraComponent* CableFXComponent;
 
   UPROPERTY()
   ACableEnd* CableEndA{nullptr};
