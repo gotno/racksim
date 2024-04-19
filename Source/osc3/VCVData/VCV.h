@@ -128,6 +128,7 @@ struct VCVPort {
 struct VCVCable {
   int64_t id = -1, inputModuleId, outputModuleId;
   int32 inputPortId, outputPortId; 
+  FLinearColor color;
   
   bool operator==(const VCVCable& other) {
     return id == other.id;

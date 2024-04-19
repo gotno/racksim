@@ -63,11 +63,10 @@ void AVCVCable::BeginPlay() {
       EAttachLocation::KeepRelativeOffset,
       true
     );
-    // TODO: user configurable cable opacity
-    CableFXComponent->SetFloatParameter(FName("alpha"), 0.8f);
-    CableFXComponent->SetColorParameter(FName("color"), CableColor);
-    CableFXComponent->SetFloatParameter(FName("cable_diameter"), 0.22f * RENDER_SCALE);
-    // CableFXComponent->ReinitializeSystem();
+    // TODO: user configurable cable opacity/tension
+    Tension = 0.f;
+    SetOpacity(0.8f);
+    SetColor(CableColor);
   }
 
   FActorSpawnParameters spawnParams;
@@ -224,7 +223,7 @@ void AVCVCable::HandleRegistration() {
       outputPort = CableEndA->GetPort();
     }
 
-    GameMode->RegisterCableConnect(inputPort, outputPort);
+    GameMode->RegisterCableConnect(inputPort, outputPort, CableColor);
     return;
   }
 
@@ -248,5 +247,18 @@ void AVCVCable::SetTension(float inTension) {
 }
 
 void AVCVCable::SetOpacity(float Opacity) {
+  if (!CableFXComponent) return;
+
   CableFXComponent->SetFloatParameter(FName("alpha"), Opacity);
+}
+
+void AVCVCable::SetColor(FColor Color) {
+  CableColor = Color;
+
+  if (CableFXComponent)
+    CableFXComponent->SetColorParameter(FName("color"), CableColor);
+  if (CableEndA)
+    CableEndA->SetColor(CableColor);
+  if (CableEndB)
+    CableEndB->SetColor(CableColor);
 }

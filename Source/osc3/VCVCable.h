@@ -54,6 +54,7 @@ public:
 
   void SetTension(float inTension);
   void SetOpacity(float Opacity);
+  void SetColor(FColor Color);
 
   void RecalculatePosition();
 

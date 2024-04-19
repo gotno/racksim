@@ -362,7 +362,8 @@ void Aosc3GameModeBase::ProcessSpawnCableQueue() {
       SpawnCable(
         cable.id,
         ModuleActors[cable.inputModuleId]->GetPortActor(PortType::Input, cable.inputPortId),
-        ModuleActors[cable.outputModuleId]->GetPortActor(PortType::Output, cable.outputPortId)
+        ModuleActors[cable.outputModuleId]->GetPortActor(PortType::Output, cable.outputPortId),
+        cable.color
       );
       spawnedCables.Push(cable);
     } else {
@@ -447,14 +448,15 @@ AVCVCable* Aosc3GameModeBase::SpawnCable(AVCVPort* Port) {
 }
 
 // spawn complete/persisted cable
-void Aosc3GameModeBase::SpawnCable(int64_t& Id, AVCVPort* InputPort, AVCVPort* OutputPort) {
+void Aosc3GameModeBase::SpawnCable(int64_t& Id, AVCVPort* InputPort, AVCVPort* OutputPort, FLinearColor Color) {
   AVCVCable* cable = SpawnCable(InputPort);
   cable->SetId(Id);
   cable->ConnectToPort(OutputPort);
+  cable->SetColor(Color.ToFColor(false));
 }
 
-void Aosc3GameModeBase::RegisterCableConnect(AVCVPort* InputPort, AVCVPort* OutputPort) {
-  OSCctrl->SendCreateCable(InputPort->Module->Id, OutputPort->Module->Id, InputPort->Id, OutputPort->Id);
+void Aosc3GameModeBase::RegisterCableConnect(AVCVPort* InputPort, AVCVPort* OutputPort, FColor Color) {
+  OSCctrl->SendCreateCable(InputPort->Module->Id, OutputPort->Module->Id, InputPort->Id, OutputPort->Id, Color);
   osc3GameState->SetUnsaved();
 }
 
