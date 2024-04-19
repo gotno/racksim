@@ -46,11 +46,13 @@ public:
   void HandleRegistration();
 
   // wake for WakeSeconds
-  void Stir(float WakeSeconds = 2.f);
+  // void Stir(float WakeSeconds = 2.f);
   
   void ToggleLatched() {
     bLatched = !bLatched;
   }
+
+  void RecalculatePosition();
 
   // rack's default cable colors. these will be replaced with
   // colors from settings.json after rackman->Init grabs them
@@ -83,9 +85,9 @@ private:
   FColor CableColor;
   static inline int CurrentCableColorIndex{0};
 
-  FTimerHandle CableSleepHandle;
-  void Sleep();
-  void Wake();
+  // FTimerHandle CableSleepHandle;
+  // void Sleep();
+  // void Wake();
   
   Aosc3GameModeBase* GameMode{nullptr};
   

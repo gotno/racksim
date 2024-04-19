@@ -107,46 +107,48 @@ void AVCVCable::EndPlay(const EEndPlayReason::Type EndPlayReason) {
 
 void AVCVCable::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
-
-  if (CableFXComponent) {
-    CableFXComponent->SetVectorParameter(FName("start_tangent"), -CableEndA->GetActorForwardVector());
-    CableFXComponent->SetVectorParameter(FName("end_tangent"), -CableEndB->GetActorForwardVector());
-    CableFXComponent->SetVectorParameter(FName("cable_end"), CableEndB->GetMesh()->GetSocketLocation(TEXT("wire")));
-  }
 }
 
-void AVCVCable::Sleep() {
-  // CableComponent->SetComponentTickEnabled(false);
+void AVCVCable::RecalculatePosition() {
+  if (!CableFXComponent) return;
+
+  CableFXComponent->SetVectorParameter(FName("start_tangent"), -CableEndA->GetActorForwardVector());
+  CableFXComponent->SetVectorParameter(FName("end_tangent"), -CableEndB->GetActorForwardVector());
+  CableFXComponent->SetVectorParameter(FName("cable_end"), CableEndB->GetMesh()->GetSocketLocation(TEXT("wire")));
 }
 
-void AVCVCable::Wake() {
-  // CableComponent->SetComponentTickEnabled(true);
-}
+// void AVCVCable::Sleep() {
+//   CableComponent->SetComponentTickEnabled(false);
+// }
 
-void AVCVCable::Stir(float WakeSeconds) {
-  float distanceBetweenEnds =
-    FVector::Distance(
-      CableEndA->GetActorLocation(),
-      CableEndB->GetActorLocation()
-    );
-  // CableComponent->CableLength = distanceBetweenEnds * 0.8f;
+// void AVCVCable::Wake() {
+//   CableComponent->SetComponentTickEnabled(true);
+// }
 
-  // naive attempt to set cable force relative to average of cable end vectors
-  // actually working kind of ok!
-  // CableComponent->CableForce =
-  //   (CableEndA->GetActorForwardVector() + CableEndB->GetActorForwardVector())
-  //     * 0.5f * -500.f;
+// void AVCVCable::Stir(float WakeSeconds) {
+//   float distanceBetweenEnds =
+//     FVector::Distance(
+//       CableEndA->GetActorLocation(),
+//       CableEndB->GetActorLocation()
+//     );
+//   CableComponent->CableLength = distanceBetweenEnds * 0.8f;
 
-  GetWorld()->GetTimerManager().ClearTimer(CableSleepHandle);
-  GetWorld()->GetTimerManager().SetTimer(
-    CableSleepHandle,
-    this,
-    &AVCVCable::Sleep,
-    WakeSeconds,
-    false // loop
-  );
-  Wake();
-}
+//   // naive attempt to set cable force relative to average of cable end vectors
+//   // actually working kind of ok!
+//   CableComponent->CableForce =
+//     (CableEndA->GetActorForwardVector() + CableEndB->GetActorForwardVector())
+//       * 0.5f * -500.f;
+
+//   GetWorld()->GetTimerManager().ClearTimer(CableSleepHandle);
+//   GetWorld()->GetTimerManager().SetTimer(
+//     CableSleepHandle,
+//     this,
+//     &AVCVCable::Sleep,
+//     WakeSeconds,
+//     false // loop
+//   );
+//   Wake();
+// }
 
 void AVCVCable::ConnectToPort(AVCVPort* Port) {
   if (CableEndA->IsConnected()) {
