@@ -788,8 +788,8 @@ void AVRAvatar::HandleCompletePortEngage(const FInputActionValue& _Value, EContr
       ? LeftHandHeldCableEnd
       : RightHandHeldCableEnd;
 
-  heldCableEnd->Drop();
-  controller->EndPortInteract();
+  bool connected = heldCableEnd->Drop();
+  controller->EndPortInteract(connected);
 }
 
 void AVRAvatar::HandleCableLatch(const FInputActionValue& _Value, EControllerHand Hand) {

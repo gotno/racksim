@@ -94,13 +94,16 @@ void ACableEnd::Disconnect() {
   HandleDisconnected();
 }
 
-void ACableEnd::Drop() {
+bool ACableEnd::Drop() {
+  bool connected{false};
   if (SnapToPort) {
     Connect(SnapToPort);
+    connected = true;
   } else {
     Cable->Abandon();
   }
   OnDestinationPortTargetedDelegate.Clear();
+  return connected;
 }
 
 AVCVPort* ACableEnd::GetConnectedPort() {
