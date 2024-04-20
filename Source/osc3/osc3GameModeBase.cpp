@@ -107,6 +107,8 @@ void Aosc3GameModeBase::Reset() {
   StopAutosaving();
   OSCctrl->PauseSending();
 
+  AVCVCable::CurrentCableColorIndex = -1;
+
   osc3GameState->SetPatchLoaded(false);
   SaveData = nullptr;
 

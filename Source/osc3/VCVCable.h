@@ -55,6 +55,7 @@ public:
   void SetTension(float inTension);
   void SetOpacity(float Opacity);
   void SetColor(FColor Color);
+  void CycleColor(int Direction);
 
   void RecalculatePosition();
 
@@ -67,6 +68,7 @@ public:
     FColor::FromHex(FString("#3695ef")),
     FColor::FromHex(FString("#8b4ade"))
   };
+  static inline int CurrentCableColorIndex{-1};
 private:
   UPROPERTY(VisibleAnywhere)
   USceneComponent* RootSceneComponent;
@@ -87,7 +89,6 @@ private:
   ACableEnd* CableEndB{nullptr};
 
   FColor CableColor;
-  static inline int CurrentCableColorIndex{0};
 
   // FTimerHandle CableSleepHandle;
   // void Sleep();

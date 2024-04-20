@@ -186,6 +186,11 @@ void AVRAvatar::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
   // toggle latched (allow cable to exist unconnected)
   Input->BindAction(PortInteractionActions.CableLatchLeft, ETriggerEvent::Started, this, &AVRAvatar::HandleCableLatch, EControllerHand::Left);
   Input->BindAction(PortInteractionActions.CableLatchRight, ETriggerEvent::Started, this, &AVRAvatar::HandleCableLatch, EControllerHand::Right);
+  // cycle cable colors
+  Input->BindAction(PortInteractionActions.CableColorCycleLeft, ETriggerEvent::Triggered, this, &AVRAvatar::HandleCableColorCycle, EControllerHand::Left);
+  Input->BindAction(PortInteractionActions.CableColorCycleRight, ETriggerEvent::Triggered, this, &AVRAvatar::HandleCableColorCycle, EControllerHand::Right);
+  Input->BindAction(PortInteractionActions.CableColorCycleLeft, ETriggerEvent::Completed, this, &AVRAvatar::HandleCompleteCableColorCycle, EControllerHand::Left);
+  Input->BindAction(PortInteractionActions.CableColorCycleRight, ETriggerEvent::Completed, this, &AVRAvatar::HandleCompleteCableColorCycle, EControllerHand::Right);
 
   // general
   // toggle main menu
@@ -800,6 +805,37 @@ void AVRAvatar::HandleCableLatch(const FInputActionValue& _Value, EControllerHan
       : RightHandHeldCableEnd;
 
   if (heldCableEnd) heldCableEnd->Cable->ToggleLatched();
+}
+
+void AVRAvatar::HandleCableColorCycle(const FInputActionValue& Value, EControllerHand Hand) {
+  AVRMotionController* controller = GetControllerForHand(Hand);
+  ACableEnd* heldCableEnd =
+    Hand == EControllerHand::Left
+      ? LeftHandHeldCableEnd
+      : RightHandHeldCableEnd;
+
+  int& cycleDirection =
+    Hand == EControllerHand::Left
+      ? LeftCableColorCycleDirection
+      : RightCableColorCycleDirection;
+
+  if (Value.Get<float>() > 0.8f) cycleDirection = 1;
+  if (Value.Get<float>() < -0.8f) cycleDirection = -1;
+}
+void AVRAvatar::HandleCompleteCableColorCycle(const FInputActionValue& _Value, EControllerHand Hand) {
+  AVRMotionController* controller = GetControllerForHand(Hand);
+  ACableEnd* heldCableEnd =
+    Hand == EControllerHand::Left
+      ? LeftHandHeldCableEnd
+      : RightHandHeldCableEnd;
+
+  int& cycleDirection =
+    Hand == EControllerHand::Left
+      ? LeftCableColorCycleDirection
+      : RightCableColorCycleDirection;
+
+  if (heldCableEnd) heldCableEnd->Cable->CycleColor(cycleDirection);
+  cycleDirection = 0;
 }
 
 void AVRAvatar::RequestScreenshot(const FInputActionValue& _Value) {

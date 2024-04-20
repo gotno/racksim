@@ -43,8 +43,7 @@ void AVCVCable::BeginPlay() {
 
   GameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
 
-  CableColor = CableColors[CurrentCableColorIndex++];
-  if (CurrentCableColorIndex > CableColors.Num() - 1) CurrentCableColorIndex = 0;
+  CycleColor(1);
 
   // if (CableMaterialInterface) {
   //   CableMaterialInstance = UMaterialInstanceDynamic::Create(CableMaterialInterface, this);
@@ -261,4 +260,15 @@ void AVCVCable::SetColor(FColor Color) {
     CableEndA->SetColor(CableColor);
   if (CableEndB)
     CableEndB->SetColor(CableColor);
+}
+
+void AVCVCable::CycleColor(int Direction) {
+  CurrentCableColorIndex = CurrentCableColorIndex + Direction;
+  if (CurrentCableColorIndex > CableColors.Num() - 1) {
+    CurrentCableColorIndex = 0;
+  } else if (CurrentCableColorIndex < 0) {
+    CurrentCableColorIndex = CableColors.Num() - 1;
+  }
+
+  SetColor(CableColors[CurrentCableColorIndex]);
 }
