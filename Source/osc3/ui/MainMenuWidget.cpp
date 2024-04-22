@@ -8,6 +8,7 @@
 #include "Components/ListView.h"
 #include "Components/TextBlock.h"
 #include "Components/Slider.h"
+#include "Components/CheckBox.h"
 
 void UMainMenuWidget::NativeConstruct() {
   Super::NativeConstruct();
@@ -24,6 +25,7 @@ void UMainMenuWidget::NativeConstruct() {
   CableOpacitySlider->OnMouseCaptureEnd.AddDynamic(this, &UMainMenuWidget::HandleCableOpacitySliderRelease);
   CableTensionSlider->OnValueChanged.AddDynamic(this, &UMainMenuWidget::HandleCableTensionSliderChange);
   CableTensionSlider->OnMouseCaptureEnd.AddDynamic(this, &UMainMenuWidget::HandleCableTensionSliderRelease);
+  CableColorCycleToggle->OnCheckStateChanged.AddDynamic(this, &UMainMenuWidget::HandleCableColorCycleToggle);
   ConfigurationBackButton->OnReleased.AddDynamic(this, &UMainMenuWidget::GotoMain);
 }
 
@@ -166,4 +168,8 @@ void UMainMenuWidget::HandleCableTensionSliderChange(float Value) {
 
 void UMainMenuWidget::HandleCableTensionSliderRelease() {
   CableTensionUpdateFunction(CableTensionSlider->GetValue());
+}
+
+void UMainMenuWidget::HandleCableColorCycleToggle(bool bIsChecked) {
+  CableColorCycleToggleFunction(bIsChecked);
 }

@@ -43,7 +43,7 @@ void AVCVCable::BeginPlay() {
 
   GameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
 
-  CycleColor(1);
+  CycleColor();
 
   // if (CableMaterialInterface) {
   //   CableMaterialInstance = UMaterialInstanceDynamic::Create(CableMaterialInterface, this);
@@ -260,6 +260,10 @@ void AVCVCable::SetColor(FColor Color) {
     CableEndA->SetColor(CableColor);
   if (CableEndB)
     CableEndB->SetColor(CableColor);
+}
+
+void AVCVCable::CycleColor() {
+  CycleColor(CableColorCycleDirection);
 }
 
 void AVCVCable::CycleColor(int Direction) {

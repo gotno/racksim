@@ -628,6 +628,9 @@ void Aosc3GameModeBase::SpawnMainMenu() {
       for (AVCVCable* cable : CableActors) {
         cable->SetTension(CableTension);
       }
+    },
+    [&](bool CycleColors) { // set auto-cycle cable colors
+      AVCVCable::CableColorCycleDirection = CycleColors ? 1 : 0;
     }
   );
 }

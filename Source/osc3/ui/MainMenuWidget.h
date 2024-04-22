@@ -14,6 +14,7 @@ class UListView;
 class UFileListEntryData;
 class UTextBlock;
 class USlider;
+class UCheckBox;
 
 UCLASS()
 class OSC3_API UMainMenuWidget : public UUserWidget
@@ -53,6 +54,9 @@ public:
   }
   void SetCableTensionUpdateFunction(TFunction<void (float)> inCableTensionUpdateFunction) {
     CableTensionUpdateFunction = inCableTensionUpdateFunction;
+  }
+  void SetCableColorCycleToggleFunction(TFunction<void (bool)> inCableColorCycleToggleFunction) {
+    CableColorCycleToggleFunction = inCableColorCycleToggleFunction;
   }
 	
 protected:
@@ -103,6 +107,8 @@ protected:
   USlider* CableTensionSlider;
   UPROPERTY(meta = (BindWidget))
   UTextBlock* CableTensionSliderLabel;
+  UPROPERTY(meta = (BindWidget))
+  UCheckBox* CableColorCycleToggle;
 
   UPROPERTY(meta = (BindWidget))
   UBorder* LoadingSection;
@@ -164,4 +170,7 @@ private:
   UFUNCTION()
   void HandleCableTensionSliderRelease();
   TFunction<void (float)> CableTensionUpdateFunction;
+  UFUNCTION()
+  void HandleCableColorCycleToggle(bool bIsChecked);
+  TFunction<void (bool)> CableColorCycleToggleFunction;
 };

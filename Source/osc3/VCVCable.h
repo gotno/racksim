@@ -56,6 +56,8 @@ public:
   void SetOpacity(float Opacity);
   void SetColor(FColor Color);
   void CycleColor(int Direction);
+  void CycleColor();
+  static inline int CableColorCycleDirection{1};
 
   void RecalculatePosition();
 

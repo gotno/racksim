@@ -52,7 +52,8 @@ void AMainMenu::Init(
   TFunction<void ()> ContinueFunction,
   TFunction<void (FString)> LoadFunction,
   TFunction<void (float)> CableOpacityUpdateFunction,
-  TFunction<void (float)> CableTensionUpdateFunction
+  TFunction<void (float)> CableTensionUpdateFunction,
+  TFunction<void (bool)> CableColorCycleToggleFunction
 ) {
   MainMenuWidget->SetExitFunction(ExitFunction);
   MainMenuWidget->SetSaveFunction(SaveFunction);
@@ -61,6 +62,7 @@ void AMainMenu::Init(
   MainMenuWidget->SetLoadFunction(LoadFunction);
   MainMenuWidget->SetCableOpacityUpdateFunction(CableOpacityUpdateFunction);
   MainMenuWidget->SetCableTensionUpdateFunction(CableTensionUpdateFunction);
+  MainMenuWidget->SetCableColorCycleToggleFunction(CableColorCycleToggleFunction);
 
   // these don't change, so they don't need to be in Refresh,
   // but they do need to be set before we Refresh

@@ -32,7 +32,8 @@ public:
     TFunction<void ()> ContinueFunction,
     TFunction<void (FString)> LoadFunction,
     TFunction<void (float)> CableOpacityUpdateFunction,
-    TFunction<void (float)> CableTensionUpdateFunction
+    TFunction<void (float)> CableTensionUpdateFunction,
+    TFunction<void (bool)> CableColorCycleToggleFunction
   );
   void Hide();
   void Show();
