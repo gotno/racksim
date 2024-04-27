@@ -23,9 +23,18 @@ void UMainMenuWidget::NativeConstruct() {
 
   CableOpacitySlider->OnValueChanged.AddDynamic(this, &UMainMenuWidget::HandleCableOpacitySliderChange);
   CableOpacitySlider->OnMouseCaptureEnd.AddDynamic(this, &UMainMenuWidget::HandleCableOpacitySliderRelease);
+  // TODO: check for GameUserSettings
+  CableOpacitySlider->SetValue(DEFAULT_CABLE_OPACITY);
+  HandleCableOpacitySliderChange(DEFAULT_CABLE_OPACITY);
+
   CableTensionSlider->OnValueChanged.AddDynamic(this, &UMainMenuWidget::HandleCableTensionSliderChange);
   CableTensionSlider->OnMouseCaptureEnd.AddDynamic(this, &UMainMenuWidget::HandleCableTensionSliderRelease);
+  // TODO: check for GameUserSettings
+  CableTensionSlider->SetValue(DEFAULT_CABLE_TENSION);
+  HandleCableTensionSliderChange(DEFAULT_CABLE_TENSION);
+
   CableColorCycleToggle->OnCheckStateChanged.AddDynamic(this, &UMainMenuWidget::HandleCableColorCycleToggle);
+
   ConfigurationBackButton->OnReleased.AddDynamic(this, &UMainMenuWidget::GotoMain);
 }
 

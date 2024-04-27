@@ -62,9 +62,9 @@ void AVCVCable::BeginPlay() {
       EAttachLocation::KeepRelativeOffset,
       true
     );
-    // TODO: user configurable cable opacity/tension
-    Tension = 0.f;
-    SetOpacity(0.8f);
+    // TODO: check for GameUserSettings
+    Tension = DEFAULT_CABLE_TENSION;
+    SetOpacity(DEFAULT_CABLE_OPACITY);
     SetColor(CableColor);
   }
 
