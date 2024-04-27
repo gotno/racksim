@@ -44,9 +44,6 @@ public:
   void Abandon();
 
   void HandleRegistration();
-
-  // wake for WakeSeconds
-  // void Stir(float WakeSeconds = 2.f);
   
   void ToggleLatched() {
     bLatched = !bLatched;
@@ -75,13 +72,6 @@ private:
   UPROPERTY(VisibleAnywhere)
   USceneComponent* RootSceneComponent;
 
-  // UPROPERTY(VisibleAnywhere)
-  // UCableComponent* CableComponent;
-  // TCHAR* CableMaterialReference = TEXT("/Script/Engine.Material'/Game/materials/cable.cable'");
-  // UPROPERTY()
-  // UMaterialInstanceDynamic* CableMaterialInstance;
-  // UPROPERTY()
-  // UMaterialInterface* CableMaterialInterface;
   UNiagaraSystem* CableFXSystem;
   UNiagaraComponent* CableFXComponent;
 
@@ -91,17 +81,13 @@ private:
   ACableEnd* CableEndB{nullptr};
 
   FColor CableColor;
-
-  // FTimerHandle CableSleepHandle;
-  // void Sleep();
-  // void Wake();
   
   Aosc3GameModeBase* GameMode{nullptr};
   
   bool IsComplete();
   bool IsRegistered();
   
-  // allowed to exist even if unattached (IsIncomplete)
+  // allowed to exist even if unattached
   bool bLatched{false};
   float Tension{0.f};
 };

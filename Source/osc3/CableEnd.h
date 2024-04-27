@@ -36,6 +36,7 @@ public:
   void Disconnect();
   void HandleDisconnected();
   bool IsConnected() { return ConnectedPort != nullptr; }
+  // drops the held cable end and returns whether it was connected to a port
   bool Drop();
 
   AVCVPort* SnapToPort{nullptr};
