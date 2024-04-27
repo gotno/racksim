@@ -15,7 +15,8 @@ class Aosc3GameModeBase;
 class AVCVPort;
 class ACableEnd;
 
-// class UNiagaraSystem;
+class UNiagaraSystem;
+class UNiagaraComponent;
 
 UCLASS()
 class OSC3_API AVCVCable : public AActor {
@@ -43,13 +44,19 @@ public:
   void Abandon();
 
   void HandleRegistration();
-
-  // wake for WakeSeconds
-  void Stir(float WakeSeconds = 2.f);
   
   void ToggleLatched() {
     bLatched = !bLatched;
   }
+
+  void SetTension(float inTension);
+  void SetOpacity(float Opacity);
+  void SetColor(FColor Color);
+  void CycleColor(int Direction);
+  void CycleColor();
+  static inline int CableColorCycleDirection{1};
+
+  void RecalculatePosition();
 
   // rack's default cable colors. these will be replaced with
   // colors from settings.json after rackman->Init grabs them
@@ -60,19 +67,13 @@ public:
     FColor::FromHex(FString("#3695ef")),
     FColor::FromHex(FString("#8b4ade"))
   };
+  static inline int CurrentCableColorIndex{-1};
 private:
-  // UNiagaraSystem* NiaSys;
-
   UPROPERTY(VisibleAnywhere)
   USceneComponent* RootSceneComponent;
-  
-  UPROPERTY(VisibleAnywhere)
-  UCableComponent* CableComponent;
-  TCHAR* CableMaterialReference = TEXT("/Script/Engine.Material'/Game/materials/cable.cable'");
-  UPROPERTY()
-  UMaterialInstanceDynamic* CableMaterialInstance;
-  UPROPERTY()
-  UMaterialInterface* CableMaterialInterface;
+
+  UNiagaraSystem* CableFXSystem;
+  UNiagaraComponent* CableFXComponent;
 
   UPROPERTY()
   ACableEnd* CableEndA{nullptr};
@@ -80,17 +81,13 @@ private:
   ACableEnd* CableEndB{nullptr};
 
   FColor CableColor;
-  static inline int CurrentCableColorIndex{0};
-
-  FTimerHandle CableSleepHandle;
-  void Sleep();
-  void Wake();
   
   Aosc3GameModeBase* GameMode{nullptr};
   
   bool IsComplete();
   bool IsRegistered();
   
-  // allowed to exist even if unattached (IsIncomplete)
+  // allowed to exist even if unattached
   bool bLatched{false};
+  float Tension{0.f};
 };

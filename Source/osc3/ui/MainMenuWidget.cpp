@@ -7,6 +7,8 @@
 #include "Components/Button.h"
 #include "Components/ListView.h"
 #include "Components/TextBlock.h"
+#include "Components/Slider.h"
+#include "Components/CheckBox.h"
 
 void UMainMenuWidget::NativeConstruct() {
   Super::NativeConstruct();
@@ -15,8 +17,25 @@ void UMainMenuWidget::NativeConstruct() {
   SaveButton->OnReleased.AddDynamic(this, &UMainMenuWidget::HandleSaveClick);
   NewButton->OnReleased.AddDynamic(this, &UMainMenuWidget::HandleNewClick);
   ContinueButton->OnReleased.AddDynamic(this, &UMainMenuWidget::HandleContinueClick);
+  ConfigurationButton->OnReleased.AddDynamic(this, &UMainMenuWidget::GotoConfiguration);
   LoadButton->OnReleased.AddDynamic(this, &UMainMenuWidget::GotoFileManager);
   FileManagerCancelButton->OnReleased.AddDynamic(this, &UMainMenuWidget::GotoMain);
+
+  CableOpacitySlider->OnValueChanged.AddDynamic(this, &UMainMenuWidget::HandleCableOpacitySliderChange);
+  CableOpacitySlider->OnMouseCaptureEnd.AddDynamic(this, &UMainMenuWidget::HandleCableOpacitySliderRelease);
+  // TODO: check for GameUserSettings
+  CableOpacitySlider->SetValue(DEFAULT_CABLE_OPACITY);
+  HandleCableOpacitySliderChange(DEFAULT_CABLE_OPACITY);
+
+  CableTensionSlider->OnValueChanged.AddDynamic(this, &UMainMenuWidget::HandleCableTensionSliderChange);
+  CableTensionSlider->OnMouseCaptureEnd.AddDynamic(this, &UMainMenuWidget::HandleCableTensionSliderRelease);
+  // TODO: check for GameUserSettings
+  CableTensionSlider->SetValue(DEFAULT_CABLE_TENSION);
+  HandleCableTensionSliderChange(DEFAULT_CABLE_TENSION);
+
+  CableColorCycleToggle->OnCheckStateChanged.AddDynamic(this, &UMainMenuWidget::HandleCableColorCycleToggle);
+
+  ConfigurationBackButton->OnReleased.AddDynamic(this, &UMainMenuWidget::GotoMain);
 }
 
 void UMainMenuWidget::UpdateState(Aosc3GameState* GameState) {
@@ -51,10 +70,16 @@ void UMainMenuWidget::GotoFileManager() {
   FileManagerSection->SetVisibility(ESlateVisibility::Visible);
 }
 
+void UMainMenuWidget::GotoConfiguration() {
+  HideAll();
+  ConfigurationSection->SetVisibility(ESlateVisibility::Visible);
+}
+
 void UMainMenuWidget::HideAll() {
   MainSection->SetVisibility(ESlateVisibility::Hidden);
   FileManagerSection->SetVisibility(ESlateVisibility::Hidden);
   LoadingSection->SetVisibility(ESlateVisibility::Hidden);
+  ConfigurationSection->SetVisibility(ESlateVisibility::Hidden);
 }
 
 void UMainMenuWidget::SetRecentPatchesListItems(TArray<UFileListEntryData*> Entries) {
@@ -132,4 +157,30 @@ void UMainMenuWidget::LoadDirectoryInFileManager(FString Directory) {
 
   FileBrowserList->SetListItems(entries);
   FPaths::NormalizeDirectoryName(Directory);
+}
+
+void UMainMenuWidget::HandleCableOpacitySliderChange(float Value) {
+  FString label{"Cable opacity: "};
+  label.AppendInt(FMath::RoundToInt(Value * 100.f));
+  label.Append("%");
+  CableOpacitySliderLabel->SetText(FText::FromString(label));
+}
+
+void UMainMenuWidget::HandleCableOpacitySliderRelease() {
+  CableOpacityUpdateFunction(CableOpacitySlider->GetValue());
+}
+
+void UMainMenuWidget::HandleCableTensionSliderChange(float Value) {
+  FString label{"Cable tension: "};
+  label.AppendInt(FMath::RoundToInt(Value * 100.f));
+  label.Append("%");
+  CableTensionSliderLabel->SetText(FText::FromString(label));
+}
+
+void UMainMenuWidget::HandleCableTensionSliderRelease() {
+  CableTensionUpdateFunction(CableTensionSlider->GetValue());
+}
+
+void UMainMenuWidget::HandleCableColorCycleToggle(bool bIsChecked) {
+  CableColorCycleToggleFunction(bIsChecked);
 }

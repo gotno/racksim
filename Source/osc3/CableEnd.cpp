@@ -94,13 +94,16 @@ void ACableEnd::Disconnect() {
   HandleDisconnected();
 }
 
-void ACableEnd::Drop() {
+bool ACableEnd::Drop() {
+  bool connected{false};
   if (SnapToPort) {
     Connect(SnapToPort);
+    connected = true;
   } else {
     Cable->Abandon();
   }
   OnDestinationPortTargetedDelegate.Clear();
+  return connected;
 }
 
 AVCVPort* ACableEnd::GetConnectedPort() {
@@ -148,7 +151,7 @@ void ACableEnd::UpdatePosition() {
 void ACableEnd::RealignMesh() {
   StaticMeshComponent->SetWorldLocation(GetActorLocation());
   StaticMeshComponent->SetWorldRotation(GetActorForwardVector().Rotation());
-  Cable->Stir(0.2f);
+  Cable->RecalculatePosition();
 }
 
 void ACableEnd::OffsetMeshFrom(AActor* Actor) {
@@ -157,13 +160,13 @@ void ACableEnd::OffsetMeshFrom(AActor* Actor) {
     Actor->GetActorLocation() - forwardVector * MeshOffset
   );
   StaticMeshComponent->SetWorldRotation(forwardVector.Rotation());
-  Cable->Stir(0.2f);
+  Cable->RecalculatePosition();
 }
 
 void ACableEnd::SetPosition(FVector Location, FRotator Rotation) {
   SetActorLocation(Location);
   SetActorRotation(Rotation);
-  Cable->Stir();
+  Cable->RecalculatePosition();
 }
 
 void ACableEnd::HandleCableTargeted(AActor* CableEnd, EControllerHand Hand) {

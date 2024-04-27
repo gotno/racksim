@@ -45,7 +45,7 @@ public:
   UFUNCTION()
   void SendDestroyModule(int64 ModuleId);
   UFUNCTION()
-  void SendCreateCable(int64 InputModuleId, int64 OuputModuleId, int InputPortId, int OutputPortId);
+  void SendCreateCable(int64 InputModuleId, int64 OuputModuleId, int InputPortId, int OutputPortId, FColor Color);
   UFUNCTION()
   void SendDestroyCable(int64 CableId);
   UFUNCTION()

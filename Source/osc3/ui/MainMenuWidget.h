@@ -13,6 +13,8 @@ class UButton;
 class UListView;
 class UFileListEntryData;
 class UTextBlock;
+class USlider;
+class UCheckBox;
 
 UCLASS()
 class OSC3_API UMainMenuWidget : public UUserWidget
@@ -46,6 +48,16 @@ public:
   void SetRecentPatchesListItems(TArray<UFileListEntryData*> Entries);
   void SetFMDrivesListItems(TArray<UFileListEntryData*> Entries);
   void SetFMShortcutsListItems(TArray<UFileListEntryData*> Entries);
+
+  void SetCableOpacityUpdateFunction(TFunction<void (float)> inCableOpacityUpdateFunction) {
+    CableOpacityUpdateFunction = inCableOpacityUpdateFunction;
+  }
+  void SetCableTensionUpdateFunction(TFunction<void (float)> inCableTensionUpdateFunction) {
+    CableTensionUpdateFunction = inCableTensionUpdateFunction;
+  }
+  void SetCableColorCycleToggleFunction(TFunction<void (bool)> inCableColorCycleToggleFunction) {
+    CableColorCycleToggleFunction = inCableColorCycleToggleFunction;
+  }
 	
 protected:
 	virtual void NativeConstruct() override;	
@@ -62,6 +74,8 @@ protected:
   UButton* NewButton;
   UPROPERTY(meta = (BindWidget))
   UButton* LoadButton;
+  UPROPERTY(meta = (BindWidget))
+  UButton* ConfigurationButton;
   UPROPERTY(meta = (BindWidget))
   UButton* ExitButton;
 
@@ -80,6 +94,21 @@ protected:
 	UListView* FileBrowserList;
   UPROPERTY(meta = (BindWidget))
   UButton* FileManagerCancelButton;
+
+  UPROPERTY(meta = (BindWidget))
+  UBorder* ConfigurationSection;
+  UPROPERTY(meta = (BindWidget))
+  UButton* ConfigurationBackButton;
+  UPROPERTY(meta = (BindWidget))
+  USlider* CableOpacitySlider;
+  UPROPERTY(meta = (BindWidget))
+  UTextBlock* CableOpacitySliderLabel;
+  UPROPERTY(meta = (BindWidget))
+  USlider* CableTensionSlider;
+  UPROPERTY(meta = (BindWidget))
+  UTextBlock* CableTensionSliderLabel;
+  UPROPERTY(meta = (BindWidget))
+  UCheckBox* CableColorCycleToggle;
 
   UPROPERTY(meta = (BindWidget))
   UBorder* LoadingSection;
@@ -127,6 +156,21 @@ private:
     EFileType Type,
     TFunction<void (FString)> ClickCallback
   );
-
   void SetFileListHeadingText(FString HeadingText);
+
+  UFUNCTION()
+  void GotoConfiguration();
+  UFUNCTION()
+  void HandleCableOpacitySliderChange(float Value);
+  UFUNCTION()
+  void HandleCableOpacitySliderRelease();
+  TFunction<void (float)> CableOpacityUpdateFunction;
+  UFUNCTION()
+  void HandleCableTensionSliderChange(float Value);
+  UFUNCTION()
+  void HandleCableTensionSliderRelease();
+  TFunction<void (float)> CableTensionUpdateFunction;
+  UFUNCTION()
+  void HandleCableColorCycleToggle(bool bIsChecked);
+  TFunction<void (bool)> CableColorCycleToggleFunction;
 };

@@ -288,7 +288,7 @@ void AOSCController::SendModuleDiffRequest(const int64_t& ModuleId) const {
   OSCClient->SendOSCMessage(message);
 }
 
-void AOSCController::SendCreateCable(int64 InputModuleId, int64 OutputModuleId, int InputPortId, int OutputPortId) {
+void AOSCController::SendCreateCable(int64 InputModuleId, int64 OutputModuleId, int InputPortId, int OutputPortId, FColor Color) {
   if (bSendingPaused) return;
 
   FOSCAddress address = UOSCManager::ConvertStringToOSCAddress(FString(TEXT("/create/cable")));
@@ -298,6 +298,11 @@ void AOSCController::SendCreateCable(int64 InputModuleId, int64 OutputModuleId, 
   UOSCManager::AddInt64(message, OutputModuleId);
   UOSCManager::AddInt32(message, InputPortId);
   UOSCManager::AddInt32(message, OutputPortId);
+
+  FLinearColor color = Color.ReinterpretAsLinear();
+  UOSCManager::AddFloat(message, color.R);
+  UOSCManager::AddFloat(message, color.G);
+  UOSCManager::AddFloat(message, color.B);
 
   OSCClient->SendOSCMessage(message);
 }
@@ -678,6 +683,13 @@ void AOSCController::AddCable(const FOSCAddress& AddressPattern, const FOSCMessa
   UOSCManager::GetInt64(message, 2, cable.outputModuleId);
   UOSCManager::GetInt32(message, 3, cable.inputPortId);
   UOSCManager::GetInt32(message, 4, cable.outputPortId);
+
+  FLinearColor color;
+  color.A = 1.f;
+  UOSCManager::GetFloat(message, 5, color.R);
+  UOSCManager::GetFloat(message, 6, color.G);
+  UOSCManager::GetFloat(message, 7, color.B);
+  cable.color = color;
 
   // TODO: why
   NotifyReceived("cable", cableId);
