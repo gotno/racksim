@@ -151,9 +151,10 @@ void UMainMenuWidget::LoadDirectoryInFileManager(FString Directory) {
 }
 
 void UMainMenuWidget::HandleCableOpacitySliderChange(float Value) {
-  CableOpacitySliderLabel->SetText(
-    FText::FromString(FString("Cable opacity: ") + FString::SanitizeFloat(Value * 100.f) + FString("%"))
-  );
+  FString label{"Cable opacity: "};
+  label.AppendInt(FMath::RoundToInt(Value * 100.f));
+  label.Append("%");
+  CableOpacitySliderLabel->SetText(FText::FromString(label));
 }
 
 void UMainMenuWidget::HandleCableOpacitySliderRelease() {
@@ -161,9 +162,10 @@ void UMainMenuWidget::HandleCableOpacitySliderRelease() {
 }
 
 void UMainMenuWidget::HandleCableTensionSliderChange(float Value) {
-  CableTensionSliderLabel->SetText(
-    FText::FromString(FString("Cable tension: ") + FString::SanitizeFloat(Value * 100.f) + FString("%"))
-  );
+  FString label{"Cable tension: "};
+  label.AppendInt(FMath::RoundToInt(Value * 100.f));
+  label.Append("%");
+  CableTensionSliderLabel->SetText(FText::FromString(label));
 }
 
 void UMainMenuWidget::HandleCableTensionSliderRelease() {
