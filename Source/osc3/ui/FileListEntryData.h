@@ -14,6 +14,7 @@ class OSC3_API UFileListEntryData : public UObject {
 public:
   FString Label;
   FString Path;
+  bool bScrollHover{false};
   EFileType Type{EFileType::File};
   TFunction<void (FString)> ClickCallback;
 };

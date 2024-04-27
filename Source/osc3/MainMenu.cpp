@@ -114,8 +114,9 @@ TArray<UFileListEntryData*> AMainMenu::GenerateRecentPatchesEntries() {
 
   for (FString path : GameMode->GetRecentPatchPaths()) {
     UFileListEntryData* entry = NewObject<UFileListEntryData>(this);
-    entry->Label = path;
+    entry->Label = FPaths::GetBaseFilename(path, true);
     entry->Path = path;
+    entry->bScrollHover = true;
     entries.Add(entry);
   }
 
@@ -165,7 +166,7 @@ TArray<UFileListEntryData*> AMainMenu::GenerateFMShortcutsEntries() {
   entries.Add(homeEntry);
 
   UFileListEntryData* patchesEntry = NewObject<UFileListEntryData>(this);
-  patchesEntry->Label = TEXT("Rack2/Patches");
+  patchesEntry->Label = TEXT("Rack2\\Patches");
   patchesEntry->Path = patchesPath;
   entries.Add(patchesEntry);
 

@@ -9,6 +9,7 @@ class Aosc3GameModeBase;
 class UFileListEntryData;
 
 class UTextBlock;
+class UCommonTextBlock;
 class UButton;
 
 UCLASS()
@@ -20,13 +21,19 @@ protected:
   virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override;
 
   UPROPERTY(meta = (BindWidget))
-	UTextBlock* Label;
+  UCommonTextBlock* Label;
   UPROPERTY(meta = (BindWidget))
-	UButton* Button;
+  UTextBlock* LabelStill;
+  UPROPERTY(meta = (BindWidget))
+  UButton* Button;
 private:
   UFileListEntryData* EntryData;
-  // Aosc3GameModeBase* GameMode;
 
   UFUNCTION()
   void HandleClick();
+
+  UFUNCTION()
+  void HandleHover();
+  UFUNCTION()
+  void HandleUnhover();
 };
