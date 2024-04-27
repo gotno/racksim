@@ -107,6 +107,8 @@ void Aosc3GameModeBase::Reset() {
   StopAutosaving();
   OSCctrl->PauseSending();
 
+  AVCVCable::CurrentCableColorIndex = -1;
+
   osc3GameState->SetPatchLoaded(false);
   SaveData = nullptr;
 
@@ -362,7 +364,8 @@ void Aosc3GameModeBase::ProcessSpawnCableQueue() {
       SpawnCable(
         cable.id,
         ModuleActors[cable.inputModuleId]->GetPortActor(PortType::Input, cable.inputPortId),
-        ModuleActors[cable.outputModuleId]->GetPortActor(PortType::Output, cable.outputPortId)
+        ModuleActors[cable.outputModuleId]->GetPortActor(PortType::Output, cable.outputPortId),
+        cable.color
       );
       spawnedCables.Push(cable);
     } else {
@@ -447,14 +450,15 @@ AVCVCable* Aosc3GameModeBase::SpawnCable(AVCVPort* Port) {
 }
 
 // spawn complete/persisted cable
-void Aosc3GameModeBase::SpawnCable(int64_t& Id, AVCVPort* InputPort, AVCVPort* OutputPort) {
+void Aosc3GameModeBase::SpawnCable(int64_t& Id, AVCVPort* InputPort, AVCVPort* OutputPort, FLinearColor Color) {
   AVCVCable* cable = SpawnCable(InputPort);
   cable->SetId(Id);
   cable->ConnectToPort(OutputPort);
+  cable->SetColor(Color.ToFColor(false));
 }
 
-void Aosc3GameModeBase::RegisterCableConnect(AVCVPort* InputPort, AVCVPort* OutputPort) {
-  OSCctrl->SendCreateCable(InputPort->Module->Id, OutputPort->Module->Id, InputPort->Id, OutputPort->Id);
+void Aosc3GameModeBase::RegisterCableConnect(AVCVPort* InputPort, AVCVPort* OutputPort, FColor Color) {
+  OSCctrl->SendCreateCable(InputPort->Module->Id, OutputPort->Module->Id, InputPort->Id, OutputPort->Id, Color);
   osc3GameState->SetUnsaved();
 }
 
@@ -614,7 +618,20 @@ void Aosc3GameModeBase::SpawnMainMenu() {
     [&]() { SavePatch(); }, // 'save patch' button callback
     [&]() { LoadPatch(FString("new")); }, // 'new patch' button callback
     [&]() { LoadPatch(FString("autosave")); }, // 'continue with autosave' button callback
-    [&](FString PatchPath) { LoadPatch(PatchPath); } // general load patch callback
+    [&](FString PatchPath) { LoadPatch(PatchPath); }, // general load patch callback
+    [&](float CableOpacity) { // set cable opacity callback
+      for (AVCVCable* cable : CableActors) {
+        cable->SetOpacity(CableOpacity);
+      }
+    },
+    [&](float CableTension) { // set cable tension callback
+      for (AVCVCable* cable : CableActors) {
+        cable->SetTension(CableTension);
+      }
+    },
+    [&](bool CycleColors) { // set auto-cycle cable colors
+      AVCVCable::CableColorCycleDirection = CycleColors ? 1 : 0;
+    }
   );
 }
 

@@ -35,6 +35,8 @@ struct FHapticEffects {
 
   UPROPERTY(EditDefaultsOnly)
   UHapticFeedbackEffect_Base* Bump;
+  UPROPERTY(EditDefaultsOnly)
+  UHapticFeedbackEffect_Base* Thump;
 };
 
 UCLASS()
@@ -62,7 +64,7 @@ public:
   void EndParamInteract();
 
   void StartPortInteract();
-  void EndPortInteract();
+  void EndPortInteract(bool Connected);
   void GetHeldCableEndInfo(FVector& Location, FVector& ForwardVector);
 
   void StartWidgetLeftClick();
@@ -100,6 +102,7 @@ private:
   void WidgetInteractionTick();
   
   void HapticBump();
+  void HapticThump();
 
   void SetTooltipVisibility(bool bVisible);
   // TODO: user setting

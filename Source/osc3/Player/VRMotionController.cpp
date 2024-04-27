@@ -275,6 +275,10 @@ void AVRMotionController::HapticBump() {
   PlayerController->PlayHapticEffect(HapticEffects.Bump, MotionController->GetTrackingSource());
 }
 
+void AVRMotionController::HapticThump() {
+  PlayerController->PlayHapticEffect(HapticEffects.Thump, MotionController->GetTrackingSource());
+}
+
 void AVRMotionController::RefreshTooltip() {
   if (TargetedParam) {
     FString label, displayValue;
@@ -389,7 +393,7 @@ void AVRMotionController::HandleDestinationPortTargeted(AVCVPort* Port) {
     HapticBump();
 }
 
-void AVRMotionController::EndPortInteract() {
+void AVRMotionController::EndPortInteract(bool Connected) {
   OnCableHeldDelegate.Broadcast(
     nullptr,
     MotionController->GetTrackingSource()
@@ -403,6 +407,7 @@ void AVRMotionController::EndPortInteract() {
     OnCableHeldDelegate.Remove(delegate);
   CableHeldDelegates.Empty();
 
+  if (Connected) HapticThump();
   bIsPortInteracting = false;
 }
 

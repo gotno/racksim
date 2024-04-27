@@ -36,7 +36,7 @@ public:
   void Disconnect();
   void HandleDisconnected();
   bool IsConnected() { return ConnectedPort != nullptr; }
-  void Drop();
+  bool Drop();
 
   AVCVPort* SnapToPort{nullptr};
   
