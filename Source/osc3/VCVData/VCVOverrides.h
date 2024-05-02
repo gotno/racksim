@@ -34,11 +34,6 @@ struct VCVOverrides {
     }
     return FVector::OneVector;
   }
-
-  FVector2D getUVOverride(FString brand) {
-    if (UVOverrides.Contains(brand)) return UVOverrides[brand];
-    return FVector2D(1, 1);
-  }
   
   VCVOverrides() {
     BodyColors.Add("Slime Child Audio", FLinearColor(0.3726f, 0.3176f, 0.4078f));
@@ -65,13 +60,9 @@ struct VCVOverrides {
     
     scaleMultipliers.Add("Instruō", VectorMap());
     scaleMultipliers["Instruō"].Add("brasstrimpot", FVector(0.05f, 1, 1));
-
-    UVOverrides.Add("NANO Modules", FVector2D(0.989f, 1.f));
   };
 
 private:
-  TMap<FString, FVector2D> UVOverrides;
-
   typedef TMap<FString, FVector> VectorMap;
   TMap<FString, VectorMap> scaleMultipliers;
 

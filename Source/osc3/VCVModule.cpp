@@ -168,9 +168,6 @@ void AVCVModule::Init(VCVModule vcv_module, TFunction<void ()> ReadyCallback) {
   BaseMaterialInstance->SetVectorParameterValue(FName("color"), bodyColor);
   FaceMaterialInstance->SetVectorParameterValue(FName("background_color"), bodyColor);
 
-  FaceMaterialInstance->SetScalarParameterValue(FName("uscale"), overrides.getUVOverride(Model.brand).X);
-  FaceMaterialInstance->SetScalarParameterValue(FName("vscale"), overrides.getUVOverride(Model.brand).Y);
-
   StaticMeshComponent->SetWorldScale3D(FVector(RENDER_SCALE * MODULE_DEPTH, Model.box.size.x, Model.box.size.y));
   OutlineMeshComponent->SetWorldScale3D(FVector(RENDER_SCALE * MODULE_DEPTH + 0.2f, Model.box.size.x + 0.2f, Model.box.size.y + 0.2f));
 
