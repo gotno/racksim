@@ -84,7 +84,7 @@ public:
 
   TArray<FString> GetRecentPatchPaths();
 
-  void RegisterSVG(FString Filepath, Vec2 Size);
+  void RegisterSVG(FString Filepath);
   void RegisterTexture(FString Filepath, UTexture2D* Texture);
   UTexture2D* GetTexture(FString Filepath);
   

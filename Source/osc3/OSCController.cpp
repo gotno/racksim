@@ -167,7 +167,7 @@ void AOSCController::AddModule(const FOSCAddress& AddressPattern, const FOSCMess
   
   FString panelSvgPath;
   UOSCManager::GetString(message, 10, panelSvgPath);
-  GameMode->RegisterSVG(panelSvgPath, box.size);
+  GameMode->RegisterSVG(panelSvgPath);
   
   Modules.Add(moduleId, VCVModule(
       moduleId,
@@ -538,19 +538,19 @@ void AOSCController::AddParam(const FOSCAddress& AddressPattern, const FOSCMessa
   param.svgPaths.SetNum(5);
 
   UOSCManager::GetString(message, 28, param.svgPaths[0]);
-  GameMode->RegisterSVG(param.svgPaths[0], param.box.size);
+  GameMode->RegisterSVG(param.svgPaths[0]);
 
   UOSCManager::GetString(message, 29, param.svgPaths[1]);
-  GameMode->RegisterSVG(param.svgPaths[1], param.box.size);
+  GameMode->RegisterSVG(param.svgPaths[1]);
 
   UOSCManager::GetString(message, 30, param.svgPaths[2]);
-  GameMode->RegisterSVG(param.svgPaths[2], param.box.size);
+  GameMode->RegisterSVG(param.svgPaths[2]);
 
   UOSCManager::GetString(message, 31, param.svgPaths[3]);
-  GameMode->RegisterSVG(param.svgPaths[3], param.box.size);
+  GameMode->RegisterSVG(param.svgPaths[3]);
 
   UOSCManager::GetString(message, 32, param.svgPaths[4]);
-  GameMode->RegisterSVG(param.svgPaths[4], param.box.size);
+  GameMode->RegisterSVG(param.svgPaths[4]);
 
   UOSCManager::GetFloat(message, 33, param.bodyColor.R);
   UOSCManager::GetFloat(message, 34, param.bodyColor.G);
@@ -597,7 +597,7 @@ void AOSCController::AddPort(const FOSCMessage &Message, VCVPort& vcv_port) {
 
   UOSCManager::GetString(Message, 8, vcv_port.svgPath);
 
-  GameMode->RegisterSVG(vcv_port.svgPath, vcv_port.box.size);
+  GameMode->RegisterSVG(vcv_port.svgPath);
 
   UOSCManager::GetFloat(Message, 9, vcv_port.bodyColor.R);
   UOSCManager::GetFloat(Message, 10, vcv_port.bodyColor.G);

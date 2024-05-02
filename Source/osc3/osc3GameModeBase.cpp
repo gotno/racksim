@@ -544,7 +544,7 @@ void Aosc3GameModeBase::SendParamUpdate(int64_t ModuleId, int32 ParamId, float V
   OSCctrl->SendParamUpdate(ModuleId, ParamId, Value);
 }
 
-void Aosc3GameModeBase::RegisterSVG(FString Filepath, Vec2 Size) {
+void Aosc3GameModeBase::RegisterSVG(FString Filepath) {
   if (Filepath.Compare(FString("")) == 0) return;
   if (SVGTextures.Contains(Filepath)) return;
 
