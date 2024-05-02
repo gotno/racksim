@@ -6,7 +6,8 @@
 
 UTexture2D* USvgRenderer::GetTexture(const FString& Filepath) {
   int width, height;
-  unsigned char* rgba = renderSvgToPixelArray(TCHAR_TO_ANSI(*Filepath), width, height);
+  unsigned char* rgba =
+    renderSvgToPixelArray(TCHAR_TO_ANSI(*Filepath), width, height, 3.f);
 
   UTexture2D* texture = UTexture2D::CreateTransient(width, height, PF_R8G8B8A8);
   if (!texture) {
