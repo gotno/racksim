@@ -9,8 +9,8 @@ public class osc3 : ModuleRules
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 	
     PublicIncludePaths.AddRange(new string[] { "osc3" });
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "OSC", "UMG", "DefinitivePainter",  "HeadMountedDisplay", "EnhancedInput", "CableComponent", "Niagara" });
-		PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore", "UMG", "DefinitivePainter", "Json", "JsonUtilities" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "OSC", "UMG", "HeadMountedDisplay", "EnhancedInput", "CableComponent", "Niagara" });
+		PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore", "UMG", "Json", "JsonUtilities" });
 
     PublicAdditionalLibraries.Add(Path.Combine(ModuleDirectory, "ThirdParty", "lib", "svgrender", "svgrender.lib"));
 	}

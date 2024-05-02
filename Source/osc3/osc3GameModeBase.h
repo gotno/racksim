@@ -2,8 +2,6 @@
 
 #include "CoreMinimal.h"
 
-#include "DefinitivePainter/Public/SVG/Importer/DPSVGImporter.h"
-
 #include "VCVData/VCV.h"
 
 #include "GameFramework/GameModeBase.h"
@@ -21,9 +19,7 @@ class AVCVModule;
 class AContextMenu;
 class AVCVPort;
 class ALibrary;
-class AWidgetSurrogate;
 class Aosc3PlayerController;
-class UDPSVGAsset;
 class UTexture2D;
 class AModuleWeldment;
 class USvgRenderer;
@@ -85,7 +81,6 @@ public:
   TArray<FString> GetRecentPatchPaths();
 
   void RegisterSVG(FString Filepath);
-  void RegisterTexture(FString Filepath, UTexture2D* Texture);
   UTexture2D* GetTexture(FString Filepath);
   
   void SpawnLibrary();
@@ -154,11 +149,6 @@ private:
   UPROPERTY()
   Uosc3SaveGame* SaveData{nullptr};
 
-  FDPSVGImporter SVGImporter;
-  UPROPERTY()
-  TMap<FString, UDPSVGAsset*> SVGAssets;
-  UPROPERTY()
-  TMap<FString, AWidgetSurrogate*> SVGWidgetSurrogates;
   UPROPERTY()
   TMap<FString, UTexture2D*> SVGTextures;
   
