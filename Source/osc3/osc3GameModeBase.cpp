@@ -18,6 +18,7 @@
 #include "ModuleComponents/VCVPort.h"
 #include "Library.h"
 #include "SVG/WidgetSurrogate.h"
+#include "Utility/SvgRenderer.h"
 
 #include "Engine/Texture2D.h"
 #include "DefinitivePainter/Public/SVG/DPSVGAsset.h"
@@ -29,6 +30,7 @@
 Aosc3GameModeBase::Aosc3GameModeBase() {
   OSCctrl = CreateDefaultSubobject<AOSCController>(FName(TEXT("OSCctrl")));
   rackman = CreateDefaultSubobject<URackManager>(FName(TEXT("rackman")));
+  svg2tex = CreateDefaultSubobject<USvgRenderer>(FName(TEXT("svg2tex")));
 }
 
 void Aosc3GameModeBase::BeginPlay() {
@@ -544,29 +546,38 @@ void Aosc3GameModeBase::SendParamUpdate(int64_t ModuleId, int32 ParamId, float V
 
 void Aosc3GameModeBase::RegisterSVG(FString Filepath, Vec2 Size) {
   if (Filepath.Compare(FString("")) == 0) return;
-  if (SVGAssets.Contains(Filepath)) return;
+  if (SVGTextures.Contains(Filepath)) return;
 
-  UE_LOG(LogTemp, Warning, TEXT("importing svg %s"), *Filepath);
-
-  UDPSVGAsset* svgAsset = NewObject<UDPSVGAsset>(this, UDPSVGAsset::StaticClass());
-  SVGImporter.PerformImport(Filepath, svgAsset);
-  SVGAssets.Add(Filepath, svgAsset);
-  
-  FVector surrogateLocation;
-  FRotator surrogateRotation;
-  PlayerPawn->GetRenderablePosition(surrogateLocation, surrogateRotation);
-
-  AWidgetSurrogate* surrogate = 
-    GetWorld()->SpawnActor<AWidgetSurrogate>(
-      AWidgetSurrogate::StaticClass(),
-      surrogateLocation,
-      surrogateRotation
-    );
-  
-  SVGWidgetSurrogates.Add(Filepath, surrogate);
-  surrogate->SetSVG(svgAsset, Size, Filepath);
-  surrogate->SetActorScale3D(FVector(0.05f, 0.05f, 0.05f));
+  SVGTextures.Add(Filepath, nullptr);
+  UTexture2D* texture = svg2tex->GetTexture(Filepath);
+  SVGTextures[Filepath] = texture;
 }
+
+// void Aosc3GameModeBase::RegisterSVG(FString Filepath, Vec2 Size) {
+//   if (Filepath.Compare(FString("")) == 0) return;
+//   if (SVGAssets.Contains(Filepath)) return;
+
+//   UE_LOG(LogTemp, Warning, TEXT("importing svg %s"), *Filepath);
+
+//   UDPSVGAsset* svgAsset = NewObject<UDPSVGAsset>(this, UDPSVGAsset::StaticClass());
+//   SVGImporter.PerformImport(Filepath, svgAsset);
+//   SVGAssets.Add(Filepath, svgAsset);
+  
+//   FVector surrogateLocation;
+//   FRotator surrogateRotation;
+//   PlayerPawn->GetRenderablePosition(surrogateLocation, surrogateRotation);
+
+//   AWidgetSurrogate* surrogate = 
+//     GetWorld()->SpawnActor<AWidgetSurrogate>(
+//       AWidgetSurrogate::StaticClass(),
+//       surrogateLocation,
+//       surrogateRotation
+//     );
+  
+//   SVGWidgetSurrogates.Add(Filepath, surrogate);
+//   surrogate->SetSVG(svgAsset, Size, Filepath);
+//   surrogate->SetActorScale3D(FVector(0.05f, 0.05f, 0.05f));
+// }
 
 void Aosc3GameModeBase::RegisterTexture(FString Filepath, UTexture2D* Texture) {
   UE_LOG(LogTemp, Warning, TEXT("registering texture %s"), *Filepath);

@@ -26,6 +26,7 @@ class Aosc3PlayerController;
 class UDPSVGAsset;
 class UTexture2D;
 class AModuleWeldment;
+class USvgRenderer;
 
 struct ReturnModulePosition {
   FVector Location{0.f};
@@ -116,6 +117,8 @@ private:
   URackManager* rackman;
   UPROPERTY()
   AOSCController* OSCctrl;
+  UPROPERTY()
+  USvgRenderer* svg2tex;
   UPROPERTY()
   AMainMenu* MainMenu;
 
