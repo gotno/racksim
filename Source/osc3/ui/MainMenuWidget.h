@@ -15,6 +15,7 @@ class UFileListEntryData;
 class UTextBlock;
 class USlider;
 class UCheckBox;
+class USizeBox;
 
 UCLASS()
 class OSC3_API UMainMenuWidget : public UUserWidget
@@ -66,6 +67,8 @@ protected:
   UBorder* MainSection;
   UPROPERTY(meta = (BindWidget))
   UButton* ContinueButton;
+  UPROPERTY(meta = (BindWidget))
+  USizeBox* SaveButtonContainer;
   UPROPERTY(meta = (BindWidget))
   UButton* SaveButton;
   // UPROPERTY(meta = (BindWidget))

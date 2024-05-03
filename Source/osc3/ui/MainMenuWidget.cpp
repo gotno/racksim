@@ -9,6 +9,7 @@
 #include "Components/TextBlock.h"
 #include "Components/Slider.h"
 #include "Components/CheckBox.h"
+#include "Components/SizeBox.h"
 
 void UMainMenuWidget::NativeConstruct() {
   Super::NativeConstruct();
@@ -47,7 +48,7 @@ void UMainMenuWidget::UpdateState(Aosc3GameState* GameState) {
   );
 
   // Save button
-  SaveButton->SetVisibility(
+  SaveButtonContainer->SetVisibility(
     GameState->IsPatchLoaded()
       ? ESlateVisibility::Visible
       : ESlateVisibility::Collapsed
