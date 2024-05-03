@@ -28,7 +28,12 @@ ALibrary::ALibrary() {
 
   LibraryWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("LibraryWidget"));
   LibraryWidgetComponent->SetupAttachment(StaticMeshComponent);
+  LibraryWidgetComponent->AddWorldOffset(LibraryWidgetComponent->GetForwardVector() * -0.01f);
   LibraryWidgetComponent->SetWindowFocusable(false);
+
+  LibraryWidgetComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+  LibraryWidgetComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+  LibraryWidgetComponent->SetCollisionResponseToChannel(WIDGET_TRACE, ECollisionResponse::ECR_Block);
 
   static ConstructorHelpers::FClassFinder<ULibraryWidget> libraryWidgetObject(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/widgets/BP_LibraryWidget.BP_LibraryWidget_C'"));
   if (libraryWidgetObject.Succeeded()) {

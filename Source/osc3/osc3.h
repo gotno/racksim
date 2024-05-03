@@ -36,6 +36,7 @@
 
 #define PARAM_TRACE ECC_GameTraceChannel3
 #define TELEPORT_TRACE ECC_GameTraceChannel4
+#define WIDGET_TRACE ECC_GameTraceChannel10
 
 #define TAG_INTERACTABLE FName("interactable")
 #define TAG_INTERACTABLE_PARAM FName("interactable_param")

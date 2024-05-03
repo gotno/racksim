@@ -22,6 +22,10 @@ AContextMenu::AContextMenu() {
   ContextMenuWidgetComponent->SetWindowFocusable(false);
   ContextMenuWidgetComponent->SetupAttachment(GetRootComponent());
 
+  ContextMenuWidgetComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+  ContextMenuWidgetComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+  ContextMenuWidgetComponent->SetCollisionResponseToChannel(WIDGET_TRACE, ECollisionResponse::ECR_Block);
+
   static ConstructorHelpers::FClassFinder<UContextMenuWidget>
     contextMenuWidgetObject(WidgetBlueprintReference);
   if (contextMenuWidgetObject.Succeeded()) {

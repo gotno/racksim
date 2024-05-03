@@ -39,6 +39,7 @@ AVRMotionController::AVRMotionController() {
   WidgetInteractionComponent = CreateDefaultSubobject<UWidgetInteractionComponent>(TEXT("WidgetInteractionComponent"));
   WidgetInteractionComponent->SetupAttachment(MotionController);
   WidgetInteractionComponent->VirtualUserIndex = 0;
+  WidgetInteractionComponent->TraceChannel = WIDGET_TRACE;
 
   WidgetInteractionComponent->bShowDebug = false;
   WidgetInteractionComponent->InteractionDistance = 40.f;
