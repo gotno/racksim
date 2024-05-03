@@ -64,8 +64,8 @@ void AContextMenu::Init(const Vec2& ModuleSize) {
 
   // TODO: dominant hand
   ContextMenuWidgetComponent->AddWorldOffset(GetActorRightVector() * halfMenuWidth);
-  AddActorWorldOffset(GetActorRightVector() * halfModuleWidth);
-  AddActorWorldOffset(GetActorForwardVector() * -1.f);
+  AddActorWorldOffset(GetActorRightVector() * (halfModuleWidth - 0.5f));
+  AddActorWorldOffset(-GetActorForwardVector() * (RENDER_SCALE + 0.1f));
   // AddActorLocalRotation(FRotator(0.f, 15.f, 0.f));
 }
 
