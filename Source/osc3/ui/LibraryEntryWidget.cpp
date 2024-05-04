@@ -35,7 +35,6 @@ void ULibraryEntryWidget::NativeOnListItemObjectSet(UObject* ListItemObject) {
   ModuleSlug = entry->ModuleSlug;
   bFavorite = entry->bFavorite;
 
-
   FavoriteToggleButtonLabel->SetText(
     bFavorite
       ? FText::FromString(FString(TEXT("★")))
@@ -49,13 +48,13 @@ void ULibraryEntryWidget::RequestModuleSpawn() {
 }
 
 void ULibraryEntryWidget::HandleButtonHover() {
-  DescriptionText->SetVisibility(ESlateVisibility::Visible);
-  TagsText->SetVisibility(ESlateVisibility::Collapsed);
+  DescriptionText->SetVisibility(ESlateVisibility::Collapsed);
+  TagsText->SetVisibility(ESlateVisibility::Visible);
 }
 
 void ULibraryEntryWidget::HandleButtonUnhover() {
-  DescriptionText->SetVisibility(ESlateVisibility::Collapsed);
-  TagsText->SetVisibility(ESlateVisibility::Visible);
+  DescriptionText->SetVisibility(ESlateVisibility::Visible);
+  TagsText->SetVisibility(ESlateVisibility::Collapsed);
 }
 
 void ULibraryEntryWidget::HandleFavoriteClick() {
