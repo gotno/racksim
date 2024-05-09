@@ -6,6 +6,8 @@
 #include "Player/VRAvatar.h"
 #include "UI/MainMenuWidget.h"
 #include "UI/FileListEntryData.h"
+#include "UI/Keyboard.h"
+#include "UI/KeyboardWidget.h"
 
 #include "UObject/ConstructorHelpers.h"
 #include "Kismet/GameplayStatics.h"
@@ -39,6 +41,7 @@ void AMainMenu::BeginPlay() {
   PlayerPawn = Cast<AVRAvatar>(UGameplayStatics::GetPlayerPawn(this, 0));
   GameState = Cast<Aosc3GameState>(UGameplayStatics::GetGameState(this));
 	
+  // set up menu widget
   MainMenuWidget = Cast<UMainMenuWidget>(MainMenuWidgetComponent->GetUserWidgetObject());
   
   FVector2D drawSize(933.f, 700.f);
@@ -47,6 +50,40 @@ void AMainMenu::BeginPlay() {
 
   MainMenuWidgetComponent->SetDrawSize(drawSize);
   MainMenuWidgetComponent->SetWorldScale3D(FVector(1.f, scale, scale));
+
+  // spawn keyboard actor
+  FActorSpawnParameters spawnParams;
+  spawnParams.Owner = this;
+  Keyboard =
+    GetWorld()->SpawnActor<AKeyboard>(
+      AKeyboard::StaticClass(),
+      GetActorLocation(),
+      GetActorRotation(),
+      spawnParams
+    );
+  Keyboard->AddActorWorldOffset(FVector(0.f, 0.f, (-desiredWorldHeight * 0.5f) - 1.f));
+  Keyboard->AddActorLocalRotation(FRotator(10.f, 0.f, 0.f));
+  Keyboard->AttachToComponent(GetRootComponent(), FAttachmentTransformRules::KeepWorldTransform);
+
+  Keyboard->AddOnInputUpdatedDelegate(this, FName("HandleKeyboardInputUpdated"));
+  Keyboard->AddOnInputConfirmedDelegate(this, FName("HandleKeyboardInputConfirmed"));
+  Keyboard->SetActorHiddenInGame(true);
+
+  MainMenuWidget->Keyboard = Keyboard;
+}
+
+void AMainMenu::HandleKeyboardInputUpdated(FString Input, int8 CursorIndex) {
+  Input.InsertAt(CursorIndex, "|");
+  Input.Append(".vcv");
+  if (MainMenuWidget) {
+    MainMenuWidget->SetKeyboardInputText(Input);
+  }
+}
+
+void AMainMenu::HandleKeyboardInputConfirmed(FString Input) {
+  // TODO: use the input to save as
+  Keyboard->ClearInput();
+  MainMenuWidget->GotoMain();
 }
 
 void AMainMenu::Init(
@@ -199,7 +236,5 @@ TArray<UFileListEntryData*> AMainMenu::GenerateFMShortcutsEntries() {
 
 TArray<UFileListEntryData*> AMainMenu::GenerateFMFileBrowserEntries(FString& Directory) {
   TArray<UFileListEntryData*> entries;
-
-
   return entries;
 }

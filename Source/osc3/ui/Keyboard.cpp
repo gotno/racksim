@@ -70,6 +70,10 @@ void AKeyboard::AddOnInputConfirmedDelegate(UObject* Object, const FName& Method
   }
 }
 
+void AKeyboard::SetInput(FString Input) {
+  if (KeyboardWidget) KeyboardWidget->SetInput(Input);
+}
+
 void AKeyboard::ClearInput() {
   if (KeyboardWidget) KeyboardWidget->ClearInput();
 }

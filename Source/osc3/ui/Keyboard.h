@@ -14,6 +14,7 @@ class OSC3_API AKeyboard : public AActor {
 	
 public:	
 	AKeyboard();
+  void SetInput(FString Input);
 
 protected:
 	virtual void BeginPlay() override;

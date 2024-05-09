@@ -64,6 +64,12 @@ public:
     OnInputUpdatedDelegate.Broadcast(InputText, CursorIndex);
   }
 
+  void SetInput(FString Input) {
+    InputText = Input;
+    CursorIndex = Input.Len();
+    OnInputUpdatedDelegate.Broadcast(InputText, CursorIndex);
+  }
+
 protected:
 	virtual void NativeConstruct() override;	
   

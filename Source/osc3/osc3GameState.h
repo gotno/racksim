@@ -25,6 +25,13 @@ public:
   bool CanContinueAutosave() { return bCanContinueAutosave; }
   void SetCanContinueAutosave(bool inbCanContinueAutosave) { bCanContinueAutosave = inbCanContinueAutosave; }
 
+  FString GetPatchPath() {
+    if (PatchPath.Equals("new") || PatchPath.Equals(AutosaveName)) {
+      return "";
+    }
+    return PatchPath;
+  }
+
   void SetPatchPath(FString inPatchPath) {
     PatchPath = inPatchPath;
 

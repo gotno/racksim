@@ -2,6 +2,7 @@
 
 #include "osc3GameState.h"
 #include "UI/FileListEntryData.h"
+#include "UI/Keyboard.h"
 
 #include "Components/Border.h"
 #include "Components/Button.h"
@@ -16,6 +17,7 @@ void UMainMenuWidget::NativeConstruct() {
   
   ExitButton->OnReleased.AddDynamic(this, &UMainMenuWidget::HandleExitClick);
   SaveButton->OnReleased.AddDynamic(this, &UMainMenuWidget::HandleSaveClick);
+  SaveAsButton->OnReleased.AddDynamic(this, &UMainMenuWidget::HandleSaveAsClick);
   NewButton->OnReleased.AddDynamic(this, &UMainMenuWidget::HandleNewClick);
   ContinueButton->OnReleased.AddDynamic(this, &UMainMenuWidget::HandleContinueClick);
   ConfigurationButton->OnReleased.AddDynamic(this, &UMainMenuWidget::GotoConfiguration);
@@ -54,6 +56,23 @@ void UMainMenuWidget::UpdateState(Aosc3GameState* GameState) {
       : ESlateVisibility::Collapsed
   );
   SaveButton->SetIsEnabled(GameState->IsUnsaved() && GameState->HasSaveFile());
+
+  // Save As button
+  SaveAsButtonContainer->SetVisibility(
+    GameState->IsPatchLoaded()
+      ? ESlateVisibility::Visible
+      : ESlateVisibility::Collapsed
+  );
+
+  FString patchPath = GameState->GetPatchPath();
+  if (patchPath.IsEmpty()) {
+    LoadedPatchDirectory = "";
+    LoadedPatchBasename = "";
+  } else {
+    LoadedPatchDirectory = FPaths::GetPath(patchPath);
+    LoadedPatchDirectory.Append("\\");
+    LoadedPatchBasename = FPaths::GetBaseFilename(patchPath, true);
+  }
 }
 
 void UMainMenuWidget::GotoLoading() {
@@ -81,6 +100,16 @@ void UMainMenuWidget::HideAll() {
   FileManagerSection->SetVisibility(ESlateVisibility::Hidden);
   LoadingSection->SetVisibility(ESlateVisibility::Hidden);
   ConfigurationSection->SetVisibility(ESlateVisibility::Hidden);
+
+  // keyboard/input
+  bSavingAs = false;
+  ReloadDirectoryInFileManager();
+  FilenameInputContainer->SetVisibility(ESlateVisibility::Collapsed);
+  Keyboard->SetActorHiddenInGame(true);
+}
+
+void UMainMenuWidget::SetKeyboardInputText(FString Text) {
+  FilenameInput->SetText(FText::FromString(Text));
 }
 
 void UMainMenuWidget::SetRecentPatchesListItems(TArray<UFileListEntryData*> Entries) {
@@ -126,6 +155,7 @@ void UMainMenuWidget::SetFileListHeadingText(FString HeadingText) {
 }
 
 void UMainMenuWidget::LoadDirectoryInFileManager(FString Directory) {
+  CurrentFMDirectory = Directory;
   SetFileListHeadingText(Directory);
 
   TArray<UFileListEntryData*> entries;
@@ -143,8 +173,12 @@ void UMainMenuWidget::LoadDirectoryInFileManager(FString Directory) {
   FileManager.FindFiles(found, *(Directory + "*.vcv"), true, false);
   for (FString& filename : found) {
     entries.Add(CreateListEntryData(filename, Directory + filename, EFileType::File, [this](FString PatchPath) {
-      LoadFunction(PatchPath);
-      GotoLoading();
+      if (!bSavingAs) {
+        LoadFunction(PatchPath);
+        GotoLoading();
+      } else {
+        Keyboard->SetInput(FPaths::GetBaseFilename(PatchPath, true));
+      }
     }));
   }
 
@@ -158,6 +192,10 @@ void UMainMenuWidget::LoadDirectoryInFileManager(FString Directory) {
 
   FileBrowserList->SetListItems(entries);
   FPaths::NormalizeDirectoryName(Directory);
+}
+
+void UMainMenuWidget::ReloadDirectoryInFileManager() {
+  LoadDirectoryInFileManager(CurrentFMDirectory);
 }
 
 void UMainMenuWidget::HandleCableOpacitySliderChange(float Value) {
@@ -184,4 +222,20 @@ void UMainMenuWidget::HandleCableTensionSliderRelease() {
 
 void UMainMenuWidget::HandleCableColorCycleToggle(bool bIsChecked) {
   CableColorCycleToggleFunction(bIsChecked);
+}
+
+void UMainMenuWidget::HandleSaveAsClick() {
+  GotoFileManager();
+
+  bSavingAs = true;
+  if (LoadedPatchDirectory.IsEmpty()) {
+    ReloadDirectoryInFileManager();
+    Keyboard->SetInput("");
+  } else {
+    LoadDirectoryInFileManager(LoadedPatchDirectory);
+    Keyboard->SetInput(LoadedPatchBasename);
+  }
+
+  FilenameInputContainer->SetVisibility(ESlateVisibility::Visible);
+  Keyboard->SetActorHiddenInGame(false);
 }

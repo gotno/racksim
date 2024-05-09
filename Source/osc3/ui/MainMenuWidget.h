@@ -8,6 +8,7 @@
 #include "MainMenuWidget.generated.h"
 
 class Aosc3GameState;
+class AKeyboard;
 class UBorder;
 class UButton;
 class UListView;
@@ -59,6 +60,8 @@ public:
   void SetCableColorCycleToggleFunction(TFunction<void (bool)> inCableColorCycleToggleFunction) {
     CableColorCycleToggleFunction = inCableColorCycleToggleFunction;
   }
+
+  void SetKeyboardInputText(FString Text);
 	
 protected:
 	virtual void NativeConstruct() override;	
@@ -71,8 +74,10 @@ protected:
   USizeBox* SaveButtonContainer;
   UPROPERTY(meta = (BindWidget))
   UButton* SaveButton;
-  // UPROPERTY(meta = (BindWidget))
-  // UButton* SaveAsButton;
+  UPROPERTY(meta = (BindWidget))
+  USizeBox* SaveAsButtonContainer;
+  UPROPERTY(meta = (BindWidget))
+  UButton* SaveAsButton;
   UPROPERTY(meta = (BindWidget))
   UButton* NewButton;
   UPROPERTY(meta = (BindWidget))
@@ -116,8 +121,17 @@ protected:
   UPROPERTY(meta = (BindWidget))
   UBorder* LoadingSection;
   // UBorder* StatusSection; // aactually
+
+  UPROPERTY(meta = (BindWidget))
+  UBorder* FilenameInputContainer;
+  UPROPERTY(meta = (BindWidget))
+  UTextBlock* FilenameInput;
   
 private:
+  AKeyboard* Keyboard;
+
+  FString CurrentFMDirectory{""};
+
   void HideAll();
 
   TFunction<void ()> ExitFunction;
@@ -133,6 +147,13 @@ private:
     GotoLoading();
     SaveFunction();
   }
+
+  bool bSavingAs{false};
+  UFUNCTION()
+  void HandleSaveAsClick();
+
+  FString LoadedPatchDirectory{""};
+  FString LoadedPatchBasename{""};
 
   TFunction<void ()> NewFunction;
   UFUNCTION()
@@ -153,6 +174,7 @@ private:
   UFUNCTION()
   void GotoFileManager();
   void LoadDirectoryInFileManager(FString Directory);
+  void ReloadDirectoryInFileManager();
   UFileListEntryData* CreateListEntryData(
     FString Label,
     FString Path,

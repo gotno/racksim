@@ -11,6 +11,7 @@ class UFileListEntryData;
 
 class UWidgetComponent;
 class UMainMenuWidget;
+class AKeyboard;
 
 UCLASS()
 class OSC3_API AMainMenu : public AActor {
@@ -18,6 +19,11 @@ class OSC3_API AMainMenu : public AActor {
 	
 public:	
 	AMainMenu();
+
+  UFUNCTION()
+  void HandleKeyboardInputUpdated(FString Input, int8 CursorIndex);
+  UFUNCTION()
+  void HandleKeyboardInputConfirmed(FString Input);
   
 protected:
 	virtual void BeginPlay() override;
@@ -44,6 +50,8 @@ private:
   Aosc3GameModeBase* GameMode;
   Aosc3GameState* GameState;
   AVRAvatar* PlayerPawn;
+
+  AKeyboard* Keyboard;
 
   USceneComponent* RootSceneComponent;
 
