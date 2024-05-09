@@ -78,6 +78,8 @@ public:
   void ClickMenuItem(const FVCVMenuItem& MenuItem);
   void UpdateMenuItemQuantity(const FVCVMenuItem& MenuItem, const float& Value) const;
 
+  void ConfirmSaved();
+
   TArray<FString> GetRecentPatchPaths();
 
   void RegisterSVG(FString Filepath);
@@ -152,7 +154,7 @@ private:
   UPROPERTY()
   TMap<FString, UTexture2D*> SVGTextures;
   
-  void SavePatch();
+  void SavePatch(FString PatchPath = "");
   void LoadPatch(FString PatchPath);
   void StartRack(FString PatchPath);
   void RestartRack(FString PatchPath);

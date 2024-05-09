@@ -51,7 +51,7 @@ public:
   UFUNCTION()
   void SendAutosaveAndExit(FString NextPatchPath = TEXT(""));
   UFUNCTION()
-  void SendSavePatch();
+  void SendSavePatch(FString PatchPath = "");
   UFUNCTION()
   void SendLoadPatch(FString PatchPath);
   UFUNCTION()
@@ -122,6 +122,9 @@ private:
 
   UFUNCTION()
   void SetClientPort(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port);
+
+  UFUNCTION()
+  void ConfirmSaved(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port);
 
   // UFUNCTION()
   // void TestBundle(const FOSCBundle& InBundle, const FString& InIPAddress, int32 InPort);

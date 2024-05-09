@@ -34,6 +34,7 @@ public:
   void Init(
     TFunction<void ()> ExitFunction,
     TFunction<void ()> SaveFunction,
+    TFunction<void (FString)> inSaveAsFunction,
     TFunction<void ()> NewFunction,
     TFunction<void ()> ContinueFunction,
     TFunction<void (FString)> LoadFunction,
@@ -59,6 +60,8 @@ private:
   TCHAR* WidgetBlueprintReference =
     TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/widgets/BP_MainMenuWidget.BP_MainMenuWidget_C'");
   UMainMenuWidget* MainMenuWidget;
+
+  TFunction<void (FString)> SaveAsFunction;
 
   TArray<UFileListEntryData*> GenerateRecentPatchesEntries();
   TArray<UFileListEntryData*> GenerateFMDrivesEntries();

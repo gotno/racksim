@@ -81,14 +81,18 @@ void AMainMenu::HandleKeyboardInputUpdated(FString Input, int8 CursorIndex) {
 }
 
 void AMainMenu::HandleKeyboardInputConfirmed(FString Input) {
-  // TODO: use the input to save as
-  Keyboard->ClearInput();
-  MainMenuWidget->GotoMain();
+  MainMenuWidget->GotoLoading();
+
+  FString path = MainMenuWidget->CurrentFMDirectory;
+  path.Append(Input);
+  path.Append(".vcv");
+  SaveAsFunction(path);
 }
 
 void AMainMenu::Init(
   TFunction<void ()> ExitFunction,
   TFunction<void ()> SaveFunction,
+  TFunction<void (FString)> inSaveAsFunction,
   TFunction<void ()> NewFunction,
   TFunction<void ()> ContinueFunction,
   TFunction<void (FString)> LoadFunction,
@@ -98,6 +102,7 @@ void AMainMenu::Init(
 ) {
   MainMenuWidget->SetExitFunction(ExitFunction);
   MainMenuWidget->SetSaveFunction(SaveFunction);
+  SaveAsFunction = inSaveAsFunction;
   MainMenuWidget->SetNewFunction(NewFunction);
   MainMenuWidget->SetContinueFunction(ContinueFunction);
   MainMenuWidget->SetLoadFunction(LoadFunction);

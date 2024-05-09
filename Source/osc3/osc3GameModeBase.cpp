@@ -63,19 +63,25 @@ void Aosc3GameModeBase::EndPlay(const EEndPlayReason::Type EndPlayReason) {
   rackman->Cleanup();
 }
 
-void Aosc3GameModeBase::SavePatch() {
+void Aosc3GameModeBase::SavePatch(FString PatchPath) {
   Uosc3SaveGame* saveGame = MakeSaveGame();
   if (!saveGame) return;
 
   FAsyncSaveGameToSlotDelegate savedDelegate;
 
-  savedDelegate.BindLambda([this](const FString& SlotName, const int32 UserIndex, bool bSuccess) {
-    OSCctrl->SendSavePatch();
-    osc3GameState->SetSaved();
-    MainMenu->Show();
+  if (!PatchPath.IsEmpty())
+    osc3GameState->SetPatchPath(PatchPath);
+
+  savedDelegate.BindLambda([this, PatchPath](const FString& SlotName, const int32 UserIndex, bool bSuccess) {
+    OSCctrl->SendSavePatch(PatchPath);
   });
 
   UGameplayStatics::AsyncSaveGameToSlot(saveGame, osc3GameState->GetSaveName(), 0, savedDelegate);
+}
+
+void Aosc3GameModeBase::ConfirmSaved() {
+  osc3GameState->SetSaved();
+  MainMenu->Show();
 }
 
 void Aosc3GameModeBase::LoadPatch(FString PatchPath) {
@@ -588,8 +594,9 @@ void Aosc3GameModeBase::SpawnMainMenu() {
     );
   MainMenu->Init(
     [&]() { RequestExit(); }, // 'exit' button callback
-    [&]() { SavePatch(); }, // 'save patch' button callback
-    [&]() { LoadPatch(FString("new")); }, // 'new patch' button callback
+    [&]() { SavePatch(); }, // 'save' button callback
+    [&](FString PatchPath) { SavePatch(PatchPath); }, // 'save as' button callback
+    [&]() { LoadPatch(FString("new")); }, // 'new' button callback
     [&]() { LoadPatch(FString("autosave")); }, // 'continue with autosave' button callback
     [&](FString PatchPath) { LoadPatch(PatchPath); }, // general load patch callback
     [&](float CableOpacity) { // set cable opacity callback

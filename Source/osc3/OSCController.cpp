@@ -47,6 +47,7 @@ void AOSCController::Init() {
   AddRoute("/menu/synced/*", FName(TEXT("MenuSynced")));
 
   AddRoute("/set_rack_server_port/*", FName(TEXT("SetClientPort")));
+  AddRoute("/confirm_saved/*", FName(TEXT("ConfirmSaved")));
 
   // OSCServer->OnOscBundleReceived.AddDynamic(this, &AOSCController::TestBundle);
   // OSCServer->OnOscMessageReceived.AddDynamic(this, &AOSCController::TestMessage);
@@ -307,12 +308,13 @@ void AOSCController::SendCreateCable(int64 InputModuleId, int64 OutputModuleId, 
   OSCClient->SendOSCMessage(message);
 }
 
-void AOSCController::SendSavePatch() {
+void AOSCController::SendSavePatch(FString PatchPath) {
   if (bSendingPaused) return;
 
   FOSCAddress address = UOSCManager::ConvertStringToOSCAddress(FString(TEXT("/save_patch")));
   FOSCMessage message;
   UOSCManager::SetOSCMessageAddress(message, address);
+  UOSCManager::AddString(message, PatchPath);
 
   OSCClient->SendOSCMessage(message);
 }
@@ -713,6 +715,10 @@ void AOSCController::UpdateLight(const FOSCAddress& AddressPattern, const FOSCMe
   UOSCManager::GetFloat(message, 5, color.A);
 
   GameMode->UpdateLight(moduleId, lightId, color);
+}
+
+void AOSCController::ConfirmSaved(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port) {
+  GameMode->ConfirmSaved();
 }
 
 void AOSCController::SyncParam(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port) {
