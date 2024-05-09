@@ -6,6 +6,7 @@
 #include "Components/SizeBox.h"
 #include "Components/Button.h"
 #include "Components/TextBlock.h"
+#include "Components/Image.h"
 #include "Components/GridPanel.h"
 #include "Components/GridSlot.h"
 
@@ -65,6 +66,10 @@ void UKeyboardWidget::SetShifted() {
       key->SecondaryLabel->SetText(FText::FromString(key->Data.PrimaryLabel));
       key->PrimaryLabel->SetText(FText::FromString(key->Data.SecondaryLabel));
     }
+    if (key->Data.Type == EKeyType::SHIFT) {
+      key->ShiftIcon->SetVisibility(ESlateVisibility::Hidden);
+      key->ShiftLockIcon->SetVisibility(ESlateVisibility::Visible);
+    }
   }
 }
 
@@ -73,6 +78,10 @@ void UKeyboardWidget::SetUnshifted() {
     if (key->Data.IsShiftable()) {
       key->PrimaryLabel->SetText(FText::FromString(key->Data.PrimaryLabel));
       key->SecondaryLabel->SetText(FText::FromString(key->Data.SecondaryLabel));
+    }
+    if (key->Data.Type == EKeyType::SHIFT) {
+      key->ShiftLockIcon->SetVisibility(ESlateVisibility::Hidden);
+      key->ShiftIcon->SetVisibility(ESlateVisibility::Visible);
     }
   }
 }
@@ -115,12 +124,45 @@ void UKeyboardWidget::MakeKey(KeyInfo& Key, int8 Row, int8 Col) {
   UKeyboardKey* KeyWidget = CreateWidget<UKeyboardKey>(this, KeyClass);
   Keys.Add(KeyWidget);
 
-  KeyWidget->PrimaryLabel->SetText(FText::FromString(Key.PrimaryLabel));
-  KeyWidget->SecondaryLabel->SetText(FText::FromString(Key.SecondaryLabel));
   KeyWidget->SizeBox->SetHeightOverride(Key.RowSpan * 76);
   KeyWidget->SizeBox->SetWidthOverride(Key.ColSpan * 76);
   KeyWidget->Data = Key;
   
+  if (Key.Type == EKeyType::RAW) {
+    KeyWidget->PrimaryLabel->SetText(FText::FromString(Key.PrimaryLabel));
+    KeyWidget->SecondaryLabel->SetText(FText::FromString(Key.SecondaryLabel));
+  } else {
+    KeyWidget->PrimaryLabel->SetVisibility(ESlateVisibility::Hidden);
+    KeyWidget->SecondaryLabel->SetVisibility(ESlateVisibility::Hidden);
+  }
+
+  switch (Key.Type) {
+    case EKeyType::CONFIRM:
+      KeyWidget->ConfirmIcon->SetVisibility(ESlateVisibility::Visible);
+      break;
+    case EKeyType::BACKSPACE:
+      KeyWidget->BackspaceIcon->SetVisibility(ESlateVisibility::Visible);
+      break;
+    case EKeyType::SHIFT:
+      KeyWidget->ShiftIcon->SetVisibility(ESlateVisibility::Visible);
+      break;
+    case EKeyType::SPACE:
+      KeyWidget->SpaceIcon->SetVisibility(ESlateVisibility::Visible);
+      break;
+    case EKeyType::HOME:
+      KeyWidget->HomeIcon->SetVisibility(ESlateVisibility::Visible);
+      break;
+    case EKeyType::LEFT:
+      KeyWidget->LeftIcon->SetVisibility(ESlateVisibility::Visible);
+      break;
+    case EKeyType::RIGHT:
+      KeyWidget->RightIcon->SetVisibility(ESlateVisibility::Visible);
+      break;
+    case EKeyType::END:
+      KeyWidget->EndIcon->SetVisibility(ESlateVisibility::Visible);
+      break;
+  }
+
   KeyWidget->OnClickedDelegate.AddUniqueDynamic(this, &UKeyboardWidget::HandleKeyReleased);
   
   UGridSlot* slot = Cast<UGridSlot>(GridPanel->AddChild(KeyWidget));

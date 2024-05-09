@@ -10,6 +10,7 @@
 class UButton;
 class UTextBlock;
 class USizeBox;
+class UImage;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FKeyReleasedSignature, class UKeyboardKey*, Key);
 
@@ -31,6 +32,25 @@ public:
   UTextBlock* PrimaryLabel;
   UPROPERTY(meta = (BindWidget))
   UTextBlock* SecondaryLabel;
+
+  UPROPERTY(meta = (BindWidget))
+  UImage* BackspaceIcon;
+  UPROPERTY(meta = (BindWidget))
+  UImage* ConfirmIcon;
+  UPROPERTY(meta = (BindWidget))
+  UImage* ShiftIcon;
+  UPROPERTY(meta = (BindWidget))
+  UImage* ShiftLockIcon;
+  UPROPERTY(meta = (BindWidget))
+  UImage* SpaceIcon;
+  UPROPERTY(meta = (BindWidget))
+  UImage* HomeIcon;
+  UPROPERTY(meta = (BindWidget))
+  UImage* LeftIcon;
+  UPROPERTY(meta = (BindWidget))
+  UImage* RightIcon;
+  UPROPERTY(meta = (BindWidget))
+  UImage* EndIcon;
   
   KeyInfo Data;
 
