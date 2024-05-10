@@ -155,6 +155,8 @@ void AMainMenu::Tick(float DeltaTime) {
   
   if (PlayerPawn) {
     SetActorRotation(PlayerPawn->GetLookAtCameraRotation(GetActorLocation()));
+
+    SetActorLocation(GetActorLocation() + GetActorUpVector() * 10.f);
     SetActorLocation(
       FMath::VInterpTo(
         GetActorLocation(),
@@ -163,6 +165,7 @@ void AMainMenu::Tick(float DeltaTime) {
         10.f
       )
     );
+    SetActorLocation(GetActorLocation() + GetActorUpVector() * -10.f);
   }
 }
 
