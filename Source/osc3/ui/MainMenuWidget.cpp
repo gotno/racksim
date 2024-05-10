@@ -87,6 +87,8 @@ void UMainMenuWidget::UpdateState(Aosc3GameState* GameState) {
     LoadedPatchDirectory.Append("\\");
     LoadedPatchBasename = FPaths::GetBaseFilename(patchPath, true);
   }
+
+  bPatchIsSaved = !GameState->IsUnsaved();
 }
 
 void UMainMenuWidget::GotoLoading(FString UpperText, FString LowerText) {
@@ -126,8 +128,7 @@ void UMainMenuWidget::SetKeyboardInputText(FString Text) {
 void UMainMenuWidget::SetRecentPatchesListItems(TArray<UFileListEntryData*> Entries) {
   for (UFileListEntryData* entry : Entries) {
     entry->ClickCallback = [this](FString PatchPath) {
-      GotoLoading(FPaths::GetCleanFilename(PatchPath), LoadingPatchLabel);
-      LoadFunction(PatchPath);
+      HandleLoadPatch(PatchPath);
     };
   }
   RecentPatchesList->SetListItems(Entries);
@@ -185,8 +186,7 @@ void UMainMenuWidget::LoadDirectoryInFileManager(FString Directory) {
   for (FString& filename : found) {
     entries.Add(CreateListEntryData(filename, Directory + filename, EFileType::File, [this](FString PatchPath) {
       if (!bSavingAs) {
-        LoadFunction(PatchPath);
-        GotoLoading(FPaths::GetCleanFilename(PatchPath), LoadingPatchLabel);
+        HandleLoadPatch(PatchPath);
       } else {
         Keyboard->SetInput(FPaths::GetBaseFilename(PatchPath, true));
       }
@@ -259,6 +259,38 @@ void UMainMenuWidget::HandleConfirmationConfirmClick() {
 void UMainMenuWidget::HandleConfirmationCancelClick() {
   ConfirmationSection->SetVisibility(ESlateVisibility::Hidden);
   ConfirmationCancelFunction();
+}
+
+void UMainMenuWidget::HandleLoadPatch(FString PatchPath) {
+  if (bPatchIsSaved) {
+    GotoLoading(FPaths::GetCleanFilename(PatchPath), LoadingPatchLabel);
+    LoadFunction(PatchPath);
+  } else {
+    Confirm(
+      TEXT("The current patch is unsaved!\nAre you sure you want to open this one?"),
+      TEXT("Yes, open patch"),
+      [this, PatchPath]() {
+        GotoLoading(FPaths::GetCleanFilename(PatchPath), LoadingPatchLabel);
+        LoadFunction(PatchPath);
+      }
+    );
+  }
+}
+
+void UMainMenuWidget::HandleNewClick() {
+  if (bPatchIsSaved) {
+    GotoLoading(TEXT(""), LoadingPatchLabel);
+    NewFunction();
+  } else {
+    Confirm(
+      TEXT("The current patch is unsaved!\nAre you sure you want to create a new one?"),
+      TEXT("Yes, create patch"),
+      [this]() {
+        GotoLoading(TEXT(""), LoadingPatchLabel);
+        NewFunction();
+      }
+    );
+  }
 }
 
 void UMainMenuWidget::Confirm(

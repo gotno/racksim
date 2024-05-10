@@ -206,10 +206,7 @@ private:
 
   TFunction<void ()> NewFunction;
   UFUNCTION()
-  void HandleNewClick() {
-    GotoLoading();
-    NewFunction();
-  }
+  void HandleNewClick();
 
   TFunction<void ()> ContinueFunction;
   UFUNCTION()
@@ -231,6 +228,9 @@ private:
     TFunction<void (FString)> ClickCallback
   );
   void SetFileListHeadingText(FString HeadingText);
+
+  bool bPatchIsSaved{false};
+  void HandleLoadPatch(FString PatchPath);
 
   UFUNCTION()
   void HandleCableOpacitySliderChange(float Value);
