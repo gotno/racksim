@@ -66,6 +66,7 @@ public:
 protected:
 	virtual void NativeConstruct() override;	
 
+  // file section
   UPROPERTY(meta = (BindWidget))
   UBorder* MainSection;
   UPROPERTY(meta = (BindWidget))
@@ -83,13 +84,13 @@ protected:
   UPROPERTY(meta = (BindWidget))
   UButton* LoadButton;
   UPROPERTY(meta = (BindWidget))
-  UButton* ConfigurationButton;
-  UPROPERTY(meta = (BindWidget))
   UButton* ExitButton;
 
   UPROPERTY(meta = (BindWidget))
 	UListView* RecentPatchesList;
 
+  // filebrowser section
+  // TODO: rename this stuff FileBrowser*
   UPROPERTY(meta = (BindWidget))
   UBorder* FileManagerSection;
   UPROPERTY(meta = (BindWidget))
@@ -103,10 +104,7 @@ protected:
   UPROPERTY(meta = (BindWidget))
   UButton* FileManagerCancelButton;
 
-  UPROPERTY(meta = (BindWidget))
-  UBorder* ConfigurationSection;
-  UPROPERTY(meta = (BindWidget))
-  UButton* ConfigurationBackButton;
+  // config section
   UPROPERTY(meta = (BindWidget))
   USlider* CableOpacitySlider;
   UPROPERTY(meta = (BindWidget))
@@ -183,8 +181,6 @@ private:
   );
   void SetFileListHeadingText(FString HeadingText);
 
-  UFUNCTION()
-  void GotoConfiguration();
   UFUNCTION()
   void HandleCableOpacitySliderChange(float Value);
   UFUNCTION()

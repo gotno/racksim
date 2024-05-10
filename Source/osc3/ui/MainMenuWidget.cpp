@@ -20,7 +20,6 @@ void UMainMenuWidget::NativeConstruct() {
   SaveAsButton->OnReleased.AddDynamic(this, &UMainMenuWidget::HandleSaveAsClick);
   NewButton->OnReleased.AddDynamic(this, &UMainMenuWidget::HandleNewClick);
   ContinueButton->OnReleased.AddDynamic(this, &UMainMenuWidget::HandleContinueClick);
-  ConfigurationButton->OnReleased.AddDynamic(this, &UMainMenuWidget::GotoConfiguration);
   LoadButton->OnReleased.AddDynamic(this, &UMainMenuWidget::GotoFileManager);
   FileManagerCancelButton->OnReleased.AddDynamic(this, &UMainMenuWidget::GotoMain);
 
@@ -37,8 +36,6 @@ void UMainMenuWidget::NativeConstruct() {
   HandleCableTensionSliderChange(DEFAULT_CABLE_TENSION);
 
   CableColorCycleToggle->OnCheckStateChanged.AddDynamic(this, &UMainMenuWidget::HandleCableColorCycleToggle);
-
-  ConfigurationBackButton->OnReleased.AddDynamic(this, &UMainMenuWidget::GotoMain);
 }
 
 void UMainMenuWidget::UpdateState(Aosc3GameState* GameState) {
@@ -90,16 +87,10 @@ void UMainMenuWidget::GotoFileManager() {
   FileManagerSection->SetVisibility(ESlateVisibility::Visible);
 }
 
-void UMainMenuWidget::GotoConfiguration() {
-  HideAll();
-  ConfigurationSection->SetVisibility(ESlateVisibility::Visible);
-}
-
 void UMainMenuWidget::HideAll() {
   MainSection->SetVisibility(ESlateVisibility::Hidden);
   FileManagerSection->SetVisibility(ESlateVisibility::Hidden);
   LoadingSection->SetVisibility(ESlateVisibility::Hidden);
-  ConfigurationSection->SetVisibility(ESlateVisibility::Hidden);
 
   // keyboard/input
   bSavingAs = false;
