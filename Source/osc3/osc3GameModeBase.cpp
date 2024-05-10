@@ -341,7 +341,10 @@ void Aosc3GameModeBase::SpawnModule(VCVModule vcv_module) {
   ModuleActors.Add(vcv_module.id, module);
   module->Init(
     vcv_module,
-    [&]() { OSCctrl->NotifyReceived(TEXT("module"), vcv_module.id); }
+    [&]() {
+      // TODO: use this to kick off queued module spawning?
+      OSCctrl->NotifyReceived(TEXT("module"), vcv_module.id);
+    }
   );
 
   module->SetActorRotation(rotation);

@@ -245,6 +245,7 @@ TArray<UFileListEntryData*> AMainMenu::GenerateFMShortcutsEntries() {
   downloadsEntry->Path = downloadsPath;
   entries.Add(downloadsEntry);
 
+  // TODO
   // rack patch/plugin dir proposed
   // UE_LOG(LogTemp, Warning, TEXT("FPlatformProcess::UserSettingsDir() %s"), FPlatformProcess::UserSettingsDir());
   // LogTemp: Warning: FPlatformProcess::UserSettingsDir() C:/Users/floyd/AppData/Local/
