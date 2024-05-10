@@ -63,6 +63,9 @@ public:
   void SendMenuItemClick(const FVCVMenuItem& MenuItem) const;
   void SendMenuItemQuantityUpdate(const FVCVMenuItem& MenuItem, const float& Value) const;
   void SendModuleDiffRequest(const int64_t& ModuleId) const;
+  void ClearData() {
+    Modules.Empty();
+  }
 private:
   FTimerHandle hSyncPortTimer;
   int MinRackClientPort{7000}, RackClientPort{7000}, MaxRackClientPort{7020};

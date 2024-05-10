@@ -112,6 +112,7 @@ void Aosc3GameModeBase::LoadPatch(FString PatchPath) {
 void Aosc3GameModeBase::Reset() {
   StopAutosaving();
   OSCctrl->PauseSending();
+  OSCctrl->ClearData();
 
   AVCVCable::CurrentCableColorIndex = -1;
 
