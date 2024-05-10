@@ -17,6 +17,9 @@
 void UMainMenuWidget::NativeConstruct() {
   Super::NativeConstruct();
   
+  ConfirmationConfirmButton->OnReleased.AddDynamic(this, &UMainMenuWidget::HandleConfirmationConfirmClick);
+  ConfirmationCancelButton->OnReleased.AddDynamic(this, &UMainMenuWidget::HandleConfirmationCancelClick);
+
   ExitButton->OnReleased.AddDynamic(this, &UMainMenuWidget::HandleExitClick);
   SaveButton->OnReleased.AddDynamic(this, &UMainMenuWidget::HandleSaveClick);
   SaveAsButton->OnReleased.AddDynamic(this, &UMainMenuWidget::HandleSaveAsClick);
@@ -107,6 +110,7 @@ void UMainMenuWidget::HideAll() {
   MainSection->SetVisibility(ESlateVisibility::Hidden);
   FileManagerSection->SetVisibility(ESlateVisibility::Hidden);
   LoadingSection->SetVisibility(ESlateVisibility::Hidden);
+  ConfirmationSection->SetVisibility(ESlateVisibility::Hidden);
 
   // keyboard/input
   bSavingAs = false;
@@ -245,4 +249,46 @@ void UMainMenuWidget::HandleSaveAsClick() {
 
   FilenameInputContainer->SetVisibility(ESlateVisibility::Visible);
   Keyboard->SetActorHiddenInGame(false);
+}
+
+void UMainMenuWidget::HandleConfirmationConfirmClick() {
+  ConfirmationSection->SetVisibility(ESlateVisibility::Hidden);
+  ConfirmationConfirmFunction();
+}
+
+void UMainMenuWidget::HandleConfirmationCancelClick() {
+  ConfirmationSection->SetVisibility(ESlateVisibility::Hidden);
+  ConfirmationCancelFunction();
+}
+
+void UMainMenuWidget::Confirm(
+  FString ConfirmationLabel,
+  FString ConfirmButtonLabel,
+  TFunction<void ()> inConfirmationConfirmFunction,
+  bool bSolo
+) {
+  if (bSolo) HideAll();
+  ConfirmationText->SetText(FText::FromString(ConfirmationLabel));
+  ConfirmationConfirmButtonLabel->SetText(FText::FromString(ConfirmButtonLabel));
+  ConfirmationConfirmFunction = inConfirmationConfirmFunction;
+  ConfirmationCancelFunction = [this]() {
+    ConfirmationSection->SetVisibility(ESlateVisibility::Hidden);
+  };
+  ConfirmationSection->SetVisibility(ESlateVisibility::Visible);
+}
+
+void UMainMenuWidget::Confirm(
+  FString ConfirmationLabel,
+  FString ConfirmButtonLabel,
+  TFunction<void ()> inConfirmationConfirmFunction,
+  TFunction<void ()> inConfirmationCancelFunction,
+  bool bSolo
+) {
+  if (bSolo) HideAll();
+  ConfirmationText->SetText(FText::FromString(ConfirmationLabel));
+  ConfirmationConfirmButtonLabel->SetText(FText::FromString(ConfirmButtonLabel));
+  ConfirmationConfirmFunction = inConfirmationConfirmFunction;
+  ConfirmationCancelFunction = inConfirmationCancelFunction;
+  ConfirmationSection->SetVisibility(ESlateVisibility::Visible);
+  // Confirm(ConfirmationLabel, ConfirmButtonLabel, inConfirmationConfirmFunction, bSolo);
 }

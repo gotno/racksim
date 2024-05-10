@@ -63,6 +63,20 @@ public:
   }
 
   void SetKeyboardInputText(FString Text);
+
+  void Confirm(
+    FString ConfirmationLabel,
+    FString ConfirmButtonLabel,
+    TFunction<void ()> inConfirmationConfirmFunction,
+    bool bSolo = false
+  );
+  void Confirm(
+    FString ConfirmationLabel,
+    FString ConfirmButtonLabel,
+    TFunction<void ()> inConfirmationConfirmFunction,
+    TFunction<void ()> inConfirmationCancelFunction,
+    bool bSolo = false
+  );
 	
 protected:
 	virtual void NativeConstruct() override;	
@@ -74,6 +88,20 @@ protected:
   UTextBlock* Title;
   UPROPERTY(meta = (BindWidget))
   UTextBlock* TitlePatchPath;
+
+  // confirmation
+  UPROPERTY(meta = (BindWidget))
+  UBorder* ConfirmationSection;
+  UPROPERTY(meta = (BindWidget))
+  UTextBlock* ConfirmationText;
+  UPROPERTY(meta = (BindWidget))
+  UButton* ConfirmationConfirmButton;
+  UPROPERTY(meta = (BindWidget))
+  UTextBlock* ConfirmationConfirmButtonLabel;
+  UPROPERTY(meta = (BindWidget))
+  UButton* ConfirmationCancelButton;
+  UPROPERTY(meta = (BindWidget))
+  UTextBlock* ConfirmationCancelButtonLabel;
 
   // file section
   UPROPERTY(meta = (BindWidget))
@@ -144,6 +172,14 @@ private:
   FString CurrentFMDirectory{""};
 
   void HideAll();
+
+  TFunction<void ()> ConfirmationConfirmFunction;
+  UFUNCTION()
+  void HandleConfirmationConfirmClick();
+
+  TFunction<void ()> ConfirmationCancelFunction;
+  UFUNCTION()
+  void HandleConfirmationCancelClick();
 
   FString LoadingPatchLabel{"initializing simulation"};
 
