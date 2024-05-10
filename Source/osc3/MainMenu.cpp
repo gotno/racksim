@@ -81,12 +81,23 @@ void AMainMenu::HandleKeyboardInputUpdated(FString Input, int8 CursorIndex) {
 }
 
 void AMainMenu::HandleKeyboardInputConfirmed(FString Input) {
-  MainMenuWidget->GotoLoading();
-
   FString path = MainMenuWidget->CurrentFMDirectory;
   path.Append(Input);
   path.Append(".vcv");
-  SaveAsFunction(path);
+
+  if (FPaths::FileExists(path)) {
+    MainMenuWidget->Confirm(
+      TEXT("File exists! Overwrite?"),
+      TEXT("Yes, overwrite file"),
+      [this, path]() {
+        MainMenuWidget->GotoLoading(TEXT(""), TEXT("saving patch"));
+        SaveAsFunction(path);
+      }
+    );
+  } else {
+    MainMenuWidget->GotoLoading(TEXT(""), TEXT("saving patch"));
+    SaveAsFunction(path);
+  }
 }
 
 void AMainMenu::Init(
