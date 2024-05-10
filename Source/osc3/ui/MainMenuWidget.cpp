@@ -86,9 +86,11 @@ void UMainMenuWidget::UpdateState(Aosc3GameState* GameState) {
   }
 }
 
-void UMainMenuWidget::GotoLoading() {
+void UMainMenuWidget::GotoLoading(FString UpperText, FString LowerText) {
   HideAll();
   LoadingSection->SetVisibility(ESlateVisibility::Visible);
+  UpperLoadingText->SetText(FText::FromString(UpperText));
+  LowerLoadingText->SetText(FText::FromString(LowerText));
 }
 
 void UMainMenuWidget::GotoMain() {
@@ -120,7 +122,7 @@ void UMainMenuWidget::SetKeyboardInputText(FString Text) {
 void UMainMenuWidget::SetRecentPatchesListItems(TArray<UFileListEntryData*> Entries) {
   for (UFileListEntryData* entry : Entries) {
     entry->ClickCallback = [this](FString PatchPath) {
-      GotoLoading();
+      GotoLoading(FPaths::GetCleanFilename(PatchPath), LoadingPatchLabel);
       LoadFunction(PatchPath);
     };
   }
@@ -180,7 +182,7 @@ void UMainMenuWidget::LoadDirectoryInFileManager(FString Directory) {
     entries.Add(CreateListEntryData(filename, Directory + filename, EFileType::File, [this](FString PatchPath) {
       if (!bSavingAs) {
         LoadFunction(PatchPath);
-        GotoLoading();
+        GotoLoading(FPaths::GetCleanFilename(PatchPath), LoadingPatchLabel);
       } else {
         Keyboard->SetInput(FPaths::GetBaseFilename(PatchPath, true));
       }

@@ -31,7 +31,7 @@ public:
   void GotoMain();
 
   void UpdateState(Aosc3GameState* GameState);
-  void GotoLoading();
+  void GotoLoading(FString UpperText = "", FString LowerText = "");
 
   void SetExitFunction(TFunction<void ()> inExitFunction) {
     ExitFunction = inExitFunction;
@@ -128,6 +128,10 @@ protected:
   UPROPERTY(meta = (BindWidget))
   UBorder* LoadingSection;
   // UBorder* StatusSection; // aactually
+  UPROPERTY(meta = (BindWidget))
+  UTextBlock* UpperLoadingText;
+  UPROPERTY(meta = (BindWidget))
+  UTextBlock* LowerLoadingText;
 
   UPROPERTY(meta = (BindWidget))
   UBorder* FilenameInputContainer;
@@ -141,10 +145,12 @@ private:
 
   void HideAll();
 
+  FString LoadingPatchLabel{"initializing simulation"};
+
   TFunction<void ()> ExitFunction;
   UFUNCTION()
   void HandleExitClick() {
-    GotoLoading();
+    GotoLoading("goodbye", "leaving simulation");
     ExitFunction();
   }
 
