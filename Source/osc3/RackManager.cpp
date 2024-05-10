@@ -139,6 +139,27 @@ void URackManager::Cleanup() {
     .DeleteDirectoryRecursively(*(RackPluginsPath + "/gtnosft"));
 }
 
+void URackManager::GetAutosaveInfo(FString& PatchPath, bool& bIsSaved) {
+  FString JsonStr;
+	if (!FFileHelper::LoadFileToString(JsonStr, *AutosavePath))
+    return;
+
+  TSharedRef<TJsonReader<TCHAR>> JsonReader = TJsonReaderFactory<TCHAR>::Create(*JsonStr);
+  TSharedPtr<FJsonValue> OutJson;
+
+  if (!FJsonSerializer::Deserialize(JsonReader, OutJson))
+    return;
+
+  TSharedPtr<FJsonObject> rootJ = OutJson->AsObject();
+
+  rootJ->TryGetStringField(TEXT("path"), PatchPath);
+
+  // TODO: this doesn't work because we're not properly handling the history rackside
+  bool bUnsaved;
+  if (rootJ->TryGetBoolField(TEXT("unsaved"), bUnsaved))
+    bIsSaved = !bUnsaved;
+}
+
 void URackManager::LoadConfigurationData() {
   FString JsonStr;
 	if (!FFileHelper::LoadFileToString(JsonStr, *(RackUserPath + "settings.json")))

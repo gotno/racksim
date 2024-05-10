@@ -150,6 +150,22 @@ void Aosc3GameModeBase::RackConnectionEstablished() {
   OSCctrl->NotifyResync();
 
   osc3GameState->SetPatchLoaded(true);
+  if (osc3GameState->IsAutosave()) {
+    FString path;
+    bool bIsSaved;
+    rackman->GetAutosaveInfo(path, bIsSaved);
+
+    osc3GameState->SetPatchPath(path);
+    // TODO: this doesn't work because we aren't handling history properly on the rackside
+    // bIsSaved ? osc3GameState->SetSaved() : osc3GameState->SetUnsaved();
+    if (SaveData) {
+      if (SaveData->bAutosavePatchIsSaved) {
+        osc3GameState->SetSaved();
+      } else {
+        osc3GameState->SetUnsaved();
+      }
+    }
+  }
 
   if (SaveData) {
     PlayerPawn->SetActorLocation(SaveData->PlayerLocation);
@@ -184,6 +200,7 @@ void Aosc3GameModeBase::RestartRack(FString PatchPath) {
 void Aosc3GameModeBase::RequestExit() {
   Uosc3SaveGame* SaveGame = MakeSaveGame();
   if (!SaveGame) return;
+  SaveGame->bAutosavePatchIsSaved = !osc3GameState->IsUnsaved();
 
   FAsyncSaveGameToSlotDelegate SavedDelegate;
 
@@ -227,6 +244,7 @@ void Aosc3GameModeBase::StopAutosaving() {
 void Aosc3GameModeBase::Autosave() {
   Uosc3SaveGame* SaveGame = MakeSaveGame();
   if (!SaveGame) return;
+  SaveGame->bAutosavePatchIsSaved = !osc3GameState->IsUnsaved();
 
   FAsyncSaveGameToSlotDelegate SavedDelegate;
 

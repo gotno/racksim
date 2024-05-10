@@ -34,15 +34,18 @@ public:
 
   void SetPatchPath(FString inPatchPath) {
     PatchPath = inPatchPath;
+    bPatchIsAutosave = PatchPath.Equals(AutosaveName);
 
     if (PatchPath.Equals("new")) {
       SaveName = "";
-    } else if (PatchPath.Equals(AutosaveName)) {
+    } else if (bPatchIsAutosave) {
       SaveName = AutosaveName;
     } else {
       SaveName = FMD5::HashAnsiString(*PatchPath);
     }
   }
+
+  bool IsAutosave() { return bPatchIsAutosave; }
 
   FString GetSaveName() {
     return SaveName;
@@ -56,6 +59,7 @@ private:
   bool bPatchLoaded{false};
   bool bUnsaved{false};
   bool bCanContinueAutosave{false};
+  bool bPatchIsAutosave{false};
   FString PatchPath{""};
   FString SaveName{""};
   FString AutosaveName{"autosave"};

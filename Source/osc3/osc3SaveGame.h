@@ -51,4 +51,6 @@ public:
   bool bLibraryHidden{true};
   UPROPERTY(VisibleAnywhere, Category = Base)
   FVector PlayerLocation{0.f};
+  UPROPERTY(VisibleAnywhere, Category = Base)
+  bool bAutosavePatchIsSaved{false};
 };

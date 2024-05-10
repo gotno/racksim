@@ -20,6 +20,8 @@ public:
 
   float AutosaveInterval{15.f};
   TArray<FColor> CableColors;
+
+  void GetAutosaveInfo(FString& PatchPath, bool& bIsSaved);
   
 private:
   void SetupPlugin();
