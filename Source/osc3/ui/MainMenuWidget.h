@@ -211,7 +211,7 @@ private:
   TFunction<void ()> ContinueFunction;
   UFUNCTION()
   void HandleContinueClick() {
-    GotoLoading();
+    GotoLoading(TEXT(""), LoadingPatchLabel);
     ContinueFunction();
   }
 
