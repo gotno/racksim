@@ -52,7 +52,8 @@ void UMainMenuWidget::UpdateState(Aosc3GameState* GameState) {
     TitlePatchPath->SetVisibility(ESlateVisibility::Visible);
 
     FString filename = FPaths::GetBaseFilename(GameState->GetPatchPath(), true);
-    filename.Append(GameState->IsUnsaved() ? ".vcv*" : ".vcv");
+    filename.Append(".vcv");
+    if (GameState->IsUnsaved()) filename.InsertAt(0, "*");
     TitlePatchPath->SetText(FText::FromString(filename));
   }
 
