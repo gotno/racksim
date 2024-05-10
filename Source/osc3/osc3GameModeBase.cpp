@@ -103,7 +103,6 @@ void Aosc3GameModeBase::LoadPatch(FString PatchPath) {
       } else {
         StartRack(PatchPath);
       }
-
     }
   });
   UGameplayStatics::AsyncLoadGameFromSlot(osc3GameState->GetSaveName(), 0, LoadedDelegate);
@@ -117,6 +116,7 @@ void Aosc3GameModeBase::Reset() {
   AVCVCable::CurrentCableColorIndex = -1;
 
   osc3GameState->SetPatchLoaded(false);
+  osc3GameState->SetSaved();
   SaveData = nullptr;
 
   // modules/weldments
@@ -499,6 +499,7 @@ void Aosc3GameModeBase::RequestModuleSpawn(FString PluginSlug, FString ModuleSlu
 
   ReturnModulePositions.Add(returnId, ReturnModulePosition());
   OSCctrl->SendCreateModule(PluginSlug, ModuleSlug, returnId);
+  osc3GameState->SetUnsaved();
 }
 
 void Aosc3GameModeBase::RequestModuleDiff(const int64_t& ModuleId) const {
@@ -519,7 +520,10 @@ void Aosc3GameModeBase::DestroyModule(int64_t ModuleId, bool bSync) {
   ModuleActors[ModuleId]->Destroy();
   ModuleActors.Remove(ModuleId);
 
-  if (bSync) OSCctrl->SendDestroyModule(ModuleId);
+  if (bSync) {
+    OSCctrl->SendDestroyModule(ModuleId);
+    osc3GameState->SetUnsaved();
+  }
 }
 
 void Aosc3GameModeBase::RequestMenu(const FVCVMenu& Menu) const {
