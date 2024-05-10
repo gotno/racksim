@@ -17,6 +17,7 @@ class UTextBlock;
 class USlider;
 class UCheckBox;
 class USizeBox;
+class UHorizontalBox;
 
 UCLASS()
 class OSC3_API UMainMenuWidget : public UUserWidget
@@ -65,6 +66,14 @@ public:
 	
 protected:
 	virtual void NativeConstruct() override;	
+
+  // title
+  UPROPERTY(meta = (BindWidget))
+  UHorizontalBox* TitleContainer;
+  UPROPERTY(meta = (BindWidget))
+  UTextBlock* Title;
+  UPROPERTY(meta = (BindWidget))
+  UTextBlock* TitlePatchPath;
 
   // file section
   UPROPERTY(meta = (BindWidget))

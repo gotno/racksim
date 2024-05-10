@@ -11,6 +11,8 @@
 #include "Components/Slider.h"
 #include "Components/CheckBox.h"
 #include "Components/SizeBox.h"
+#include "Components/HorizontalBox.h"
+#include "Components/VerticalBoxSlot.h"
 
 void UMainMenuWidget::NativeConstruct() {
   Super::NativeConstruct();
@@ -39,6 +41,18 @@ void UMainMenuWidget::NativeConstruct() {
 }
 
 void UMainMenuWidget::UpdateState(Aosc3GameState* GameState) {
+  if (GameState->GetPatchPath().IsEmpty()) {
+    Cast<UVerticalBoxSlot>(TitleContainer->Slot)->SetHorizontalAlignment(EHorizontalAlignment::HAlign_Center);
+    TitlePatchPath->SetVisibility(ESlateVisibility::Collapsed);
+  } else {
+    Cast<UVerticalBoxSlot>(TitleContainer->Slot)->SetHorizontalAlignment(EHorizontalAlignment::HAlign_Left);
+    TitlePatchPath->SetVisibility(ESlateVisibility::Visible);
+
+    FString filename = FPaths::GetBaseFilename(GameState->GetPatchPath(), true);
+    filename.Append(GameState->IsUnsaved() ? ".vcv*" : ".vcv");
+    TitlePatchPath->SetText(FText::FromString(filename));
+  }
+
   // Continue with Autosave button
   ContinueButton->SetVisibility(
     !GameState->IsPatchLoaded() && GameState->CanContinueAutosave()
