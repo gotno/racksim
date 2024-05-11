@@ -37,7 +37,7 @@ public:
     bPatchIsAutosave = PatchPath.Equals(AutosaveName);
 
     if (PatchPath.Equals("new")) {
-      SaveName = "";
+      SaveName = "template";
     } else if (bPatchIsAutosave) {
       SaveName = AutosaveName;
     } else {

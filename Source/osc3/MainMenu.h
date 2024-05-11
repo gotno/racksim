@@ -37,6 +37,7 @@ public:
     TFunction<void (FString)> inSaveAsFunction,
     TFunction<void ()> NewFunction,
     TFunction<void ()> ContinueFunction,
+    TFunction<void ()> OverwriteTemplateFunction,
     TFunction<void (FString)> LoadFunction,
     TFunction<void (float)> CableOpacityUpdateFunction,
     TFunction<void (float)> CableTensionUpdateFunction,

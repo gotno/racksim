@@ -69,6 +69,12 @@ void Aosc3GameModeBase::SavePatch(FString PatchPath) {
 
   FAsyncSaveGameToSlotDelegate savedDelegate;
 
+  // if true, we're overwriting the template patch:
+  // save current path to revert back after save
+  FString revertPath{""};
+  if (PatchPath.Equals("new"))
+    revertPath = osc3GameState->GetPatchPath();
+
   if (!PatchPath.IsEmpty())
     osc3GameState->SetPatchPath(PatchPath);
 
@@ -77,6 +83,9 @@ void Aosc3GameModeBase::SavePatch(FString PatchPath) {
   });
 
   UGameplayStatics::AsyncSaveGameToSlot(saveGame, osc3GameState->GetSaveName(), 0, savedDelegate);
+
+  if (!revertPath.IsEmpty())
+    osc3GameState->SetPatchPath(revertPath);
 }
 
 void Aosc3GameModeBase::ConfirmSaved() {
@@ -95,7 +104,11 @@ void Aosc3GameModeBase::LoadPatch(FString PatchPath) {
     if (LoadedGameData) SaveData = Cast<Uosc3SaveGame>(LoadedGameData);
 
     if (rackman->RackIsRunning()) {
-      RestartRack(PatchPath);
+      if (PatchPath.Equals("new")) {
+        RestartRack(rackman->GetTemplatePath());
+      } else {
+        RestartRack(PatchPath);
+      }
     } else {
       if (PatchPath.Equals("autosave")) {
         StartRack("autosave");
@@ -623,8 +636,9 @@ void Aosc3GameModeBase::SpawnMainMenu() {
     [&]() { RequestExit(); }, // 'exit' button callback
     [&]() { SavePatch(); }, // 'save' button callback
     [&](FString PatchPath) { SavePatch(PatchPath); }, // 'save as' button callback
-    [&]() { LoadPatch(FString("new")); }, // 'new' button callback
-    [&]() { LoadPatch(FString("autosave")); }, // 'continue with autosave' button callback
+    [&]() { LoadPatch(TEXT("new")); }, // 'new' button callback
+    [&]() { LoadPatch(TEXT("autosave")); }, // 'continue with autosave' button callback
+    [&]() { SavePatch(TEXT("new")); },  // 'overwrite template' button callback
     [&](FString PatchPath) { LoadPatch(PatchPath); }, // general load patch callback
     [&](float CableOpacity) { // set cable opacity callback
       for (AVCVCable* cable : CableActors) {

@@ -25,6 +25,7 @@ void UMainMenuWidget::NativeConstruct() {
   SaveAsButton->OnReleased.AddDynamic(this, &UMainMenuWidget::HandleSaveAsClick);
   NewButton->OnReleased.AddDynamic(this, &UMainMenuWidget::HandleNewClick);
   ContinueButton->OnReleased.AddDynamic(this, &UMainMenuWidget::HandleContinueClick);
+  OverwriteTemplateButton->OnReleased.AddDynamic(this, &UMainMenuWidget::HandleOverwriteTemplateClick);
   LoadButton->OnReleased.AddDynamic(this, &UMainMenuWidget::GotoFileManager);
   FileManagerCancelButton->OnReleased.AddDynamic(this, &UMainMenuWidget::GotoMain);
 
@@ -74,6 +75,13 @@ void UMainMenuWidget::UpdateState(Aosc3GameState* GameState) {
 
   // Save As button
   SaveAsButtonContainer->SetVisibility(
+    GameState->IsPatchLoaded()
+      ? ESlateVisibility::Visible
+      : ESlateVisibility::Collapsed
+  );
+
+  // Overwrite template button
+  OverwriteTemplateButtonContainer->SetVisibility(
     GameState->IsPatchLoaded()
       ? ESlateVisibility::Visible
       : ESlateVisibility::Collapsed
@@ -292,6 +300,17 @@ void UMainMenuWidget::HandleNewClick() {
       }
     );
   }
+}
+
+void UMainMenuWidget::HandleOverwriteTemplateClick() {
+  Confirm(
+    TEXT("Overwrite template patch?"),
+    TEXT("Yes, overwrite patch"),
+    [this]() {
+      GotoLoading(TEXT(""), TEXT("overwriting template"));
+      OverwriteTemplateFunction();
+    }
+  );
 }
 
 void UMainMenuWidget::Confirm(

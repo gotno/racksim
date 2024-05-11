@@ -106,6 +106,7 @@ void AMainMenu::Init(
   TFunction<void (FString)> inSaveAsFunction,
   TFunction<void ()> NewFunction,
   TFunction<void ()> ContinueFunction,
+  TFunction<void ()> OverwriteTemplateFunction,
   TFunction<void (FString)> LoadFunction,
   TFunction<void (float)> CableOpacityUpdateFunction,
   TFunction<void (float)> CableTensionUpdateFunction,
@@ -116,6 +117,7 @@ void AMainMenu::Init(
   SaveAsFunction = inSaveAsFunction;
   MainMenuWidget->SetNewFunction(NewFunction);
   MainMenuWidget->SetContinueFunction(ContinueFunction);
+  MainMenuWidget->SetOverwriteTemplateFunction(OverwriteTemplateFunction);
   MainMenuWidget->SetLoadFunction(LoadFunction);
   MainMenuWidget->SetCableOpacityUpdateFunction(CableOpacityUpdateFunction);
   MainMenuWidget->SetCableTensionUpdateFunction(CableTensionUpdateFunction);

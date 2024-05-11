@@ -48,6 +48,9 @@ public:
   void SetLoadFunction(TFunction<void (FString)> inLoadFunction) {
     LoadFunction = inLoadFunction;
   }
+  void SetOverwriteTemplateFunction(TFunction<void ()> inOverwriteTemplateFunction) {
+    OverwriteTemplateFunction = inOverwriteTemplateFunction;
+  }
   void SetRecentPatchesListItems(TArray<UFileListEntryData*> Entries);
   void SetFMDrivesListItems(TArray<UFileListEntryData*> Entries);
   void SetFMShortcutsListItems(TArray<UFileListEntryData*> Entries);
@@ -109,6 +112,10 @@ protected:
   UPROPERTY(meta = (BindWidget))
   UButton* ContinueButton;
   UPROPERTY(meta = (BindWidget))
+  UButton* NewButton;
+  UPROPERTY(meta = (BindWidget))
+  UButton* LoadButton;
+  UPROPERTY(meta = (BindWidget))
   USizeBox* SaveButtonContainer;
   UPROPERTY(meta = (BindWidget))
   UButton* SaveButton;
@@ -117,9 +124,9 @@ protected:
   UPROPERTY(meta = (BindWidget))
   UButton* SaveAsButton;
   UPROPERTY(meta = (BindWidget))
-  UButton* NewButton;
+  USizeBox* OverwriteTemplateButtonContainer;
   UPROPERTY(meta = (BindWidget))
-  UButton* LoadButton;
+  UButton* OverwriteTemplateButton;
   UPROPERTY(meta = (BindWidget))
   UButton* ExitButton;
 
@@ -215,7 +222,13 @@ private:
     ContinueFunction();
   }
 
+  TFunction<void ()> OverwriteTemplateFunction;
+  UFUNCTION()
+  void HandleOverwriteTemplateClick();
+
   TFunction<void (FString)> LoadFunction;
+  bool bPatchIsSaved{false};
+  void HandleLoadPatch(FString PatchPath);
 
   UFUNCTION()
   void GotoFileManager();
@@ -228,9 +241,6 @@ private:
     TFunction<void (FString)> ClickCallback
   );
   void SetFileListHeadingText(FString HeadingText);
-
-  bool bPatchIsSaved{false};
-  void HandleLoadPatch(FString PatchPath);
 
   UFUNCTION()
   void HandleCableOpacitySliderChange(float Value);
