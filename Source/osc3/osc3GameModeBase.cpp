@@ -97,11 +97,12 @@ void Aosc3GameModeBase::LoadPatch(FString PatchPath) {
     if (rackman->RackIsRunning()) {
       RestartRack(PatchPath);
     } else {
-      if (!PatchPath.Equals("new") && !PatchPath.Equals("autosave")) {
-        PatchPathToBootstrap = PatchPath;
-        StartRack("new");
+      if (PatchPath.Equals("autosave")) {
+        StartRack("autosave");
       } else {
-        StartRack(PatchPath);
+        PatchPathToBootstrap =
+          PatchPath.Equals("new") ? rackman->GetTemplatePath() : PatchPath;
+        StartRack("new");
       }
     }
   });

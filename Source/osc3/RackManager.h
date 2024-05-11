@@ -22,7 +22,10 @@ public:
   TArray<FColor> CableColors;
 
   void GetAutosaveInfo(FString& PatchPath, bool& bIsSaved);
-  
+  FString GetTemplatePath() {
+    return TemplatePath;
+  }
+
 private:
   void SetupPlugin();
   void LaunchRack(FString PatchPath);
@@ -40,6 +43,7 @@ private:
   FString RackExecutablePath{""};
   FString OSCctrlBootstrapPath{""};
   FString AutosavePath{""};
+  FString TemplatePath{""};
 
   FProcHandle hRackProc;
   FTimerHandle hFinishRunTimer;
