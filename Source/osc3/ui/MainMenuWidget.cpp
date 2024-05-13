@@ -45,13 +45,16 @@ void UMainMenuWidget::NativeConstruct() {
 }
 
 void UMainMenuWidget::UpdateState(Aosc3GameState* GameState) {
-  if (GameState->GetPatchPath().IsEmpty()) {
-    Cast<UVerticalBoxSlot>(TitleContainer->Slot)->SetHorizontalAlignment(EHorizontalAlignment::HAlign_Center);
-    TitlePatchPath->SetVisibility(ESlateVisibility::Collapsed);
-  } else {
-    Cast<UVerticalBoxSlot>(TitleContainer->Slot)->SetHorizontalAlignment(EHorizontalAlignment::HAlign_Left);
-    TitlePatchPath->SetVisibility(ESlateVisibility::Visible);
+  Cast<UVerticalBoxSlot>(TitleContainer->Slot)->SetHorizontalAlignment(
+    GameState->IsPatchLoaded() ? EHorizontalAlignment::HAlign_Left : EHorizontalAlignment::HAlign_Center
+  );
+  TitlePatchPath->SetVisibility(
+    GameState->IsPatchLoaded() ? ESlateVisibility::Visible : ESlateVisibility::Collapsed
+  );
 
+  if (GameState->GetPatchPath().IsEmpty()) {
+    TitlePatchPath->SetText(FText::FromString(FString("*[unsaved patch]")));
+  } else {
     FString filename = FPaths::GetBaseFilename(GameState->GetPatchPath(), true);
     filename.Append(".vcv");
     if (GameState->IsUnsaved()) filename.InsertAt(0, "*");
