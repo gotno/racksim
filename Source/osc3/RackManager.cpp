@@ -154,7 +154,9 @@ void URackManager::GetAutosaveInfo(FString& PatchPath, bool& bIsSaved) {
 
   TSharedPtr<FJsonObject> rootJ = OutJson->AsObject();
 
-  rootJ->TryGetStringField(TEXT("path"), PatchPath);
+  FString path;
+  rootJ->TryGetStringField(TEXT("path"), path);
+  PatchPath = path.Equals(TemplatePath) ? "" : path;
 
   // TODO: this doesn't work because we're not properly handling the history rackside
   bool bUnsaved;
