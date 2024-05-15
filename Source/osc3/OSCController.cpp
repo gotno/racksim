@@ -132,7 +132,7 @@ void AOSCController::ModuleSyncComplete(const FOSCAddress& AddressPattern, const
 
   // UE_LOG(LogTemp, Warning, TEXT("Module Sync Complete %lld"), moduleId);
 
-  GameMode->SpawnModule(Modules[moduleId]);
+  GameMode->RegisterModule(Modules[moduleId]);
 }
 
 void AOSCController::AddModule(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port) {

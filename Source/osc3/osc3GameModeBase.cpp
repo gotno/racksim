@@ -139,6 +139,7 @@ void Aosc3GameModeBase::Reset() {
   ModulesSeekingWeldment.Empty();
   for (auto& pair : ModuleActors) pair.Value->Destroy();
   ModuleActors.Empty();
+  ModulesToSpawn.Empty();
 
   // cables
   for (AVCVCable* cable : CableActors) cable->Destroy();
@@ -317,6 +318,19 @@ void Aosc3GameModeBase::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 }
 
+void Aosc3GameModeBase::RegisterModule(VCVModule vcv_module) {
+  ModulesToSpawn.Insert(vcv_module, 0);
+  SpawnNextModule();
+}
+
+void Aosc3GameModeBase::SpawnNextModule() {
+  if (bSpawningModule) return;
+  if (ModulesToSpawn.IsEmpty()) return;
+
+  bSpawningModule = true;
+  SpawnModule(ModulesToSpawn.Pop());
+}
+
 void Aosc3GameModeBase::SpawnModule(VCVModule vcv_module) {
   if (ModuleActors.Contains(vcv_module.id)) return;
 
@@ -356,8 +370,10 @@ void Aosc3GameModeBase::SpawnModule(VCVModule vcv_module) {
   module->Init(
     vcv_module,
     [&]() {
-      // TODO: use this to kick off queued module spawning?
       OSCctrl->NotifyReceived(TEXT("module"), vcv_module.id);
+
+      bSpawningModule = false;
+      SpawnNextModule();
     }
   );
 
@@ -593,8 +609,8 @@ void Aosc3GameModeBase::RegisterSVG(FString Filepath) {
   if (SVGTextures.Contains(Filepath)) return;
 
   SVGTextures.Add(Filepath, nullptr);
-  UTexture2D* texture = svg2tex->GetTexture(Filepath);
-  SVGTextures[Filepath] = texture;
+  // UTexture2D* texture = svg2tex->GetTexture(Filepath);
+  // SVGTextures[Filepath] = texture;
 }
 
 UTexture2D* Aosc3GameModeBase::GetTexture(FString Filepath) {

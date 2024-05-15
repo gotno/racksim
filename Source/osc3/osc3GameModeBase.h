@@ -53,7 +53,7 @@ protected:
 public:
   void RackConnectionEstablished();
 
-  void SpawnModule(VCVModule vcv_module);
+  void RegisterModule(VCVModule vcv_module);
   void QueueCableSpawn(VCVCable vcv_cable);
   void RequestExit();
   void ToggleMainMenu();
@@ -130,6 +130,11 @@ private:
 
   UPROPERTY()
   TMap<int64, AVCVModule*> ModuleActors;
+
+  TArray<VCVModule> ModulesToSpawn;
+  bool bSpawningModule{false};
+  void SpawnNextModule();
+  void SpawnModule(VCVModule vcv_module);
 
   UPROPERTY()
   TArray<AModuleWeldment*> ModuleWeldments;
