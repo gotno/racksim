@@ -1,11 +1,35 @@
 #include "Utility/SvgRenderer.h"
 
+#include "osc3.h"
 #include "Utility/SvgWorker.h"
+#include "ThirdParty/include/svgrender/svgrender.h"
 
 #include "Engine/Texture2D.h"
 
-void USvgRenderer::RenderTextureAsync(const FString& Filepath) {
-  Worker = new FSvgWorker(Filepath);
+void USvgRenderer::BeginDestroy() {
+  Super::BeginDestroy();
+
+  if (Worker) {
+    delete Worker;
+    Worker = nullptr;
+  }
+}
+
+void USvgRenderer::RenderTextureAsync(FString Filepath) {
+  if (!Worker) Worker = new FSvgWorker();
+
+  float scale = 1.5 * RENDER_SCALE;
+  int width, height;
+
+  getSvgSize(TCHAR_TO_ANSI(*Filepath), width, height, scale);
+
+  TextureTarget = UTexture2D::CreateTransient(width, height, PF_R8G8B8A8);
+  if (!TextureTarget) {
+    UE_LOG(LogTemp, Warning, TEXT("SvgRenderer unable to create texture"));
+    return;
+  }
+
+  Worker->MakeTexture(Filepath, TextureTarget, scale);
 
   GetWorld()->GetTimerManager().SetTimer(
     hFinished,
@@ -17,29 +41,9 @@ void USvgRenderer::RenderTextureAsync(const FString& Filepath) {
 }
 
 void USvgRenderer::CheckFinished() {
-  if (Worker->width == -1 || Worker->height == -1) return;
+  if (!Worker->bIsFinished) return;
 
   GetWorld()->GetTimerManager().ClearTimer(hFinished);
-  MakeTexture();
-}
 
-void USvgRenderer::MakeTexture() {
-  int& width = Worker->width;
-  int& height = Worker->height;
-  FString& Filepath = Worker->Filepath;
-
-  UTexture2D* texture = UTexture2D::CreateTransient(width, height, PF_R8G8B8A8);
-  if (!texture) {
-    UE_LOG(LogTemp, Warning, TEXT("SvgRenderer unable to create texture"));
-    return;
-  }
-  
-  uint8* MipData = (uint8*)texture->GetPlatformData()->Mips[0].BulkData.Lock(LOCK_READ_WRITE);
-  FMemory::Memcpy(MipData, Worker->rgba, width * height * sizeof(uint32));
-  
-  texture->GetPlatformData()->Mips[0].BulkData.Unlock();
-  texture->UpdateResource();
-
-  OnTextureRenderedDelegate.Broadcast(Filepath, texture);
-  delete Worker;
+  OnTextureRenderedDelegate.Broadcast(Worker->Filepath, TextureTarget);
 }

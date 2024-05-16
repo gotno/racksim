@@ -2,22 +2,26 @@
 
 #include "CoreMinimal.h"
 
+class UTexture2D;
+
 class FSvgWorker : public FRunnable {
 
 public:
-  FSvgWorker(FString inFilepath);
+  FSvgWorker();
   virtual ~FSvgWorker();
 
+  void MakeTexture(FString& inFilepath, UTexture2D* inTextureTarget, float inScale);
+
+  UPROPERTY()
+  UTexture2D* TextureTarget{nullptr};
   FString Filepath;
-  int width{-1};
-  int height{-1};
-  unsigned char* rgba;
+  float scale{1.f};
+  bool bIsFinished{false};
 
   virtual bool Init() override;
   virtual uint32 Run() override;
-  virtual void Exit() override;
-  virtual void Stop() override;
-  
+
 private:
-  FRunnableThread* Thread;
+  FRunnableThread* Thread{nullptr};
+  void Cleanup();
 };

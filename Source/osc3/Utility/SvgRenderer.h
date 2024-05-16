@@ -14,7 +14,8 @@ class OSC3_API USvgRenderer : public UObject {
 	GENERATED_BODY()
 	
 public:	
-  void RenderTextureAsync(const FString& Filepath);
+  void BeginDestroy() override;
+  void RenderTextureAsync(FString Filepath);
   FTextureRenderedSignature OnTextureRenderedDelegate;
 
 private:
@@ -22,7 +23,9 @@ private:
 
   FSvgWorker* Worker;
 
+  UPROPERTY()
+  UTexture2D* TextureTarget;
+
   UFUNCTION()
   void CheckFinished();
-  void MakeTexture();
 };
