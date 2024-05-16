@@ -52,7 +52,6 @@ uint32 FSvgWorker::Run() {
   FMemory::Memcpy(MipData, rgba, width * height * sizeof(uint32));
 
   TextureTarget->GetPlatformData()->Mips[0].BulkData.Unlock();
-  TextureTarget->UpdateResource();
 
   delete[] rgba;
 

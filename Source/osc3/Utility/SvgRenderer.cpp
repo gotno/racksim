@@ -45,5 +45,6 @@ void USvgRenderer::CheckFinished() {
 
   GetWorld()->GetTimerManager().ClearTimer(hFinished);
 
+  TextureTarget->UpdateResource();
   OnTextureRenderedDelegate.Broadcast(Worker->Filepath, TextureTarget);
 }
