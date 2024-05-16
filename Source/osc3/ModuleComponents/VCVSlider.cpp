@@ -83,16 +83,6 @@ void AVCVSlider::BeginPlay() {
 
 void AVCVSlider::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
-  
-  if (!baseTexture) {
-    baseTexture = GameMode->GetTexture(Model->svgPaths[0]);
-    if (baseTexture) BaseFaceMaterialInstance->SetTextureParameterValue(FName("texture"), baseTexture);
-  }
-
-  if (!handleTexture) {
-    handleTexture = GameMode->GetTexture(Model->svgPaths[1]);
-    if (handleTexture) HandleFaceMaterialInstance->SetTextureParameterValue(FName("texture"), handleTexture);
-  }
 }
 
 void AVCVSlider::Init(VCVParam* vcv_param) {
@@ -110,6 +100,22 @@ void AVCVSlider::Init(VCVParam* vcv_param) {
   WorldOffset = getOffsetFromValue();
   HandleMeshComponent->SetWorldLocation(minHandlePosition + GetSliderDirectionVector() * WorldOffset);
   ShadowOffset = WorldOffset;
+
+  for (FString& svgPath : Model->svgPaths) {
+    if (!svgPath.IsEmpty())
+      GameMode->RequestTexture(svgPath, this, FName("SetTexture"));
+  }
+}
+
+void AVCVSlider::SetTexture(FString Filepath, UTexture2D* inTexture) {
+  if (!BaseTexture && !Model->svgPaths[0].IsEmpty() && Filepath.Equals(Model->svgPaths[0])) {
+    BaseTexture = inTexture;
+    BaseFaceMaterialInstance->SetTextureParameterValue(FName("texture"), BaseTexture);
+  }
+  if (!HandleTexture && !Model->svgPaths[1].IsEmpty() && Filepath.Equals(Model->svgPaths[1])) {
+    HandleTexture = inTexture;
+    HandleFaceMaterialInstance->SetTextureParameterValue(FName("texture"), HandleTexture);
+  }
 }
 
 FVector AVCVSlider::GetSliderDirectionVector() {

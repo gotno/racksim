@@ -24,6 +24,8 @@ class UTexture2D;
 class AModuleWeldment;
 class USvgRenderer;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FTextureReadySignature, FString, Filepath, UTexture2D*, Texture);
+
 struct ReturnModulePosition {
   FVector Location{0.f};
   FRotator Rotation{0.f};
@@ -82,8 +84,8 @@ public:
 
   TArray<FString> GetRecentPatchPaths();
 
-  void RegisterSVG(FString Filepath);
-  UTexture2D* GetTexture(FString Filepath);
+  void RequestTexture(FString& Filepath, UObject* Requester, const FName& Callback);
+  FTextureReadySignature OnTextureReadyDelegate;
   
   void SpawnLibrary();
   void SpawnMainMenu();
@@ -131,6 +133,13 @@ private:
   UPROPERTY()
   TMap<int64, AVCVModule*> ModuleActors;
 
+  void RegisterSvg(FString Filepath);
+  TArray<FString> SvgsToRender;
+  bool bRenderingSvg{false};
+  void RenderNextSvg();
+  UFUNCTION()
+  void AddSvgTexture(FString Filepath, UTexture2D* Texture);
+
   TArray<VCVModule> ModulesToSpawn;
   bool bSpawningModule{false};
   void SpawnNextModule();
@@ -157,7 +166,7 @@ private:
   Uosc3SaveGame* SaveData{nullptr};
 
   UPROPERTY()
-  TMap<FString, UTexture2D*> SVGTextures;
+  TMap<FString, UTexture2D*> SvgTextures;
   
   void SavePatch(FString PatchPath = "");
   void LoadPatch(FString PatchPath);

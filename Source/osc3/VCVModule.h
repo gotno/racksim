@@ -34,6 +34,8 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
   void Init(VCVModule vcv_module, TFunction<void ()> ReadyCallback);
+  UFUNCTION()
+  void SetTexture(FString& FilePath, UTexture2D* Texture);
   
   void GetSlugs(FString& PluginSlug, FString& Slug);
   int64_t Id{-1};

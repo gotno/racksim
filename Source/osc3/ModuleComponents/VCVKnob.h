@@ -22,6 +22,9 @@ public:
 	virtual void Tick(float DeltaTime) override;
   void Init(struct VCVParam* vcv_param) override;
 
+  UFUNCTION()
+  void SetTexture(FString Filepath, UTexture2D* inTexture);
+
 private:
   TCHAR* MeshReference = TEXT("/Script/Engine.StaticMesh'/Game/meshes/faced/unit_knob_faced.unit_knob_faced'");
   TCHAR* BaseMaterialReference = TEXT("/Script/Engine.Material'/Game/meshes/faced/generic_base.generic_base'");

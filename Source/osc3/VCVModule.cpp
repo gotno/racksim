@@ -185,7 +185,16 @@ void AVCVModule::Init(VCVModule vcv_module, TFunction<void ()> ReadyCallback) {
   SpawnComponents();
   SetHidden(false);
 
+  GameMode->RequestTexture(Model.panelSvgPath, this, FName("SetTexture"));
+
   ReadyCallback();
+}
+
+void AVCVModule::SetTexture(FString& Filepath, UTexture2D* inTexture) {
+  if (!Texture && Filepath.Equals(Model.panelSvgPath)) {
+    Texture = inTexture;
+    FaceMaterialInstance->SetTextureParameterValue(FName("texture"), Texture);
+  }
 }
 
 void AVCVModule::GetSlugs(FString& PluginSlug, FString& Slug) {
@@ -366,11 +375,6 @@ void AVCVModule::ToggleContextMenu() {
 
 void AVCVModule::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
-  
-  if (!Texture) {
-    Texture = GameMode->GetTexture(Model.panelSvgPath);
-    if (Texture) FaceMaterialInstance->SetTextureParameterValue(FName("texture"), Texture);
-  }
 
   SnapModeTick();
 

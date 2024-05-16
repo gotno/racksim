@@ -49,12 +49,6 @@ void AVCVSwitch::BeginPlay() {
 }
 
 void AVCVSwitch::Tick(float DeltaTime) {
-  for (int i = 0; i < Model->svgPaths.Num(); i++) {
-    if (!Frames[i]) {
-      Frames[i] = GameMode->GetTexture(Model->svgPaths[i]);
-      if (GetFrameFromValue() == i && Frames[i]) SetFrame();
-    }
-  }
 }
 
 void AVCVSwitch::Init(VCVParam* vcv_param) {
@@ -63,6 +57,21 @@ void AVCVSwitch::Init(VCVParam* vcv_param) {
   // remove empty svg paths and init frames array to same size
   vcv_param->svgPaths.Remove(FString(""));
   Frames.Init(nullptr, vcv_param->svgPaths.Num());
+
+  for (FString& svgPath : Model->svgPaths) {
+    GameMode->RequestTexture(svgPath, this, FName("SetTexture"));
+  }
+}
+
+void AVCVSwitch::SetTexture(FString Filepath, UTexture2D* inTexture) {
+  int frameIndex = 0;
+  for (UTexture2D* frameTexture : Frames) {
+    if (!Frames[frameIndex] && Filepath.Equals(Model->svgPaths[frameIndex])) {
+      Frames[frameIndex] = inTexture;
+      if (GetFrameFromValue() == frameIndex) SetFrame();
+    }
+    ++frameIndex;
+  }
 }
 
 void AVCVSwitch::Engage() {

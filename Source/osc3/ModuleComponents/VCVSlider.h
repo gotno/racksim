@@ -21,6 +21,9 @@ public:
 	virtual void Tick(float DeltaTime) override;
   void Init(VCVParam* vcv_param) override;
 
+  UFUNCTION()
+  void SetTexture(FString Filepath, UTexture2D* inTexture);
+
 private:
   UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
   UStaticMeshComponent* BaseMeshComponent;
@@ -58,9 +61,9 @@ private:
   TCHAR* HandleFaceMaterialReference = TEXT("/Script/Engine.Material'/Game/meshes/faced/texture_face.texture_face'");
 
   UPROPERTY()
-  UTexture2D* baseTexture;
+  UTexture2D* BaseTexture;
   UPROPERTY()
-  UTexture2D* handleTexture;
+  UTexture2D* HandleTexture;
 
   Aosc3GameModeBase* GameMode;
   

@@ -19,6 +19,9 @@ class OSC3_API AVCVPort : public AActor {
 public:	
 	AVCVPort();
 
+  UFUNCTION()
+  void SetTexture(FString Filepath, UTexture2D* inTexture);
+
 protected:
 	virtual void BeginPlay() override;
 

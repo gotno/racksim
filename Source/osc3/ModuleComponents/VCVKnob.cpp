@@ -54,18 +54,6 @@ void AVCVKnob::BeginPlay() {
   
 void AVCVKnob::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
-  if (!TextureBackground && !Model->svgPaths[0].IsEmpty()) {
-    TextureBackground = GameMode->GetTexture(Model->svgPaths[0]);
-    if (TextureBackground) FaceMaterialInstance->SetTextureParameterValue(FName("texture_bg"), TextureBackground);
-  }
-  if (!Texture && !Model->svgPaths[1].IsEmpty()) {
-    Texture = GameMode->GetTexture(Model->svgPaths[1]);
-    if (Texture) FaceMaterialInstance->SetTextureParameterValue(FName("texture"), Texture);
-  }
-  if (!TextureForeground && !Model->svgPaths[2].IsEmpty()) {
-    TextureForeground = GameMode->GetTexture(Model->svgPaths[2]);
-    if (TextureForeground) FaceMaterialInstance->SetTextureParameterValue(FName("texture_fg"), TextureForeground);
-  }
 }
 
 void AVCVKnob::Init(VCVParam* vcv_param) {
@@ -80,6 +68,26 @@ void AVCVKnob::Init(VCVParam* vcv_param) {
   SetActorScale3D(GetActorScale3D() * scaleMultiplier);
 
   BaseMaterialInstance->SetVectorParameterValue(FName("color"), Model->bodyColor);
+
+  for (FString& svgPath : Model->svgPaths) {
+    if (!svgPath.IsEmpty())
+      GameMode->RequestTexture(svgPath, this, FName("SetTexture"));
+  }
+}
+
+void AVCVKnob::SetTexture(FString Filepath, UTexture2D* inTexture) {
+  if (!TextureBackground && !Model->svgPaths[0].IsEmpty() && Filepath.Equals(Model->svgPaths[0])) {
+    TextureBackground = inTexture;
+    FaceMaterialInstance->SetTextureParameterValue(FName("texture_bg"), TextureBackground);
+  }
+  if (!Texture && !Model->svgPaths[1].IsEmpty() && Filepath.Equals(Model->svgPaths[1])) {
+    Texture = inTexture;
+    FaceMaterialInstance->SetTextureParameterValue(FName("texture"), Texture);
+  }
+  if (!TextureForeground && !Model->svgPaths[2].IsEmpty() && Filepath.Equals(Model->svgPaths[2])) {
+    TextureForeground = inTexture;
+    FaceMaterialInstance->SetTextureParameterValue(FName("texture_fg"), TextureForeground);
+  }
 }
 
 void AVCVKnob::UpdateRotation(FRotator inRotation) {

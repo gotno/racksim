@@ -54,11 +54,6 @@ void AVCVPort::BeginPlay() {
 
 void AVCVPort::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
-  
-  if (Texture) return;
-  
-  Texture = GameMode->GetTexture(Model->svgPath);
-  if (Texture) FaceMaterialInstance->SetTextureParameterValue(FName("texture"), Texture);
 }
 
 void AVCVPort::Init(VCVPort* vcv_port) {
@@ -71,6 +66,15 @@ void AVCVPort::Init(VCVPort* vcv_port) {
   
   BaseMaterialInstance->SetVectorParameterValue(FName("color"), Model->bodyColor);
   FaceMaterialInstance->SetVectorParameterValue(FName("background_color"), Model->bodyColor);
+
+  GameMode->RequestTexture(Model->svgPath, this, FName("SetTexture"));
+}
+
+void AVCVPort::SetTexture(FString Filepath, UTexture2D* inTexture) {
+  if (!Texture && Filepath.Equals(Model->svgPath)) {
+    Texture = inTexture;
+    FaceMaterialInstance->SetTextureParameterValue(FName("texture"), Texture);
+  }
 }
 
 bool AVCVPort::CanConnect(PortType inType) {

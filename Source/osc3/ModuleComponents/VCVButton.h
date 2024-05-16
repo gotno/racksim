@@ -21,6 +21,9 @@ public:
 	virtual void Tick(float DeltaTime) override;
   void Init(VCVParam* vcv_param) override;
 
+  UFUNCTION()
+  void SetTexture(FString Filepath, UTexture2D* inTexture);
+
 private:
   Aosc3GameModeBase* GameMode;
 
@@ -44,7 +47,6 @@ private:
   
   UPROPERTY()
   TArray<UTexture2D*> Frames;
-  bool bAllFramesFound{false};
 public:
   void Engage() override;
   void Release() override;

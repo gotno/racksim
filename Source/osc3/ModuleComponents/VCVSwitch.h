@@ -21,6 +21,9 @@ public:
 	virtual void Tick(float DeltaTime) override;
   void Init(VCVParam* vcv_param) override;
 
+  UFUNCTION()
+  void SetTexture(FString Filepath, UTexture2D* inTexture);
+
 private:
   UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
   UStaticMeshComponent* MeshComponent;
