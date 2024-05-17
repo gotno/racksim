@@ -49,6 +49,12 @@ private:
   UStaticMesh* StaticMesh;
 
   UPROPERTY()
+  UMaterialInstanceDynamic* LoadingMaterialInstance;
+  UPROPERTY()
+  UMaterialInterface* LoadingMaterialInterface;
+  TCHAR* LoadingMaterialRef{TEXT("/Script/Engine.Material'/Game/materials/loading.loading'")};
+
+  UPROPERTY()
   UMaterialInstanceDynamic* BaseMaterialInstance;
   UPROPERTY()
   UMaterialInterface* BaseMaterialInterface;

@@ -45,13 +45,16 @@ void AVCVButton::BeginPlay() {
   UBodySetup* bodySetup = MeshComponent->GetBodySetup();
   if (bodySetup) bodySetup->CollisionTraceFlag = ECollisionTraceFlag::CTF_UseComplexAsSimple;
 
+  if (LoadingMaterialInterface) {
+    MeshComponent->SetMaterial(1, LoadingMaterialInstance);
+  }
+
   if (BaseMaterialInterface) {
     BaseMaterialInstance = UMaterialInstanceDynamic::Create(BaseMaterialInterface, this);
     MeshComponent->SetMaterial(0, BaseMaterialInstance);
   }
   if (FaceMaterialInterface) {
     FaceMaterialInstance = UMaterialInstanceDynamic::Create(FaceMaterialInterface, this);
-    MeshComponent->SetMaterial(1, FaceMaterialInstance);
   }
 
   GameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(this));
@@ -80,16 +83,19 @@ void AVCVButton::SetTexture(FString Filepath, UTexture2D* inTexture) {
   int frameToShow =
     Model->value == Model->minValue ? 0 : Frames.Num() - 1;
 
+  bool bAnyTextureSet{false};
   int frameIndex = 0;
   for (UTexture2D* frameTexture : Frames) {
     if (!Frames[frameIndex] && Filepath.Equals(Model->svgPaths[frameIndex])) {
       Frames[frameIndex] = inTexture;
+      bAnyTextureSet = true;
 
       if (frameToShow == frameIndex)
         FaceMaterialInstance->SetTextureParameterValue(FName("texture"), Frames[frameIndex]);
     }
     ++frameIndex;
   }
+  if (bAnyTextureSet) MeshComponent->SetMaterial(1, FaceMaterialInstance);
 }
 
 void AVCVButton::Engage() {

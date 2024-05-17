@@ -10,19 +10,29 @@
 #include "Kismet/GameplayStatics.h"
 
 AVCVParam::AVCVParam() {
-	PrimaryActorTick.bCanEverTick = true;
-  
+  PrimaryActorTick.bCanEverTick = true;
+
   Tags.Add(TAG_INTERACTABLE_PARAM);
+
+  // loading indicator material
+  static ConstructorHelpers::FObjectFinder<UMaterial>
+    LoadingMaterialFinder(LoadingMaterialRef);
+  if (LoadingMaterialFinder.Object)
+    LoadingMaterialInterface = Cast<UMaterial>(LoadingMaterialFinder.Object);
 }
 
 void AVCVParam::BeginPlay() {
-	Super::BeginPlay();
+  Super::BeginPlay();
   GameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(this));
   GameState = Cast<Aosc3GameState>(UGameplayStatics::GetGameState(this));
+
+  if (LoadingMaterialInterface) {
+    LoadingMaterialInstance = UMaterialInstanceDynamic::Create(LoadingMaterialInterface, this);
+  }
 }
 
 void AVCVParam::Tick(float DeltaTime) {
-	Super::Tick(DeltaTime);
+  Super::Tick(DeltaTime);
 }
 
 void AVCVParam::Init(VCVParam* vcv_param) {

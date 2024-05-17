@@ -27,6 +27,12 @@ AVCVPort::AVCVPort() {
     BaseMaterialInterface = Cast<UMaterial>(BaseMaterial.Object);
   }
 
+  // loading indicator material
+  static ConstructorHelpers::FObjectFinder<UMaterial>
+    LoadingMaterialFinder(LoadingMaterialRef);
+  if (LoadingMaterialFinder.Object)
+    LoadingMaterialInterface = Cast<UMaterial>(LoadingMaterialFinder.Object);
+
   static ConstructorHelpers::FObjectFinder<UMaterial> FaceMaterial(TEXT("/Script/Engine.Material'/Game/meshes/faced/texture_face_bg.texture_face_bg'"));
   if (FaceMaterial.Object) {
     FaceMaterialInterface = Cast<UMaterial>(FaceMaterial.Object);
@@ -39,6 +45,11 @@ void AVCVPort::BeginPlay() {
   Module = Cast<AVCVModule>(GetOwner());
   GameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(this));
 
+  if (LoadingMaterialInterface) {
+    LoadingMaterialInstance = UMaterialInstanceDynamic::Create(LoadingMaterialInterface, this);
+    StaticMeshComponent->SetMaterial(1, LoadingMaterialInstance);
+  }
+
   if (BaseMaterialInterface) {
     BaseMaterialInstance = UMaterialInstanceDynamic::Create(BaseMaterialInterface, this);
     StaticMeshComponent->SetMaterial(0, BaseMaterialInstance);
@@ -46,7 +57,6 @@ void AVCVPort::BeginPlay() {
 
   if (FaceMaterialInterface) {
     FaceMaterialInstance = UMaterialInstanceDynamic::Create(FaceMaterialInterface, this);
-    StaticMeshComponent->SetMaterial(1, FaceMaterialInstance);
   }
   
   Tags.Add(TAG_INTERACTABLE_PORT);
@@ -73,6 +83,7 @@ void AVCVPort::Init(VCVPort* vcv_port) {
 void AVCVPort::SetTexture(FString Filepath, UTexture2D* inTexture) {
   if (!Texture && Filepath.Equals(Model->svgPath)) {
     Texture = inTexture;
+    StaticMeshComponent->SetMaterial(1, FaceMaterialInstance);
     FaceMaterialInstance->SetTextureParameterValue(FName("texture"), Texture);
   }
 }
