@@ -88,6 +88,12 @@ AVCVModule::AVCVModule() {
   SnapColliderRight->SetCollisionObjectType(RIGHT_SNAP_COLLIDER_OBJECT);
 
   // OutlineMaterialInterface setup in GrabbableActor
+
+  // loading indicator material
+  static ConstructorHelpers::FObjectFinder<UMaterial>
+    LoadingMaterialFinder(LoadingMaterialRef);
+  if (LoadingMaterialFinder.Object)
+    LoadingMaterialInterface = Cast<UMaterial>(LoadingMaterialFinder.Object);
 }
 
 void AVCVModule::BeginPlay() {
@@ -102,6 +108,11 @@ void AVCVModule::BeginPlay() {
   UBodySetup* bodySetup = StaticMeshComponent->GetBodySetup();
   if (bodySetup) bodySetup->CollisionTraceFlag = ECollisionTraceFlag::CTF_UseComplexAsSimple;
 
+  if (LoadingMaterialInterface) {
+    LoadingMaterialInstance = UMaterialInstanceDynamic::Create(LoadingMaterialInterface, this);
+    StaticMeshComponent->SetMaterial(1, LoadingMaterialInstance);
+  }
+
   if (BaseMaterialInterface) {
     BaseMaterialInstance = UMaterialInstanceDynamic::Create(BaseMaterialInterface, this);
     StaticMeshComponent->SetMaterial(0, BaseMaterialInstance);
@@ -109,7 +120,6 @@ void AVCVModule::BeginPlay() {
 
   if (FaceMaterialInterface) {
     FaceMaterialInstance = UMaterialInstanceDynamic::Create(FaceMaterialInterface, this);
-    StaticMeshComponent->SetMaterial(1, FaceMaterialInstance);
   }
 
   if (SnapIndicatorMaterialInterface) {
@@ -185,7 +195,17 @@ void AVCVModule::Init(VCVModule vcv_module, TFunction<void ()> ReadyCallback) {
   SpawnComponents();
   SetHidden(false);
 
+  GameMode->RequestTexture(Model.panelSvgPath, this, FName("SetTexture"));
+
   ReadyCallback();
+}
+
+void AVCVModule::SetTexture(FString& Filepath, UTexture2D* inTexture) {
+  if (!Texture && Filepath.Equals(Model.panelSvgPath)) {
+    Texture = inTexture;
+    StaticMeshComponent->SetMaterial(1, FaceMaterialInstance);
+    FaceMaterialInstance->SetTextureParameterValue(FName("texture"), Texture);
+  }
 }
 
 void AVCVModule::GetSlugs(FString& PluginSlug, FString& Slug) {
@@ -366,11 +386,6 @@ void AVCVModule::ToggleContextMenu() {
 
 void AVCVModule::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
-  
-  if (!Texture) {
-    Texture = GameMode->GetTexture(Model.panelSvgPath);
-    if (Texture) FaceMaterialInstance->SetTextureParameterValue(FName("texture"), Texture);
-  }
 
   SnapModeTick();
 

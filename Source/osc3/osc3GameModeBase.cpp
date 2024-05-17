@@ -29,6 +29,7 @@ Aosc3GameModeBase::Aosc3GameModeBase() {
   OSCctrl = CreateDefaultSubobject<AOSCController>(FName(TEXT("OSCctrl")));
   rackman = CreateDefaultSubobject<URackManager>(FName(TEXT("rackman")));
   svg2tex = CreateDefaultSubobject<USvgRenderer>(FName(TEXT("svg2tex")));
+  svg2tex->OnTextureRenderedDelegate.AddUniqueDynamic(this, &Aosc3GameModeBase::AddSvgTexture);
 }
 
 void Aosc3GameModeBase::BeginPlay() {
@@ -139,6 +140,7 @@ void Aosc3GameModeBase::Reset() {
   ModulesSeekingWeldment.Empty();
   for (auto& pair : ModuleActors) pair.Value->Destroy();
   ModuleActors.Empty();
+  ModulesToSpawn.Empty();
 
   // cables
   for (AVCVCable* cable : CableActors) cable->Destroy();
@@ -317,6 +319,55 @@ void Aosc3GameModeBase::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 }
 
+void Aosc3GameModeBase::RequestTexture(FString& Filepath, UObject* Requester, const FName& Callback) {
+  RegisterSvg(Filepath);
+
+  FScriptDelegate delegate;
+  delegate.BindUFunction(Requester, Callback);
+  OnTextureReadyDelegate.AddUnique(delegate);
+
+  if (SvgTextures[Filepath])
+    OnTextureReadyDelegate.Broadcast(Filepath, SvgTextures[Filepath]);
+}
+
+void Aosc3GameModeBase::RegisterSvg(FString Filepath) {
+  if (Filepath.Compare(FString("")) == 0) return;
+  if (SvgTextures.Contains(Filepath)) return;
+
+  SvgTextures.Add(Filepath, nullptr);
+  SvgsToRender.Insert(Filepath, 0);
+  RenderNextSvg();
+}
+
+void Aosc3GameModeBase::RenderNextSvg() {
+  if (bRenderingSvg) return;
+  if (SvgsToRender.IsEmpty()) return;
+
+  bRenderingSvg = true;
+  svg2tex->RenderTextureAsync(SvgsToRender.Pop());
+}
+
+void Aosc3GameModeBase::AddSvgTexture(FString Filepath, UTexture2D* Texture) {
+  SvgTextures[Filepath] = Texture;
+  OnTextureReadyDelegate.Broadcast(Filepath, Texture);
+
+  bRenderingSvg = false;
+  RenderNextSvg();
+}
+
+void Aosc3GameModeBase::RegisterModule(VCVModule vcv_module) {
+  ModulesToSpawn.Insert(vcv_module, 0);
+  SpawnNextModule();
+}
+
+void Aosc3GameModeBase::SpawnNextModule() {
+  if (bSpawningModule) return;
+  if (ModulesToSpawn.IsEmpty()) return;
+
+  bSpawningModule = true;
+  SpawnModule(ModulesToSpawn.Pop());
+}
+
 void Aosc3GameModeBase::SpawnModule(VCVModule vcv_module) {
   if (ModuleActors.Contains(vcv_module.id)) return;
 
@@ -356,8 +407,10 @@ void Aosc3GameModeBase::SpawnModule(VCVModule vcv_module) {
   module->Init(
     vcv_module,
     [&]() {
-      // TODO: use this to kick off queued module spawning?
       OSCctrl->NotifyReceived(TEXT("module"), vcv_module.id);
+
+      bSpawningModule = false;
+      SpawnNextModule();
     }
   );
 
@@ -586,20 +639,6 @@ void Aosc3GameModeBase::UpdateParam(int64_t ModuleId, VCVParam& Param) {
 
 void Aosc3GameModeBase::SendParamUpdate(int64_t ModuleId, int32 ParamId, float Value) {
   OSCctrl->SendParamUpdate(ModuleId, ParamId, Value);
-}
-
-void Aosc3GameModeBase::RegisterSVG(FString Filepath) {
-  if (Filepath.Compare(FString("")) == 0) return;
-  if (SVGTextures.Contains(Filepath)) return;
-
-  SVGTextures.Add(Filepath, nullptr);
-  UTexture2D* texture = svg2tex->GetTexture(Filepath);
-  SVGTextures[Filepath] = texture;
-}
-
-UTexture2D* Aosc3GameModeBase::GetTexture(FString Filepath) {
-  if (!SVGTextures.Contains(Filepath)) return nullptr;
-  return SVGTextures[Filepath];
 }
 
 void Aosc3GameModeBase::SpawnLibrary() {

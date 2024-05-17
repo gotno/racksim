@@ -57,15 +57,19 @@ AVCVSlider::AVCVSlider() {
 }
 
 void AVCVSlider::BeginPlay() {
-	Super::BeginPlay();
-	
+  Super::BeginPlay();
+
+  if (LoadingMaterialInterface) {
+    BaseMeshComponent->SetMaterial(1, LoadingMaterialInstance);
+    HandleMeshComponent->SetMaterial(1, LoadingMaterialInstance);
+  }
+
   if (BaseMaterialInterface) {
     BaseMaterialInstance = UMaterialInstanceDynamic::Create(BaseMaterialInterface, this);
     BaseMeshComponent->SetMaterial(0, BaseMaterialInstance);
   }
   if (BaseFaceMaterialInterface) {
     BaseFaceMaterialInstance = UMaterialInstanceDynamic::Create(BaseFaceMaterialInterface, this);
-    BaseMeshComponent->SetMaterial(1, BaseFaceMaterialInstance);
   }
 
   if (HandleMaterialInterface) {
@@ -75,7 +79,6 @@ void AVCVSlider::BeginPlay() {
   }
   if (HandleFaceMaterialInterface) {
     HandleFaceMaterialInstance = UMaterialInstanceDynamic::Create(HandleFaceMaterialInterface, this);
-    HandleMeshComponent->SetMaterial(1, HandleFaceMaterialInstance);
   }
   
   GameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(this));
@@ -83,16 +86,6 @@ void AVCVSlider::BeginPlay() {
 
 void AVCVSlider::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
-  
-  if (!baseTexture) {
-    baseTexture = GameMode->GetTexture(Model->svgPaths[0]);
-    if (baseTexture) BaseFaceMaterialInstance->SetTextureParameterValue(FName("texture"), baseTexture);
-  }
-
-  if (!handleTexture) {
-    handleTexture = GameMode->GetTexture(Model->svgPaths[1]);
-    if (handleTexture) HandleFaceMaterialInstance->SetTextureParameterValue(FName("texture"), handleTexture);
-  }
 }
 
 void AVCVSlider::Init(VCVParam* vcv_param) {
@@ -110,6 +103,29 @@ void AVCVSlider::Init(VCVParam* vcv_param) {
   WorldOffset = getOffsetFromValue();
   HandleMeshComponent->SetWorldLocation(minHandlePosition + GetSliderDirectionVector() * WorldOffset);
   ShadowOffset = WorldOffset;
+
+  for (FString& svgPath : Model->svgPaths) {
+    if (!svgPath.IsEmpty())
+      GameMode->RequestTexture(svgPath, this, FName("SetTexture"));
+  }
+}
+
+void AVCVSlider::SetTexture(FString Filepath, UTexture2D* inTexture) {
+  bool bAnyTextureSet{false};
+  if (!BaseTexture && !Model->svgPaths[0].IsEmpty() && Filepath.Equals(Model->svgPaths[0])) {
+    BaseTexture = inTexture;
+    bAnyTextureSet = true;
+    BaseFaceMaterialInstance->SetTextureParameterValue(FName("texture"), BaseTexture);
+  }
+  if (!HandleTexture && !Model->svgPaths[1].IsEmpty() && Filepath.Equals(Model->svgPaths[1])) {
+    HandleTexture = inTexture;
+    bAnyTextureSet = true;
+    HandleFaceMaterialInstance->SetTextureParameterValue(FName("texture"), HandleTexture);
+  }
+  if (bAnyTextureSet) {
+    BaseMeshComponent->SetMaterial(1, BaseFaceMaterialInstance);
+    HandleMeshComponent->SetMaterial(1, HandleFaceMaterialInstance);
+  }
 }
 
 FVector AVCVSlider::GetSliderDirectionVector() {

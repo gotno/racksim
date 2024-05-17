@@ -34,6 +34,8 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
   void Init(VCVModule vcv_module, TFunction<void ()> ReadyCallback);
+  UFUNCTION()
+  void SetTexture(FString& FilePath, UTexture2D* Texture);
   
   void GetSlugs(FString& PluginSlug, FString& Slug);
   int64_t Id{-1};
@@ -103,6 +105,12 @@ private:
   UMaterialInstanceDynamic* SnapIndicatorMaterialInstance;
   UPROPERTY()
   UMaterialInterface* SnapIndicatorMaterialInterface;
+
+  UPROPERTY()
+  UMaterialInstanceDynamic* LoadingMaterialInstance;
+  UPROPERTY()
+  UMaterialInterface* LoadingMaterialInterface;
+  TCHAR* LoadingMaterialRef{TEXT("/Script/Engine.Material'/Game/materials/loading.loading'")};
 
   UPROPERTY()
   UMaterialInstanceDynamic* BaseMaterialInstance;

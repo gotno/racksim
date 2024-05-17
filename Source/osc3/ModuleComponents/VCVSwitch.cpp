@@ -35,6 +35,10 @@ AVCVSwitch::AVCVSwitch() {
 void AVCVSwitch::BeginPlay() {
 	Super::BeginPlay();
 
+  if (LoadingMaterialInterface) {
+    MeshComponent->SetMaterial(1, LoadingMaterialInstance);
+  }
+
   if (BaseMaterialInterface) {
     BaseMaterialInstance = UMaterialInstanceDynamic::Create(BaseMaterialInterface, this);
     MeshComponent->SetMaterial(0, BaseMaterialInstance);
@@ -42,19 +46,12 @@ void AVCVSwitch::BeginPlay() {
   }
   if (FaceMaterialInterface) {
     FaceMaterialInstance = UMaterialInstanceDynamic::Create(FaceMaterialInterface, this);
-    MeshComponent->SetMaterial(1, FaceMaterialInstance);
   }
 
   GameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(this));
 }
 
 void AVCVSwitch::Tick(float DeltaTime) {
-  for (int i = 0; i < Model->svgPaths.Num(); i++) {
-    if (!Frames[i]) {
-      Frames[i] = GameMode->GetTexture(Model->svgPaths[i]);
-      if (GetFrameFromValue() == i && Frames[i]) SetFrame();
-    }
-  }
 }
 
 void AVCVSwitch::Init(VCVParam* vcv_param) {
@@ -63,6 +60,24 @@ void AVCVSwitch::Init(VCVParam* vcv_param) {
   // remove empty svg paths and init frames array to same size
   vcv_param->svgPaths.Remove(FString(""));
   Frames.Init(nullptr, vcv_param->svgPaths.Num());
+
+  for (FString& svgPath : Model->svgPaths) {
+    GameMode->RequestTexture(svgPath, this, FName("SetTexture"));
+  }
+}
+
+void AVCVSwitch::SetTexture(FString Filepath, UTexture2D* inTexture) {
+  bool bAnyTextureSet{false};
+  int frameIndex = 0;
+  for (UTexture2D* frameTexture : Frames) {
+    if (!Frames[frameIndex] && Filepath.Equals(Model->svgPaths[frameIndex])) {
+      Frames[frameIndex] = inTexture;
+      bAnyTextureSet = true;
+      if (GetFrameFromValue() == frameIndex) SetFrame();
+    }
+    ++frameIndex;
+  }
+  if (bAnyTextureSet) MeshComponent->SetMaterial(1, FaceMaterialInstance);
 }
 
 void AVCVSwitch::Engage() {

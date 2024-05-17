@@ -19,6 +19,9 @@ class OSC3_API AVCVPort : public AActor {
 public:	
 	AVCVPort();
 
+  UFUNCTION()
+  void SetTexture(FString Filepath, UTexture2D* inTexture);
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -44,6 +47,12 @@ private:
   UStaticMeshComponent* StaticMeshComponent;
   UPROPERTY()
   UStaticMesh* StaticMesh;
+
+  UPROPERTY()
+  UMaterialInstanceDynamic* LoadingMaterialInstance;
+  UPROPERTY()
+  UMaterialInterface* LoadingMaterialInterface;
+  TCHAR* LoadingMaterialRef{TEXT("/Script/Engine.Material'/Game/materials/loading.loading'")};
 
   UPROPERTY()
   UMaterialInstanceDynamic* BaseMaterialInstance;

@@ -45,36 +45,22 @@ void AVCVButton::BeginPlay() {
   UBodySetup* bodySetup = MeshComponent->GetBodySetup();
   if (bodySetup) bodySetup->CollisionTraceFlag = ECollisionTraceFlag::CTF_UseComplexAsSimple;
 
+  if (LoadingMaterialInterface) {
+    MeshComponent->SetMaterial(1, LoadingMaterialInstance);
+  }
+
   if (BaseMaterialInterface) {
     BaseMaterialInstance = UMaterialInstanceDynamic::Create(BaseMaterialInterface, this);
     MeshComponent->SetMaterial(0, BaseMaterialInstance);
   }
   if (FaceMaterialInterface) {
     FaceMaterialInstance = UMaterialInstanceDynamic::Create(FaceMaterialInterface, this);
-    MeshComponent->SetMaterial(1, FaceMaterialInstance);
   }
 
   GameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(this));
 }
 
 void AVCVButton::Tick(float DeltaTime) {
-  if (!bAllFramesFound) {
-    int initialFrameToShow =
-      Model->value == Model->minValue ? 0 : Frames.Num() - 1;
-    bool bAnyFramesMissing{false};
-
-    for (int i = 0; i < Model->svgPaths.Num(); i++) {
-      if (!Frames[i]) {
-        bAnyFramesMissing = true;
-        Frames[i] = GameMode->GetTexture(Model->svgPaths[i]);
-        if (Frames[i] && initialFrameToShow == i) {
-          FaceMaterialInstance->SetTextureParameterValue(FName("texture"), Frames[i]);
-        }
-      }
-    }
-
-    bAllFramesFound = !bAnyFramesMissing;
-  }
 }
 
 void AVCVButton::Init(VCVParam* vcv_param) {
@@ -87,6 +73,29 @@ void AVCVButton::Init(VCVParam* vcv_param) {
   SpawnLights(MeshComponent);
   BaseMaterialInstance->SetVectorParameterValue(TEXT("color"), Model->bodyColor);
   FaceMaterialInstance->SetVectorParameterValue(TEXT("background_color"), Model->bodyColor);
+
+  for (FString& svgPath : Model->svgPaths) {
+    GameMode->RequestTexture(svgPath, this, FName("SetTexture"));
+  }
+}
+
+void AVCVButton::SetTexture(FString Filepath, UTexture2D* inTexture) {
+  int frameToShow =
+    Model->value == Model->minValue ? 0 : Frames.Num() - 1;
+
+  bool bAnyTextureSet{false};
+  int frameIndex = 0;
+  for (UTexture2D* frameTexture : Frames) {
+    if (!Frames[frameIndex] && Filepath.Equals(Model->svgPaths[frameIndex])) {
+      Frames[frameIndex] = inTexture;
+      bAnyTextureSet = true;
+
+      if (frameToShow == frameIndex)
+        FaceMaterialInstance->SetTextureParameterValue(FName("texture"), Frames[frameIndex]);
+    }
+    ++frameIndex;
+  }
+  if (bAnyTextureSet) MeshComponent->SetMaterial(1, FaceMaterialInstance);
 }
 
 void AVCVButton::Engage() {
@@ -101,7 +110,9 @@ void AVCVButton::Engage() {
 void AVCVButton::Release() {
   if (Model->momentary) {
     SetValue(Model->minValue);
-    FaceMaterialInstance->SetTextureParameterValue(FName("texture"), Frames[Model->value]);
+    // TODO: this check is here entirely because of befaco stereo strip mute button
+    if (Model->value >= 0 && Model->value < Frames.Num())
+      FaceMaterialInstance->SetTextureParameterValue(FName("texture"), Frames[Model->value]);
   }
   Super::Release();
 }
