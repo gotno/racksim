@@ -637,6 +637,11 @@ void Aosc3GameModeBase::UpdateParam(int64_t ModuleId, VCVParam& Param) {
   ModuleActors[ModuleId]->GetParamActor(Param.id)->Update(Param);
 }
 
+void Aosc3GameModeBase::UpdatePort(int64_t ModuleId, VCVPort& Port) {
+  if (!ModuleActors.Contains(ModuleId)) return;
+  ModuleActors[ModuleId]->GetPortActor(Port.type, Port.id)->Update(Port);
+}
+
 void Aosc3GameModeBase::SendParamUpdate(int64_t ModuleId, int32 ParamId, float Value) {
   OSCctrl->SendParamUpdate(ModuleId, ParamId, Value);
 }

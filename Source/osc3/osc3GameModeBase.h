@@ -69,6 +69,7 @@ public:
 
   void UpdateLight(int64_t ModuleId, int32 LightId, FLinearColor Color);
   void UpdateParam(int64_t ModuleId, VCVParam& Param);
+  void UpdatePort(int64_t ModuleId, VCVPort& Port);
 
   void SendParamUpdate(int64_t ModuleId, int32 ParamId, float Value);
   void DuplicateModule(AVCVModule* Module);

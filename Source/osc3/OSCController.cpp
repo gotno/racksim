@@ -40,6 +40,7 @@ void AOSCController::Init() {
   AddRoute("/module_sync_complete/*", FName(TEXT("ModuleSyncComplete")));
 
   AddRoute("/param/sync/*", FName(TEXT("SyncParam")));
+  AddRoute("/port/sync/*", FName(TEXT("SyncPort")));
   
   AddRoute("/library/json_path/*", FName(TEXT("SetLibraryJsonPath")));
 
@@ -592,6 +593,7 @@ void AOSCController::AddPort(const FOSCMessage &Message, VCVPort& vcv_port) {
   UOSCManager::GetFloat(Message, 9, vcv_port.bodyColor.R);
   UOSCManager::GetFloat(Message, 10, vcv_port.bodyColor.G);
   UOSCManager::GetFloat(Message, 11, vcv_port.bodyColor.B);
+  UOSCManager::GetBool(Message, 12, vcv_port.visible);
 }
 
 void AOSCController::AddDisplay(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port) {
@@ -712,7 +714,7 @@ void AOSCController::ConfirmSaved(const FOSCAddress& AddressPattern, const FOSCM
 void AOSCController::SyncParam(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port) {
   int64_t moduleId;
   if (ModuleGuard(message, moduleId)) return;
-  
+
   int32 paramId;
   UOSCManager::GetInt32(message, 1, paramId);
   VCVParam param(paramId);
@@ -720,8 +722,26 @@ void AOSCController::SyncParam(const FOSCAddress& AddressPattern, const FOSCMess
   UOSCManager::GetString(message, 2, param.displayValue);
   UOSCManager::GetFloat(message, 3, param.value);
   UOSCManager::GetBool(message, 4, param.visible);
-  
+
   GameMode->UpdateParam(moduleId, param);
+}
+
+void AOSCController::SyncPort(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 _port) {
+  int64_t moduleId;
+  if (ModuleGuard(message, moduleId)) return;
+
+  int32 portId;
+  UOSCManager::GetInt32(message, 1, portId);
+
+  int32 type;
+  UOSCManager::GetInt32(message, 2, type);
+  PortType portType = static_cast<PortType>(type);
+
+  VCVPort port(portId, portType);
+
+  UOSCManager::GetBool(message, 3, port.visible);
+
+  GameMode->UpdatePort(moduleId, port);
 }
 
 void AOSCController::SetLibraryJsonPath(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port) {

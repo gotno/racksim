@@ -77,7 +77,17 @@ void AVCVPort::Init(VCVPort* vcv_port) {
   BaseMaterialInstance->SetVectorParameterValue(FName("color"), Model->bodyColor);
   FaceMaterialInstance->SetVectorParameterValue(FName("background_color"), Model->bodyColor);
 
+  SetActorHiddenInGame(!Model->visible);
+  StaticMeshComponent->SetCollisionEnabled(Model->visible ? ECollisionEnabled::QueryOnly : ECollisionEnabled::NoCollision);
+
   GameMode->RequestTexture(Model->svgPath, this, FName("SetTexture"));
+}
+
+void AVCVPort::Update(VCVPort& vcv_port) {
+  FScopeLock Lock(&DataGuard);
+  Model->merge(vcv_port);
+  SetActorHiddenInGame(!Model->visible);
+  StaticMeshComponent->SetCollisionEnabled(Model->visible ? ECollisionEnabled::QueryOnly : ECollisionEnabled::NoCollision);
 }
 
 void AVCVPort::SetTexture(FString Filepath, UTexture2D* inTexture) {

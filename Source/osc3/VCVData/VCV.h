@@ -120,9 +120,15 @@ struct VCVPort {
   FString svgPath;
   FLinearColor bodyColor;
 
+  bool visible{true};
+
   VCVPort() {}
   VCVPort(int32 _id, PortType _type) : id(_id), type(_type) {}
   VCVPort(int32 _id, PortType _type, int64_t _moduleId) : id(_id), type(_type), moduleId(_moduleId) {}
+
+  void merge(const VCVPort& other) {
+    visible = other.visible;
+  }
 };
 
 struct VCVCable {

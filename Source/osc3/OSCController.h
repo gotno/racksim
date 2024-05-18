@@ -112,6 +112,8 @@ private:
   void UpdateLight(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port);
   UFUNCTION()
   void SyncParam(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port);
+  UFUNCTION()
+  void SyncPort(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 _port);
 
   void AddPort(const FOSCMessage &Message, VCVPort& vcv_port);
 
