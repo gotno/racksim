@@ -105,7 +105,7 @@ void UMainMenuWidget::UpdateState(Aosc3GameState* GameState) {
 
 void UMainMenuWidget::GotoLoading(FString UpperText, FString LowerText) {
   HideAll();
-  LoadingSection->SetVisibility(ESlateVisibility::Visible);
+  LoadingSection->SetVisibility(ESlateVisibility::HitTestInvisible);
   UpperLoadingText->SetText(FText::FromString(UpperText));
   LowerLoadingText->SetText(FText::FromString(LowerText));
 }
@@ -329,7 +329,7 @@ void UMainMenuWidget::Confirm(
   ConfirmationCancelFunction = [this]() {
     ConfirmationSection->SetVisibility(ESlateVisibility::Hidden);
   };
-  ConfirmationSection->SetVisibility(ESlateVisibility::Visible);
+  ConfirmationSection->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
 }
 
 void UMainMenuWidget::Confirm(

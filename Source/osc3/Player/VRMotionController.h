@@ -23,6 +23,7 @@ class UCapsuleComponent;
 class UPrimitiveComponent;
 class UWidgetComponent;
 class UWidgetInteractionComponent;
+class UNiagaraComponent;
 
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnGrabbableTargetedSignature, AActor* /* GrabbableActor */, EControllerHand /* Hand */);
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnParamTargetedSignature, AActor* /* VCVParam */, EControllerHand /* Hand */);
@@ -32,7 +33,7 @@ DECLARE_MULTICAST_DELEGATE_TwoParams(FOnCableHeldSignature, AActor* /* VCVCable 
 
 USTRUCT()
 struct FHapticEffects {
-	GENERATED_BODY()
+  GENERATED_BODY()
 
   UPROPERTY(EditDefaultsOnly)
   UHapticFeedbackEffect_Base* Bump;
@@ -42,16 +43,16 @@ struct FHapticEffects {
 
 UCLASS()
 class OSC3_API AVRMotionController : public AActor {
-	GENERATED_BODY()
-	
-public:	
-	AVRMotionController();
+  GENERATED_BODY()
+
+public:
+  AVRMotionController();
 
 protected:
-	virtual void BeginPlay() override;
+  virtual void BeginPlay() override;
 
-public:	
-	virtual void Tick(float DeltaTime) override;
+public:
+  virtual void Tick(float DeltaTime) override;
 
   void SetTrackingSource(EControllerHand Hand);
 
@@ -76,12 +77,15 @@ public:
 
   UPROPERTY(EditAnywhere, Category="Input")
   FHapticEffects HapticEffects;
-  
+
 private:
   AVRAvatar* Avatar;
   Aosc3GameModeBase* GameMode;
   APlayerController* PlayerController;
   FString HandName;
+
+  UPROPERTY(VisibleAnywhere)
+  UNiagaraComponent* PointerFXComponent;
 
   UPROPERTY(VisibleAnywhere)
   UMotionControllerComponent* MotionController;

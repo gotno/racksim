@@ -21,6 +21,9 @@
 #include "Components/WidgetInteractionComponent.h"
 #include "DrawDebugHelpers.h"
 
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
+
 #include "Kismet/GameplayStatics.h"
 
 AVRMotionController::AVRMotionController() {
@@ -37,7 +40,7 @@ AVRMotionController::AVRMotionController() {
   GrabSphere = CreateDefaultSubobject<USphereComponent>(TEXT("GrabSphere"));
   GrabSphere->InitSphereRadius(GrabSphereRadius);
   GrabSphere->SetupAttachment(GetRootComponent());
-  
+
   TooltipWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("Tooltip"));
   TooltipWidgetComponent->SetupAttachment(GetRootComponent());
 
@@ -47,7 +50,10 @@ AVRMotionController::AVRMotionController() {
   WidgetInteractionComponent->TraceChannel = WIDGET_TRACE;
 
   WidgetInteractionComponent->bShowDebug = false;
-  WidgetInteractionComponent->InteractionDistance = 40.f;
+  WidgetInteractionComponent->InteractionDistance = 60.f;
+
+  PointerFXComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("PointerFXComponent"));
+  PointerFXComponent->SetupAttachment(GetRootComponent());
 }
 
 void AVRMotionController::BeginPlay() {
@@ -133,12 +139,16 @@ void AVRMotionController::WidgetInteractionTick() {
 
   if (WidgetInteractionComponent->IsOverHitTestVisibleWidget()) {
     FHitResult widgetHit = WidgetInteractionComponent->GetLastHitResult();
-    DrawDebugLine(
-      GetWorld(),
-      GetActorLocation() + GetActorForwardVector() * 5.f,
-      GetActorLocation() + GetActorForwardVector() * (widgetHit.Distance - 0.4f),
-      FColor::FromHex(TEXT("010101FF"))
+
+    PointerFXComponent->SetWorldLocation(InteractTraceEnd);
+    PointerFXComponent->SetVectorParameter(
+      FName("pointer_end"),
+      MotionController->GetComponentLocation() + MotionController->GetForwardVector() * widgetHit.Distance
     );
+
+    PointerFXComponent->SetVisibility(true);
+  } else {
+    PointerFXComponent->SetVisibility(false);
   }
 }
 

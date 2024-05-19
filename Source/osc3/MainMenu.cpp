@@ -153,9 +153,9 @@ void AMainMenu::Toggle() {
 }
 
 void AMainMenu::Tick(float DeltaTime) {
-	Super::Tick(DeltaTime);
-  
-  if (PlayerPawn) {
+  Super::Tick(DeltaTime);
+
+  if (!IsHidden() && PlayerPawn) {
     SetActorRotation(PlayerPawn->GetLookAtCameraRotation(GetActorLocation()));
 
     SetActorLocation(GetActorLocation() + GetActorUpVector() * 10.f);
