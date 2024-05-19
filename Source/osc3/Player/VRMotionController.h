@@ -17,6 +17,7 @@ class UTooltip;
 
 class UMotionControllerComponent;
 class USceneComponent;
+class UStaticMeshComponent;
 class USphereComponent;
 class UCapsuleComponent;
 class UPrimitiveComponent;
@@ -85,13 +86,16 @@ private:
   UPROPERTY(VisibleAnywhere)
   UMotionControllerComponent* MotionController;
 
+  UPROPERTY(VisibleAnywhere)
+  UStaticMeshComponent* ControllerMesh;
+  UPROPERTY(VisibleAnywhere)
+  UStaticMeshComponent* InteractIndicatorMesh;
+
   // grabber
   UPROPERTY(VisibleAnywhere)
   USphereComponent* GrabSphere;
   UPROPERTY(EditDefaultsOnly, Category="Interaction")
   float GrabSphereRadius = MODULE_DEPTH * RENDER_SCALE * 1.5;
-  UPROPERTY(EditDefaultsOnly, Category="Interaction")
-  FVector GrabSphereOffset{0.f, -2.f, -2.f};
 
   UPROPERTY(VisibleAnywhere)
   UWidgetInteractionComponent* WidgetInteractionComponent;

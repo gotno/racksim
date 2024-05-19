@@ -24,20 +24,25 @@
 #include "Kismet/GameplayStatics.h"
 
 AVRMotionController::AVRMotionController() {
-	PrimaryActorTick.bCanEverTick = true;
-  
+  PrimaryActorTick.bCanEverTick = true;
+
   MotionController = CreateDefaultSubobject<UMotionControllerComponent>(TEXT("MotionController"));
   SetRootComponent(MotionController);
-  
+
+  ControllerMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Controller Mesh"));
+  ControllerMesh->SetupAttachment(GetRootComponent());
+  InteractIndicatorMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Interact Indicator Mesh"));
+  InteractIndicatorMesh->SetupAttachment(GetRootComponent());
+
   GrabSphere = CreateDefaultSubobject<USphereComponent>(TEXT("GrabSphere"));
   GrabSphere->InitSphereRadius(GrabSphereRadius);
-  GrabSphere->SetupAttachment(MotionController);
+  GrabSphere->SetupAttachment(GetRootComponent());
   
   TooltipWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("Tooltip"));
-  TooltipWidgetComponent->SetupAttachment(MotionController);
-  
+  TooltipWidgetComponent->SetupAttachment(GetRootComponent());
+
   WidgetInteractionComponent = CreateDefaultSubobject<UWidgetInteractionComponent>(TEXT("WidgetInteractionComponent"));
-  WidgetInteractionComponent->SetupAttachment(MotionController);
+  WidgetInteractionComponent->SetupAttachment(GetRootComponent());
   WidgetInteractionComponent->VirtualUserIndex = 0;
   WidgetInteractionComponent->TraceChannel = WIDGET_TRACE;
 
@@ -46,8 +51,8 @@ AVRMotionController::AVRMotionController() {
 }
 
 void AVRMotionController::BeginPlay() {
-	Super::BeginPlay();
-  
+  Super::BeginPlay();
+
   Avatar = Cast<AVRAvatar>(GetOwner());
   GameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(this));
 
@@ -76,16 +81,11 @@ void AVRMotionController::SetTrackingSource(EControllerHand Hand) {
 
   HandName = Hand == EControllerHand::Left ? "left" : "right";
   WidgetInteractionComponent->PointerIndex = Hand == EControllerHand::Left ? 1 : 0; 
-  
-  if (Hand == EControllerHand::Left) {
-    GrabSphereOffset.Y = -GrabSphereOffset.Y;
-  }
-  GrabSphere->AddLocalOffset(GrabSphereOffset);
 }
 
 void AVRMotionController::Tick(float DeltaTime) {
-	Super::Tick(DeltaTime);
-  
+  Super::Tick(DeltaTime);
+
   WidgetInteractionTick();
 
   // grab sphere
@@ -101,7 +101,10 @@ void AVRMotionController::Tick(float DeltaTime) {
   // interact trace
   InteractTraceStart = MotionController->GetComponentLocation();
   InteractTraceEnd = InteractTraceStart + MotionController->GetForwardVector() * 3;
-  DrawDebugLine(GetWorld(), InteractTraceStart, InteractTraceEnd, FColor::Purple);
+  // DrawDebugLine(GetWorld(), InteractTraceStart, InteractTraceEnd, FColor::Purple);
+
+  FVector indicatorPos = InteractTraceStart + MotionController->GetForwardVector() * (3 - 0.5f);
+  InteractIndicatorMesh->SetWorldLocation(indicatorPos);
 
   ParamTargetTick();
   PortTargetTick();
