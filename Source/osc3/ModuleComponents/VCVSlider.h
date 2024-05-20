@@ -9,32 +9,36 @@ class UTexture2D;
 
 UCLASS()
 class OSC3_API AVCVSlider : public AVCVParam {
-	GENERATED_BODY()
-	
+  GENERATED_BODY()
+
 public:
   AVCVSlider();
 
 protected:
-	virtual void BeginPlay() override;
+  virtual void BeginPlay() override;
 
 public:
-	virtual void Tick(float DeltaTime) override;
+  virtual void Tick(float DeltaTime) override;
   void Init(VCVParam* vcv_param) override;
 
   UFUNCTION()
   void SetTexture(FString Filepath, UTexture2D* inTexture);
+
+  FVector GetHandleLocation() {
+    return HandleMeshComponent->GetComponentLocation();
+  }
 
 private:
   UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
   UStaticMeshComponent* BaseMeshComponent;
   UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
   UStaticMeshComponent* HandleMeshComponent;
-  
+
   UPROPERTY()
   UStaticMesh* BaseStaticMesh;
   UPROPERTY()
   UStaticMesh* HandleStaticMesh;
-  
+
   UPROPERTY()
   UMaterialInstanceDynamic* BaseMaterialInstance;
   UPROPERTY()
@@ -66,10 +70,10 @@ private:
   UTexture2D* HandleTexture;
 
   Aosc3GameModeBase* GameMode;
-  
+
   float LastValue;
   float AlterRatio = 0.8f;
-  
+
   FVector LastControllerPosition;
   float LastPositionDelta{0.f};
 
