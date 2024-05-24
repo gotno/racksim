@@ -4,18 +4,17 @@
 #include "Blueprint/UserWidget.h"
 #include "Tooltip.generated.h"
 
-class UTextBlock;
+class UCommonTextBlock;
 
 UCLASS()
 class OSC3_API UTooltip : public UUserWidget {
 	GENERATED_BODY()
 
 protected:
-	UPROPERTY(BlueprintReadOnly, meta=(BindWidget))
-	UTextBlock* LineOne;
-
-	UPROPERTY(BlueprintReadOnly, meta=(BindWidget))
-	UTextBlock* LineTwo;
+  UPROPERTY(meta=(BindWidget))
+  UCommonTextBlock* LineOne;
+  UPROPERTY(meta=(BindWidget))
+  UCommonTextBlock* LineTwo;
 
 public:
   void SetText(

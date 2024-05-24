@@ -1,6 +1,6 @@
 #include "UI/Tooltip.h"
 
-#include "Components/TextBlock.h"
+#include "CommonTextBlock.h"
 
 void UTooltip::SetText(FString InLineOne, FString InLineTwo, bool bEmphasis, bool bSubtitle) {
   if (InLineTwo.IsEmpty()) {
