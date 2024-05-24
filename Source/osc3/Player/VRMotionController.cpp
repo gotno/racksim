@@ -445,7 +445,7 @@ void AVRMotionController::EndPortInteract(bool Connected) {
     OnCableHeldDelegate.Remove(delegate);
   CableHeldDelegates.Empty();
 
-  if (Connected) HapticThump();
+  if (Connected) HapticBump();
   bIsPortInteracting = false;
 }
 
