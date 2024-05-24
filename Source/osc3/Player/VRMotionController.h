@@ -119,6 +119,8 @@ private:
   bool bIsWorldInteracting{false};
 
   FVector InteractTraceStart{0.f}, InteractTraceEnd{0.f};
+  UPROPERTY(EditDefaultsOnly, Category="Interaction")
+  float InteractTraceReach{4.f};
 
   void ParamTargetTick();
   AActor* TargetedParam{nullptr};

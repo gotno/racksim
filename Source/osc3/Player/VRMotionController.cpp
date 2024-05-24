@@ -95,6 +95,7 @@ void AVRMotionController::Tick(float DeltaTime) {
 
   WidgetInteractionTick();
 
+  GrabbableTargetTick();
   // grab sphere
   // DrawDebugSphere(
   //   GetWorld(),
@@ -103,34 +104,34 @@ void AVRMotionController::Tick(float DeltaTime) {
   //   16,
   //   FColor::Blue
   // );
-  GrabbableTargetTick();
 
-  // interact trace
   InteractTraceStart = MotionController->GetComponentLocation();
-  InteractTraceEnd = InteractTraceStart + MotionController->GetForwardVector() * 4;
+  InteractTraceEnd = InteractTraceStart + MotionController->GetForwardVector() * InteractTraceReach;
+  // interact trace
   // DrawDebugLine(GetWorld(), InteractTraceStart, InteractTraceEnd, FColor::Purple);
 
+  // SetIndicatorPosition();
   FVector indicatorLocation;
   FRotator indicatorRotation = MotionController->GetComponentRotation();
   if (TargetedParam) {
     if (Cast<AVCVKnob>(TargetedParam)) {
       indicatorLocation =
-        TargetedParam->GetActorLocation() - TargetedParam->GetActorForwardVector() * (RENDER_SCALE + 0.75f);
+        TargetedParam->GetActorLocation() - TargetedParam->GetActorForwardVector() * (RENDER_SCALE + 1.f);
       indicatorRotation = TargetedParam->GetActorRotation();
     } else if (Cast<AVCVSlider>(TargetedParam)) {
       AVCVSlider* slider = Cast<AVCVSlider>(TargetedParam);
       indicatorLocation =
-        slider->GetHandleLocation() - slider->GetActorForwardVector() * 1.25f;
+        slider->GetHandleLocation() - slider->GetActorForwardVector() * 1.5f;
     } else {
       indicatorLocation =
         TargetedParam->GetActorLocation() - TargetedParam->GetActorForwardVector() * 1.f;
     }
-  } else if (!bIsPortInteracting && TargetedOriginPort && !Cast<AVCVPort>(TargetedOriginPort)->HasConnections()) {
-    indicatorLocation =
-      TargetedOriginPort->GetActorLocation() - TargetedOriginPort->GetActorForwardVector() * 1.f;
+  // } else if (!bIsPortInteracting && TargetedOriginPort && !Cast<AVCVPort>(TargetedOriginPort)->HasConnections()) {
+  //   indicatorLocation =
+  //     TargetedOriginPort->GetActorLocation() - TargetedOriginPort->GetActorForwardVector() * 1.f;
   } else {
     indicatorLocation =
-      InteractTraceStart + MotionController->GetForwardVector() * 1.5f; // * (3 - 0.5f);
+      InteractTraceStart + MotionController->GetForwardVector() * InteractTraceReach * 0.5f;
   }
   InteractIndicatorMesh->SetWorldLocation(indicatorLocation);
   InteractIndicatorMesh->SetWorldRotation(indicatorRotation);
