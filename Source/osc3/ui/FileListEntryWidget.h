@@ -11,6 +11,7 @@ class UFileListEntryData;
 class UTextBlock;
 class UCommonTextBlock;
 class UButton;
+class UImage;
 
 UCLASS()
 class OSC3_API UFileListEntryWidget : public UUserWidget, public IUserObjectListEntry {
@@ -26,6 +27,10 @@ protected:
   UTextBlock* LabelStill;
   UPROPERTY(meta = (BindWidget))
   UButton* Button;
+  UPROPERTY(meta = (BindWidget))
+  UImage* FolderIcon;
+  UPROPERTY(meta = (BindWidget))
+  UImage* FileIcon;
 private:
   UFileListEntryData* EntryData;
 

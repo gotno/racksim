@@ -238,7 +238,8 @@ private:
     FString Label,
     FString Path,
     EFileType Type,
-    TFunction<void (FString)> ClickCallback
+    TFunction<void (FString)> ClickCallback,
+    EFileIcon Icon = EFileIcon::None
   );
   void SetFileListHeadingText(FString HeadingText);
 

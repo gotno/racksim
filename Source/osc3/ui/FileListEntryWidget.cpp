@@ -1,12 +1,13 @@
 #include "UI/FileListEntryWidget.h"
 
-#include "UI/FileListEntryData.h"
+#include "osc3.h"
 #include "osc3GameModeBase.h"
-#include "library.h"
+#include "UI/FileListEntryData.h"
 
 #include "CommonTextBlock.h"
 #include "Components/TextBlock.h"
 #include "Components/Button.h"
+#include "Components/Image.h"
 
 #include "Kismet/GameplayStatics.h"
 
@@ -19,10 +20,21 @@ void UFileListEntryWidget::NativeConstruct() {
 }
 
 void UFileListEntryWidget::NativeOnListItemObjectSet(UObject* ListItemObject) {
-	EntryData = Cast<UFileListEntryData>(ListItemObject);
+  EntryData = Cast<UFileListEntryData>(ListItemObject);
   Label->SetText(FText::FromString(EntryData->Path));
   LabelStill->SetText(FText::FromString(EntryData->Label));
   Button->SetIsEnabled(!EntryData->Path.Equals(""));
+
+  FolderIcon->SetVisibility(
+    EntryData->Icon == EFileIcon::Directory
+      ? ESlateVisibility::Visible
+      : ESlateVisibility::Collapsed
+  );
+  FileIcon->SetVisibility(
+    EntryData->Icon == EFileIcon::File
+      ? ESlateVisibility::Visible
+      : ESlateVisibility::Collapsed
+  );
 }
 
 void UFileListEntryWidget::HandleClick() {

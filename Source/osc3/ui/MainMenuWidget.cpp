@@ -164,11 +164,12 @@ void UMainMenuWidget::SetFMShortcutsListItems(TArray<UFileListEntryData*> Entrie
   FileShortcutsList->SetListItems(Entries);
 }
 
-UFileListEntryData* UMainMenuWidget::CreateListEntryData(FString Label, FString Path, EFileType Type, TFunction<void (FString)> ClickCallback) {
+UFileListEntryData* UMainMenuWidget::CreateListEntryData(FString Label, FString Path, EFileType Type, TFunction<void (FString)> ClickCallback, EFileIcon Icon) {
   UFileListEntryData* entry = NewObject<UFileListEntryData>(this);
   entry->Label = Label;
   entry->Path = Path;
   entry->Type = Type;
+  entry->Icon = Icon;
   entry->ClickCallback = ClickCallback;
   return entry;
 }
@@ -190,10 +191,18 @@ void UMainMenuWidget::LoadDirectoryInFileManager(FString Directory) {
   if (!parentDirectory.Equals("/")) {
     entries.Add(CreateListEntryData("..", parentDirectory, EFileType::Directory, [this](FString Directory) {
       LoadDirectoryInFileManager(Directory);
-    }));
+    }, EFileIcon::Directory));
   }
 
   TArray<FString> found;
+  FileManager.FindFiles(found, *(Directory + "*"), false, true);
+  for (FString& childDirectory : found) {
+    entries.Add(CreateListEntryData(childDirectory, Directory + childDirectory + "/", EFileType::Directory, [this](FString Directory) {
+      LoadDirectoryInFileManager(Directory);
+    }, EFileIcon::Directory));
+  }
+
+  found.Empty();
   FileManager.FindFiles(found, *(Directory + "*.vcv"), true, false);
   for (FString& filename : found) {
     entries.Add(CreateListEntryData(filename, Directory + filename, EFileType::File, [this](FString PatchPath) {
@@ -202,19 +211,10 @@ void UMainMenuWidget::LoadDirectoryInFileManager(FString Directory) {
       } else {
         Keyboard->SetInput(FPaths::GetBaseFilename(PatchPath, true));
       }
-    }));
-  }
-
-  found.Empty();
-  FileManager.FindFiles(found, *(Directory + "*"), false, true);
-  for (FString& childDirectory : found) {
-    entries.Add(CreateListEntryData(childDirectory, Directory + childDirectory + "/", EFileType::Directory, [this](FString Directory) {
-      LoadDirectoryInFileManager(Directory);
-    }));
+    }, EFileIcon::File));
   }
 
   FileBrowserList->SetListItems(entries);
-  FPaths::NormalizeDirectoryName(Directory);
 }
 
 void UMainMenuWidget::ReloadDirectoryInFileManager() {

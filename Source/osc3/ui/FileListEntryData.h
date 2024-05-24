@@ -16,5 +16,6 @@ public:
   FString Path;
   bool bScrollHover{false};
   EFileType Type{EFileType::File};
+  EFileIcon Icon{EFileIcon::None};
   TFunction<void (FString)> ClickCallback;
 };
