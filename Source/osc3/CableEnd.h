@@ -65,6 +65,8 @@ private:
   UMaterialInstanceDynamic* BaseMaterialInstance;
   UPROPERTY()
   UMaterialInterface* BaseMaterialInterface;
+  UPROPERTY()
+  UMaterialInstanceDynamic* RingMaterialInstance;
 
   UPROPERTY(VisibleAnywhere)
   UCapsuleComponent* Collider;

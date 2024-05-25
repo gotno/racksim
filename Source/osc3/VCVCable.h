@@ -20,17 +20,17 @@ class UNiagaraComponent;
 
 UCLASS()
 class OSC3_API AVCVCable : public AActor {
-	GENERATED_BODY()
-	
-public:	
-	AVCVCable();
+  GENERATED_BODY()
+
+public:
+  AVCVCable();
 
 protected:
-	virtual void BeginPlay() override;
+  virtual void BeginPlay() override;
   virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
-public:	
-	virtual void Tick(float DeltaTime) override;
+public:
+  virtual void Tick(float DeltaTime) override;
 
   int64_t Id{-1};
   void SetId(int64_t inId) { Id = inId; }
@@ -44,9 +44,14 @@ public:
   void Abandon();
 
   void HandleRegistration();
-  
+
   void ToggleLatched() {
     bLatched = !bLatched;
+    SetColor(CableColor);
+  }
+
+  bool IsLatched() {
+    return bLatched;
   }
 
   void SetTension(float inTension);

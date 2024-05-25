@@ -50,6 +50,8 @@ void ACableEnd::BeginPlay() {
   if (BaseMaterialInterface) {
     BaseMaterialInstance = UMaterialInstanceDynamic::Create(BaseMaterialInterface, this);
     StaticMeshComponent->SetMaterial(0, BaseMaterialInstance);
+    RingMaterialInstance = UMaterialInstanceDynamic::Create(BaseMaterialInterface, this);
+    StaticMeshComponent->SetMaterial(1, RingMaterialInstance);
   }
 
   Collider->OnComponentBeginOverlap.AddDynamic(this, &ACableEnd::HandleColliderOverlapStart);
@@ -229,6 +231,7 @@ void ACableEnd::HandleColliderOverlapEnd(UPrimitiveComponent* OverlappedComponen
 
 void ACableEnd::SetColor(FColor Color) {
   BaseMaterialInstance->SetVectorParameterValue(FName("Color"), Color);
+  RingMaterialInstance->SetVectorParameterValue(FName("Color"), Cable->IsLatched() ? FColor::Black : Color);
 }
 
 void ACableEnd::SetSnapToPort(AVCVPort* Port) {
