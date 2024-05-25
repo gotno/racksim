@@ -125,6 +125,11 @@ struct FPortInteractionActions {
   UInputAction* PortEngageRight;
 
   UPROPERTY(EditDefaultsOnly)
+  UInputAction* CableDestroyLeft;
+  UPROPERTY(EditDefaultsOnly)
+  UInputAction* CableDestroyRight;
+
+  UPROPERTY(EditDefaultsOnly)
   UInputAction* CableLatchLeft;
   UPROPERTY(EditDefaultsOnly)
   UInputAction* CableLatchRight;
@@ -315,6 +320,7 @@ private:
   void HandleStartPortEngage(const FInputActionValue& _Value, EControllerHand Hand);
   void HandlePortEngage(const FInputActionValue& _Value, EControllerHand Hand);
   void HandleCompletePortEngage(const FInputActionValue& _Value, EControllerHand Hand);
+  void HandleCableDestroy(const FInputActionValue& _Value, EControllerHand Hand);
   void HandleCableLatch(const FInputActionValue& _Value, EControllerHand Hand);
   void HandleCableColorCycle(const FInputActionValue& Value, EControllerHand Hand);
   void HandleCompleteCableColorCycle(const FInputActionValue& _Value, EControllerHand Hand);

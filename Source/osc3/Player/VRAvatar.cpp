@@ -183,6 +183,9 @@ void AVRAvatar::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
   Input->BindAction(PortInteractionActions.PortEngageRight, ETriggerEvent::Triggered, this, &AVRAvatar::HandlePortEngage, EControllerHand::Right);
   Input->BindAction(PortInteractionActions.PortEngageLeft, ETriggerEvent::Completed, this, &AVRAvatar::HandleCompletePortEngage, EControllerHand::Left);
   Input->BindAction(PortInteractionActions.PortEngageRight, ETriggerEvent::Completed, this, &AVRAvatar::HandleCompletePortEngage, EControllerHand::Right);
+  // destroy cable
+  Input->BindAction(PortInteractionActions.CableDestroyLeft, ETriggerEvent::Started, this, &AVRAvatar::HandleCableDestroy, EControllerHand::Left);
+  Input->BindAction(PortInteractionActions.CableDestroyRight, ETriggerEvent::Started, this, &AVRAvatar::HandleCableDestroy, EControllerHand::Right);
   // toggle latched (allow cable to exist unconnected)
   Input->BindAction(PortInteractionActions.CableLatchLeft, ETriggerEvent::Started, this, &AVRAvatar::HandleCableLatch, EControllerHand::Left);
   Input->BindAction(PortInteractionActions.CableLatchRight, ETriggerEvent::Started, this, &AVRAvatar::HandleCableLatch, EControllerHand::Right);
@@ -781,6 +784,8 @@ void AVRAvatar::HandlePortEngage(const FInputActionValue& _Value, EControllerHan
       ? LeftHandHeldCableEnd
       : RightHandHeldCableEnd;
 
+  if (!heldCableEnd) return;
+
   FVector location, forwardVector;
   controller->GetHeldCableEndInfo(location, forwardVector);
   heldCableEnd->SetPosition(location, forwardVector.Rotation());
@@ -795,6 +800,20 @@ void AVRAvatar::HandleCompletePortEngage(const FInputActionValue& _Value, EContr
 
   bool connected = heldCableEnd->Drop();
   controller->EndPortInteract(connected);
+}
+
+void AVRAvatar::HandleCableDestroy(const FInputActionValue& _Value, EControllerHand Hand) {
+  AVRMotionController* controller = GetControllerForHand(Hand);
+  ACableEnd* heldCableEnd =
+    Hand == EControllerHand::Left
+      ? LeftHandHeldCableEnd
+      : RightHandHeldCableEnd;
+
+  if (!heldCableEnd) return;
+
+  if (heldCableEnd->Cable->IsLatched()) heldCableEnd->Cable->ToggleLatched();
+  heldCableEnd->Drop();
+  controller->EndPortInteract(false);
 }
 
 void AVRAvatar::HandleCableLatch(const FInputActionValue& _Value, EControllerHand Hand) {
