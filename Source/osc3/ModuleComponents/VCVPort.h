@@ -14,22 +14,23 @@ class AVCVModule;
 
 UCLASS()
 class OSC3_API AVCVPort : public AActor {
-	GENERATED_BODY()
-	
-public:	
-	AVCVPort();
+  GENERATED_BODY()
+
+public:
+  AVCVPort();
+  friend class AVCVModule;
 
   UFUNCTION()
   void SetTexture(FString Filepath, UTexture2D* inTexture);
 
 protected:
-	virtual void BeginPlay() override;
+  virtual void BeginPlay() override;
 
-public:	
-	virtual void Tick(float DeltaTime) override;
+public:
+  virtual void Tick(float DeltaTime) override;
   void Init(struct VCVPort* Model);
   void Update(VCVPort& Port);
-  
+
   int32 Id{-1};
   AVCVModule* Module;
 
@@ -66,7 +67,7 @@ private:
 
   UPROPERTY()
   UTexture2D* Texture;
-  
+
   Aosc3GameModeBase* GameMode;
 
   VCVPort* Model;

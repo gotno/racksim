@@ -16,6 +16,7 @@ class OSC3_API AVCVParam : public AActor {
 
 public:
   AVCVParam();
+  friend class AVCVModule;
 
 protected:
   virtual void BeginPlay() override;

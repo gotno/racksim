@@ -601,6 +601,10 @@ void Aosc3GameModeBase::SetModuleFavorite(FString PluginSlug, FString ModuleSlug
 
 void Aosc3GameModeBase::DestroyModule(int64_t ModuleId, bool bSync) {
   if (!ModuleActors.Contains(ModuleId)) return;
+  if (!ModuleActors[ModuleId]->IsStagedForDestroy()) {
+    ModuleActors[ModuleId]->SetStagedForDestroy(true);
+    return;
+  }
 
   if (ModuleActors[ModuleId]->IsInWeldment())
     SplitWeldment(ModuleActors[ModuleId]->GetWeldment(), ModuleActors[ModuleId]);

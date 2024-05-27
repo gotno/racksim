@@ -2,6 +2,9 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+
+#include "VCVData/VCV.h"
+
 #include "VCVLight.generated.h"
 
 class Aosc3GameModeBase;
@@ -9,16 +12,17 @@ class UTexture2D;
 
 UCLASS()
 class OSC3_API AVCVLight : public AActor {
-	GENERATED_BODY()
-	
-public:	
-	AVCVLight();
+  GENERATED_BODY()
+
+public:
+  AVCVLight();
+  friend class AVCVModule;
 
 protected:
-	virtual void BeginPlay() override;
+  virtual void BeginPlay() override;
 
-public:	
-	virtual void Tick(float DeltaTime) override;
+public:
+  virtual void Tick(float DeltaTime) override;
 
   void Init(struct VCVLight* Model);
   void SetColor(FLinearColor Color);

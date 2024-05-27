@@ -209,6 +209,26 @@ void AVCVModule::SetTexture(FString& Filepath, UTexture2D* inTexture) {
   }
 }
 
+void AVCVModule::SetStagedForDestroy(bool inbStagedForDestroy) {
+  bStagedForDestroy = inbStagedForDestroy;
+
+  if (bStagedForDestroy) {
+    for (auto& pair : ParamActors) pair.Value->SetActorHiddenInGame(true);
+    for (auto& pair : LightActors) pair.Value->SetActorHiddenInGame(true);
+    for (auto& pair : ParamLightActors) pair.Value->SetActorHiddenInGame(true);
+    for (auto& pair : InputActors) pair.Value->SetActorHiddenInGame(true);
+    for (auto& pair : OutputActors) pair.Value->SetActorHiddenInGame(true);
+    FaceMaterialInstance->SetScalarParameterValue(FName("texture_alpha"), 0.f);
+  } else {
+    for (auto& pair : ParamActors) pair.Value->SetActorHiddenInGame(!pair.Value->Model->visible);
+    for (auto& pair : LightActors) pair.Value->SetActorHiddenInGame(!pair.Value->Model->visible);
+    for (auto& pair : ParamLightActors) pair.Value->SetActorHiddenInGame(!pair.Value->Model->visible);
+    for (auto& pair : InputActors) pair.Value->SetActorHiddenInGame(!pair.Value->Model->visible);
+    for (auto& pair : OutputActors) pair.Value->SetActorHiddenInGame(!pair.Value->Model->visible);
+    FaceMaterialInstance->SetScalarParameterValue(FName("texture_alpha"), 1.f);
+  }
+}
+
 void AVCVModule::GetSlugs(FString& PluginSlug, FString& Slug) {
   PluginSlug = Model.pluginSlug;
   Slug = Model.slug;
@@ -363,6 +383,7 @@ void AVCVModule::AlterGrab(FVector GrabbedLocation, FRotator GrabbedRotation) {
 void AVCVModule::ReleaseGrab() {
   Super::ReleaseGrab();
   GameState->SetUnsaved();
+  if (IsStagedForDestroy()) SetStagedForDestroy(false);
 }
 
 void AVCVModule::WeldSnap() {

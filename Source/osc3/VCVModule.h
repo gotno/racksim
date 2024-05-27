@@ -36,6 +36,8 @@ public:
   void Init(VCVModule vcv_module, TFunction<void ()> ReadyCallback);
   UFUNCTION()
   void SetTexture(FString& FilePath, UTexture2D* Texture);
+  void SetStagedForDestroy(bool inbStagedForDestroy);
+  bool IsStagedForDestroy() { return bStagedForDestroy; };
   
   void GetSlugs(FString& PluginSlug, FString& Slug);
   int64_t Id{-1};
@@ -85,6 +87,7 @@ public:
   void AlignActorTo(AVCVModule* Module, FSnapModeSide AlignToSide);
 private:
   Aosc3GameState* GameState;
+  bool bStagedForDestroy{false};
 
   UPROPERTY()
   UBoxComponent* SnapColliderLeft;
