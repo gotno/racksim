@@ -177,18 +177,18 @@ class UEnhancedInputLocalPlayerSubsystem;
 
 UCLASS()
 class OSC3_API AVRAvatar : public ACharacter {
-	GENERATED_BODY()
+  GENERATED_BODY()
 
 public:
-	AVRAvatar();
+  AVRAvatar();
 
 protected:
-	virtual void BeginPlay() override;
+  virtual void BeginPlay() override;
   virtual void PawnClientRestart() override;
 
-public:	
-	virtual void Tick(float DeltaTime) override;
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+public:
+  virtual void Tick(float DeltaTime) override;
+  virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
   void EnableWorldManipulation();
 
   AVRMotionController* GetMotionController(EControllerHand Hand) {
@@ -198,6 +198,8 @@ public:
       return RightController;
     }
   }
+
+  FVector GetSavegamePlayerLocation();
 
   UPROPERTY(EditAnywhere, Category="Input")
   FBaseActions BaseActions;

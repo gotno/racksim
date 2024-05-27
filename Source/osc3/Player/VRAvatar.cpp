@@ -95,6 +95,12 @@ void AVRAvatar::PawnClientRestart() {
   }
 }
 
+FVector AVRAvatar::GetSavegamePlayerLocation() {
+  FVector location = Camera->GetComponentLocation();
+  location.Z = GetActorLocation().Z;
+  return location;
+}
+
 void AVRAvatar::EnableWorldManipulation() {
   InputSubsystem->AddMappingContext(InputMappingContexts.WorldManipulationLeft, 1);
   InputSubsystem->AddMappingContext(InputMappingContexts.WorldManipulationRight, 1);

@@ -299,7 +299,7 @@ Uosc3SaveGame* Aosc3GameModeBase::MakeSaveGame() {
 
     LibraryActor->GetPosition(SaveGameInstance->LibraryPosition.Location, SaveGameInstance->LibraryPosition.Rotation);
     SaveGameInstance->bLibraryHidden = LibraryActor->IsHidden();
-    SaveGameInstance->PlayerLocation = PlayerPawn->GetActorLocation();
+    SaveGameInstance->PlayerLocation = Cast<AVRAvatar>(PlayerPawn)->GetSavegamePlayerLocation();
 
     return SaveGameInstance;
   }
