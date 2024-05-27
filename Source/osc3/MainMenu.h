@@ -15,26 +15,21 @@ class AKeyboard;
 
 UCLASS()
 class OSC3_API AMainMenu : public AActor {
-	GENERATED_BODY()
-	
-public:	
-	AMainMenu();
+  GENERATED_BODY()
 
-  UFUNCTION()
-  void HandleKeyboardInputUpdated(FString Input, int8 CursorIndex);
-  UFUNCTION()
-  void HandleKeyboardInputConfirmed(FString Input);
-  
+public:
+  AMainMenu();
+
 protected:
-	virtual void BeginPlay() override;
+  virtual void BeginPlay() override;
 
-public:	
-	virtual void Tick(float DeltaTime) override;
-  
+public:
+  virtual void Tick(float DeltaTime) override;
+
   void Init(
     TFunction<void ()> ExitFunction,
     TFunction<void ()> SaveFunction,
-    TFunction<void (FString)> inSaveAsFunction,
+    TFunction<void (FString)> SaveAsFunction,
     TFunction<void ()> NewFunction,
     TFunction<void ()> ContinueFunction,
     TFunction<void ()> OverwriteTemplateFunction,
@@ -61,8 +56,6 @@ private:
   TCHAR* WidgetBlueprintReference =
     TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/widgets/BP_MainMenuWidget.BP_MainMenuWidget_C'");
   UMainMenuWidget* MainMenuWidget;
-
-  TFunction<void (FString)> SaveAsFunction;
 
   TArray<UFileListEntryData*> GenerateRecentPatchesEntries();
   TArray<UFileListEntryData*> GenerateFMDrivesEntries();

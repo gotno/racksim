@@ -22,8 +22,7 @@ class UHorizontalBox;
 UCLASS()
 class OSC3_API UMainMenuWidget : public UUserWidget
 {
-	GENERATED_BODY()
-
+  GENERATED_BODY()
   friend class AMainMenu;
 
 public:
@@ -38,6 +37,9 @@ public:
   }
   void SetSaveFunction(TFunction<void ()> inSaveFunction) {
     SaveFunction = inSaveFunction;
+  }
+  void SetSaveAsFunction(TFunction<void (FString)> inSaveAsFunction) {
+    SaveAsFunction = inSaveAsFunction;
   }
   void SetNewFunction(TFunction<void ()> inNewFunction) {
     NewFunction = inNewFunction;
@@ -65,7 +67,7 @@ public:
     CableColorCycleToggleFunction = inCableColorCycleToggleFunction;
   }
 
-  void SetKeyboardInputText(FString Text);
+  void SetKeyboard(AKeyboard* inKeyboard);
 
   void Confirm(
     FString ConfirmationLabel,
@@ -80,9 +82,9 @@ public:
     TFunction<void ()> inConfirmationCancelFunction,
     bool bSolo = false
   );
-	
+
 protected:
-	virtual void NativeConstruct() override;	
+  virtual void NativeConstruct() override;	
 
   // title
   UPROPERTY(meta = (BindWidget))
@@ -176,6 +178,11 @@ protected:
 private:
   AKeyboard* Keyboard;
 
+  UFUNCTION()
+  void HandleKeyboardInputUpdated(FString Input, int8 CursorIndex);
+  UFUNCTION()
+  void HandleKeyboardInputConfirmed(FString Input);
+
   FString CurrentFMDirectory{""};
 
   void HideAll();
@@ -207,6 +214,7 @@ private:
   bool bSavingAs{false};
   UFUNCTION()
   void HandleSaveAsClick();
+  TFunction<void (FString)> SaveAsFunction;
 
   FString LoadedPatchDirectory{""};
   FString LoadedPatchBasename{""};

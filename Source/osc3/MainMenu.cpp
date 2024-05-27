@@ -64,46 +64,14 @@ void AMainMenu::BeginPlay() {
   Keyboard->AddActorWorldOffset(FVector(0.f, 0.f, (-desiredWorldHeight * 0.5f) - 1.f));
   Keyboard->AddActorLocalRotation(FRotator(10.f, 0.f, 0.f));
   Keyboard->AttachToComponent(GetRootComponent(), FAttachmentTransformRules::KeepWorldTransform);
-
-  Keyboard->AddOnInputUpdatedDelegate(this, FName("HandleKeyboardInputUpdated"));
-  Keyboard->AddOnInputConfirmedDelegate(this, FName("HandleKeyboardInputConfirmed"));
   Keyboard->SetActorHiddenInGame(true);
-
-  MainMenuWidget->Keyboard = Keyboard;
-}
-
-void AMainMenu::HandleKeyboardInputUpdated(FString Input, int8 CursorIndex) {
-  Input.InsertAt(CursorIndex, "|");
-  Input.Append(".vcv");
-  if (MainMenuWidget) {
-    MainMenuWidget->SetKeyboardInputText(Input);
-  }
-}
-
-void AMainMenu::HandleKeyboardInputConfirmed(FString Input) {
-  FString path = MainMenuWidget->CurrentFMDirectory;
-  path.Append(Input);
-  path.Append(".vcv");
-
-  if (FPaths::FileExists(path)) {
-    MainMenuWidget->Confirm(
-      TEXT("File exists! Overwrite?"),
-      TEXT("Yes, overwrite file"),
-      [this, path]() {
-        MainMenuWidget->GotoLoading(TEXT(""), TEXT("saving patch"));
-        SaveAsFunction(path);
-      }
-    );
-  } else {
-    MainMenuWidget->GotoLoading(TEXT(""), TEXT("saving patch"));
-    SaveAsFunction(path);
-  }
+  MainMenuWidget->SetKeyboard(Keyboard);
 }
 
 void AMainMenu::Init(
   TFunction<void ()> ExitFunction,
   TFunction<void ()> SaveFunction,
-  TFunction<void (FString)> inSaveAsFunction,
+  TFunction<void (FString)> SaveAsFunction,
   TFunction<void ()> NewFunction,
   TFunction<void ()> ContinueFunction,
   TFunction<void ()> OverwriteTemplateFunction,
@@ -114,7 +82,7 @@ void AMainMenu::Init(
 ) {
   MainMenuWidget->SetExitFunction(ExitFunction);
   MainMenuWidget->SetSaveFunction(SaveFunction);
-  SaveAsFunction = inSaveAsFunction;
+  MainMenuWidget->SetSaveAsFunction(SaveAsFunction);
   MainMenuWidget->SetNewFunction(NewFunction);
   MainMenuWidget->SetContinueFunction(ContinueFunction);
   MainMenuWidget->SetOverwriteTemplateFunction(OverwriteTemplateFunction);

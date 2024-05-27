@@ -103,6 +103,38 @@ void UMainMenuWidget::UpdateState(Aosc3GameState* GameState) {
   bPatchIsSaved = !GameState->IsUnsaved();
 }
 
+void UMainMenuWidget::SetKeyboard(AKeyboard* inKeyboard) {
+  Keyboard = inKeyboard;
+  Keyboard->AddOnInputUpdatedDelegate(this, FName("HandleKeyboardInputUpdated"));
+  Keyboard->AddOnInputConfirmedDelegate(this, FName("HandleKeyboardInputConfirmed"));
+}
+
+void UMainMenuWidget::HandleKeyboardInputUpdated(FString Input, int8 CursorIndex) {
+  Input.InsertAt(CursorIndex, "|");
+  Input.Append(".vcv");
+  FilenameInput->SetText(FText::FromString(Input));
+}
+
+void UMainMenuWidget::HandleKeyboardInputConfirmed(FString Input) {
+  FString path = CurrentFMDirectory;
+  path.Append(Input);
+  path.Append(".vcv");
+
+  if (FPaths::FileExists(path)) {
+    Confirm(
+      TEXT("File exists! Overwrite?"),
+      TEXT("Yes, overwrite file"),
+      [this, path]() {
+        GotoLoading(TEXT(""), TEXT("saving patch"));
+        SaveAsFunction(path);
+      }
+    );
+  } else {
+    GotoLoading(TEXT(""), TEXT("saving patch"));
+    SaveAsFunction(path);
+  }
+}
+
 void UMainMenuWidget::GotoLoading(FString UpperText, FString LowerText) {
   HideAll();
   LoadingSection->SetVisibility(ESlateVisibility::HitTestInvisible);
@@ -131,10 +163,6 @@ void UMainMenuWidget::HideAll() {
   ReloadDirectoryInFileManager();
   FilenameInputContainer->SetVisibility(ESlateVisibility::Collapsed);
   Keyboard->SetActorHiddenInGame(true);
-}
-
-void UMainMenuWidget::SetKeyboardInputText(FString Text) {
-  FilenameInput->SetText(FText::FromString(Text));
 }
 
 void UMainMenuWidget::SetRecentPatchesListItems(TArray<UFileListEntryData*> Entries) {

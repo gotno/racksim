@@ -54,6 +54,7 @@ void AKeyboard::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 }
 
+// TODO: AddUnique?
 void AKeyboard::AddOnInputUpdatedDelegate(UObject* Object, const FName& MethodName) {
   if (KeyboardWidget) {
     FScriptDelegate Delegate;
@@ -62,6 +63,7 @@ void AKeyboard::AddOnInputUpdatedDelegate(UObject* Object, const FName& MethodNa
   }
 }
 
+// TODO: AddUnique?
 void AKeyboard::AddOnInputConfirmedDelegate(UObject* Object, const FName& MethodName) {
   if (KeyboardWidget) {
     FScriptDelegate Delegate;
