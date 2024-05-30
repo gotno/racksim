@@ -108,7 +108,7 @@ void AVRAvatar::EnableWorldManipulation() {
 }
 
 void AVRAvatar::Tick(float DeltaTime) {
-	Super::Tick(DeltaTime);
+  Super::Tick(DeltaTime);
 }
 
 void AVRAvatar::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
@@ -401,7 +401,6 @@ void AVRAvatar::HandleRotateWorld(const FInputActionValue& _Value, EControllerHa
   }
 }
 void AVRAvatar::RotateWorldAroundPivot(float degrees, FVector pivot) {
-  DrawDebugSphere(GetWorld(), pivot, 2.f, 12, FColor::Emerald);
   FVector vrOrigin = VRRoot->GetComponentLocation();
   FVector translation = vrOrigin - pivot;
   FVector rotatedTranslation = translation.RotateAngleAxis(degrees, FVector::UpVector);
