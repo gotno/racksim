@@ -93,6 +93,8 @@ void AVRMotionController::SetTrackingSource(EControllerHand Hand) {
 void AVRMotionController::Tick(float DeltaTime) {
   Super::Tick(DeltaTime);
 
+  SetActorHiddenInGame(!MotionController->IsTracked());
+
   WidgetInteractionTick();
 
   GrabbableTargetTick();
