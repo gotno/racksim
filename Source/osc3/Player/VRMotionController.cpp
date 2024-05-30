@@ -167,11 +167,7 @@ void AVRMotionController::WidgetInteractionTick() {
     FHitResult widgetHit = WidgetInteractionComponent->GetLastHitResult();
 
     PointerFXComponent->SetWorldLocation(InteractTraceEnd);
-    PointerFXComponent->SetVectorParameter(
-      FName("pointer_end"),
-      MotionController->GetComponentLocation() + MotionController->GetForwardVector() * widgetHit.Distance
-    );
-
+    PointerFXComponent->SetVectorParameter(FName("pointer_end"), widgetHit.Location);
     PointerFXComponent->SetVisibility(true);
   } else {
     PointerFXComponent->SetVisibility(false);
