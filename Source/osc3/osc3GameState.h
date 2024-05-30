@@ -41,7 +41,10 @@ public:
     } else if (bPatchIsAutosave) {
       SaveName = AutosaveName;
     } else {
-      SaveName = FMD5::HashAnsiString(*PatchPath);
+      SaveName = PatchPath;
+      SaveName.ReplaceInline(TEXT("/"), TEXT("_"), ESearchCase::IgnoreCase);
+      SaveName.ReplaceInline(TEXT("\\"), TEXT("_"), ESearchCase::IgnoreCase);
+      SaveName.ReplaceInline(TEXT(":"), TEXT("_"), ESearchCase::IgnoreCase);
     }
   }
 
