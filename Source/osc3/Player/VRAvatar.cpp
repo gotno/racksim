@@ -38,15 +38,10 @@ AVRAvatar::AVRAvatar() {
 
   Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
   Camera->SetupAttachment(VRRoot);
-  
-  DestinationMarker = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Destination"));
-  DestinationMarker->SetupAttachment(VRRoot);
-  DestinationMarker->SetVisibility(false);
 }
 
 void AVRAvatar::BeginPlay() {
 	Super::BeginPlay();
-  DestinationMarker->SetVisibility(false);
   GameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(this));
 }
 
@@ -66,8 +61,14 @@ void AVRAvatar::PawnClientRestart() {
       InputSubsystem->ClearAllMappings();
       InputSubsystem->AddMappingContext(InputMappingContexts.Base, 0);
     }
-  }	
-  
+  }
+
+  if (!DestinationMarker) {
+    DestinationMarker = GetWorld()->SpawnActor<AActor>(DestinationMarkerClass);
+    DestinationMarker->SetOwner(this);
+    DestinationMarker->SetActorHiddenInGame(true);
+  }
+
   if (!LeftController) {
     LeftController = GetWorld()->SpawnActor<AVRMotionController>(MotionControllerClass);
     LeftController->AttachToComponent(VRRoot, FAttachmentTransformRules::KeepRelativeTransform);
@@ -321,21 +322,22 @@ void AVRAvatar::HandleTeleport(const FInputActionValue& Value, EControllerHand H
         LastDestinationLocation, 0.2f
       );
     LastDestinationLocation = destinationLocation;
-    DestinationMarker->SetWorldLocation(destinationLocation);
-    DestinationMarker->SetVisibility(true);
+
+    DestinationMarker->SetActorLocation(destinationLocation, true);
+    DestinationMarker->SetActorHiddenInGame(false);
   } else {
-    DestinationMarker->SetVisibility(false);
+    DestinationMarker->SetActorHiddenInGame(true);
   }
 }
 void AVRAvatar::HandleCompleteTeleport(const FInputActionValue& _Value, EControllerHand Hand) {
   SetWorldManipulationActive(Hand, false);
   if (HasDestinationHit) {
-    FVector offset = DestinationHitResult.Location - Camera->GetComponentLocation();
+    FVector offset = DestinationMarker->GetActorLocation() - Camera->GetComponentLocation();
     offset.Z = 0.f;
     AddActorWorldOffset(offset);
   }
   HasDestinationHit = false;
-  DestinationMarker->SetVisibility(false);
+  DestinationMarker->SetActorHiddenInGame(true);
 }
 void AVRAvatar::SweepDestination(EControllerHand Hand) {
   AVRMotionController* controller = GetControllerForHand(Hand);

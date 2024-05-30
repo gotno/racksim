@@ -243,7 +243,9 @@ private:
   USceneComponent* VRRoot;
 
   UPROPERTY(VisibleAnywhere)
-  UStaticMeshComponent* DestinationMarker;
+  AActor* DestinationMarker;
+  UPROPERTY(EditDefaultsOnly, Category="Input")
+  TSubclassOf<AActor> DestinationMarkerClass;
   
   Aosc3GameModeBase* GameMode;
 
