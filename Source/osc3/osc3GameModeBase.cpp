@@ -491,6 +491,8 @@ void Aosc3GameModeBase::ProcessWeldmentQueue() {
   }
 
   if (!SaveData) {
+    TArray<int64_t> weldedModuleIds;
+
     for (auto& kv : ModulesSeekingWeldment) {
       VCVModule& startModule = kv.Value;
       if (startModule.leftExpanderId != -1) continue;
@@ -520,9 +522,13 @@ void Aosc3GameModeBase::ProcessWeldmentQueue() {
       if (bReadyToWeld) {
         WeldModules(modulesToWeld);
         for (int64_t moduleId : modulesToWeld) {
-          ModulesSeekingWeldment.Remove(moduleId);
+          weldedModuleIds.Add(moduleId);
         }
       }
+    }
+
+    for (int64_t moduleId : weldedModuleIds) {
+      ModulesSeekingWeldment.Remove(moduleId);
     }
   }
 }
