@@ -184,7 +184,7 @@ void Aosc3GameModeBase::RackConnectionEstablished() {
   }
 
   if (SaveData) {
-    PlayerPawn->SetActorLocation(SaveData->PlayerLocation);
+    PlayerPawn->SetPlayerPosition(SaveData->PlayerLocation, SaveData->PlayerRotation);
     LibraryActor->SetActorLocation(SaveData->LibraryPosition.Location);
     LibraryActor->SetActorRotation(SaveData->LibraryPosition.Rotation);
     LibraryActor->SetActorHiddenInGame(SaveData->bLibraryHidden);

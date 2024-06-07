@@ -199,7 +199,8 @@ public:
     }
   }
 
-  FVector GetSavegamePlayerLocation();
+  void GetSavegamePlayerPosition(FVector& Location, FRotator& Rotation);
+  void SetPlayerPosition(FVector& Location, FRotator& Rotation);
 
   UPROPERTY(EditAnywhere, Category="Input")
   FBaseActions BaseActions;

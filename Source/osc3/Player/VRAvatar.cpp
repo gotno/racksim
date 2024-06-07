@@ -96,10 +96,17 @@ void AVRAvatar::PawnClientRestart() {
   }
 }
 
-FVector AVRAvatar::GetSavegamePlayerLocation() {
-  FVector location = Camera->GetComponentLocation();
-  location.Z = GetActorLocation().Z;
-  return location;
+void AVRAvatar::GetSavegamePlayerPosition(FVector& Location, FRotator& Rotation) {
+  Location = VRRoot->GetComponentLocation();
+
+  Rotation = VRRoot->GetComponentRotation();
+  Rotation.Pitch = 0.f;
+  Rotation.Roll = 0.f;
+}
+
+void AVRAvatar::SetPlayerPosition(FVector& Location, FRotator& Rotation) {
+  VRRoot->SetWorldLocation(Location);
+  VRRoot->SetWorldRotation(Rotation);
 }
 
 void AVRAvatar::EnableWorldManipulation() {
