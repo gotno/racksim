@@ -48,9 +48,11 @@ uint32 FSvgWorker::Run() {
   unsigned char* rgba =
     renderSvgToPixelArray(TCHAR_TO_ANSI(*Filepath), width, height, scale);
 
+  if (!TextureTarget) return 0;
   uint8* MipData = (uint8*)TextureTarget->GetPlatformData()->Mips[0].BulkData.Lock(LOCK_READ_WRITE);
   FMemory::Memcpy(MipData, rgba, width * height * sizeof(uint32));
 
+  if (!TextureTarget) return 0;
   TextureTarget->GetPlatformData()->Mips[0].BulkData.Unlock();
 
   delete[] rgba;
