@@ -112,6 +112,10 @@ void AVRMotionController::Tick(float DeltaTime) {
   // interact trace
   // DrawDebugLine(GetWorld(), InteractTraceStart, InteractTraceEnd, FColor::Purple);
 
+  ParamTargetTick();
+  PortTargetTick();
+  CableTargetTick();
+
   // SetIndicatorPosition();
   FVector indicatorLocation;
   FRotator indicatorRotation = MotionController->GetComponentRotation();
@@ -137,10 +141,6 @@ void AVRMotionController::Tick(float DeltaTime) {
   }
   InteractIndicatorMesh->SetWorldLocation(indicatorLocation);
   InteractIndicatorMesh->SetWorldRotation(indicatorRotation);
-
-  ParamTargetTick();
-  PortTargetTick();
-  CableTargetTick();
 
   if (TooltipWidgetComponent->IsVisible())
     TooltipWidgetComponent->SetWorldRotation(
