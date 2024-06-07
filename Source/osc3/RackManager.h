@@ -2,21 +2,35 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
+
+#include "Misc/InteractiveProcess.h"
+
 #include "RackManager.generated.h"
 
 UCLASS()
 class OSC3_API URackManager : public UObject {
-	GENERATED_BODY()
-    
+  GENERATED_BODY()
+
 public:
   void Init();
   void Run(FString PatchPath, TFunction<void ()> inFinishRunCallback);
   void Cleanup();
-  bool RackIsRunning() { return bRunning; }
   bool DoesAutosaveExist();
   FString GetBootstrapPath() { return OSCctrlBootstrapPath; }
   TArray<FString> GetRecentPatchPaths();
   void CallOnExit(TFunction<void ()> inOnExitCallback);
+
+  FProcHandle GetHandle() { return hRackProc; }
+  bool SetHandle(FProcHandle inHandle) {
+    if (inHandle.IsValid() && FPlatformProcess::IsProcRunning(inHandle)) {
+      bRunning = true;
+      hRackProc = inHandle;
+    }
+    return bRunning;
+  }
+  bool RackIsRunning() {
+    return hRackProc.IsValid() && FPlatformProcess::IsProcRunning(hRackProc);
+  }
 
   float AutosaveInterval{15.f};
   TArray<FColor> CableColors;

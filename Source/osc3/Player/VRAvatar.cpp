@@ -6,6 +6,7 @@
 #include "osc3.h"
 
 #include "osc3GameModeBase.h"
+#include "osc3GameState.h"
 #include "VCVModule.h"
 #include "Utility/ModuleWeldment.h"
 #include "ModuleComponents/VCVParam.h"
@@ -43,6 +44,7 @@ AVRAvatar::AVRAvatar() {
 void AVRAvatar::BeginPlay() {
 	Super::BeginPlay();
   GameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(this));
+  GameState = Cast<Aosc3GameState>(UGameplayStatics::GetGameState(this));
 }
 
 void AVRAvatar::PawnClientRestart() {
@@ -342,6 +344,7 @@ void AVRAvatar::HandleCompleteTeleport(const FInputActionValue& _Value, EControl
     FVector offset = DestinationMarker->GetActorLocation() - Camera->GetComponentLocation();
     offset.Z = 0.f;
     AddActorWorldOffset(offset);
+    GameState->SetUnsaved();
   }
   HasDestinationHit = false;
   DestinationMarker->SetActorHiddenInGame(true);
@@ -400,6 +403,7 @@ void AVRAvatar::HandleRotateWorld(const FInputActionValue& _Value, EControllerHa
   LastRotateWorldDelta = deltaYaw;
   
   RotateWorldAroundPivot(deltaYaw, Camera->GetComponentLocation());
+  GameState->SetUnsaved();
 
   if (Hand == EControllerHand::Left) {
     LastLeftHandLocation = LeftController->GetActorLocation();
@@ -455,6 +459,7 @@ void AVRAvatar::HandleTranslateWorld(const FInputActionValue& _Value, EControlle
   LastTranslateWorldDelta = locationDelta;
 
   AddActorWorldOffset(locationDelta);
+  GameState->SetUnsaved();
 
   if (Hand == EControllerHand::Left) {
     LastLeftHandLocation = LeftController->GetActorLocation();
@@ -506,6 +511,7 @@ void AVRAvatar::HandleRotoTranslateWorld(const FInputActionValue& _Value) {
   LastTranslateWorldDelta = locationDelta;
 
   AddActorWorldOffset(locationDelta);
+  GameState->SetUnsaved();
 
   // UE_LOG(LogTemp, Warning, TEXT("ran roto-translate %f %s"), deltaYaw, *locationDelta.ToCompactString());
 

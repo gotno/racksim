@@ -8,6 +8,7 @@
 #include "osc3GameModeBase.generated.h"
 
 class Aosc3GameState;
+class Uosc3GameInstance;
 class AOSCController;
 class AGrabbableActor;
 class URackManager;
@@ -23,6 +24,8 @@ class Aosc3PlayerController;
 class UTexture2D;
 class AModuleWeldment;
 class USvgRenderer;
+class ASkyLight;
+class ADirectionalLight;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FTextureReadySignature, FString, Filepath, UTexture2D*, Texture);
 
@@ -40,10 +43,10 @@ struct ReturnModulePosition {
 
 UCLASS()
 class OSC3_API Aosc3GameModeBase : public AGameModeBase {
-	GENERATED_BODY()
+  GENERATED_BODY()
 
 public:
-    Aosc3GameModeBase();
+  Aosc3GameModeBase();
 
 private:
   virtual void Tick(float DeltaTime) override;
@@ -129,8 +132,8 @@ private:
   Aosc3PlayerController* PlayerController;
   UPROPERTY()
   AVRAvatar* PlayerPawn;
-
-  FVector DefaultInPatchPlayerLocation{0.f};
+  UPROPERTY()
+  Uosc3GameInstance* osc3GameInstance;
 
   UPROPERTY()
   TMap<int64, AVCVModule*> ModuleActors;
@@ -160,6 +163,11 @@ private:
   UPROPERTY()
   ALibrary* LibraryActor{nullptr};
 
+  UPROPERTY()
+  ASkyLight* FillLight;
+  UPROPERTY()
+  ADirectionalLight* SunLight;
+
   int64_t LastClickedMenuModuleId{-1};
   int currentReturnModuleId{0};
   TMap<int32, ReturnModulePosition> ReturnModulePositions;
@@ -169,9 +177,13 @@ private:
 
   UPROPERTY()
   TMap<FString, UTexture2D*> SvgTextures;
-  
+
+  void AdjustLightIntensity(float Amount);
+  void AdjustLightAngle(float Amount);
+
   void SavePatch(FString PatchPath = "");
   void LoadPatch(FString PatchPath);
+  void LoadMap(FString MapName, FString NextPatchPath = "");
   void StartRack(FString PatchPath);
   void RestartRack(FString PatchPath);
   FString PatchPathToBootstrap{""};

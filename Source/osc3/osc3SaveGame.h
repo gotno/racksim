@@ -52,5 +52,16 @@ public:
   UPROPERTY(VisibleAnywhere, Category = Base)
   FVector PlayerLocation{0.f};
   UPROPERTY(VisibleAnywhere, Category = Base)
+  FRotator PlayerRotation{0.f};
+  UPROPERTY(VisibleAnywhere, Category = Base)
   bool bAutosavePatchIsSaved{false};
+  UPROPERTY(VisibleAnywhere, Category = Base)
+  FString PatchPath{""};
+
+  UPROPERTY(VisibleAnywhere, Category = Base)
+  FString MapName{""};
+  UPROPERTY(VisibleAnywhere, Category = Base)
+  float EnvironmentLightIntensityAmount{-1.f};
+  UPROPERTY(VisibleAnywhere, Category = Base)
+  float EnvironmentLightAngleAmount{-1.f};
 };

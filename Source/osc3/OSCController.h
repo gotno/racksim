@@ -30,6 +30,7 @@ public:
   void SyncPorts();
 
   bool IsRunning() { return bRunning; }
+  bool IsConnected() { return bConnected; }
   void PauseSending() { bSendingPaused = true; }
   void UnpauseSending() { bSendingPaused = false; }
 
@@ -71,6 +72,7 @@ private:
   int MinRackClientPort{7000}, RackClientPort{7000}, MaxRackClientPort{7020};
   int ServerPort{7001};
   bool bRunning{false};
+  bool bConnected{false};
   bool bSendingPaused{false};
 
   UPROPERTY()

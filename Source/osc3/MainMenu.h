@@ -36,12 +36,16 @@ public:
     TFunction<void (FString)> LoadFunction,
     TFunction<void (float)> CableOpacityUpdateFunction,
     TFunction<void (float)> CableTensionUpdateFunction,
-    TFunction<void (bool)> CableColorCycleToggleFunction
+    TFunction<void (bool)> CableColorCycleToggleFunction,
+    TFunction<void (FString)> LoadMapFunction,
+    TFunction<void (float)> EnvironmentLightIntensityUpdateFunction,
+    TFunction<void (float)> EnvironmentLightAngleUpdateFunction
   );
   void Hide();
   void Show();
   void Refresh();
   void Toggle();
+  void Status(FString UpperText = "", FString LowerText = "");
 
 private:
   Aosc3GameModeBase* GameMode;

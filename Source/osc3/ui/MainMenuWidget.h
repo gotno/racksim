@@ -29,8 +29,8 @@ public:
   UFUNCTION()
   void GotoMain();
 
+  void GotoStatus(FString UpperText = "", FString LowerText = "");
   void UpdateState(Aosc3GameState* GameState);
-  void GotoLoading(FString UpperText = "", FString LowerText = "");
 
   void SetExitFunction(TFunction<void ()> inExitFunction) {
     ExitFunction = inExitFunction;
@@ -65,6 +65,15 @@ public:
   }
   void SetCableColorCycleToggleFunction(TFunction<void (bool)> inCableColorCycleToggleFunction) {
     CableColorCycleToggleFunction = inCableColorCycleToggleFunction;
+  }
+  void SetEnvironmentLightIntensityUpdateFunction(TFunction<void (float)> inEnvironmentLightIntensityUpdateFunction) {
+    EnvironmentLightIntensityUpdateFunction = inEnvironmentLightIntensityUpdateFunction;
+  }
+  void SetEnvironmentLightAngleUpdateFunction(TFunction<void (float)> inEnvironmentLightAngleUpdateFunction) {
+    EnvironmentLightAngleUpdateFunction = inEnvironmentLightAngleUpdateFunction;
+  }
+  void SetLoadMapFunction(TFunction<void (FString)> inLoadMapFunction) {
+    LoadMapFunction = inLoadMapFunction;
   }
 
   void SetKeyboard(AKeyboard* inKeyboard);
@@ -163,6 +172,21 @@ protected:
   UCheckBox* CableColorCycleToggle;
 
   UPROPERTY(meta = (BindWidget))
+  UButton* MapOneButton;
+  UPROPERTY(meta = (BindWidget))
+  UButton* MapTwoButton;
+  UPROPERTY(meta = (BindWidget))
+  UButton* MapThreeButton;
+  UPROPERTY(meta = (BindWidget))
+  USlider* EnvironmentLightIntensitySlider;
+  UPROPERTY(meta = (BindWidget))
+  UTextBlock* EnvironmentLightIntensitySliderLabel;
+  UPROPERTY(meta = (BindWidget))
+  USlider* EnvironmentLightAngleSlider;
+  UPROPERTY(meta = (BindWidget))
+  UTextBlock* EnvironmentLightAngleSliderLabel;
+
+  UPROPERTY(meta = (BindWidget))
   UBorder* LoadingSection;
   // UBorder* StatusSection; // aactually
   UPROPERTY(meta = (BindWidget))
@@ -195,19 +219,19 @@ private:
   UFUNCTION()
   void HandleConfirmationCancelClick();
 
-  FString LoadingPatchLabel{"initializing simulation"};
+  FString LoadingPatchLabel = LOADING_PATCH_LABEL;
 
   TFunction<void ()> ExitFunction;
   UFUNCTION()
   void HandleExitClick() {
-    GotoLoading("goodbye", "leaving simulation");
+    GotoStatus("goodbye", "leaving simulation");
     ExitFunction();
   }
 
   TFunction<void ()> SaveFunction;
   UFUNCTION()
   void HandleSaveClick() {
-    GotoLoading();
+    GotoStatus();
     SaveFunction();
   }
 
@@ -226,7 +250,7 @@ private:
   TFunction<void ()> ContinueFunction;
   UFUNCTION()
   void HandleContinueClick() {
-    GotoLoading(TEXT(""), LoadingPatchLabel);
+    GotoStatus(TEXT(""), LoadingPatchLabel);
     ContinueFunction();
   }
 
@@ -264,4 +288,31 @@ private:
   UFUNCTION()
   void HandleCableColorCycleToggle(bool bIsChecked);
   TFunction<void (bool)> CableColorCycleToggleFunction;
+
+  UFUNCTION()
+  void HandleEnvironmentLightIntensitySliderChange(float Value);
+  TFunction<void (float)> EnvironmentLightIntensityUpdateFunction;
+  void SetEnvironmentLightIntensitySliderLabel(float& Value);
+
+  UFUNCTION()
+  void HandleEnvironmentLightAngleSliderChange(float Value);
+  TFunction<void (float)> EnvironmentLightAngleUpdateFunction;
+  void SetEnvironmentLightAngleSliderLabel(float& Value);
+
+  TFunction<void (FString)> LoadMapFunction;
+  UFUNCTION()
+  void HandleMapOneClick() {
+    GotoStatus(TEXT(""), "traveling to the light void");
+    LoadMapFunction("light_void");
+  }
+  UFUNCTION()
+  void HandleMapTwoClick() {
+    GotoStatus(TEXT(""), "traveling to the dark void");
+    LoadMapFunction("dark_void");
+  }
+  UFUNCTION()
+  void HandleMapThreeClick() {
+    GotoStatus(TEXT(""), "traveling to the park");
+    LoadMapFunction("park");
+  }
 };

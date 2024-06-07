@@ -78,7 +78,10 @@ void AMainMenu::Init(
   TFunction<void (FString)> LoadFunction,
   TFunction<void (float)> CableOpacityUpdateFunction,
   TFunction<void (float)> CableTensionUpdateFunction,
-  TFunction<void (bool)> CableColorCycleToggleFunction
+  TFunction<void (bool)> CableColorCycleToggleFunction,
+  TFunction<void (FString)> LoadMapFunction,
+  TFunction<void (float)> EnvironmentLightIntensityUpdateFunction,
+  TFunction<void (float)> EnvironmentLightAngleUpdateFunction
 ) {
   MainMenuWidget->SetExitFunction(ExitFunction);
   MainMenuWidget->SetSaveFunction(SaveFunction);
@@ -90,6 +93,9 @@ void AMainMenu::Init(
   MainMenuWidget->SetCableOpacityUpdateFunction(CableOpacityUpdateFunction);
   MainMenuWidget->SetCableTensionUpdateFunction(CableTensionUpdateFunction);
   MainMenuWidget->SetCableColorCycleToggleFunction(CableColorCycleToggleFunction);
+  MainMenuWidget->SetLoadMapFunction(LoadMapFunction);
+  MainMenuWidget->SetEnvironmentLightIntensityUpdateFunction(EnvironmentLightIntensityUpdateFunction);
+  MainMenuWidget->SetEnvironmentLightAngleUpdateFunction(EnvironmentLightAngleUpdateFunction);
 
   // these don't change, so they don't need to be in Refresh,
   // but they do need to be set before we Refresh
@@ -118,6 +124,10 @@ void AMainMenu::Refresh() {
 void AMainMenu::Toggle() {
   if (IsHidden()) Show();
   else Hide();
+}
+
+void AMainMenu::Status(FString UpperText, FString LowerText) {
+  MainMenuWidget->GotoStatus(UpperText, LowerText);
 }
 
 void AMainMenu::Tick(float DeltaTime) {
@@ -199,6 +209,12 @@ TArray<UFileListEntryData*> AMainMenu::GenerateFMShortcutsEntries() {
   patchesEntry->Label = TEXT("Rack2\\Patches");
   patchesEntry->Path = patchesPath;
   entries.Add(patchesEntry);
+  // TODO
+  // rack patch/plugin dir proposed
+  // UFileListEntryData* patchesEntry = NewObject<UFileListEntryData>(this);
+  // patchesEntry->Label = TEXT("Rack2\\Patches");
+  // patchesEntry->Path = FString(FPlatformProcess::UserSettingsDir()) + "Rack2/patches/";
+  // entries.Add(patchesEntry);
 
   UFileListEntryData* desktopEntry = NewObject<UFileListEntryData>(this);
   desktopEntry->Label = TEXT("Desktop");
@@ -214,12 +230,6 @@ TArray<UFileListEntryData*> AMainMenu::GenerateFMShortcutsEntries() {
   downloadsEntry->Label = TEXT("Downloads");
   downloadsEntry->Path = downloadsPath;
   entries.Add(downloadsEntry);
-
-  // TODO
-  // rack patch/plugin dir proposed
-  // UE_LOG(LogTemp, Warning, TEXT("FPlatformProcess::UserSettingsDir() %s"), FPlatformProcess::UserSettingsDir());
-  // LogTemp: Warning: FPlatformProcess::UserSettingsDir() C:/Users/floyd/AppData/Local/
-  // + "Rack2/patches/"
 
   return entries;
 }

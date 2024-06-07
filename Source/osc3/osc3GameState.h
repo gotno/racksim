@@ -3,14 +3,15 @@
 #include "CoreMinimal.h"
 #include "GameFramework/GameStateBase.h"
 
+#include "osc3.h"
 #include "Misc/SecureHash.h"
 
 #include "osc3GameState.generated.h"
 
 UCLASS()
 class OSC3_API Aosc3GameState : public AGameStateBase {
-	GENERATED_BODY()
-	
+  GENERATED_BODY()
+
 public:
   bool IsPatchLoaded() { return bPatchLoaded; }
   void SetPatchLoaded(bool inbPatchLoaded) { bPatchLoaded = inbPatchLoaded; }
@@ -58,6 +59,23 @@ public:
     return AutosaveName;
   }
 
+  float EnvironmentLightIntensityAmount{0.24f};
+  float EnvironmentLightAngleAmount{0.45f};
+  FString CurrentMapName{"dark_void"};
+  void SetCurrentMapName(FString MapName) {
+    CurrentMapName = MapName;
+
+    EnvironmentLightIntensityAmount =
+      LightIntensityMap.Contains(CurrentMapName)
+        ? LightIntensityMap[CurrentMapName]
+        : LightIntensityMap[TEXT("default")];
+
+    EnvironmentLightAngleAmount =
+      LightAngleMap.Contains(CurrentMapName)
+        ? LightAngleMap[CurrentMapName]
+        : LightAngleMap[TEXT("default")];
+  }
+
 private:
   bool bPatchLoaded{false};
   bool bUnsaved{false};
@@ -66,4 +84,12 @@ private:
   FString PatchPath{""};
   FString SaveName{""};
   FString AutosaveName{"autosave"};
+
+  TMap<FString, float> LightIntensityMap = {
+    {"default", DEFAULT_ROOM_BRIGHTNESS_AMOUNT},
+    {"park", DEFAULT_ROOM_BRIGHTNESS_AMOUNT_WITH_SUN},
+  };
+  TMap<FString, float> LightAngleMap = {
+    {"default", DEFAULT_SUN_ANGLE_AMOUNT},
+  };
 };

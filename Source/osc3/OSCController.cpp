@@ -104,6 +104,7 @@ void AOSCController::SetClientPort(const FOSCAddress& AddressPattern, const FOSC
   RackClientPort = clientPort;
   OSCClient->SetSendIPAddress(TEXT("127.0.0.1"), RackClientPort);
 
+  bConnected = true;
   GameMode->RackConnectionEstablished();
 }
 

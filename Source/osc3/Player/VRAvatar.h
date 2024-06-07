@@ -12,6 +12,7 @@ class AVRMotionController;
 struct FHitResult;
 class UHapticFeedbackEffect_Base;
 class Aosc3GameModeBase;
+class Aosc3GameState;
 class AVCVCable;
 class ACableEnd;
 class AVCVParam;
@@ -248,7 +249,8 @@ private:
   UPROPERTY(EditDefaultsOnly, Category="Input")
   TSubclassOf<AActor> DestinationMarkerClass;
   
-  Aosc3GameModeBase* GameMode;
+  Aosc3GameModeBase* GameMode{nullptr};
+  Aosc3GameState* GameState{nullptr};
 
   EControllerHand GetOtherHand(EControllerHand Hand) {
     return Hand == EControllerHand::Left ? EControllerHand::Right : EControllerHand::Left;

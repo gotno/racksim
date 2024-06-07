@@ -6,6 +6,7 @@
 #include "MainMenu.h"
 #include "Player/VRAvatar.h"
 #include "osc3SaveGame.h"
+#include "osc3GameInstance.h"
 
 #include "Player/VRMotionController.h"
 #include "Utility/GrabbableActor.h"
@@ -23,6 +24,11 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 
+#include "Engine/SkyLight.h"
+#include "Components/SkyLightComponent.h"
+#include "Engine/DirectionalLight.h"
+#include "Components/DirectionalLightComponent.h"
+
 #include "HeadMountedDisplayFunctionLibrary.h"
 
 Aosc3GameModeBase::Aosc3GameModeBase() {
@@ -36,32 +42,64 @@ void Aosc3GameModeBase::BeginPlay() {
 	Super::BeginPlay();
 
   UHeadMountedDisplayFunctionLibrary::EnableHMD(true);
+  
+  TArray<AActor*> lights;
+  UGameplayStatics::GetAllActorsOfClass(GetWorld(), ASkyLight::StaticClass(), lights);
+  if (lights.Num() > 0) FillLight = Cast<ASkyLight>(lights[0]);
+  lights.Empty();
+
+  UGameplayStatics::GetAllActorsOfClass(GetWorld(), ADirectionalLight::StaticClass(), lights);
+  if (lights.Num() > 0) SunLight = Cast<ADirectionalLight>(lights[0]);
 
   osc3GameState = Cast<Aosc3GameState>(UGameplayStatics::GetGameState(this));
   if (osc3GameState) UE_LOG(LogTemp, Warning, TEXT("GameState exists"));
+
+  osc3GameInstance = Cast<Uosc3GameInstance>(GetWorld()->GetGameInstance());
+  if (osc3GameInstance) UE_LOG(LogTemp, Warning, TEXT("GameInstance exists"));
   
   rackman->Init();
   AVCVCable::CableColors = rackman->CableColors;
-  osc3GameState->SetCanContinueAutosave(rackman->DoesAutosaveExist());
+  osc3GameState->SetCanContinueAutosave(
+    !osc3GameState->IsPatchLoaded() && rackman->DoesAutosaveExist()
+  );
 
   PlayerController = Cast<Aosc3PlayerController>(UGameplayStatics::GetPlayerController(this, 0));
   if (PlayerController) UE_LOG(LogTemp, Warning, TEXT("PlayerController exists"));
 
   PlayerPawn = Cast<AVRAvatar>(UGameplayStatics::GetPlayerPawn(this, 0));
-  if (PlayerPawn) {
-    UE_LOG(LogTemp, Warning, TEXT("PlayerPawn exists"));
-    DefaultInPatchPlayerLocation =
-      PlayerPawn->GetActorLocation() + FVector(0.f, 0.f, 606.f);
-  }
+  if (PlayerPawn) UE_LOG(LogTemp, Warning, TEXT("PlayerPawn exists"));
   
   SpawnLibrary();
   SpawnMainMenu();
+
+  // give rackman back control over rack
+  if (osc3GameInstance->RackIsRunning()) {
+    rackman->SetHandle(osc3GameInstance->hRackProc);
+  }
+
+  osc3GameState->SetCurrentMapName(UGameplayStatics::GetCurrentLevelName(GetWorld(), true));
+
+  // there is a patch to load
+  if (!osc3GameInstance->NextPatchPath.IsEmpty()) {
+    // the patch is an autosave from switching maps
+    if (osc3GameInstance->NextPatchPath.Equals(osc3GameState->GetAutosaveName())) {
+      SaveData = osc3GameInstance->SaveData;
+    }
+
+    if (rackman->RackIsRunning()) {
+      OSCctrl->Init();
+      MainMenu->Status(TEXT(""), TEXT("reconnecting rack"));
+    }
+  } else {
+    MainMenu->Show();
+  }
 }
 
 void Aosc3GameModeBase::EndPlay(const EEndPlayReason::Type EndPlayReason) {
   Super::EndPlay(EndPlayReason);
 
-  rackman->Cleanup();
+  OSCctrl->PauseSending();
+  if (osc3GameInstance->NextPatchPath.IsEmpty()) rackman->Cleanup();
 }
 
 void Aosc3GameModeBase::SavePatch(FString PatchPath) {
@@ -70,10 +108,10 @@ void Aosc3GameModeBase::SavePatch(FString PatchPath) {
 
   FAsyncSaveGameToSlotDelegate savedDelegate;
 
-  // if true, we're overwriting the template patch:
-  // save current path to revert back after save
   FString revertPath{""};
   if (PatchPath.Equals("new"))
+    // if true, we're overwriting the template patch:
+    // save current path to revert back after save
     revertPath = osc3GameState->GetPatchPath();
 
   if (!PatchPath.IsEmpty())
@@ -97,12 +135,23 @@ void Aosc3GameModeBase::ConfirmSaved() {
 void Aosc3GameModeBase::LoadPatch(FString PatchPath) {
   Reset();
 
-  PatchPath.ReplaceInline(TEXT("/"), TEXT("\\"), ESearchCase::CaseSensitive);
+  PatchPath.ReplaceInline(TEXT("/"), TEXT("\\"), ESearchCase::IgnoreCase);
   osc3GameState->SetPatchPath(PatchPath);
 
   FAsyncLoadGameFromSlotDelegate LoadedDelegate;
   LoadedDelegate.BindLambda([=](const FString& SlotName, const int32 UserIndex, USaveGame* LoadedGameData) {
-    if (LoadedGameData) SaveData = Cast<Uosc3SaveGame>(LoadedGameData);
+    if (LoadedGameData) {
+      SaveData = Cast<Uosc3SaveGame>(LoadedGameData);
+
+      if (!SaveData->MapName.Equals(osc3GameState->CurrentMapName)) {
+        FString statusText = "traveling to the " + SaveData->MapName;
+        statusText.ReplaceInline(TEXT("_"), TEXT(" "), ESearchCase::IgnoreCase);
+        MainMenu->Status(TEXT(""), statusText);
+
+        LoadMap(SaveData->MapName, PatchPath);
+        return;
+      }
+    }
 
     if (rackman->RackIsRunning()) {
       if (PatchPath.Equals("new")) {
@@ -121,6 +170,23 @@ void Aosc3GameModeBase::LoadPatch(FString PatchPath) {
     }
   });
   UGameplayStatics::AsyncLoadGameFromSlot(osc3GameState->GetSaveName(), 0, LoadedDelegate);
+}
+
+void Aosc3GameModeBase::LoadMap(FString MapName, FString NextPatchPath) {
+  osc3GameInstance->NextMapName = MapName;
+
+  if (osc3GameState->IsPatchLoaded() || !NextPatchPath.IsEmpty()) {
+    osc3GameInstance->NextPatchPath =
+      NextPatchPath.IsEmpty() ? osc3GameState->GetAutosaveName() : NextPatchPath;
+
+    if (osc3GameInstance->NextPatchPath.Equals(osc3GameState->GetAutosaveName()))
+      osc3GameInstance->SaveData = MakeSaveGame();
+
+    if (rackman->RackIsRunning())
+      osc3GameInstance->hRackProc = rackman->GetHandle();
+  }
+
+  UGameplayStatics::OpenLevel(GetWorld(), osc3GameInstance->GetMapName());
 }
 
 void Aosc3GameModeBase::Reset() {
@@ -160,9 +226,35 @@ void Aosc3GameModeBase::RackConnectionEstablished() {
     return;
   }
 
-  OSCctrl->NotifyResync();
+  // we're connected to the previous patch, now load the real patch
+  if (!osc3GameInstance->NextPatchPath.IsEmpty()) {
+    bool bIsAutosave =
+      osc3GameInstance->NextPatchPath.Equals(osc3GameState->GetAutosaveName());
+    bool bIsNew =
+      osc3GameInstance->NextPatchPath.Equals("new");
+    MainMenu->Status(
+      bIsAutosave || bIsNew ? TEXT("") : FPaths::GetCleanFilename(osc3GameInstance->NextPatchPath),
+      bIsAutosave ? TEXT("loading autosave") : LOADING_PATCH_LABEL
+    );
+
+    if (bIsAutosave) {
+      osc3GameState->SetPatchPath(SaveData->PatchPath);
+      osc3GameState->SetPatchLoaded(true);
+      osc3GameState->SetUnsaved();
+      osc3GameInstance->NextPatchPath.Empty();
+    } else {
+      FString nextPatchPath = osc3GameInstance->NextPatchPath;
+      osc3GameInstance->NextPatchPath.Empty();
+      LoadPatch(nextPatchPath);
+
+      return;
+    }
+  }
 
   osc3GameState->SetPatchLoaded(true);
+
+  OSCctrl->NotifyResync();
+
   if (osc3GameState->IsAutosave()) {
     FString path;
     bool bIsSaved;
@@ -185,11 +277,18 @@ void Aosc3GameModeBase::RackConnectionEstablished() {
     LibraryActor->SetActorLocation(SaveData->LibraryPosition.Location);
     LibraryActor->SetActorRotation(SaveData->LibraryPosition.Rotation);
     LibraryActor->SetActorHiddenInGame(SaveData->bLibraryHidden);
-  } else {
-    PlayerPawn->SetActorLocation(DefaultInPatchPlayerLocation);
+    if (SaveData->EnvironmentLightIntensityAmount != -1.f) {
+      osc3GameState->EnvironmentLightIntensityAmount = SaveData->EnvironmentLightIntensityAmount;
+    }
+    if (SaveData->EnvironmentLightAngleAmount != -1.f) {
+      osc3GameState->EnvironmentLightAngleAmount = SaveData->EnvironmentLightAngleAmount;
+    }
   }
 
+  AdjustLightIntensity(osc3GameState->EnvironmentLightIntensityAmount);
+  AdjustLightAngle(osc3GameState->EnvironmentLightAngleAmount);
   PlayerPawn->EnableWorldManipulation();
+  MainMenu->Refresh();
   MainMenu->Hide();
   StartAutosaving();
 }
@@ -209,21 +308,19 @@ void Aosc3GameModeBase::RestartRack(FString PatchPath) {
   OSCctrl->SendAutosaveAndExit(PatchPath);
 }
 
-// TODO break into save/save+exit/exit
 void Aosc3GameModeBase::RequestExit() {
-  Uosc3SaveGame* SaveGame = MakeSaveGame();
-  if (!SaveGame) return;
-  SaveGame->bAutosavePatchIsSaved = !osc3GameState->IsUnsaved();
+  Uosc3SaveGame* autosave = MakeSaveGame();
+  if (!autosave) return;
+  autosave->bAutosavePatchIsSaved = !osc3GameState->IsUnsaved();
 
   FAsyncSaveGameToSlotDelegate SavedDelegate;
 
-  SavedDelegate.BindLambda([&](const FString& SlotName, const int32 UserIndex, bool bSuccess) {
+  SavedDelegate.BindLambda([&, this](const FString& SlotName, const int32 UserIndex, bool bSuccess) {
     float exitDelay{0.1f}; // seconds
 
-    if (OSCctrl->IsRunning() && rackman->RackIsRunning()) {
+    if (rackman->RackIsRunning() && OSCctrl->IsConnected()) {
       // give rack a second to finish exiting before EndPlay runs Cleanup
       exitDelay = 1.f;
-
       OSCctrl->SendAutosaveAndExit();
     }
 
@@ -237,7 +334,7 @@ void Aosc3GameModeBase::RequestExit() {
     );
   });
 
-  UGameplayStatics::AsyncSaveGameToSlot(SaveGame, osc3GameState->GetAutosaveName(), 0, SavedDelegate);
+  UGameplayStatics::AsyncSaveGameToSlot(autosave, osc3GameState->GetAutosaveName(), 0, SavedDelegate);
 }
 
 void Aosc3GameModeBase::StartAutosaving() {
@@ -294,9 +391,28 @@ Uosc3SaveGame* Aosc3GameModeBase::MakeSaveGame() {
       SaveGameInstance->WeldmentInfos.Add(info);
     }
 
-    LibraryActor->GetPosition(SaveGameInstance->LibraryPosition.Location, SaveGameInstance->LibraryPosition.Rotation);
+    PlayerPawn->GetSavegamePlayerPosition(
+      SaveGameInstance->PlayerLocation,
+      SaveGameInstance->PlayerRotation
+    );
+
+    LibraryActor->GetPosition(
+      SaveGameInstance->LibraryPosition.Location,
+      SaveGameInstance->LibraryPosition.Rotation
+    );
     SaveGameInstance->bLibraryHidden = LibraryActor->IsHidden();
-    SaveGameInstance->PlayerLocation = Cast<AVRAvatar>(PlayerPawn)->GetSavegamePlayerLocation();
+
+    if (!osc3GameInstance->NextPatchPath.Equals(osc3GameState->GetAutosaveName())) {
+      SaveGameInstance->EnvironmentLightIntensityAmount = osc3GameState->EnvironmentLightIntensityAmount;
+      SaveGameInstance->EnvironmentLightAngleAmount = osc3GameState->EnvironmentLightAngleAmount;
+    }
+
+    SaveGameInstance->MapName =
+      !osc3GameInstance->NextMapName.IsEmpty()
+        ? osc3GameInstance->NextMapName
+        : osc3GameState->CurrentMapName;
+
+    SaveGameInstance->PatchPath = osc3GameState->GetPatchPath();
 
     return SaveGameInstance;
   }
@@ -313,7 +429,7 @@ void Aosc3GameModeBase::Exit() {
 }
 
 void Aosc3GameModeBase::Tick(float DeltaTime) {
-	Super::Tick(DeltaTime);
+  Super::Tick(DeltaTime);
 }
 
 void Aosc3GameModeBase::RequestTexture(FString& Filepath, UObject* Requester, const FName& Callback) {
@@ -709,7 +825,10 @@ void Aosc3GameModeBase::SpawnMainMenu() {
     },
     [&](bool CycleColors) { // set auto-cycle cable colors
       AVCVCable::CableColorCycleDirection = CycleColors ? 1 : 0;
-    }
+    },
+    [&](FString MapName) { LoadMap(MapName); }, // load map callback
+    [&](float Amount) { AdjustLightIntensity(Amount); }, // set environment light intensity
+    [&](float Amount) { AdjustLightAngle(Amount); } // set environment light angle
   );
 }
 
@@ -902,4 +1021,32 @@ void Aosc3GameModeBase::DestroyWeldment(AModuleWeldment* Weldment) {
 
 TArray<FString> Aosc3GameModeBase::GetRecentPatchPaths() {
   return rackman->GetRecentPatchPaths();
+}
+
+void Aosc3GameModeBase::AdjustLightIntensity(float Amount) {
+  if (!FillLight) return;
+
+  if (Amount != osc3GameState->EnvironmentLightIntensityAmount) {
+    osc3GameState->EnvironmentLightIntensityAmount = Amount;
+    osc3GameState->SetUnsaved();
+  }
+
+  // translate to exponential slider value
+  float expValue = (pow(20, Amount) - 1) / 19;
+  FillLight->GetLightComponent()->SetIntensity(expValue * MAX_ROOM_BRIGHTNESS);
+}
+
+void Aosc3GameModeBase::AdjustLightAngle(float Amount) {
+  if (!SunLight) return;
+
+  if (Amount != osc3GameState->EnvironmentLightAngleAmount) {
+    osc3GameState->EnvironmentLightAngleAmount = Amount;
+    osc3GameState->SetUnsaved();
+  }
+
+  UDirectionalLightComponent* light =
+    Cast<UDirectionalLightComponent>(SunLight->GetLightComponent());
+  FRotator rotation = light->GetComponentRotation();
+  rotation.Pitch = Amount * (MAX_SUN_ANGLE - MIN_SUN_ANGLE) + MIN_SUN_ANGLE;
+  light->SetWorldRotation(rotation);
 }

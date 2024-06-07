@@ -41,7 +41,15 @@ void UMainMenuWidget::NativeConstruct() {
   CableTensionSlider->SetValue(DEFAULT_CABLE_TENSION);
   HandleCableTensionSliderChange(DEFAULT_CABLE_TENSION);
 
+  // TODO: check for GameUserSettings
   CableColorCycleToggle->OnCheckStateChanged.AddDynamic(this, &UMainMenuWidget::HandleCableColorCycleToggle);
+
+  EnvironmentLightIntensitySlider->OnValueChanged.AddDynamic(this, &UMainMenuWidget::HandleEnvironmentLightIntensitySliderChange);
+  EnvironmentLightAngleSlider->OnValueChanged.AddDynamic(this, &UMainMenuWidget::HandleEnvironmentLightAngleSliderChange);
+
+  MapOneButton->OnReleased.AddDynamic(this, &UMainMenuWidget::HandleMapOneClick);
+  MapTwoButton->OnReleased.AddDynamic(this, &UMainMenuWidget::HandleMapTwoClick);
+  MapThreeButton->OnReleased.AddDynamic(this, &UMainMenuWidget::HandleMapThreeClick);
 }
 
 void UMainMenuWidget::UpdateState(Aosc3GameState* GameState) {
@@ -63,7 +71,7 @@ void UMainMenuWidget::UpdateState(Aosc3GameState* GameState) {
 
   // Continue with Autosave button
   ContinueButton->SetVisibility(
-    !GameState->IsPatchLoaded() && GameState->CanContinueAutosave()
+    GameState->CanContinueAutosave()
       ? ESlateVisibility::Visible
       : ESlateVisibility::Collapsed
   );
@@ -90,6 +98,7 @@ void UMainMenuWidget::UpdateState(Aosc3GameState* GameState) {
       : ESlateVisibility::Collapsed
   );
 
+  // patch file info
   FString patchPath = GameState->GetPatchPath();
   if (patchPath.IsEmpty()) {
     LoadedPatchDirectory = "";
@@ -99,8 +108,32 @@ void UMainMenuWidget::UpdateState(Aosc3GameState* GameState) {
     LoadedPatchDirectory.Append("\\");
     LoadedPatchBasename = FPaths::GetBaseFilename(patchPath, true);
   }
-
   bPatchIsSaved = !GameState->IsUnsaved();
+
+  // lighting controls
+  if (GameState->CurrentMapName.Equals("park")) {
+    EnvironmentLightAngleSlider->SetVisibility(ESlateVisibility::Visible);
+    EnvironmentLightAngleSliderLabel->SetVisibility(ESlateVisibility::Visible);
+  } else {
+    EnvironmentLightAngleSlider->SetVisibility(ESlateVisibility::Collapsed);
+    EnvironmentLightAngleSliderLabel->SetVisibility(ESlateVisibility::Collapsed);
+  }
+  EnvironmentLightIntensitySlider->SetValue(GameState->EnvironmentLightIntensityAmount);
+  SetEnvironmentLightIntensitySliderLabel(GameState->EnvironmentLightIntensityAmount);
+  EnvironmentLightAngleSlider->SetValue(GameState->EnvironmentLightAngleAmount);
+  SetEnvironmentLightAngleSliderLabel(GameState->EnvironmentLightAngleAmount);
+
+  // map load buttons
+  MapOneButton->SetIsEnabled(true);
+  MapTwoButton->SetIsEnabled(true);
+  MapThreeButton->SetIsEnabled(true);
+  if (GameState->CurrentMapName.Equals("light_void")) {
+    MapOneButton->SetIsEnabled(false);
+  } else if (GameState->CurrentMapName.Equals("dark_void")) {
+    MapTwoButton->SetIsEnabled(false);
+  } else if (GameState->CurrentMapName.Equals("park")) {
+    MapThreeButton->SetIsEnabled(false);
+  }
 }
 
 void UMainMenuWidget::SetKeyboard(AKeyboard* inKeyboard) {
@@ -125,17 +158,17 @@ void UMainMenuWidget::HandleKeyboardInputConfirmed(FString Input) {
       TEXT("File exists! Overwrite?"),
       TEXT("Yes, overwrite file"),
       [this, path]() {
-        GotoLoading(TEXT(""), TEXT("saving patch"));
+        GotoStatus(TEXT(""), TEXT("saving patch"));
         SaveAsFunction(path);
       }
     );
   } else {
-    GotoLoading(TEXT(""), TEXT("saving patch"));
+    GotoStatus(TEXT(""), TEXT("saving patch"));
     SaveAsFunction(path);
   }
 }
 
-void UMainMenuWidget::GotoLoading(FString UpperText, FString LowerText) {
+void UMainMenuWidget::GotoStatus(FString UpperText, FString LowerText) {
   HideAll();
   LoadingSection->SetVisibility(ESlateVisibility::HitTestInvisible);
   UpperLoadingText->SetText(FText::FromString(UpperText));
@@ -260,6 +293,30 @@ void UMainMenuWidget::HandleCableOpacitySliderRelease() {
   CableOpacityUpdateFunction(CableOpacitySlider->GetValue());
 }
 
+void UMainMenuWidget::SetEnvironmentLightIntensitySliderLabel(float& Value) {
+  FString label{"Room brightness: "};
+  label.AppendInt(FMath::RoundToInt(Value * 100.f));
+  label.Append("%");
+  EnvironmentLightIntensitySliderLabel->SetText(FText::FromString(label));
+}
+
+void UMainMenuWidget::HandleEnvironmentLightIntensitySliderChange(float Value) {
+  SetEnvironmentLightIntensitySliderLabel(Value);
+  EnvironmentLightIntensityUpdateFunction(Value);
+}
+
+void UMainMenuWidget::SetEnvironmentLightAngleSliderLabel(float& Value) {
+  FString label{"Sun Angle: "};
+  label.AppendInt(FMath::RoundToInt(Value * (MAX_SUN_ANGLE - MIN_SUN_ANGLE) + MIN_SUN_ANGLE));
+  label.Append(" degrees");
+  EnvironmentLightAngleSliderLabel->SetText(FText::FromString(label));
+}
+
+void UMainMenuWidget::HandleEnvironmentLightAngleSliderChange(float Value) {
+  SetEnvironmentLightAngleSliderLabel(Value);
+  EnvironmentLightAngleUpdateFunction(Value);
+}
+
 void UMainMenuWidget::HandleCableTensionSliderChange(float Value) {
   FString label{"Cable tension: "};
   label.AppendInt(FMath::RoundToInt(Value * 100.f));
@@ -303,14 +360,14 @@ void UMainMenuWidget::HandleConfirmationCancelClick() {
 
 void UMainMenuWidget::HandleLoadPatch(FString PatchPath) {
   if (bPatchIsSaved) {
-    GotoLoading(FPaths::GetCleanFilename(PatchPath), LoadingPatchLabel);
+    GotoStatus(FPaths::GetCleanFilename(PatchPath), LoadingPatchLabel);
     LoadFunction(PatchPath);
   } else {
     Confirm(
       TEXT("The current patch is unsaved!\nAre you sure you want to open this one?"),
       TEXT("Yes, open patch"),
       [this, PatchPath]() {
-        GotoLoading(FPaths::GetCleanFilename(PatchPath), LoadingPatchLabel);
+        GotoStatus(FPaths::GetCleanFilename(PatchPath), LoadingPatchLabel);
         LoadFunction(PatchPath);
       }
     );
@@ -319,14 +376,14 @@ void UMainMenuWidget::HandleLoadPatch(FString PatchPath) {
 
 void UMainMenuWidget::HandleNewClick() {
   if (bPatchIsSaved) {
-    GotoLoading(TEXT(""), LoadingPatchLabel);
+    GotoStatus(TEXT(""), LoadingPatchLabel);
     NewFunction();
   } else {
     Confirm(
       TEXT("The current patch is unsaved!\nAre you sure you want to create a new one?"),
       TEXT("Yes, create patch"),
       [this]() {
-        GotoLoading(TEXT(""), LoadingPatchLabel);
+        GotoStatus(TEXT(""), LoadingPatchLabel);
         NewFunction();
       }
     );
@@ -338,7 +395,7 @@ void UMainMenuWidget::HandleOverwriteTemplateClick() {
     TEXT("Overwrite template patch?"),
     TEXT("Yes, overwrite patch"),
     [this]() {
-      GotoLoading(TEXT(""), TEXT("overwriting template"));
+      GotoStatus(TEXT(""), TEXT("overwriting template"));
       OverwriteTemplateFunction();
     }
   );
