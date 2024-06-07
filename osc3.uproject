@@ -45,9 +45,17 @@
 		{
 			"Name": "CommonUI",
 			"Enabled": true
+		},
+		{
+			"Name": "HPMotionController",
+			"Enabled": true,
+			"SupportedTargetPlatforms": [
+				"Win64"
+			]
 		}
-  ],
-  "PostBuildSteps": {
-    "Win64": []
-  }
+	],
+	"PostBuildSteps":
+	{
+		"Win64": []
+	}
 }
