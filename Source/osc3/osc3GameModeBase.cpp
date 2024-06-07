@@ -147,10 +147,7 @@ void Aosc3GameModeBase::Reset() {
   CableActors.Empty();
   CableQueue.Empty();
 
-  // TODO dry with avatar:destroymodule
-  LibraryActor->SetActorHiddenInGame(true);
-  LibraryActor->SetActorLocation(FVector(0.f, 0.f, -500.f));
-  // TuckLibrary();
+  TuckLibrary();
 
   OSCctrl->UnpauseSending();
 }
@@ -667,6 +664,12 @@ void Aosc3GameModeBase::SpawnLibrary() {
 void Aosc3GameModeBase::SummonLibrary(FVector Location, FRotator Rotation) {
   if (!osc3GameState->IsPatchLoaded()) return;
   LibraryActor->Summon(Location, Rotation);
+}
+
+void Aosc3GameModeBase::TuckLibrary() {
+  LibraryActor->SetActorHiddenInGame(true);
+  LibraryActor->SetActorLocation(FVector(0.f, 0.f, -500.f));
+  osc3GameState->SetUnsaved();
 }
 
 void Aosc3GameModeBase::SpawnMainMenu() {

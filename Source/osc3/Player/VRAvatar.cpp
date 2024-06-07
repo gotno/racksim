@@ -722,11 +722,7 @@ void AVRAvatar::HandleDestroyModule(const FInputActionValue& _Value, EController
         ? LeftHandGrabbableActor
         : RightHandGrabbableActor
     );
-
-  if (library) {
-    library->SetActorHiddenInGame(true);
-    library->SetActorLocation(FVector(0.f, 0.f, -500.f));
-  }
+  if (library) GameMode->TuckLibrary();
 }
 
 void AVRAvatar::HandleStartParamEngage(const FInputActionValue& _Value, EControllerHand Hand) {

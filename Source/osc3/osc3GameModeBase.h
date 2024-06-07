@@ -60,6 +60,7 @@ public:
   void RequestExit();
   void ToggleMainMenu();
   void SummonLibrary(FVector Location, FRotator Rotation);
+  void TuckLibrary();
 
   AVCVCable* SpawnCable(AVCVPort* Port);
   void SpawnCable(int64_t& Id, AVCVPort* InputPort, AVCVPort* OutputPort, FLinearColor Color);
