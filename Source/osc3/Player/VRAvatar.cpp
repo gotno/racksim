@@ -118,6 +118,29 @@ void AVRAvatar::EnableWorldManipulation() {
 
 void AVRAvatar::Tick(float DeltaTime) {
   Super::Tick(DeltaTime);
+  // DrawDebugSphere(
+  //   GetWorld(),
+  //   GetActorLocation(),
+  //   1.f,
+  //   16,
+  //   FColor::Blue
+  // );
+  // DrawDebugSphere(
+  //   GetWorld(),
+  //   VRRoot->GetComponentLocation(),
+  //   3.f,
+  //   16,
+  //   FColor::Emerald
+  // );
+  // FVector cameraLocation = Camera->GetComponentLocation();
+  // cameraLocation.Z = 0.f;
+  // DrawDebugSphere(
+  //   GetWorld(),
+  //   cameraLocation,
+  //   1.f,
+  //   16,
+  //   FColor::Yellow
+  // );
 }
 
 void AVRAvatar::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) {
