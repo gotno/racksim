@@ -53,7 +53,7 @@ void AVRAvatar::PawnClientRestart() {
   UHeadMountedDisplayFunctionLibrary::SetTrackingOrigin(EHMDTrackingOrigin::Floor);
 
   // fix for character height being offset from root capsule component
-  float halfHeight = Cast<UCapsuleComponent>(GetRootComponent())->GetScaledCapsuleHalfHeight();
+  float halfHeight = Cast<UCapsuleComponent>(GetRootComponent())->GetScaledCapsuleHalfHeight() + 12.f;
   VRRoot->SetRelativeLocation(FVector(0, 0, -halfHeight));
   Camera->SetRelativeLocation(FVector(0, 0, -halfHeight));
 
