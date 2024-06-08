@@ -21,12 +21,10 @@ public:
   void CallOnExit(TFunction<void ()> inOnExitCallback);
 
   FProcHandle GetHandle() { return hRackProc; }
-  bool SetHandle(FProcHandle inHandle) {
+  void SetHandle(FProcHandle inHandle) {
     if (inHandle.IsValid() && FPlatformProcess::IsProcRunning(inHandle)) {
-      bRunning = true;
       hRackProc = inHandle;
     }
-    return bRunning;
   }
   bool RackIsRunning() {
     return hRackProc.IsValid() && FPlatformProcess::IsProcRunning(hRackProc);
@@ -45,7 +43,6 @@ private:
   void LaunchRack(FString PatchPath);
   void FinishRun();
   TFunction<void ()> FinishRunCallback;
-  bool bRunning{false};
 
   void LoadConfigurationData();
 

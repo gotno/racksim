@@ -73,9 +73,7 @@ void Aosc3GameModeBase::BeginPlay() {
   SpawnMainMenu();
 
   // give rackman back control over rack
-  if (osc3GameInstance->RackIsRunning()) {
-    rackman->SetHandle(osc3GameInstance->hRackProc);
-  }
+  rackman->SetHandle(osc3GameInstance->hRackProc);
 
   osc3GameState->SetCurrentMapName(UGameplayStatics::GetCurrentLevelName(GetWorld(), true));
 
@@ -87,8 +85,8 @@ void Aosc3GameModeBase::BeginPlay() {
     }
 
     if (rackman->RackIsRunning()) {
-      OSCctrl->Init();
       MainMenu->Status(TEXT(""), TEXT("reconnecting rack"));
+      OSCctrl->Init();
     }
   } else {
     MainMenu->Show();

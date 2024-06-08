@@ -81,8 +81,7 @@ void URackManager::CallOnExit(TFunction<void ()> inOnExitCallback) {
 }
 
 void URackManager::CheckForExit() {
-  if (hRackProc.IsValid() && FPlatformProcess::IsProcRunning(hRackProc))
-    return;
+  if (RackIsRunning()) return;
 
   GetWorld()->GetTimerManager().ClearTimer(hOnExitTimer);
   OnExitCallback();
@@ -104,8 +103,7 @@ bool URackManager::DoesAutosaveExist() {
 
 void URackManager::FinishRun() {
   // ensure rack is running before continuing
-  if (!hRackProc.IsValid()) return;
-  if (!FPlatformProcess::IsProcRunning(hRackProc)) return;
+  if (!RackIsRunning()) return;
 
   // find rack window before continuing
   LPCSTR rackWindowClass = "GLFW30";
@@ -117,7 +115,6 @@ void URackManager::FinishRun() {
   if (!GEngine || !GEngine->GameViewport) return;
   
   BringViewportToFront();
-  bRunning = true;
   FinishRunCallback();
 
   GetWorld()->GetTimerManager().ClearTimer(hFinishRunTimer);
@@ -132,9 +129,7 @@ void URackManager::BringViewportToFront() {
 
 void URackManager::Cleanup() {
   // force Rack to close if it is still running
-  if (hRackProc.IsValid() && FPlatformProcess::IsProcRunning(hRackProc)) {
-    FPlatformProcess::TerminateProc(hRackProc, false);
-  }
+  if (RackIsRunning()) FPlatformProcess::TerminateProc(hRackProc, false);
 
   FPlatformFileManager::Get()
     .GetPlatformFile()
