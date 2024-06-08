@@ -124,16 +124,9 @@ void UMainMenuWidget::UpdateState(Aosc3GameState* GameState) {
   SetEnvironmentLightAngleSliderLabel(GameState->EnvironmentLightAngleAmount);
 
   // map load buttons
-  MapOneButton->SetIsEnabled(true);
-  MapTwoButton->SetIsEnabled(true);
-  MapThreeButton->SetIsEnabled(true);
-  if (GameState->CurrentMapName.Equals("light_void")) {
-    MapOneButton->SetIsEnabled(false);
-  } else if (GameState->CurrentMapName.Equals("dark_void")) {
-    MapTwoButton->SetIsEnabled(false);
-  } else if (GameState->CurrentMapName.Equals("park")) {
-    MapThreeButton->SetIsEnabled(false);
-  }
+  MapOneButton->SetIsEnabled(!GameState->CurrentMapName.Equals("light_void"));
+  MapTwoButton->SetIsEnabled(!GameState->CurrentMapName.Equals("dark_void"));
+  MapThreeButton->SetIsEnabled(!GameState->CurrentMapName.Equals("park"));
 }
 
 void UMainMenuWidget::SetKeyboard(AKeyboard* inKeyboard) {
