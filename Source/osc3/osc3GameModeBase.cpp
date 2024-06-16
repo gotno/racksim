@@ -97,7 +97,6 @@ void Aosc3GameModeBase::BeginPlay() {
 void Aosc3GameModeBase::EndPlay(const EEndPlayReason::Type EndPlayReason) {
   Super::EndPlay(EndPlayReason);
 
-  OSCctrl->PauseSending();
   if (osc3GameInstance->NextPatchPath.IsEmpty()) rackman->Cleanup();
 }
 
@@ -181,8 +180,10 @@ void Aosc3GameModeBase::LoadMap(FString MapName, FString NextPatchPath) {
     if (osc3GameInstance->NextPatchPath.Equals(osc3GameState->GetAutosaveName()))
       osc3GameInstance->SaveData = MakeSaveGame();
 
-    if (rackman->RackIsRunning())
+    if (rackman->RackIsRunning()) {
       osc3GameInstance->hRackProc = rackman->GetHandle();
+      OSCctrl->PauseSending();
+    }
   }
 
   UGameplayStatics::OpenLevel(GetWorld(), osc3GameInstance->GetMapName());
@@ -242,7 +243,6 @@ void Aosc3GameModeBase::RackConnectionEstablished() {
 
     if (bIsAutosave) {
       osc3GameState->SetPatchPath(SaveData->PatchPath);
-      osc3GameState->SetPatchLoaded(true);
       osc3GameState->SetUnsaved();
       osc3GameInstance->NextPatchPath.Empty();
     } else {
