@@ -59,9 +59,6 @@ void Aosc3GameModeBase::BeginPlay() {
   
   rackman->Init();
   AVCVCable::CableColors = rackman->CableColors;
-  osc3GameState->SetCanContinueAutosave(
-    !osc3GameState->IsPatchLoaded() && rackman->DoesAutosaveExist()
-  );
 
   PlayerController = Cast<Aosc3PlayerController>(UGameplayStatics::GetPlayerController(this, 0));
   if (PlayerController) UE_LOG(LogTemp, Warning, TEXT("PlayerController exists"));
@@ -74,6 +71,9 @@ void Aosc3GameModeBase::BeginPlay() {
 
   // give rackman back control over rack
   rackman->SetHandle(osc3GameInstance->hRackProc);
+  osc3GameState->SetCanContinueAutosave(
+    !rackman->RackIsRunning() && rackman->DoesAutosaveExist()
+  );
 
   osc3GameState->SetCurrentMapName(UGameplayStatics::GetCurrentLevelName(GetWorld(), true));
 
@@ -85,6 +85,7 @@ void Aosc3GameModeBase::BeginPlay() {
     }
 
     if (rackman->RackIsRunning()) {
+      WatchRackStartup();
       MainMenu->Status(TEXT(""), TEXT("reconnecting rack"));
       OSCctrl->Init();
     }
@@ -189,6 +190,8 @@ void Aosc3GameModeBase::LoadMap(FString MapName, FString NextPatchPath) {
 
 void Aosc3GameModeBase::Reset() {
   StopAutosaving();
+  GetWorld()->GetTimerManager().ClearTimer(hRackRunningTimer);
+
   OSCctrl->PauseSending();
   OSCctrl->ClearData();
 
@@ -217,6 +220,8 @@ void Aosc3GameModeBase::Reset() {
 }
 
 void Aosc3GameModeBase::RackConnectionEstablished() {
+  GetWorld()->GetTimerManager().ClearTimer(hRackRunningTimer);
+
   // we're connected to the bootstrap patch, now restart with the real patch
   if (!PatchPathToBootstrap.IsEmpty()) {
     RestartRack(PatchPathToBootstrap);
@@ -289,9 +294,11 @@ void Aosc3GameModeBase::RackConnectionEstablished() {
   MainMenu->Refresh();
   MainMenu->Hide();
   StartAutosaving();
+  WatchRackRunning();
 }
 
 void Aosc3GameModeBase::StartRack(FString PatchPath) {
+  WatchRackStartup();
   rackman->Run(PatchPath, [=]() {
     OSCctrl->Init();
   });
@@ -299,6 +306,7 @@ void Aosc3GameModeBase::StartRack(FString PatchPath) {
 
 void Aosc3GameModeBase::RestartRack(FString PatchPath) {
   rackman->CallOnExit([=]() {
+    WatchRackStartup();
     rackman->Run(PatchPath, [=]() {
       OSCctrl->SyncPorts();
     });
@@ -319,6 +327,7 @@ void Aosc3GameModeBase::RequestExit() {
     if (rackman->RackIsRunning() && OSCctrl->IsConnected()) {
       // give rack a second to finish exiting before EndPlay runs Cleanup
       exitDelay = 1.f;
+      GetWorld()->GetTimerManager().ClearTimer(hRackRunningTimer);
       OSCctrl->SendAutosaveAndExit();
     }
 
@@ -333,6 +342,46 @@ void Aosc3GameModeBase::RequestExit() {
   });
 
   UGameplayStatics::AsyncSaveGameToSlot(autosave, osc3GameState->GetAutosaveName(), 0, SavedDelegate);
+}
+
+void Aosc3GameModeBase::WatchRackStartup() {
+  GetWorld()->GetTimerManager().SetTimer(
+    hRackRunningTimer,
+    this,
+    &Aosc3GameModeBase::RackStartupTimeout,
+    8.f, // seconds
+    false // loop
+  );
+}
+
+void Aosc3GameModeBase::RackStartupTimeout() {
+  MainMenu->Alert(
+    TEXT("Rack may be having trouble starting up.\nTry to reload, or try a different patch."),
+    TEXT("Ok")
+  );
+}
+
+void Aosc3GameModeBase::WatchRackRunning() {
+  GetWorld()->GetTimerManager().SetTimer(
+    hRackRunningTimer,
+    this,
+    &Aosc3GameModeBase::CheckRackRunning,
+    0.25f, // seconds
+    true // loop
+  );
+}
+
+void Aosc3GameModeBase::CheckRackRunning() {
+  if (rackman->RackIsRunning()) return;
+  GetWorld()->GetTimerManager().ClearTimer(hRackRunningTimer);
+
+  MainMenu->Confirm(
+    TEXT("Rack has stopped running.\nWould you like to try reloading the autosave?"),
+    TEXT("Yes, reload autosave"),
+    [&]() {
+      LoadPatch(osc3GameState->GetAutosaveName());
+    }
+  );
 }
 
 void Aosc3GameModeBase::StartAutosaving() {

@@ -117,6 +117,14 @@ private:
   void StopAutosaving();
   FTimerHandle hAutosaveTimer;
 
+  FTimerHandle hRackRunningTimer;
+  void WatchRackStartup();
+  UFUNCTION()
+  void RackStartupTimeout();
+  void WatchRackRunning();
+  UFUNCTION()
+  void CheckRackRunning();
+
   UPROPERTY()
   URackManager* rackman;
   UPROPERTY()
