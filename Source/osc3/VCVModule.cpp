@@ -180,7 +180,7 @@ void AVCVModule::Init(VCVModule vcv_module, TFunction<void ()> ReadyCallback) {
   FaceMaterialInstance->SetVectorParameterValue(FName("background_color"), bodyColor);
 
   StaticMeshComponent->SetWorldScale3D(FVector(RENDER_SCALE * MODULE_DEPTH, Model.box.size.x, Model.box.size.y));
-  OutlineMeshComponent->SetWorldScale3D(FVector(RENDER_SCALE * MODULE_DEPTH + 0.2f, Model.box.size.x + 0.2f, Model.box.size.y + 0.2f));
+  OutlineMeshComponent->SetWorldScale3D(FVector(RENDER_SCALE * MODULE_DEPTH, Model.box.size.x, Model.box.size.y));
 
   float halfWidth = Model.box.size.x * 0.5f;
   SnapColliderLeft->AddWorldOffset(-StaticMeshComponent->GetRightVector() * halfWidth);

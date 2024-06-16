@@ -166,9 +166,9 @@ void ALibrary::SetScale() {
   );
   OutlineMeshComponent->SetWorldScale3D(
     FVector(
-      DEFAULT_RENDER_SCALE * MODULE_DEPTH + 0.2f,
-      desiredHeight + 0.2f,
-      desiredHeight + 0.2f
+      DEFAULT_RENDER_SCALE * MODULE_DEPTH,
+      desiredHeight,
+      desiredHeight
     )
   );
 

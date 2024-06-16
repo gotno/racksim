@@ -27,8 +27,11 @@ AGrabbableActor::AGrabbableActor() {
   OutlineMeshComponent->SetupAttachment(StaticMeshComponent);
   OutlineMeshComponent->SetVisibility(false);
 
-  static ConstructorHelpers::FObjectFinder<UMaterial> OutlineMaterial(TEXT("/Script/Engine.Material'/Game/materials/looman_outlines/M_LocalOutlines.M_LocalOutlines'"));
-  if (OutlineMaterial.Object) OutlineMaterialInterface = Cast<UMaterial>(OutlineMaterial.Object);
+  static ConstructorHelpers::FObjectFinder<UMaterial> OutlineMaterial(
+    TEXT("/Script/Engine.Material'/Game/materials/backface_shell.backface_shell'")
+  );
+  if (OutlineMaterial.Object)
+    OutlineMaterialInterface = Cast<UMaterial>(OutlineMaterial.Object);
 }
 
 void AGrabbableActor::BeginPlay() {
@@ -48,7 +51,8 @@ void AGrabbableActor::Tick(float DeltaTime) {
 
 void AGrabbableActor::SetHighlighted(bool bHighlighted, FLinearColor OutlineColor) {
   OutlineMeshComponent->SetVisibility(bHighlighted);
-  OutlineMaterialInstance->SetVectorParameterValue(FName("Color"), OutlineColor);
+  OutlineMaterialInstance->SetVectorParameterValue(FName("color"), OutlineColor);
+  OutlineMaterialInstance->SetScalarParameterValue(FName("shell_distance"), 0.1f);
 }
 
 void AGrabbableActor::EngageGrab(FVector GrabbedLocation, FRotator GrabbedRotation) {
