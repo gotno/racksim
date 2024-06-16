@@ -75,6 +75,11 @@ void UMainMenuWidget::UpdateState(Aosc3GameState* GameState) {
       ? ESlateVisibility::Visible
       : ESlateVisibility::Collapsed
   );
+  ContinueButtonLabel->SetText(
+    GameState->IsPatchLoaded()
+      ? FText::FromString("Reload Autosave")
+      : FText::FromString("Continue with Autosave")
+  );
 
   // Save button
   SaveButtonContainer->SetVisibility(

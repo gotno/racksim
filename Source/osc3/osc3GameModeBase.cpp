@@ -71,9 +71,7 @@ void Aosc3GameModeBase::BeginPlay() {
 
   // give rackman back control over rack
   rackman->SetHandle(osc3GameInstance->hRackProc);
-  osc3GameState->SetCanContinueAutosave(
-    !rackman->RackIsRunning() && rackman->DoesAutosaveExist()
-  );
+  osc3GameState->SetCanContinueAutosave(rackman->DoesAutosaveExist());
 
   osc3GameState->SetCurrentMapName(UGameplayStatics::GetCurrentLevelName(GetWorld(), true));
 

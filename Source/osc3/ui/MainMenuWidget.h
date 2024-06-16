@@ -126,6 +126,8 @@ protected:
   UPROPERTY(meta = (BindWidget))
   UButton* ContinueButton;
   UPROPERTY(meta = (BindWidget))
+  UTextBlock* ContinueButtonLabel;
+  UPROPERTY(meta = (BindWidget))
   UButton* NewButton;
   UPROPERTY(meta = (BindWidget))
   UButton* LoadButton;
