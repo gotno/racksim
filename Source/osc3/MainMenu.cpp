@@ -130,6 +130,28 @@ void AMainMenu::Status(FString UpperText, FString LowerText) {
   MainMenuWidget->GotoStatus(UpperText, LowerText);
 }
 
+void AMainMenu::Confirm(
+  FString ConfirmationLabel,
+  FString ConfirmButtonLabel,
+  TFunction<void ()> inConfirmationConfirmFunction
+) {
+  Show();
+  MainMenuWidget->Confirm(
+    ConfirmationLabel,
+    ConfirmButtonLabel,
+    inConfirmationConfirmFunction,
+    [&]() {
+      MainMenuWidget->GotoMain();
+    },
+    true // solo
+  );
+}
+
+void AMainMenu::Alert(FString AlertLabel, FString ConfirmButtonLabel) {
+  Show();
+  MainMenuWidget->Alert(AlertLabel, ConfirmButtonLabel);
+}
+
 void AMainMenu::Tick(float DeltaTime) {
   Super::Tick(DeltaTime);
 

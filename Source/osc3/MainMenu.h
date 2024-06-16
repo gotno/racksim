@@ -46,6 +46,12 @@ public:
   void Refresh();
   void Toggle();
   void Status(FString UpperText = "", FString LowerText = "");
+  void Confirm(
+    FString ConfirmationLabel,
+    FString ConfirmButtonLabel,
+    TFunction<void ()> inConfirmationConfirmFunction
+  );
+  void Alert(FString AlertLabel, FString ConfirmButtonLabel);
 
 private:
   Aosc3GameModeBase* GameMode;

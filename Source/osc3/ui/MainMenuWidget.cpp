@@ -423,5 +423,16 @@ void UMainMenuWidget::Confirm(
   ConfirmationConfirmFunction = inConfirmationConfirmFunction;
   ConfirmationCancelFunction = inConfirmationCancelFunction;
   ConfirmationSection->SetVisibility(ESlateVisibility::Visible);
-  // Confirm(ConfirmationLabel, ConfirmButtonLabel, inConfirmationConfirmFunction, bSolo);
+}
+
+void UMainMenuWidget::Alert(FString AlertLabel, FString ConfirmButtonLabel) {
+  HideAll();
+  ConfirmationText->SetText(FText::FromString(AlertLabel));
+  ConfirmationConfirmButtonLabel->SetText(FText::FromString(ConfirmButtonLabel));
+  ConfirmationCancelButtonContainer->SetVisibility(ESlateVisibility::Collapsed);
+  ConfirmationConfirmFunction = [&]() {
+    ConfirmationCancelButtonContainer->SetVisibility(ESlateVisibility::Visible);
+    GotoMain();
+  };
+  ConfirmationSection->SetVisibility(ESlateVisibility::Visible);
 }

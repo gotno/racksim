@@ -91,6 +91,7 @@ public:
     TFunction<void ()> inConfirmationCancelFunction,
     bool bSolo = false
   );
+  void Alert(FString AlertLabel, FString ConfirmButtonLabel);
 
 protected:
   virtual void NativeConstruct() override;	
@@ -112,6 +113,8 @@ protected:
   UButton* ConfirmationConfirmButton;
   UPROPERTY(meta = (BindWidget))
   UTextBlock* ConfirmationConfirmButtonLabel;
+  UPROPERTY(meta = (BindWidget))
+  USizeBox* ConfirmationCancelButtonContainer;
   UPROPERTY(meta = (BindWidget))
   UButton* ConfirmationCancelButton;
   UPROPERTY(meta = (BindWidget))
