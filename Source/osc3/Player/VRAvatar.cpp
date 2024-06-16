@@ -371,6 +371,12 @@ void AVRAvatar::HandleCompleteTeleport(const FInputActionValue& _Value, EControl
   }
   HasDestinationHit = false;
   DestinationMarker->SetActorHiddenInGame(true);
+
+  if (Hand == EControllerHand::Left) {
+    LastLeftHandLocation = LeftController->GetActorLocation();
+  } else {
+    LastRightHandLocation = RightController->GetActorLocation();
+  }
 }
 void AVRAvatar::SweepDestination(EControllerHand Hand) {
   AVRMotionController* controller = GetControllerForHand(Hand);
