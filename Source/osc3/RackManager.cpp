@@ -19,10 +19,14 @@ void URackManager::Init() {
 #endif
   RackExecutablePath = RackPath + "Rack.exe";
   OSCctrlBootstrapPath = RackPath + "oscctrl-bootstrap.vcv";
-  AutosavePath = RackPath + "autosave/patch.json";
-  TemplatePath = RackPath + "template.vcv";
-  // TODO: check if this is the correct path for the current rack version
-  RackUserPath = FString(FPlatformProcess::UserDir()) + "Rack2/";
+
+  RackUserPath = FString(FPlatformProcess::UserSettingsDir()) + "Rack2/";
+  if (!FPaths::DirectoryExists(RackUserPath)) // fallback for rack < 2.5
+    RackUserPath = FString(FPlatformProcess::UserDir()) + "Rack2/";
+
+  AutosavePath = RackUserPath + "autosave-racksim/patch.json";
+  TemplatePath = RackUserPath + "template-racksim.vcv";
+
   RackPluginsPath = RackUserPath + "plugins-win-x64/";
 
   LoadConfigurationData();

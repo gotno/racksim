@@ -197,24 +197,22 @@ TArray<UFileListEntryData*> AMainMenu::GenerateFMShortcutsEntries() {
   downloadsPath.Append(TEXT("Downloads/"));
 
   FString documentsPath{FPlatformProcess::UserDir()};
-  FString patchesPath{documentsPath};
-  patchesPath.Append(TEXT("Rack2/patches/"));
+  FString userSettingsPath{FPlatformProcess::UserSettingsDir()};
 
   UFileListEntryData* homeEntry = NewObject<UFileListEntryData>(this);
   homeEntry->Label = TEXT("Home");
   homeEntry->Path = homePath;
   entries.Add(homeEntry);
 
+  FString patchesPath{userSettingsPath + "Rack2/patches/"};
+  // fallback for rack < 2.5
+  if (!FPaths::DirectoryExists(patchesPath))
+    patchesPath = documentsPath + "Rack2/patches/";
+
   UFileListEntryData* patchesEntry = NewObject<UFileListEntryData>(this);
   patchesEntry->Label = TEXT("Rack2\\Patches");
   patchesEntry->Path = patchesPath;
   entries.Add(patchesEntry);
-  // TODO
-  // rack patch/plugin dir proposed
-  // UFileListEntryData* patchesEntry = NewObject<UFileListEntryData>(this);
-  // patchesEntry->Label = TEXT("Rack2\\Patches");
-  // patchesEntry->Path = FString(FPlatformProcess::UserSettingsDir()) + "Rack2/patches/";
-  // entries.Add(patchesEntry);
 
   UFileListEntryData* desktopEntry = NewObject<UFileListEntryData>(this);
   desktopEntry->Label = TEXT("Desktop");
