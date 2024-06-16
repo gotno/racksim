@@ -100,7 +100,6 @@ void AVCVPort::SetTexture(FString Filepath, UTexture2D* inTexture) {
 
 bool AVCVPort::CanConnect(PortType inType) {
   if (inType != PortType::Any && inType != Type) return false;
-  if (Type == PortType::Input && HasConnections()) return false;
   return true;
 }
 
@@ -114,11 +113,6 @@ ACableEnd* AVCVPort::GetTopCableEnd() {
 }
 
 void AVCVPort::Connect(ACableEnd* CableEnd) {
-  checkf(
-    Type == PortType::Output || !HasConnections(),
-    TEXT("attempting to add more than one cable to an Input")
-  );
-
   ConnectedCableEnds.Add(CableEnd);
 }
 
