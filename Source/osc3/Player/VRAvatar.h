@@ -303,6 +303,8 @@ private:
   // module manipulation
   AGrabbableActor* LeftHandGrabbableActor{nullptr};
   AGrabbableActor* RightHandGrabbableActor{nullptr};
+  AGrabbableActor* LeftHandGrabbedActor{nullptr};
+  AGrabbableActor* RightHandGrabbedActor{nullptr};
   void HandleStartGrab(const FInputActionValue& _Value, EControllerHand Hand);
   void HandleGrab(const FInputActionValue& _Value, EControllerHand Hand);
   void HandleCompleteGrab(const FInputActionValue& _Value, EControllerHand Hand);

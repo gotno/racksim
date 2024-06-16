@@ -603,15 +603,17 @@ void AVRAvatar::HandleGrabbableTargetSet(AActor* GrabbableActor, EControllerHand
     SetControllerGrabbing(Hand, false);
     if (Hand == EControllerHand::Left) {
       LeftHandGrabbableActor = nullptr;
+      LeftHandGrabbedActor = nullptr;
     } else {
       RightHandGrabbableActor = nullptr;
+      RightHandGrabbedActor = nullptr;
     }
   }
 }
 
 void AVRAvatar::MaybeSplitWeldment(EControllerHand AlreadyGrabbingHand) {
-  AVCVModule* leftModule = Cast<AVCVModule>(LeftHandGrabbableActor);
-  AVCVModule* rightModule = Cast<AVCVModule>(RightHandGrabbableActor);
+  AVCVModule* leftModule = Cast<AVCVModule>(LeftHandGrabbedActor);
+  AVCVModule* rightModule = Cast<AVCVModule>(RightHandGrabbedActor);
 
   if (!leftModule || !rightModule) return;
   if (!leftModule->IsInWeldment() || !rightModule->IsInWeldment()) return;
@@ -623,8 +625,8 @@ void AVRAvatar::MaybeSplitWeldment(EControllerHand AlreadyGrabbingHand) {
     AVRMotionController* controller = GetControllerForHand(AlreadyGrabbingHand);
     AGrabbableActor* grabbable =
       AlreadyGrabbingHand == EControllerHand::Left
-        ? LeftHandGrabbableActor
-        : RightHandGrabbableActor;
+        ? LeftHandGrabbedActor
+        : RightHandGrabbedActor;
 
     grabbable->EngageGrab(
       controller->GetActorLocation(),
@@ -635,10 +637,15 @@ void AVRAvatar::MaybeSplitWeldment(EControllerHand AlreadyGrabbingHand) {
 
 void AVRAvatar::HandleStartGrab(const FInputActionValue& _Value, EControllerHand Hand) {
   AVRMotionController* controller = GetControllerForHand(Hand);
-  AGrabbableActor* grabbedActor =
-    Hand == EControllerHand::Left
-      ? LeftHandGrabbableActor
-      : RightHandGrabbableActor;
+
+  AGrabbableActor* grabbedActor;
+  if (Hand == EControllerHand::Left) {
+    LeftHandGrabbedActor = LeftHandGrabbableActor;
+    grabbedActor = LeftHandGrabbedActor;
+  } else {
+    RightHandGrabbedActor = RightHandGrabbableActor;
+    grabbedActor = RightHandGrabbedActor;
+  }
 
   if (GetControllerForOtherHand(Hand)->IsGrabbing())
     MaybeSplitWeldment(GetOtherHand(Hand));
@@ -651,8 +658,8 @@ void AVRAvatar::HandleGrab(const FInputActionValue& _Value, EControllerHand Hand
   AVRMotionController* controller = GetControllerForHand(Hand);
   AGrabbableActor* grabbedActor =
     Hand == EControllerHand::Left
-      ? LeftHandGrabbableActor
-      : RightHandGrabbableActor;
+      ? LeftHandGrabbedActor
+      : RightHandGrabbedActor;
 
   grabbedActor->AlterGrab(controller->GetActorLocation(), controller->GetActorRotation());
 }
@@ -661,8 +668,8 @@ void AVRAvatar::HandleCompleteGrab(const FInputActionValue& _Value, EControllerH
   AVRMotionController* controller = GetControllerForHand(Hand);
   AGrabbableActor* grabbedActor =
     Hand == EControllerHand::Left
-      ? LeftHandGrabbableActor
-      : RightHandGrabbableActor;
+      ? LeftHandGrabbedActor
+      : RightHandGrabbedActor;
 
   grabbedActor->ReleaseGrab();
   controller->EndGrab();
@@ -672,8 +679,8 @@ void AVRAvatar::HandleCompleteGrab(const FInputActionValue& _Value, EControllerH
   if (GetControllerForOtherHand(Hand)->IsGrabbing()) {
     AGrabbableActor* otherGrabbable =
       Hand == EControllerHand::Left
-        ? RightHandGrabbableActor
-        : LeftHandGrabbableActor;
+        ? RightHandGrabbedActor
+        : LeftHandGrabbedActor;
     if (grabbedActor->IsInWeldment() && grabbedActor->GetWeldment()->Contains(otherGrabbable)) {
       AVRMotionController* otherController = GetControllerForOtherHand(Hand);
       otherGrabbable->EngageGrab(
@@ -682,13 +689,21 @@ void AVRAvatar::HandleCompleteGrab(const FInputActionValue& _Value, EControllerH
       );
     }
   }
+
+  if (Hand == EControllerHand::Left) {
+    LeftHandGrabbedActor = nullptr;
+  } else {
+    RightHandGrabbedActor = nullptr;
+  }
 }
 
 void AVRAvatar::HandleSnapModeTriggered(const FInputActionValue& _Value, EControllerHand Hand) {
   AGrabbableActor* grabbedActor =
     Hand == EControllerHand::Left
-      ? LeftHandGrabbableActor
-      : RightHandGrabbableActor;
+      ? LeftHandGrabbedActor
+      : RightHandGrabbedActor;
+
+  if (!grabbedActor) return;
 
   if (Cast<AVCVModule>(grabbedActor))
     Cast<AVCVModule>(grabbedActor)->InitSnapMode();
@@ -697,8 +712,10 @@ void AVRAvatar::HandleSnapModeTriggered(const FInputActionValue& _Value, EContro
 void AVRAvatar::HandleContextMenuTriggeredOrSnapModeCancelled(const FInputActionValue& _Value, EControllerHand Hand) {
   AGrabbableActor* grabbedActor =
     Hand == EControllerHand::Left
-      ? LeftHandGrabbableActor
-      : RightHandGrabbableActor;
+      ? LeftHandGrabbedActor
+      : RightHandGrabbedActor;
+
+  if (!grabbedActor) return;
 
   AVCVModule* grabbedModule = Cast<AVCVModule>(grabbedActor);
   if (grabbedModule) {
@@ -721,8 +738,8 @@ void AVRAvatar::HandleDuplicateModule(const FInputActionValue& _Value, EControll
   AVCVModule* grabbedModule =
     Cast<AVCVModule>(
       Hand == EControllerHand::Left
-        ? LeftHandGrabbableActor
-        : RightHandGrabbableActor
+        ? LeftHandGrabbedActor
+        : RightHandGrabbedActor
     );
 
   if (grabbedModule) GameMode->DuplicateModule(grabbedModule);
@@ -733,8 +750,8 @@ void AVRAvatar::HandleDestroyModule(const FInputActionValue& _Value, EController
   AVCVModule* grabbedModule =
     Cast<AVCVModule>(
       Hand == EControllerHand::Left
-        ? LeftHandGrabbableActor
-        : RightHandGrabbableActor
+        ? LeftHandGrabbedActor
+        : RightHandGrabbedActor
     );
 
   if (grabbedModule) {
@@ -754,8 +771,8 @@ void AVRAvatar::HandleDestroyModule(const FInputActionValue& _Value, EController
   ALibrary* library =
     Cast<ALibrary>(
       Hand == EControllerHand::Left
-        ? LeftHandGrabbableActor
-        : RightHandGrabbableActor
+        ? LeftHandGrabbedActor
+        : RightHandGrabbedActor
     );
   if (library) GameMode->TuckLibrary();
 }
