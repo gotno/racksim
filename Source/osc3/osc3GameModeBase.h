@@ -68,6 +68,7 @@ public:
   AVCVCable* SpawnCable(AVCVPort* Port);
   void SpawnCable(int64_t& Id, AVCVPort* InputPort, AVCVPort* OutputPort, FLinearColor Color);
   void DestroyCableActor(AVCVCable* Cable);
+  void DestroyCableActor(int64_t& CableId);
   void RegisterCableConnect(AVCVPort* InputPort, AVCVPort* OutputPort, FColor Color);
   void RegisterCableDisconnect(AVCVCable* Cable);
 

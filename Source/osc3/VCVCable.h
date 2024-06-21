@@ -34,6 +34,7 @@ public:
 
   int64_t Id{-1};
   void SetId(int64_t inId) { Id = inId; }
+  void ResetId() { SetId(-1); }
 
   void ConnectToPort(AVCVPort* Port);
   void DisconnectFromPort(PortType Type);

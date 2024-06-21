@@ -34,6 +34,7 @@ void AOSCController::Init() {
   AddRoute("/modules/light/add/*", FName(TEXT("AddLight")));
   AddRoute("/modules/display/add/*", FName(TEXT("AddDisplay")));
   AddRoute("/cables/add/*", FName(TEXT("AddCable")));
+  AddRoute("/cables/destroy/*", FName(TEXT("DestroyCable")));
 
   AddRoute("/modules/light/update/*", FName(TEXT("UpdateLight")));
 
@@ -688,6 +689,15 @@ void AOSCController::AddCable(const FOSCAddress& AddressPattern, const FOSCMessa
   NotifyReceived("cable", cableId);
 
   GameMode->QueueCableSpawn(cable);
+}
+
+void AOSCController::DestroyCable(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port) {
+  int64 cableId;
+  UOSCManager::GetInt64(message, 0, cableId);
+
+  UE_LOG(LogTemp, Warning, TEXT("DestroyCable %lld"), cableId);
+
+  GameMode->DestroyCableActor(cableId);
 }
 
 void AOSCController::UpdateLight(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port) {

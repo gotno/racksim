@@ -732,6 +732,21 @@ void Aosc3GameModeBase::DestroyCableActor(AVCVCable* Cable) {
   Cable->Destroy();
 }
 
+// destroy as a result of rackside destruction,
+// reset id first to prevent triggering destroy call to rack
+void Aosc3GameModeBase::DestroyCableActor(int64_t& CableId) {
+  AVCVCable* Cable =
+    *CableActors.FindByPredicate([CableId](AVCVCable* Cable) {
+      if (Cable->Id == CableId) return true;
+      return false;
+    });
+  if (!Cable) return;
+
+  Cable->ResetId();
+  CableActors.Remove(Cable);
+  Cable->Destroy();
+}
+
 void Aosc3GameModeBase::DuplicateModule(AVCVModule* Module) {
   int returnId = ++currentReturnModuleId;
 

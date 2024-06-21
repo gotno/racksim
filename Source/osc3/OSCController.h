@@ -107,6 +107,8 @@ private:
   UFUNCTION()
   void AddCable(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port);
   UFUNCTION()
+  void DestroyCable(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port);
+  UFUNCTION()
   void AddLight(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port);
   UFUNCTION()
   void ModuleSyncComplete(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port);
