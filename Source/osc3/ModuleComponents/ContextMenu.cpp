@@ -66,7 +66,7 @@ void AContextMenu::Init(const Vec2& ModuleSize) {
   ContextMenuWidgetComponent->AddWorldOffset(GetActorRightVector() * halfMenuWidth);
   AddActorWorldOffset(GetActorRightVector() * (halfModuleWidth - 0.5f));
   AddActorWorldOffset(-GetActorForwardVector() * (RENDER_SCALE + 1.f));
-  // AddActorLocalRotation(FRotator(0.f, 15.f, 0.f));
+  AddActorLocalRotation(FRotator(0.f, 15.f, 0.f));
 }
 
 void AContextMenu::AddMenuItem(FVCVMenuItem MenuItem) {
