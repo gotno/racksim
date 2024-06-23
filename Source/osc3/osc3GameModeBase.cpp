@@ -408,6 +408,8 @@ void Aosc3GameModeBase::Autosave() {
   });
 
   UGameplayStatics::AsyncSaveGameToSlot(SaveGame, osc3GameState->GetAutosaveName(), 0, SavedDelegate);
+
+  osc3GameState->SetCanContinueAutosave(rackman->DoesAutosaveExist());
 }
 
 void Aosc3GameModeBase::ToggleMainMenu() {
