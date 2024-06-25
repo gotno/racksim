@@ -4,6 +4,7 @@
 #include "osc3GameModeBase.h"
 #include "VCVData/VCV.h"
 #include "VCVModule.h"
+#include "VCVParam.h"
 
 #include "Engine.h"
 #include "UObject/ConstructorHelpers.h"
@@ -16,14 +17,6 @@ AVCVLight::AVCVLight() {
   
   BaseMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Static Mesh"));
   RootComponent = BaseMeshComponent;
-
-  BaseMeshComponent->SetGenerateOverlapEvents(true);
-  BaseMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-  BaseMeshComponent->SetCollisionObjectType(LIGHT_OBJECT);
-  BaseMeshComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
-  BaseMeshComponent->SetCollisionResponseToChannel(PARAM_OBJECT, ECollisionResponse::ECR_Overlap);
-  BaseMeshComponent->SetCollisionResponseToChannel(DISPLAY_OBJECT, ECollisionResponse::ECR_Overlap);
-  BaseMeshComponent->OnComponentBeginOverlap.AddDynamic(this, &AVCVLight::HandleBeginOverlap);
 
   static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshCircle(CircleMeshReference);
   static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshRectangle(RectangleMeshReference);
@@ -73,19 +66,19 @@ void AVCVLight::Init(VCVLight* vcv_light) {
   SetActorScale3D(FVector(1.f, Model->box.size.x, Model->box.size.y));
 }
 
-void AVCVLight::HandleBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
-  if (bHandledOverlap) return;
+void AVCVLight::HandleOverlap() {
+  if (Model->overlapsParamId == -1) return;
 
-  AVCVModule* ownerModule = Cast<AVCVModule>(GetOwner());
-  ownerModule = ownerModule ? ownerModule : Cast<AVCVModule>(GetOwner()->GetOwner());
-  if (ownerModule != OtherActor->GetOwner()) return;
+  AVCVParam* overlappingParam =
+    Model->paramId == -1
+      ? Cast<AVCVModule>(GetOwner())->GetParamActor(Model->overlapsParamId)
+      : Cast<AVCVParam>(GetOwner());
 
-  FVector _, otherActorExtent;
-  OtherActor->GetActorBounds(false, _, otherActorExtent);
-  float delta = -otherActorExtent.X * 2;
-  SetActorLocation(GetActorLocation() + GetActorForwardVector() * delta);
-
-  bHandledOverlap = true;
+  SetActorLocation(
+    GetActorLocation()
+      - GetActorForwardVector()
+      * overlappingParam->GetOverlapDelta()
+  );
 }
 
 void AVCVLight::SetColor(FLinearColor Color) {

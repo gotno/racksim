@@ -11,12 +11,6 @@ AVCVDisplay::AVCVDisplay() {
   BaseMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Static Mesh"));
   RootComponent = BaseMeshComponent;
 
-  BaseMeshComponent->SetGenerateOverlapEvents(true);
-  BaseMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-  BaseMeshComponent->SetCollisionObjectType(DISPLAY_OBJECT);
-  BaseMeshComponent->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
-  BaseMeshComponent->SetCollisionResponseToChannel(LIGHT_OBJECT, ECollisionResponse::ECR_Overlap);
-  
   static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshBody(TEXT("/Script/Engine.StaticMesh'/Game/meshes/unit_lcd.unit_lcd'"));
   
   if (MeshBody.Object) BaseMeshComponent->SetStaticMesh(MeshBody.Object);

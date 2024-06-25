@@ -27,8 +27,6 @@ public:
 private:
   UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
   UStaticMeshComponent* MeshComponent;
-  UPROPERTY()
-  UStaticMesh* StaticMesh;
   
   UPROPERTY()
   UMaterialInstanceDynamic* BaseMaterialInstance;

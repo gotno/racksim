@@ -372,6 +372,9 @@ void AVCVModule::SpawnComponents() {
     a_display->AttachToComponent(StaticMeshComponent, FAttachmentTransformRules::KeepWorldTransform);
     a_display->Init(&display);
   }
+
+  for (auto& pair : LightActors) pair.Value->HandleOverlap();
+  for (auto& pair : ParamLightActors) pair.Value->HandleOverlap();
 }
 
 void AVCVModule::AlterGrab(FVector GrabbedLocation, FRotator GrabbedRotation) {

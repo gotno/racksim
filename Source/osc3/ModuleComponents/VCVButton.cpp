@@ -22,7 +22,10 @@ AVCVButton::AVCVButton() {
   MeshComponent->SetCollisionResponseToChannel(PARAM_TRACE, ECollisionResponse::ECR_Block);
   
   static ConstructorHelpers::FObjectFinder<UStaticMesh> Mesh(MeshReference);
-  if (Mesh.Object) MeshComponent->SetStaticMesh(Mesh.Object);
+  if (Mesh.Object) {
+    MeshComponent->SetStaticMesh(Mesh.Object);
+    OverlapMesh = Mesh.Object;
+  }
 
   // base material
   static ConstructorHelpers::FObjectFinder<UMaterial> BaseMaterial(BaseMaterialReference);

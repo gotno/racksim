@@ -19,7 +19,10 @@ AVCVSwitch::AVCVSwitch() {
   MeshComponent->SetCollisionResponseToChannel(LIGHT_OBJECT, ECollisionResponse::ECR_Overlap);
   
   static ConstructorHelpers::FObjectFinder<UStaticMesh> Mesh(MeshReference);
-  if (Mesh.Object) MeshComponent->SetStaticMesh(Mesh.Object);
+  if (Mesh.Object) {
+    MeshComponent->SetStaticMesh(Mesh.Object);
+    OverlapMesh = Mesh.Object;
+  }
 
   // base material
   static ConstructorHelpers::FObjectFinder<UMaterial> BaseMaterial(BaseMaterialReference);

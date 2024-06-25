@@ -59,8 +59,11 @@ struct VCVLight {
   FLinearColor bgColor;
   bool transparent{true};
 
+  int overlapsParamId{-1};
+
   VCVLight() {}
   VCVLight(int32 _id, int64_t _moduleId) : id(_id), moduleId(_moduleId) {}
+  VCVLight(int32 _id, int64_t _moduleId, int32 _paramId) : id(_id), moduleId(_moduleId), paramId(_paramId) {}
 };
 
 enum struct ParamType {

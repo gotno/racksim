@@ -31,7 +31,10 @@ AVCVSlider::AVCVSlider() {
   
   // handle mesh
   static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshHandle(HandleMeshReference);
-  if (MeshHandle.Object) HandleMeshComponent->SetStaticMesh(MeshHandle.Object);
+  if (MeshHandle.Object) {
+    HandleMeshComponent->SetStaticMesh(MeshHandle.Object);
+    OverlapMesh = MeshHandle.Object;
+  }
   HandleMeshComponent->SetupAttachment(GetRootComponent());
 
   BaseMeshComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);

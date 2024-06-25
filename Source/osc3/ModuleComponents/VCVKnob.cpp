@@ -21,7 +21,10 @@ AVCVKnob::AVCVKnob() {
   
   static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshBody(MeshReference);
   
-  if (MeshBody.Object) BaseMeshComponent->SetStaticMesh(MeshBody.Object);
+  if (MeshBody.Object) {
+    BaseMeshComponent->SetStaticMesh(MeshBody.Object);
+    OverlapMesh = MeshBody.Object;
+  }
 
   static ConstructorHelpers::FObjectFinder<UMaterial> BaseMaterial(BaseMaterialReference);
   static ConstructorHelpers::FObjectFinder<UMaterial> FaceMaterial(FaceMaterialReference);

@@ -629,7 +629,7 @@ void AOSCController::AddLight(const FOSCAddress& AddressPattern, const FOSCMessa
   if (paramId == -1) {
     Modules[moduleId].Lights.Add(lightId, VCVLight(lightId, moduleId));
   } else {
-    Modules[moduleId].Params[paramId].Lights.Add(lightId, VCVLight(lightId, moduleId));
+    Modules[moduleId].Params[paramId].Lights.Add(lightId, VCVLight(lightId, moduleId, paramId));
   }
 
   VCVLight& light =
@@ -663,6 +663,7 @@ void AOSCController::AddLight(const FOSCAddress& AddressPattern, const FOSCMessa
   light.shape = static_cast<LightShape>(shape);
 
   UOSCManager::GetBool(message, 16, light.visible);
+  UOSCManager::GetInt32(message, 17, light.overlapsParamId);
 }
 
 void AOSCController::AddCable(const FOSCAddress& AddressPattern, const FOSCMessage &message, const FString &ipaddress, int32 port) {

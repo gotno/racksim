@@ -30,6 +30,9 @@ protected:
   UMaterialInterface* LoadingMaterialInterface;
   TCHAR* LoadingMaterialRef{TEXT("/Script/Engine.Material'/Game/materials/loading.loading'")};
 
+  UPROPERTY()
+  UStaticMesh* OverlapMesh;
+
 private:
   class AVCVModule* Module;
 
@@ -50,6 +53,7 @@ public:
   void UpdateDisplayValue(const FString& DisplayValue);
 
   virtual void SetValue(float inValue);
+  float GetOverlapDelta();
 
   virtual void Engage();
   virtual void Engage(float _value);

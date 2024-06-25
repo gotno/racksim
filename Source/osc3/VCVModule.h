@@ -46,7 +46,9 @@ public:
   void GetModuleLandingPosition(FVector& Location, FRotator& Rotation, bool bOffset = true);
 
   void UpdateLight(int32 LightId, FLinearColor Color);
-  AVCVParam* GetParamActor(const int& ParamId) { return ParamActors[ParamId]; }
+  AVCVParam* GetParamActor(const int& ParamId) {
+    return ParamActors[ParamId];
+  }
   AVCVPort* GetPortActor(PortType Type, int32& PortId);
 
   void ToggleContextMenu();

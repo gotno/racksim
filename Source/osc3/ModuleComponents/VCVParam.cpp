@@ -43,6 +43,10 @@ void AVCVParam::Init(VCVParam* vcv_param) {
   SetActorScale3D(FVector(RENDER_SCALE, Model->box.size.x, Model->box.size.y));
 }
 
+float AVCVParam::GetOverlapDelta() {
+  return OverlapMesh->GetBounds().GetBox().GetSize().X * RENDER_SCALE;
+}
+
 void AVCVParam::Update(VCVParam& vcv_param) {
   FScopeLock Lock(&DataGuard);
   Model->merge(vcv_param);

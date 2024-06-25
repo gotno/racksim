@@ -35,11 +35,6 @@ private:
   UStaticMeshComponent* HandleMeshComponent;
 
   UPROPERTY()
-  UStaticMesh* BaseStaticMesh;
-  UPROPERTY()
-  UStaticMesh* HandleStaticMesh;
-
-  UPROPERTY()
   UMaterialInstanceDynamic* BaseMaterialInstance;
   UPROPERTY()
   UMaterialInstanceDynamic* BaseFaceMaterialInstance;
