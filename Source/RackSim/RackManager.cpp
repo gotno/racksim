@@ -13,7 +13,7 @@ THIRD_PARTY_INCLUDES_END
 
 void URackManager::Init() {
 #if !UE_BUILD_SHIPPING
-  RackPath = "C:/VCV/UnrealBuild/osc3_dev/Windows/Rack2Free/";
+  RackPath = "C:/VCV/UnrealBuild/racksim_dev/Windows/Rack2Free/";
 #else
   RackPath = FString(FPlatformProcess::UserHomeDir()) + "Rack2Free/";
 #endif
@@ -27,7 +27,7 @@ void URackManager::Init() {
   AutosavePath = RackUserPath + "autosave-racksim/patch.json";
 
   TemplatePath = RackUserPath + "template-racksim.vcv";
-  if (!FPaths::FileExists(TemplatePath)) // copy empty template 
+  if (!FPaths::FileExists(TemplatePath)) // copy empty template
     IFileManager::Get().Copy(*TemplatePath, *(RackPath + "template.vcv"));
 
   RackPluginsPath = RackUserPath + "plugins-win-x64/";
@@ -50,6 +50,8 @@ void URackManager::LaunchRack(FString PatchPath) {
   } else {
     params = PatchPath;
   }
+  
+// TODO: figure out pipes, make this useful
 // #if !UE_BUILD_SHIPPING
 //   params.Append(" -d");
 // #endif
