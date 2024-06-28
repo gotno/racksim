@@ -99,6 +99,11 @@ struct FModuleManipulationActions {
   UInputAction* ModuleContextMenuOrSnapModeLeft;
   UPROPERTY(EditDefaultsOnly)
   UInputAction* ModuleContextMenuOrSnapModeRight;
+
+  UPROPERTY(EditDefaultsOnly)
+  UInputAction* TeleportLeft;
+  UPROPERTY(EditDefaultsOnly)
+  UInputAction* TeleportRight;
 };
 
 USTRUCT()
