@@ -42,6 +42,18 @@ public:
   AVCVPort* GetPort(ACableEnd* CableEnd);
   AVCVPort* GetOtherPort(ACableEnd* CableEnd);
   ACableEnd* GetOtherEnd(AVCVPort* Port);
+  void SetEndPositions(
+    const FVector& EndALocation,
+    const FRotator& EndARotation,
+    const FVector& EndBLocation,
+    const FRotator& EndBRotation
+  );
+  void GetEndPositions(
+    FVector& EndALocation,
+    FRotator& EndARotation,
+    FVector& EndBLocation,
+    FRotator& EndBRotation
+  );
   void Abandon();
 
   void HandleRegistration();
@@ -50,14 +62,18 @@ public:
     bLatched = !bLatched;
     SetColor(CableColor);
   }
-
   bool IsLatched() {
     return bLatched;
   }
 
+  bool IsComplete();
+
   void SetTension(float inTension);
   void SetOpacity(float Opacity);
   void SetColor(FColor Color);
+  FColor GetColor() {
+    return CableColor;
+  }
   void CycleColor(int Direction);
   void CycleColor();
   static inline int CableColorCycleDirection{1};
@@ -87,13 +103,13 @@ private:
   ACableEnd* CableEndB{nullptr};
 
   FColor CableColor;
-  
+
   Aosc3GameModeBase* GameMode{nullptr};
-  
-  bool IsComplete();
+
   bool IsRegistered();
-  
+
   // allowed to exist even if unattached
   bool bLatched{false};
+
   float Tension{0.f};
 };

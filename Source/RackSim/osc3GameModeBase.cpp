@@ -14,6 +14,7 @@
 #include "VCVModule.h"
 #include "Utility/ModuleWeldment.h"
 #include "VCVCable.h"
+#include "CableEnd.h"
 #include "ModuleComponents/ContextMenu.h"
 #include "ModuleComponents/VCVParam.h"
 #include "ModuleComponents/VCVPort.h"
@@ -430,6 +431,37 @@ Uosc3SaveGame* Aosc3GameModeBase::MakeSaveGame() {
       SaveGameInstance->ModuleInfos.Add(module->Id, info);
     }
 
+    // incomplete cables
+    for (AVCVCable* cable : CableActors) {
+      if (cable->IsComplete()) continue; // cable will be synced from rack
+
+      FVCVCableInfo info;
+
+      AVCVPort* port = cable->GetPort(PortType::Input);
+      if (!port) port = cable->GetPort(PortType::Output);
+
+      if (port) {
+        info.ModuleId = port->Module->Id;
+        info.PortId = port->Id;
+        info.Type = port->Type;
+
+        cable->GetOtherEnd(port)->GetPosition(
+          info.OtherEndPosition.Location,
+          info.OtherEndPosition.Rotation
+        );
+      } else {
+        cable->GetEndPositions(
+          info.EndAPosition.Location,
+          info.EndAPosition.Rotation,
+          info.EndBPosition.Location,
+          info.EndBPosition.Rotation
+        );
+      }
+
+      info.Color = cable->GetColor();
+      SaveGameInstance->IncompleteCables.Push(info);
+    }
+
     for (AModuleWeldment* weldment : ModuleWeldments) {
       FWeldmentInfo info;
       info.Position.Location = weldment->GetActorLocation();
@@ -595,7 +627,7 @@ void Aosc3GameModeBase::ProcessSpawnCableQueue() {
     return Cable->Id == -1;
   });
 
-  for (VCVCable cable : CableQueue) {
+  for (VCVCable vcv_cable : CableQueue) {
     AVCVCable* matchingUnpersistedCable{nullptr};
     
     if (anyUnpersistedCables) {
@@ -605,7 +637,7 @@ void Aosc3GameModeBase::ProcessSpawnCableQueue() {
         AVCVPort* inputPort = cableToCheck->GetPort(PortType::Input);
         if (!inputPort) continue;
         
-        if (inputPort->Id == cable.inputPortId && inputPort->Module->Id == cable.inputModuleId) {
+        if (inputPort->Id == vcv_cable.inputPortId && inputPort->Module->Id == vcv_cable.inputModuleId) {
           matchingUnpersistedCable = cableToCheck;
           break;
         }
@@ -613,24 +645,41 @@ void Aosc3GameModeBase::ProcessSpawnCableQueue() {
     }
 
     if (matchingUnpersistedCable) {
-      matchingUnpersistedCable->SetId(cable.id);
-      spawnedCables.Push(cable);
-    } else if (ModuleActors.Contains(cable.inputModuleId) && ModuleActors.Contains(cable.outputModuleId)) {
+      matchingUnpersistedCable->SetId(vcv_cable.id);
+      spawnedCables.Push(vcv_cable);
+    } else if (ModuleActors.Contains(vcv_cable.inputModuleId) && ModuleActors.Contains(vcv_cable.outputModuleId)) {
       SpawnCable(
-        cable.id,
-        ModuleActors[cable.inputModuleId]->GetPortActor(PortType::Input, cable.inputPortId),
-        ModuleActors[cable.outputModuleId]->GetPortActor(PortType::Output, cable.outputPortId),
-        cable.color
+        vcv_cable.id,
+        ModuleActors[vcv_cable.inputModuleId]->GetPortActor(PortType::Input, vcv_cable.inputPortId),
+        ModuleActors[vcv_cable.outputModuleId]->GetPortActor(PortType::Output, vcv_cable.outputPortId),
+        vcv_cable.color
       );
-      spawnedCables.Push(cable);
+      spawnedCables.Push(vcv_cable);
     } else {
-      // UE_LOG(LogTemp, Warning, TEXT("awaiting modules %lld:%lld for cable %lld"), cable.inputModuleId, cable.outputModuleId, cable.id);
+      // UE_LOG(LogTemp, Warning, TEXT("awaiting modules %lld:%lld for cable %lld"), vcv_cable.inputModuleId, vcv_cable.outputModuleId, vcv_cable.id);
     }
   }
 
-  for (VCVCable cable : spawnedCables) {
-    CableQueue.RemoveSwap(cable);
+  for (VCVCable vcv_cable : spawnedCables) {
+    CableQueue.RemoveSwap(vcv_cable);
   }
+
+  if (!SaveData) return;
+  for (FVCVCableInfo& cable_info : SaveData->IncompleteCables) {
+    bool requiredModulePresent =
+      cable_info.IsConnected() && ModuleActors.Contains(cable_info.ModuleId);
+    bool noModuleRequired = !cable_info.IsConnected();
+
+    if (requiredModulePresent || noModuleRequired) {
+      SpawnCable(cable_info);
+      cable_info.bRestored = true;
+    }
+  }
+
+  SaveData->IncompleteCables =
+    SaveData->IncompleteCables.FilterByPredicate([](const FVCVCableInfo& cable_info) {
+      return !cable_info.bRestored;
+    });
 }
 
 void Aosc3GameModeBase::ProcessWeldmentQueue() {
@@ -696,17 +745,24 @@ void Aosc3GameModeBase::ProcessWeldmentQueue() {
   }
 }
 
-// spawn unpersisted cable attached to port
-AVCVCable* Aosc3GameModeBase::SpawnCable(AVCVPort* Port) {
+// spawn unpersisted & unconnected cable
+AVCVCable* Aosc3GameModeBase::SpawnCable() {
   AVCVCable* cable =
     GetWorld()->SpawnActor<AVCVCable>(
       AVCVCable::StaticClass(),
       FVector(0, 0, 0),
       FRotator(0, 0, 0)
     );
-  cable->ConnectToPort(Port);
-  
   CableActors.Push(cable);
+
+  return cable;
+}
+
+// spawn unpersisted cable connected to port
+AVCVCable* Aosc3GameModeBase::SpawnCable(AVCVPort* Port) {
+  AVCVCable* cable = SpawnCable();
+  cable->ConnectToPort(Port);
+
   return cable;
 }
 
@@ -716,6 +772,33 @@ void Aosc3GameModeBase::SpawnCable(int64_t& Id, AVCVPort* InputPort, AVCVPort* O
   cable->SetId(Id);
   cable->ConnectToPort(OutputPort);
   cable->SetColor(Color.ToFColor(false));
+}
+
+// spawn unpersisted cable from savegame
+void Aosc3GameModeBase::SpawnCable(FVCVCableInfo& cable_info) {
+  AVCVCable* cable{nullptr};
+
+  if (cable_info.IsConnected()) {
+    AVCVModule* module = ModuleActors[cable_info.ModuleId];
+    AVCVPort* port = module->GetPortActor(cable_info.Type, cable_info.PortId);
+
+    cable = SpawnCable(port);
+    cable->GetOtherEnd(port)->SetPosition(
+      cable_info.OtherEndPosition.Location,
+      cable_info.OtherEndPosition.Rotation
+    );
+  } else {
+    cable = SpawnCable();
+    cable->SetEndPositions(
+      cable_info.EndAPosition.Location,
+      cable_info.EndAPosition.Rotation,
+      cable_info.EndBPosition.Location,
+      cable_info.EndBPosition.Rotation
+    );
+  }
+
+  cable->ToggleLatched();
+  cable->SetColor(cable_info.Color);
 }
 
 void Aosc3GameModeBase::RegisterCableConnect(AVCVPort* InputPort, AVCVPort* OutputPort, FColor Color) {

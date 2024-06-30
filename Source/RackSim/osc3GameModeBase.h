@@ -26,6 +26,7 @@ class AModuleWeldment;
 class USvgRenderer;
 class ASkyLight;
 class ADirectionalLight;
+struct FVCVCableInfo;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FTextureReadySignature, FString, Filepath, UTexture2D*, Texture);
 
@@ -65,8 +66,10 @@ public:
   void SummonLibrary(FVector Location, FRotator Rotation);
   void TuckLibrary();
 
+  AVCVCable* SpawnCable();
   AVCVCable* SpawnCable(AVCVPort* Port);
   void SpawnCable(int64_t& Id, AVCVPort* InputPort, AVCVPort* OutputPort, FLinearColor Color);
+  void SpawnCable(FVCVCableInfo& cable_info);
   void DestroyCableActor(AVCVCable* Cable);
   void DestroyCableActor(int64_t& CableId);
   void RegisterCableConnect(AVCVPort* InputPort, AVCVPort* OutputPort, FColor Color);

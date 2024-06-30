@@ -165,6 +165,11 @@ void ACableEnd::OffsetMeshFrom(AActor* Actor) {
   Cable->RecalculatePosition();
 }
 
+void ACableEnd::GetPosition(FVector& Location, FRotator& Rotation) {
+  Location = GetActorLocation();
+  Rotation = GetActorRotation();
+}
+
 void ACableEnd::SetPosition(FVector Location, FRotator Rotation) {
   SetActorLocation(Location);
   SetActorRotation(Rotation);

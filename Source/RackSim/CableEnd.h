@@ -48,6 +48,7 @@ public:
   AVCVPort* GetPort();
   AVCVPort* GetConnectedPort();
   
+  void GetPosition(FVector& Location, FRotator& Rotation);
   void SetPosition(FVector Location, FRotator Rotation);
   void UpdatePosition();
 

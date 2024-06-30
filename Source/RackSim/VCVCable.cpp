@@ -152,6 +152,26 @@ AVCVPort* AVCVCable::GetPort(PortType Type) {
   return nullptr;
 }
 
+void AVCVCable::GetEndPositions(
+  FVector& EndALocation,
+  FRotator& EndARotation,
+  FVector& EndBLocation,
+  FRotator& EndBRotation
+) {
+  CableEndA->GetPosition(EndALocation, EndARotation);
+  CableEndB->GetPosition(EndBLocation, EndBRotation);
+}
+
+void AVCVCable::SetEndPositions(
+  const FVector& EndALocation,
+  const FRotator& EndARotation,
+  const FVector& EndBLocation,
+  const FRotator& EndBRotation
+) {
+  CableEndA->SetPosition(EndALocation, EndARotation);
+  CableEndB->SetPosition(EndBLocation, EndBRotation);
+}
+
 void AVCVCable::Abandon() {
   if (!bLatched) GameMode->DestroyCableActor(this);
 }

@@ -2,6 +2,9 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/SaveGame.h"
+
+#include "VCVData/VCV.h"
+
 #include "osc3SaveGame.generated.h"
 
 USTRUCT()
@@ -17,9 +20,52 @@ struct FPositionInfo {
 USTRUCT()
 struct FVCVModuleInfo {
   GENERATED_BODY()
-    
+
   UPROPERTY()
   FPositionInfo Position;
+};
+
+USTRUCT()
+struct FVCVCableInfo {
+  GENERATED_BODY()
+
+  bool IsConnected() {
+    return ModuleId != -1;
+  }
+
+  void Print() {
+    if (IsConnected()) {
+      UE_LOG(LogTemp, Warning, TEXT("connected incomplete cable:"));
+      UE_LOG(LogTemp, Warning, TEXT("  moduleId: %lld, portId: %d, type: %d"), ModuleId, PortId, (int)Type);
+      UE_LOG(LogTemp, Warning, TEXT("  other end loc: %s, rot: %s"), *OtherEndPosition.Location.ToString(), *OtherEndPosition.Rotation.ToString());
+    } else {
+      UE_LOG(LogTemp, Warning, TEXT("unconnected incomplete cable:"));
+      UE_LOG(LogTemp, Warning, TEXT("  endA loc: %s, rot: %s"), *EndAPosition.Location.ToString(), *EndAPosition.Rotation.ToString());
+      UE_LOG(LogTemp, Warning, TEXT("  endB loc: %s, rot: %s"), *EndBPosition.Location.ToString(), *EndBPosition.Rotation.ToString());
+    }
+  }
+
+  // used when one end is connected
+  UPROPERTY()
+  int64 ModuleId{-1};
+  UPROPERTY()
+  int PortId{-1};
+  UPROPERTY()
+  PortType Type{PortType::Any};
+  UPROPERTY()
+  FPositionInfo OtherEndPosition;
+
+  // used when neither end is connected
+  UPROPERTY()
+  FPositionInfo EndAPosition;
+  UPROPERTY()
+  FPositionInfo EndBPosition;
+
+  UPROPERTY()
+  bool bRestored{false};
+
+  UPROPERTY()
+  FColor Color;
 };
 
 USTRUCT()
@@ -43,6 +89,8 @@ class RACKSIM_API Uosc3SaveGame : public USaveGame {
 public:
   UPROPERTY(VisibleAnywhere, Category = Base)
   TMap<int64, FVCVModuleInfo> ModuleInfos;
+  UPROPERTY(VisibleAnywhere, Category = Base)
+  TArray<FVCVCableInfo> IncompleteCables;
   UPROPERTY(VisibleAnywhere, Category = Base)
   TArray<FWeldmentInfo> WeldmentInfos;
   UPROPERTY(VisibleAnywhere, Category = Base)
