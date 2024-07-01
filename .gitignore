@@ -1,5 +1,6 @@
 .git
 .vscode
+.ccls-cache
 DerivedDataCache
 Intermediate
 Platforms
