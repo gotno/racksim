@@ -1,5 +1,13 @@
 This repository is the Unreal Engine side of [VCVRVR](https://blog.gotno.net/vcvrvr).
 
+Feel free to file any bugs or feature requests over in [issues](https://github.com/gotno/racksim/issues).
+
+## Things to know
+1. You should have the latest version of Rack (> v2.5) installed. RackSim will use your plugins and settings.
+2. You **should not** have Rack running before starting RackSim. RackSim needs to manage its own custom version of Rack. It will not work if Rack is already running.
+3. Any new plugins or plugin updates will need to be handled by starting your installed Rack and letting it run updates.
+
+
 ## Controls
 <a name="far">`far button`</a> (typically `b` or `y`)
 
@@ -37,9 +45,9 @@ This repository is the Unreal Engine side of [VCVRVR](https://blog.gotno.net/vcv
 | --- | --- |
 | Grab Module | hold [grip](#grip) |
 | Duplicate Module (initialized) | tap [near](#near) while grabbing |
-| Destroy Module | tap [far](#far) while grabbing (once to prime, twice to destroy) |
+| Destroy Module | tap [far](#far) while grabbing (once to prime, again to destroy) |
 | Toggle Context Menu | tap [trigger](#trigger) while grabbing |
-| Snap Mode | hold [trigger](#trigger) while grabbing to engage, release to snap |
+| Snap Mode | hold [trigger](#trigger) while grabbing to engage snap mode, move into position and release to snap |
 
 ### Param Interaction
 | action | control |
@@ -53,5 +61,5 @@ This repository is the Unreal Engine side of [VCVRVR](https://blog.gotno.net/vcv
 | Create Cable from Empty Port | hold [trigger](#trigger) |
 | Grab Cable End | hold [trigger](#trigger) |
 | Destroy Cable | tap [far](#far) while grabbing, or simply drop an un-latched cable |
-| Latch Cable (prevent deletion when dropped) | tap [near](#far) while grabbing |
+| Toggle Cable Latched (prevent deletion when dropped) | tap [near](#far) while grabbing |
 | Cycle Cable Color | move [analog stick](#stick) left or right (x-axis) while grabbing |
