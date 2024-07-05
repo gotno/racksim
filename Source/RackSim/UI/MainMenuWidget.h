@@ -224,8 +224,6 @@ private:
   UFUNCTION()
   void HandleConfirmationCancelClick();
 
-  FString LoadingPatchLabel = LOADING_PATCH_LABEL;
-
   TFunction<void ()> ExitFunction;
   UFUNCTION()
   void HandleExitClick() {
@@ -255,7 +253,6 @@ private:
   TFunction<void ()> ContinueFunction;
   UFUNCTION()
   void HandleContinueClick() {
-    GotoStatus(TEXT(""), LoadingPatchLabel);
     ContinueFunction();
   }
 

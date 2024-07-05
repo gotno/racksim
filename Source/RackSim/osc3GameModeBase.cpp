@@ -78,15 +78,15 @@ void Aosc3GameModeBase::BeginPlay() {
 
   // there is a patch to load
   if (!osc3GameInstance->NextPatchPath.IsEmpty()) {
-    // the patch is an autosave from switching maps
-    if (osc3GameInstance->NextPatchPath.Equals(osc3GameState->GetAutosaveName())) {
-      SaveData = osc3GameInstance->SaveData;
-    }
-
     if (rackman->RackIsRunning()) {
+      // the patch is an autosave from switching maps
+      if (osc3GameInstance->NextPatchPath.Equals(osc3GameState->GetAutosaveName()))
+        SaveData = osc3GameInstance->SaveData;
       WatchRackStartup();
       MainMenu->Status(TEXT(""), TEXT("reconnecting rack"));
       OSCctrl->Init();
+    } else {
+      LoadPatch(osc3GameInstance->NextPatchPath);
     }
   } else {
     MainMenu->Show();
@@ -130,6 +130,14 @@ void Aosc3GameModeBase::ConfirmSaved() {
 }
 
 void Aosc3GameModeBase::LoadPatch(FString PatchPath) {
+  bool bIsAutosave = PatchPath.Equals(osc3GameState->GetAutosaveName());
+  bool bIsNew = PatchPath.Equals("new");
+  MainMenu->Status(
+    bIsAutosave || bIsNew ? TEXT("") : FPaths::GetCleanFilename(PatchPath),
+    bIsAutosave ? TEXT("loading autosave") : LOADING_PATCH_LABEL
+  );
+
+  // too multi-purpose?
   Reset();
 
   PatchPath.ReplaceInline(TEXT("/"), TEXT("\\"), ESearchCase::IgnoreCase);
@@ -231,17 +239,8 @@ void Aosc3GameModeBase::RackConnectionEstablished() {
 
   // we're connected to the previous patch, now load the real patch
   if (!osc3GameInstance->NextPatchPath.IsEmpty()) {
-    bool bIsAutosave =
-      osc3GameInstance->NextPatchPath.Equals(osc3GameState->GetAutosaveName());
-    bool bIsNew =
-      osc3GameInstance->NextPatchPath.Equals("new");
-    MainMenu->Status(
-      bIsAutosave || bIsNew ? TEXT("") : FPaths::GetCleanFilename(osc3GameInstance->NextPatchPath),
-      bIsAutosave ? TEXT("loading autosave") : LOADING_PATCH_LABEL
-    );
-
-    if (bIsAutosave) {
-      osc3GameState->SetPatchPath(SaveData->PatchPath);
+    if (osc3GameInstance->NextPatchPath.Equals(osc3GameState->GetAutosaveName())) {
+      if (SaveData) osc3GameState->SetPatchPath(SaveData->PatchPath);
       osc3GameState->SetUnsaved();
       osc3GameInstance->NextPatchPath.Empty();
     } else {

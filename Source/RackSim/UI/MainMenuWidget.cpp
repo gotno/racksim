@@ -358,14 +358,12 @@ void UMainMenuWidget::HandleConfirmationCancelClick() {
 
 void UMainMenuWidget::HandleLoadPatch(FString PatchPath) {
   if (bPatchIsSaved) {
-    GotoStatus(FPaths::GetCleanFilename(PatchPath), LoadingPatchLabel);
     LoadFunction(PatchPath);
   } else {
     Confirm(
       TEXT("The current patch is unsaved!\nAre you sure you want to open this one?"),
       TEXT("Yes, open patch"),
       [this, PatchPath]() {
-        GotoStatus(FPaths::GetCleanFilename(PatchPath), LoadingPatchLabel);
         LoadFunction(PatchPath);
       }
     );
@@ -374,14 +372,12 @@ void UMainMenuWidget::HandleLoadPatch(FString PatchPath) {
 
 void UMainMenuWidget::HandleNewClick() {
   if (bPatchIsSaved) {
-    GotoStatus(TEXT(""), LoadingPatchLabel);
     NewFunction();
   } else {
     Confirm(
       TEXT("The current patch is unsaved!\nAre you sure you want to create a new one?"),
       TEXT("Yes, create patch"),
       [this]() {
-        GotoStatus(TEXT(""), LoadingPatchLabel);
         NewFunction();
       }
     );
