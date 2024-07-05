@@ -57,16 +57,16 @@ void Aosc3GameModeBase::BeginPlay() {
 
   osc3GameInstance = Cast<Uosc3GameInstance>(GetWorld()->GetGameInstance());
   if (osc3GameInstance) UE_LOG(LogTemp, Warning, TEXT("GameInstance exists"));
-  
-  rackman->Init();
-  AVCVCable::CableColors = rackman->CableColors;
 
   PlayerController = Cast<Aosc3PlayerController>(UGameplayStatics::GetPlayerController(this, 0));
   if (PlayerController) UE_LOG(LogTemp, Warning, TEXT("PlayerController exists"));
 
   PlayerPawn = Cast<AVRAvatar>(UGameplayStatics::GetPlayerPawn(this, 0));
   if (PlayerPawn) UE_LOG(LogTemp, Warning, TEXT("PlayerPawn exists"));
-  
+
+  rackman->Init();
+  AVCVCable::CableColors = rackman->CableColors;
+
   SpawnLibrary();
   SpawnMainMenu();
 
