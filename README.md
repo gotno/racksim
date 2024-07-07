@@ -47,7 +47,13 @@ Feel free to file any bugs or feature requests over in [issues](https://github.c
 | Duplicate Module (initialized) | tap [near](#near) while grabbing |
 | Destroy Module | tap [far](#far) while grabbing (once to prime, again to destroy) |
 | Toggle Context Menu | tap [trigger](#trigger) while grabbing |
+
+### Module Grouping/Expanders
+| Action | Control |
+| --- | --- |
 | Snap Mode | hold [trigger](#trigger) while grabbing to engage snap mode, move into position and release to snap |
+| Pull a Module out of a Snapped-together Group | tap [far](#far) while grabbing the module |
+| Break apart a Snapped-together Group of Modules | With two hands, grab two adjacent modules in the group |
 
 ### Param Interaction
 | Action | Control |
