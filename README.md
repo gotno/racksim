@@ -6,7 +6,7 @@ Feel free to file any bugs or feature requests over in [issues](https://github.c
 1. You should have the latest version of Rack (> v2.5) installed. RackSim will use your plugins and settings.
 2. You **should not** have Rack running before starting RackSim. RackSim needs to manage its own custom version of Rack. It will not work if Rack is already running.
 3. Any new plugins or plugin updates will need to be handled by starting your installed Rack and letting it run updates.
-
+4. RackSim will keep its own seperate autosave directory (`autosave-racksim`) and template patch (`template-racksim.vcv`)
 
 ## Controls
 <a name="far">`far button`</a> (typically `b` or `y`)
@@ -20,20 +20,20 @@ Feel free to file any bugs or feature requests over in [issues](https://github.c
 <a name="stick">`analog stick`</a>
 
 ### Menus
-| action | control |
+| Action | Control |
 | --- | --- |
 | Scroll Menu | [analog stick](#stick) up or down (y-axis) |
 | Click Menu | [trigger](#trigger) |
 
 ### Base Actions
-| action | control |
+| Action | Control |
 | --- | --- |
 | Summon Library | tap [near](#near) |
 | Toggle Menu | tap [far](#far) |
 | Save Screenshot | hold [far](#far) |
 
 ### World Manipulation
-| action | control |
+| Action | Control |
 | --- | --- |
 | Translate World | hold [grip](#grip) |
 | Rotate World | hold [grip](#grip) and [near](#near) on same controller |
@@ -41,7 +41,7 @@ Feel free to file any bugs or feature requests over in [issues](https://github.c
 | Teleport | hold [grip](#grip) and push [analog stick](#stick) of same controller forward to aim, release [analog stick](#stick) to teleport |
 
 ### Module Manipulation
-| action | control |
+| Action | Control |
 | --- | --- |
 | Grab Module | hold [grip](#grip) |
 | Duplicate Module (initialized) | tap [near](#near) while grabbing |
@@ -50,13 +50,13 @@ Feel free to file any bugs or feature requests over in [issues](https://github.c
 | Snap Mode | hold [trigger](#trigger) while grabbing to engage snap mode, move into position and release to snap |
 
 ### Param Interaction
-| action | control |
+| Action | Control |
 | --- | --- |
 | Engage Param | hold [trigger](#trigger) |
 | Reset Param to Default | tap [far](#far) while engaging |
 
 ### Port/Cable Interaction
-| action | control |
+| Action | Control |
 | --- | --- |
 | Create Cable from Empty Port | hold [trigger](#trigger) |
 | Grab Cable End | hold [trigger](#trigger) |
