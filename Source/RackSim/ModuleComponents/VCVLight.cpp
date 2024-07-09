@@ -73,6 +73,7 @@ void AVCVLight::HandleOverlap() {
     Model->paramId == -1
       ? Cast<AVCVModule>(GetOwner())->GetParamActor(Model->overlapsParamId)
       : Cast<AVCVParam>(GetOwner());
+  if (!overlappingParam) return;
 
   SetActorLocation(
     GetActorLocation()

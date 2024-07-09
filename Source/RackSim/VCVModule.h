@@ -47,6 +47,7 @@ public:
 
   void UpdateLight(int32 LightId, FLinearColor Color);
   AVCVParam* GetParamActor(const int& ParamId) {
+    if (!ParamActors.Contains(ParamId)) return nullptr;
     return ParamActors[ParamId];
   }
   AVCVPort* GetPortActor(PortType Type, int32& PortId);
