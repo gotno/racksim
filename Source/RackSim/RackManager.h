@@ -61,6 +61,11 @@ private:
   FTimerHandle hOnExitTimer;
   void BringViewportToFront();
 
+  void* StdOutReadHandle{nullptr};
+  void* StdOutWriteHandle{nullptr};
+  FTimerHandle hPipeReadTimer;
+  void ReadStdOut();
+
   TFunction<void ()> OnExitCallback;
   UFUNCTION()
   void CheckForExit();

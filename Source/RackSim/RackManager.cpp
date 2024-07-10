@@ -50,11 +50,10 @@ void URackManager::LaunchRack(FString PatchPath) {
   } else {
     params = PatchPath;
   }
-  
-// TODO: figure out pipes, make this useful
-// #if !UE_BUILD_SHIPPING
-//   params.Append(" -d");
-// #endif
+
+  params.Append(" -d");
+
+  FPlatformProcess::CreatePipe(StdOutReadHandle, StdOutWriteHandle);
 
   hRackProc = FPlatformProcess::CreateProc(
     *RackExecutablePath,
@@ -65,8 +64,8 @@ void URackManager::LaunchRack(FString PatchPath) {
     nullptr,
     2, // -2 to 2 priority, idle to highest
     *RackPath, // working directory
-    nullptr,
-    nullptr
+    StdOutWriteHandle, // read pipe
+    nullptr // write pipe
   );
 
   if (hRackProc.IsValid()) {
@@ -77,12 +76,26 @@ void URackManager::LaunchRack(FString PatchPath) {
       0.1f, // 100 ms
       true // loop
     );
+
+    GetWorld()->GetTimerManager().SetTimer(
+      hPipeReadTimer,
+      this,
+      &URackManager::ReadStdOut,
+      0.5f, // 500 ms
+      true // loop
+    );
   }
+}
+
+void URackManager::ReadStdOut() {
+  FString StdOut = FPlatformProcess::ReadPipe(StdOutReadHandle);
+  if (StdOut.Len() > 0) UE_LOG(LogTemp, Display, TEXT("%s"), *StdOut);
 }
 
 void URackManager::CallOnExit(TFunction<void ()> inOnExitCallback) {
   OnExitCallback = inOnExitCallback;
 
+  GetWorld()->GetTimerManager().ClearTimer(hPipeReadTimer);
   GetWorld()->GetTimerManager().SetTimer(
     hOnExitTimer,
     this,
