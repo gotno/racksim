@@ -95,7 +95,6 @@ void URackManager::ReadStdOut() {
 void URackManager::CallOnExit(TFunction<void ()> inOnExitCallback) {
   OnExitCallback = inOnExitCallback;
 
-  GetWorld()->GetTimerManager().ClearTimer(hPipeReadTimer);
   GetWorld()->GetTimerManager().SetTimer(
     hOnExitTimer,
     this,
@@ -108,6 +107,7 @@ void URackManager::CallOnExit(TFunction<void ()> inOnExitCallback) {
 void URackManager::CheckForExit() {
   if (RackIsRunning()) return;
 
+  GetWorld()->GetTimerManager().ClearTimer(hPipeReadTimer);
   GetWorld()->GetTimerManager().ClearTimer(hOnExitTimer);
   OnExitCallback();
 }
