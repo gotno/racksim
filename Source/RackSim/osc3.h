@@ -80,4 +80,4 @@ enum class EFileIcon : int32 {
   None
 };
 
-#define ODB(Format, ...) if(GEngine){ GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Yellow, FString::Printf(TEXT(Format), ##__VA_ARGS__), false); }
+#define ODB(Format, ...) if(GEngine){ GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Emerald, FString::Printf(TEXT(Format), ##__VA_ARGS__), false); }
