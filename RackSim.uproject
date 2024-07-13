@@ -1,6 +1,6 @@
 {
 	"FileVersion": 3,
-	"EngineAssociation": "5.2",
+	"EngineAssociation": "{FFE448A5-4324-FDB6-3028-78BF79734266}",
 	"Category": "",
 	"Description": "",
 	"Modules": [
@@ -32,11 +32,6 @@
 				"Win64",
 				"Android"
 			]
-		},
-		{
-			"Name": "VRDebugPlugin",
-			"Enabled": true,
-			"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/content/9f6a7a87237b4f538e566391df2a778f"
 		},
 		{
 			"Name": "OSC",
