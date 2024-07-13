@@ -16,7 +16,9 @@ public:
   bool IsPatchLoaded() { return bPatchLoaded; }
   void SetPatchLoaded(bool inbPatchLoaded) { bPatchLoaded = inbPatchLoaded; }
   bool HasSaveFile() {
-    return !PatchPath.Equals("new") && !PatchPath.Equals(AutosaveName);
+    return !PatchPath.IsEmpty()
+      && !PatchPath.Equals("new")
+      && !PatchPath.Equals(AutosaveName);
   }
 
   bool IsUnsaved() { return bUnsaved; }
