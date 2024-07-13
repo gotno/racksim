@@ -1,4 +1,5 @@
 .git
+.vs
 .vscode
 .ccls-cache
 DerivedDataCache
