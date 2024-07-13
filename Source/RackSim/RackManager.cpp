@@ -51,8 +51,6 @@ void URackManager::LaunchRack(FString PatchPath) {
     params = PatchPath;
   }
 
-  params.Append(" -d");
-
   FPlatformProcess::CreatePipe(StdOutReadHandle, StdOutWriteHandle);
 
   hRackProc = FPlatformProcess::CreateProc(
