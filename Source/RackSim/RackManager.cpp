@@ -13,7 +13,7 @@ THIRD_PARTY_INCLUDES_END
 
 void URackManager::Init() {
 #if !UE_BUILD_SHIPPING
-  RackPath = "C:/VCV/UnrealBuild/racksim_dev/Windows/Rack2Free/";
+  RackPath = "C:/VCV/UnrealBuild/gsRS2024_dev/Windows/Rack2Free/";
 #else
   RackPath = FString(FPlatformProcess::UserHomeDir()) + "Rack2Free/";
 #endif
