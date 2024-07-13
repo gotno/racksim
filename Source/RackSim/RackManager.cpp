@@ -79,7 +79,7 @@ void URackManager::LaunchRack(FString PatchPath) {
       hPipeReadTimer,
       this,
       &URackManager::ReadStdOut,
-      0.5f, // 500 ms
+      0.2f, // 200 ms
       true // loop
     );
   }
@@ -87,7 +87,7 @@ void URackManager::LaunchRack(FString PatchPath) {
 
 void URackManager::ReadStdOut() {
   FString StdOut = FPlatformProcess::ReadPipe(StdOutReadHandle);
-  if (StdOut.Len() > 0) UE_LOG(LogTemp, Display, TEXT("%s"), *StdOut);
+  if (StdOut.Len() > 0) UE_LOG(LogTemp, Display, TEXT(" RACKLOG:\n%s"), *StdOut);
 }
 
 void URackManager::CallOnExit(TFunction<void ()> inOnExitCallback) {
