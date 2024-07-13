@@ -18,6 +18,7 @@ class ACableEnd;
 class AVCVParam;
 class AVCVPort;
 class AGrabbableActor;
+class UInputMappingContext;
 
 USTRUCT()
 struct FBaseActions {
