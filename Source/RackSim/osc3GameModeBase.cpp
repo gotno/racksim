@@ -309,7 +309,12 @@ void Aosc3GameModeBase::RestartRack(FString PatchPath) {
       OSCctrl->SyncPorts();
     });
   });
-  OSCctrl->SendAutosaveAndExit(PatchPath);
+
+  OSCctrl->SendAutosaveAndExit(
+    PatchPath.Equals(osc3GameState->GetAutosaveName())
+      ? TEXT("")
+      : PatchPath
+  );
 }
 
 void Aosc3GameModeBase::RequestExit() {
