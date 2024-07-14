@@ -363,14 +363,14 @@ void AVCVModule::SpawnComponents() {
   }
 
   for (VCVDisplay& display : Model.Displays) {
-    AVCVDisplay* a_display = GetWorld()->SpawnActor<AVCVDisplay>(
-      AVCVDisplay::StaticClass(),
-      GetActorLocation() + display.box.location(),
-      FRotator(0, 0, 0),
-      spawnParams
-    );
-    a_display->AttachToComponent(StaticMeshComponent, FAttachmentTransformRules::KeepWorldTransform);
-    a_display->Init(&display);
+    // AVCVDisplay* a_display = GetWorld()->SpawnActor<AVCVDisplay>(
+    //   AVCVDisplay::StaticClass(),
+    //   GetActorLocation() + display.box.location(),
+    //   FRotator(0, 0, 0),
+    //   spawnParams
+    // );
+    // a_display->AttachToComponent(StaticMeshComponent, FAttachmentTransformRules::KeepWorldTransform);
+    // a_display->Init(&display);
   }
 
   for (auto& pair : LightActors) pair.Value->HandleOverlap();
