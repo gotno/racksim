@@ -51,6 +51,9 @@ void URackManager::LaunchRack(FString PatchPath) {
     params = PatchPath;
   }
 
+  // add quotes in case the path has spaces
+  if (!params.IsEmpty()) params = "\"" + params + "\"";
+
   FPlatformProcess::CreatePipe(StdOutReadHandle, StdOutWriteHandle);
 
   hRackProc = FPlatformProcess::CreateProc(
