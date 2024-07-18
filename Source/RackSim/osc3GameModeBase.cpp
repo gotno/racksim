@@ -8,6 +8,9 @@
 #include "osc3SaveGame.h"
 #include "osc3GameInstance.h"
 
+#include "GameFramework/GameUserSettings.h"
+#include "RackSimGameUserSettings.h"
+
 #include "Player/VRMotionController.h"
 #include "Utility/GrabbableActor.h"
 
@@ -40,10 +43,10 @@ Aosc3GameModeBase::Aosc3GameModeBase() {
 }
 
 void Aosc3GameModeBase::BeginPlay() {
-	Super::BeginPlay();
+  Super::BeginPlay();
 
   UHeadMountedDisplayFunctionLibrary::EnableHMD(true);
-  
+
   TArray<AActor*> lights;
   UGameplayStatics::GetAllActorsOfClass(GetWorld(), ASkyLight::StaticClass(), lights);
   if (lights.Num() > 0) FillLight = Cast<ASkyLight>(lights[0]);
@@ -53,16 +56,18 @@ void Aosc3GameModeBase::BeginPlay() {
   if (lights.Num() > 0) SunLight = Cast<ADirectionalLight>(lights[0]);
 
   osc3GameState = Cast<Aosc3GameState>(UGameplayStatics::GetGameState(this));
-  if (osc3GameState) UE_LOG(LogTemp, Warning, TEXT("GameState exists"));
+  if (osc3GameState) UE_LOG(LogTemp, Display, TEXT("GameState exists"));
 
   osc3GameInstance = Cast<Uosc3GameInstance>(GetWorld()->GetGameInstance());
-  if (osc3GameInstance) UE_LOG(LogTemp, Warning, TEXT("GameInstance exists"));
+  if (osc3GameInstance) UE_LOG(LogTemp, Display, TEXT("GameInstance exists"));
 
   PlayerController = Cast<Aosc3PlayerController>(UGameplayStatics::GetPlayerController(this, 0));
-  if (PlayerController) UE_LOG(LogTemp, Warning, TEXT("PlayerController exists"));
+  if (PlayerController) UE_LOG(LogTemp, Display, TEXT("PlayerController exists"));
 
   PlayerPawn = Cast<AVRAvatar>(UGameplayStatics::GetPlayerPawn(this, 0));
-  if (PlayerPawn) UE_LOG(LogTemp, Warning, TEXT("PlayerPawn exists"));
+  if (PlayerPawn) UE_LOG(LogTemp, Display, TEXT("PlayerPawn exists"));
+
+  LoadUserSettings();
 
   rackman->Init();
   AVCVCable::CableColors = rackman->CableColors;
@@ -93,10 +98,31 @@ void Aosc3GameModeBase::BeginPlay() {
   }
 }
 
+void Aosc3GameModeBase::LoadUserSettings() {
+  UserSettings =
+    Cast<URackSimGameUserSettings>(UGameUserSettings::GetGameUserSettings());
+  if (!UserSettings) return;
+
+  UserSettings->LoadSettings();
+  if (!UserSettings->IsInitialized()) UserSettings->Init();
+
+  AVCVCable::CableColorCycleDirection = UserSettings->bCycleCableColors ? 1 : 0;
+  AVCVCable::CurrentCableColorIndex = UserSettings->LastCableColorIndex;
+}
+
+void Aosc3GameModeBase::SaveUserSettings() {
+  if (!UserSettings) return;
+
+  UserSettings->LastCableColorIndex = AVCVCable::CurrentCableColorIndex;
+
+  UserSettings->ApplySettings(false);
+}
+
 void Aosc3GameModeBase::EndPlay(const EEndPlayReason::Type EndPlayReason) {
   Super::EndPlay(EndPlayReason);
 
   if (osc3GameInstance->NextPatchPath.IsEmpty()) rackman->Cleanup();
+  SaveUserSettings();
 }
 
 void Aosc3GameModeBase::SavePatch(FString PatchPath) {
@@ -203,7 +229,7 @@ void Aosc3GameModeBase::Reset() {
   OSCctrl->PauseSending();
   OSCctrl->ClearData();
 
-  AVCVCable::CurrentCableColorIndex = -1;
+  if (UserSettings->bCycleCableColors) AVCVCable::CurrentCableColorIndex = -1;
 
   osc3GameState->SetPatchLoaded(false);
   osc3GameState->SetSaved();
@@ -966,14 +992,17 @@ void Aosc3GameModeBase::SpawnMainMenu() {
       for (AVCVCable* cable : CableActors) {
         cable->SetOpacity(CableOpacity);
       }
+      if (UserSettings) UserSettings->CableOpacity = CableOpacity;
     },
     [&](float CableTension) { // set cable tension callback
       for (AVCVCable* cable : CableActors) {
         cable->SetTension(CableTension);
       }
+      if (UserSettings) UserSettings->CableTension = CableTension;
     },
     [&](bool CycleColors) { // set auto-cycle cable colors
       AVCVCable::CableColorCycleDirection = CycleColors ? 1 : 0;
+      if (UserSettings) UserSettings->bCycleCableColors = CycleColors;
     },
     [&](FString MapName) { LoadMap(MapName); }, // load map callback
     [&](float Amount) { AdjustLightIntensity(Amount); }, // set environment light intensity

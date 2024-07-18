@@ -4,6 +4,9 @@
 #include "ModuleComponents/VCVPort.h"
 #include "CableEnd.h"
 
+#include "GameFramework/GameUserSettings.h"
+#include "RackSimGameUserSettings.h"
+
 #include "UObject/ConstructorHelpers.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -26,8 +29,6 @@ void AVCVCable::BeginPlay() {
 
   GameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
 
-  CycleColor();
-
   if (CableFXSystem) {
     CableFXComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(
       CableFXSystem,
@@ -38,10 +39,13 @@ void AVCVCable::BeginPlay() {
       EAttachLocation::KeepRelativeOffset,
       true
     );
-    // TODO: check for GameUserSettings
-    Tension = DEFAULT_CABLE_TENSION;
-    SetOpacity(DEFAULT_CABLE_OPACITY);
-    SetColor(CableColor);
+
+    URackSimGameUserSettings* UserSettings =
+      Cast<URackSimGameUserSettings>(UGameUserSettings::GetGameUserSettings());
+    if (UserSettings) {
+      SetOpacity(UserSettings->CableOpacity);
+      Tension = UserSettings->CableTension;
+    }
   }
 
   FActorSpawnParameters spawnParams;
@@ -54,7 +58,6 @@ void AVCVCable::BeginPlay() {
         FRotator(0.f),
         spawnParams
       );
-    CableEndA->SetColor(CableColor);
 
     CableFXComponent->AttachToComponent(
       CableEndA->GetMesh(),
@@ -70,8 +73,9 @@ void AVCVCable::BeginPlay() {
         FRotator(0.f),
         spawnParams
       );
-    CableEndB->SetColor(CableColor);
   }
+
+  CycleColor();
 }
 
 void AVCVCable::EndPlay(const EEndPlayReason::Type EndPlayReason) {
@@ -234,6 +238,7 @@ void AVCVCable::CycleColor() {
 
 void AVCVCable::CycleColor(int Direction) {
   CurrentCableColorIndex = CurrentCableColorIndex + Direction;
+
   if (CurrentCableColorIndex > CableColors.Num() - 1) {
     CurrentCableColorIndex = 0;
   } else if (CurrentCableColorIndex < 0) {

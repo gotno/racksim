@@ -3,6 +3,7 @@
 #include "osc3.h"
 #include "osc3GameModeBase.h"
 #include "osc3GameState.h"
+#include "RackSimGameUserSettings.h"
 #include "Player/VRAvatar.h"
 #include "UI/MainMenuWidget.h"
 #include "UI/FileListEntryData.h"
@@ -100,6 +101,11 @@ void AMainMenu::Init(
   // these don't change, so they don't need to be in Refresh,
   // but they do need to be set before we Refresh
   MainMenuWidget->SetFMShortcutsListItems(GenerateFMShortcutsEntries());
+
+  URackSimGameUserSettings* UserSettings =
+    Cast<URackSimGameUserSettings>(UGameUserSettings::GetGameUserSettings());
+  if (UserSettings) MainMenuWidget->UpdateSettings(UserSettings);
+
   Refresh();
 }
 

@@ -1,6 +1,7 @@
 #include "UI/MainMenuWidget.h"
 
 #include "osc3GameState.h"
+#include "RackSimGameUserSettings.h"
 #include "UI/FileListEntryData.h"
 #include "UI/Keyboard.h"
 
@@ -31,17 +32,10 @@ void UMainMenuWidget::NativeConstruct() {
 
   CableOpacitySlider->OnValueChanged.AddDynamic(this, &UMainMenuWidget::HandleCableOpacitySliderChange);
   CableOpacitySlider->OnMouseCaptureEnd.AddDynamic(this, &UMainMenuWidget::HandleCableOpacitySliderRelease);
-  // TODO: check for GameUserSettings
-  CableOpacitySlider->SetValue(DEFAULT_CABLE_OPACITY);
-  HandleCableOpacitySliderChange(DEFAULT_CABLE_OPACITY);
 
   CableTensionSlider->OnValueChanged.AddDynamic(this, &UMainMenuWidget::HandleCableTensionSliderChange);
   CableTensionSlider->OnMouseCaptureEnd.AddDynamic(this, &UMainMenuWidget::HandleCableTensionSliderRelease);
-  // TODO: check for GameUserSettings
-  CableTensionSlider->SetValue(DEFAULT_CABLE_TENSION);
-  HandleCableTensionSliderChange(DEFAULT_CABLE_TENSION);
 
-  // TODO: check for GameUserSettings
   CableColorCycleToggle->OnCheckStateChanged.AddDynamic(this, &UMainMenuWidget::HandleCableColorCycleToggle);
 
   EnvironmentLightIntensitySlider->OnValueChanged.AddDynamic(this, &UMainMenuWidget::HandleEnvironmentLightIntensitySliderChange);
@@ -50,6 +44,16 @@ void UMainMenuWidget::NativeConstruct() {
   MapOneButton->OnReleased.AddDynamic(this, &UMainMenuWidget::HandleMapOneClick);
   MapTwoButton->OnReleased.AddDynamic(this, &UMainMenuWidget::HandleMapTwoClick);
   MapThreeButton->OnReleased.AddDynamic(this, &UMainMenuWidget::HandleMapThreeClick);
+}
+
+void UMainMenuWidget::UpdateSettings(URackSimGameUserSettings* UserSettings) {
+  CableTensionSlider->SetValue(UserSettings->CableTension);
+  HandleCableTensionSliderChange(UserSettings->CableTension);
+
+  CableOpacitySlider->SetValue(UserSettings->CableOpacity);
+  HandleCableOpacitySliderChange(UserSettings->CableOpacity);
+
+  CableColorCycleToggle->SetIsChecked(UserSettings->bCycleCableColors);
 }
 
 void UMainMenuWidget::UpdateState(Aosc3GameState* GameState) {

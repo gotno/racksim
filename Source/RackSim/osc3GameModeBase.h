@@ -9,6 +9,7 @@
 
 class Aosc3GameState;
 class Uosc3GameInstance;
+class URackSimGameUserSettings;
 class AOSCController;
 class AGrabbableActor;
 class URackManager;
@@ -109,6 +110,10 @@ public:
 
 private:
   UFUNCTION()
+  void LoadUserSettings();
+  UFUNCTION()
+  void SaveUserSettings();
+  UFUNCTION()
   void Reset();
   UFUNCTION()
   void Exit();
@@ -146,6 +151,8 @@ private:
   AVRAvatar* PlayerPawn;
   UPROPERTY()
   Uosc3GameInstance* osc3GameInstance;
+  UPROPERTY()
+  URackSimGameUserSettings* UserSettings;
 
   UPROPERTY()
   TMap<int64, AVCVModule*> ModuleActors;

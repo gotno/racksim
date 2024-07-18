@@ -8,6 +8,7 @@
 #include "MainMenuWidget.generated.h"
 
 class Aosc3GameState;
+class URackSimGameUserSettings;
 class AKeyboard;
 class UBorder;
 class UButton;
@@ -30,6 +31,7 @@ public:
   void GotoMain();
 
   void GotoStatus(FString UpperText = "", FString LowerText = "");
+  void UpdateSettings(URackSimGameUserSettings* UserSettings);
   void UpdateState(Aosc3GameState* GameState);
 
   void SetExitFunction(TFunction<void ()> inExitFunction) {
