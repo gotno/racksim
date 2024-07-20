@@ -615,7 +615,7 @@ void Aosc3GameModeBase::SpawnModule(VCVModule vcv_module) {
     location = FVector(100.f, vcv_module.box.pos.x, -vcv_module.box.pos.y + 100.f);
     location.Y += vcv_module.box.size.x / 2;
     location.Z += vcv_module.box.size.y / 2;
-    rotation = FRotator(0.f);
+    rotation = FRotator(-40.f, 0.f, 0.f);
   }
 
   AVCVModule* module =
