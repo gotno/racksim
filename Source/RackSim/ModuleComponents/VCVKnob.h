@@ -53,7 +53,7 @@ private:
   Aosc3GameModeBase* GameMode;
   
   // TODO: user override of smoothing constant and ratio
-  float AlterRatio{1.f};
+  float AlterRatio{2.f};
   float MovingAverageWeight{0.2f};
 
   FRotator GetRotationFromValue();
