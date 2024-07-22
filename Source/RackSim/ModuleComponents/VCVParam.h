@@ -59,6 +59,7 @@ public:
   virtual void Engage(float _value);
   virtual void Engage(FVector _location);
   virtual void Alter(float amount);
+  virtual void Alter(float amount, float AlterRatioOverride);
   virtual void Alter(FVector _location);
   virtual void Release();
   virtual void ResetValue();

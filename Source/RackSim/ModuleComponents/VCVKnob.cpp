@@ -1,6 +1,5 @@
 #include "ModuleComponents/VCVKnob.h"
 
-#include "osc3.h"
 #include "osc3GameModeBase.h"
 #include "VCVData/VCVOverrides.h"
 
@@ -129,6 +128,15 @@ void AVCVKnob::Engage(float ControllerRoll) {
   LastControllerRoll = ControllerRoll;
 }
 
+void AVCVKnob::Alter(float ControllerRoll, float AlterRatioOverride) {
+  float originalRatio = AlterRatio;
+  AlterRatio = AlterRatioOverride;
+
+  Alter(ControllerRoll);
+
+  AlterRatio = originalRatio;
+}
+
 void AVCVKnob::Alter(float ControllerRoll) {
   Super::Alter(ControllerRoll);
   if (!bEngaged) return;
@@ -150,7 +158,6 @@ void AVCVKnob::Alter(float ControllerRoll) {
   ShadowRotation.Yaw = knobRotation.Yaw;
   ShadowRotation.Roll =
     FMath::Clamp(ShadowRotation.Roll + deltaRoll, Model->minAngle, Model->maxAngle);
-
 
   SetValue(GetValueFromRotation());
   UpdateRotation(Model->snap ? GetRotationFromValue() : ShadowRotation);

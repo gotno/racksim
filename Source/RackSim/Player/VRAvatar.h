@@ -117,6 +117,11 @@ struct FParamInteractionActions {
   UInputAction* ParamEngageRight;
 
   UPROPERTY(EditDefaultsOnly)
+  UInputAction* ParamEngagePreciseLeft;
+  UPROPERTY(EditDefaultsOnly)
+  UInputAction* ParamEngagePreciseRight;
+
+  UPROPERTY(EditDefaultsOnly)
   UInputAction* ParamResetLeft;
   UPROPERTY(EditDefaultsOnly)
   UInputAction* ParamResetRight;
@@ -332,6 +337,11 @@ private:
   void HandleParamEngage(const FInputActionValue& _Value, EControllerHand Hand);
   void HandleCompleteParamEngage(const FInputActionValue& _Value, EControllerHand Hand);
   void HandleParamReset(const FInputActionValue& _Value, EControllerHand Hand);
+
+  bool bLeftHandParamEngagePrecise{false};
+  bool bRightHandParamEngagePrecise{false};
+  void HandleStartParamEngagePrecise(const FInputActionValue& _Value, EControllerHand Hand);
+  void HandleCompleteParamEngagePrecise(const FInputActionValue& _Value, EControllerHand Hand);
 
   ACableEnd* LeftHandHeldCableEnd;
   ACableEnd* RightHandHeldCableEnd;

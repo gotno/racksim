@@ -3,6 +3,9 @@
 #include "CoreMinimal.h"
 #include "ModuleComponents/VCVParam.h"
 #include "VCVData/VCV.h"
+
+#include "osc3.h"
+
 #include "VCVKnob.generated.h"
 
 class UTexture2D;
@@ -53,7 +56,7 @@ private:
   Aosc3GameModeBase* GameMode;
   
   // TODO: user override of smoothing constant and ratio
-  float AlterRatio{2.f};
+  float AlterRatio{KNOB_ALTER_RATIO};
   float MovingAverageWeight{0.2f};
 
   FRotator GetRotationFromValue();
@@ -70,6 +73,7 @@ private:
 public:
   void Engage(float ControllerRoll) override;
   void Alter(float ControllerRoll) override;
+  void Alter(float ControllerRoll, float AlterRatioOverride) override;
   void Release() override;
   void ResetValue() override;
 

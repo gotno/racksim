@@ -116,6 +116,15 @@ void AVCVParam::Alter(float amount) {
   // UE_LOG(LogTemp, Warning, TEXT("param alter %f, ratio'd: %f"), amount, amount * AlterRatio);
 }
 
+void AVCVParam::Alter(float amount, float AlterRatioOverride) {
+  float originalRatio = AlterRatio;
+  AlterRatio = AlterRatioOverride;
+
+  Alter(amount);
+
+  AlterRatio = originalRatio;
+}
+
 void AVCVParam::Alter(FVector _value) {
   // UE_LOG(LogTemp, Warning, TEXT("param alter %s, ratio'd: %s"), *_value.ToCompactString(), *(_value * AlterRatio).ToCompactString());
 }

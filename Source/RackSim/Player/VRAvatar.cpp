@@ -216,6 +216,12 @@ void AVRAvatar::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
   Input->BindAction(ParamInteractionActions.ParamEngageLeft, ETriggerEvent::Completed, this, &AVRAvatar::HandleCompleteParamEngage, EControllerHand::Left);
   Input->BindAction(ParamInteractionActions.ParamEngageRight, ETriggerEvent::Completed, this, &AVRAvatar::HandleCompleteParamEngage, EControllerHand::Right);
 
+  // engage precise
+  Input->BindAction(ParamInteractionActions.ParamEngagePreciseLeft, ETriggerEvent::Started, this, &AVRAvatar::HandleStartParamEngagePrecise, EControllerHand::Left);
+  Input->BindAction(ParamInteractionActions.ParamEngagePreciseRight, ETriggerEvent::Started, this, &AVRAvatar::HandleStartParamEngagePrecise, EControllerHand::Right);
+  Input->BindAction(ParamInteractionActions.ParamEngagePreciseLeft, ETriggerEvent::Completed, this, &AVRAvatar::HandleCompleteParamEngagePrecise, EControllerHand::Left);
+  Input->BindAction(ParamInteractionActions.ParamEngagePreciseRight, ETriggerEvent::Completed, this, &AVRAvatar::HandleCompleteParamEngagePrecise, EControllerHand::Right);
+
   // reset
   Input->BindAction(ParamInteractionActions.ParamResetLeft, ETriggerEvent::Started, this, &AVRAvatar::HandleParamReset, EControllerHand::Left);
   Input->BindAction(ParamInteractionActions.ParamResetRight, ETriggerEvent::Started, this, &AVRAvatar::HandleParamReset, EControllerHand::Right);
@@ -801,6 +807,14 @@ void AVRAvatar::HandleStartParamEngage(const FInputActionValue& _Value, EControl
   }
 }
 
+void AVRAvatar::HandleStartParamEngagePrecise(const FInputActionValue& _Value, EControllerHand Hand) {
+  if (Hand == EControllerHand::Left) {
+    bLeftHandParamEngagePrecise = true;
+  } else {
+    bRightHandParamEngagePrecise = true;
+  }
+}
+
 void AVRAvatar::HandleParamEngage(const FInputActionValue& _Value, EControllerHand Hand) {
   AVRMotionController* controller = GetControllerForHand(Hand);
   AVCVParam* interactingParam =
@@ -808,8 +822,16 @@ void AVRAvatar::HandleParamEngage(const FInputActionValue& _Value, EControllerHa
       ? LeftHandParamActor
       : RightHandParamActor;
 
+  bool bIsPrecise =
+    Hand == EControllerHand::Left
+      ? bLeftHandParamEngagePrecise
+      : bRightHandParamEngagePrecise;
+
   if (Cast<AVCVKnob>(interactingParam)) {
-    interactingParam->Alter(controller->GetActorRotation().Roll);
+    interactingParam->Alter(
+      controller->GetActorRotation().Roll,
+      bIsPrecise ? KNOB_ALTER_RATIO_PRECISE : KNOB_ALTER_RATIO
+    );
   } else if (Cast<AVCVSlider>(interactingParam)) {
     interactingParam->Alter(controller->GetActorLocation());
   }
@@ -838,6 +860,14 @@ void AVRAvatar::HandleCompleteParamEngage(const FInputActionValue& _Value, ECont
 
   controller->EndParamInteract();
   interactingParam->Release();
+}
+
+void AVRAvatar::HandleCompleteParamEngagePrecise(const FInputActionValue& _Value, EControllerHand Hand) {
+  if (Hand == EControllerHand::Left) {
+    bLeftHandParamEngagePrecise = false;
+  } else {
+    bRightHandParamEngagePrecise = false;
+  }
 }
 
 void AVRAvatar::HandleStartPortEngage(const FInputActionValue& _Value, EControllerHand Hand) {
@@ -949,6 +979,13 @@ void AVRAvatar::ToggleMainMenu(const FInputActionValue& _Value) {
 }
 
 void AVRAvatar::SummonLibrary(const FInputActionValue& _Value, EControllerHand Hand) {
+  // precision param interaction can accidentally trigger library summon
+  bool bAbandon =
+    Hand == EControllerHand::Left
+      ? bLeftHandParamEngagePrecise
+      : bRightHandParamEngagePrecise;
+  if (bAbandon) return;
+
   AVRMotionController* controller = GetControllerForHand(Hand);
   FVector location = controller->GetActorLocation() + controller->GetActorForwardVector() * 16.f;
   FRotator rotation =
