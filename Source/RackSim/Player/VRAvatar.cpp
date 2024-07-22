@@ -992,3 +992,18 @@ FVector AVRAvatar::GetMainMenuPosition() {
   return Camera->GetComponentLocation() + Camera->GetForwardVector() * 60;
 }
 
+void AVRAvatar::SetControllerLightHidden(bool bLightHidden, EControllerHand Hand) {
+  if (Hand == EControllerHand::Left) {
+    LeftController->SetLightHidden(bLightHidden);
+  } else {
+    RightController->SetLightHidden(bLightHidden);
+  }
+}
+
+void AVRAvatar::SetControllerTooltipHidden(bool bTooltipHidden, EControllerHand Hand) {
+  if (Hand == EControllerHand::Left) {
+    LeftController->SetTooltipHidden(bTooltipHidden);
+  } else {
+    RightController->SetTooltipHidden(bTooltipHidden);
+  }
+}

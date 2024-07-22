@@ -80,6 +80,8 @@ void AMainMenu::Init(
   TFunction<void (float)> CableOpacityUpdateFunction,
   TFunction<void (float)> CableTensionUpdateFunction,
   TFunction<void (bool)> CableColorCycleToggleFunction,
+  TFunction<void (bool, EControllerHand)> ControllerLightToggleFunction,
+  TFunction<void (bool, EControllerHand)> ControllerTooltipToggleFunction,
   TFunction<void (FString)> LoadMapFunction,
   TFunction<void (float)> EnvironmentLightIntensityUpdateFunction,
   TFunction<void (float)> EnvironmentLightAngleUpdateFunction
@@ -94,6 +96,8 @@ void AMainMenu::Init(
   MainMenuWidget->SetCableOpacityUpdateFunction(CableOpacityUpdateFunction);
   MainMenuWidget->SetCableTensionUpdateFunction(CableTensionUpdateFunction);
   MainMenuWidget->SetCableColorCycleToggleFunction(CableColorCycleToggleFunction);
+  MainMenuWidget->SetControllerLightToggleFunction(ControllerLightToggleFunction);
+  MainMenuWidget->SetControllerTooltipToggleFunction(ControllerTooltipToggleFunction);
   MainMenuWidget->SetLoadMapFunction(LoadMapFunction);
   MainMenuWidget->SetEnvironmentLightIntensityUpdateFunction(EnvironmentLightIntensityUpdateFunction);
   MainMenuWidget->SetEnvironmentLightAngleUpdateFunction(EnvironmentLightAngleUpdateFunction);

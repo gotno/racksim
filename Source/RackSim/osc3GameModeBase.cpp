@@ -1004,6 +1004,16 @@ void Aosc3GameModeBase::SpawnMainMenu() {
       AVCVCable::CableColorCycleDirection = CycleColors ? 1 : 0;
       if (UserSettings) UserSettings->bCycleCableColors = CycleColors;
     },
+    [&](bool bHide, EControllerHand Hand) { // show/hide controller light
+      PlayerPawn->SetControllerLightHidden(bHide, Hand);
+      // TODO
+      // if (UserSettings) UserSettings->ControllerLightHidden[Hand] = bHide;
+    },
+    [&](bool bHide, EControllerHand Hand) { // show/hide controller tooltip
+      PlayerPawn->SetControllerTooltipHidden(bHide, Hand);
+      // TODO
+      // if (UserSettings) UserSettings->ControllerTooltipHidden[Hand] = bHide;
+    },
     [&](FString MapName) { LoadMap(MapName); }, // load map callback
     [&](float Amount) { AdjustLightIntensity(Amount); }, // set environment light intensity
     [&](float Amount) { AdjustLightAngle(Amount); } // set environment light angle

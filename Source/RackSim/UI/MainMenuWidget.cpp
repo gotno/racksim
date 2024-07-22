@@ -6,6 +6,7 @@
 #include "UI/FileListEntryData.h"
 #include "UI/Keyboard.h"
 #include "UI/MultiToggleButton.h"
+#include "UI/LabeledSlider.h"
 
 #include "Components/Border.h"
 #include "Components/Button.h"
@@ -61,6 +62,24 @@ void UMainMenuWidget::NativeConstruct() {
   CableColorCycleToggleButton->OnToggleOneToggledDelegate.AddDynamic(
     this,
     &UMainMenuWidget::HandleCableColorCycleToggle
+  );
+
+  ControllerLightsToggleButton->OnToggleOneToggledDelegate.AddDynamic(
+    this,
+    &UMainMenuWidget::HandleControllerLightToggleLeft
+  );
+  ControllerLightsToggleButton->OnToggleTwoToggledDelegate.AddDynamic(
+    this,
+    &UMainMenuWidget::HandleControllerLightToggleRight
+  );
+
+  ControllerTooltipsToggleButton->OnToggleOneToggledDelegate.AddDynamic(
+    this,
+    &UMainMenuWidget::HandleControllerTooltipToggleLeft
+  );
+  ControllerTooltipsToggleButton->OnToggleTwoToggledDelegate.AddDynamic(
+    this,
+    &UMainMenuWidget::HandleControllerTooltipToggleRight
   );
 
   ExitButton->OnReleased.AddDynamic(this, &UMainMenuWidget::HandleExitClick);
@@ -332,6 +351,20 @@ void UMainMenuWidget::HandleEnvironmentLightAngleSliderChange(float Value) {
 
 void UMainMenuWidget::HandleCableColorCycleToggle(bool bIsChecked) {
   CableColorCycleToggleFunction(bIsChecked);
+}
+
+void UMainMenuWidget::HandleControllerLightToggleLeft(bool bIsChecked) {
+  ControllerLightToggleFunction(!bIsChecked, EControllerHand::Left);
+}
+void UMainMenuWidget::HandleControllerLightToggleRight(bool bIsChecked) {
+  ControllerLightToggleFunction(!bIsChecked, EControllerHand::Right);
+}
+
+void UMainMenuWidget::HandleControllerTooltipToggleLeft(bool bIsChecked) {
+  ControllerTooltipToggleFunction(!bIsChecked, EControllerHand::Left);
+}
+void UMainMenuWidget::HandleControllerTooltipToggleRight(bool bIsChecked) {
+  ControllerTooltipToggleFunction(!bIsChecked, EControllerHand::Right);
 }
 
 void UMainMenuWidget::HandleSaveAsClick() {

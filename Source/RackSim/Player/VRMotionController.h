@@ -22,6 +22,7 @@ class USphereComponent;
 class UCapsuleComponent;
 class UPrimitiveComponent;
 class UWidgetComponent;
+class UPointLightComponent;
 class UWidgetInteractionComponent;
 class UNiagaraComponent;
 
@@ -75,6 +76,9 @@ public:
 
   void RefreshTooltip();
 
+  void SetLightHidden(bool bLightHidden);
+  void SetTooltipHidden(bool bTooltipHidden);
+
   UPROPERTY(EditAnywhere, Category="Input")
   FHapticEffects HapticEffects;
 
@@ -100,6 +104,9 @@ private:
   USphereComponent* GrabSphere;
   UPROPERTY(EditDefaultsOnly, Category="Interaction")
   float GrabSphereRadius = MODULE_DEPTH * RENDER_SCALE * 1.5;
+
+  UPROPERTY(VisibleAnywhere)
+  UPointLightComponent* Light;
 
   UPROPERTY(VisibleAnywhere)
   UWidgetInteractionComponent* WidgetInteractionComponent;

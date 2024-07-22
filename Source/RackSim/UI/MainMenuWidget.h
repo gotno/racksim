@@ -73,6 +73,14 @@ public:
   void SetCableColorCycleToggleFunction(TFunction<void (bool)> inCableColorCycleToggleFunction) {
     CableColorCycleToggleFunction = inCableColorCycleToggleFunction;
   }
+
+  void SetControllerLightToggleFunction(TFunction<void (bool, EControllerHand)> inControllerLightToggleFunction) {
+    ControllerLightToggleFunction = inControllerLightToggleFunction;
+  }
+  void SetControllerTooltipToggleFunction(TFunction<void (bool, EControllerHand)> inControllerTooltipToggleFunction) {
+    ControllerTooltipToggleFunction = inControllerTooltipToggleFunction;
+  }
+
   void SetEnvironmentLightIntensityUpdateFunction(TFunction<void (float)> inEnvironmentLightIntensityUpdateFunction) {
     EnvironmentLightIntensityUpdateFunction = inEnvironmentLightIntensityUpdateFunction;
   }
@@ -291,10 +299,23 @@ private:
   void HandleCableColorCycleToggle(bool bIsChecked);
   TFunction<void (bool)> CableColorCycleToggleFunction;
 
+  // controller light toggles
+  UFUNCTION()
+  void HandleControllerLightToggleLeft(bool bIsChecked);
+  UFUNCTION()
+  void HandleControllerLightToggleRight(bool bIsChecked);
+  TFunction<void (bool, EControllerHand)> ControllerLightToggleFunction;
+
+  // controller tooltip toggles
+  UFUNCTION()
+  void HandleControllerTooltipToggleLeft(bool bIsChecked);
+  UFUNCTION()
+  void HandleControllerTooltipToggleRight(bool bIsChecked);
+  TFunction<void (bool, EControllerHand)> ControllerTooltipToggleFunction;
+
   UFUNCTION()
   void HandleEnvironmentLightIntensitySliderChange(float Value);
   TFunction<void (float)> EnvironmentLightIntensityUpdateFunction;
-
   UFUNCTION()
   void HandleEnvironmentLightAngleSliderChange(float Value);
   TFunction<void (float)> EnvironmentLightAngleUpdateFunction;

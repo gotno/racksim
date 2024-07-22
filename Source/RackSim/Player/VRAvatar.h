@@ -226,15 +226,18 @@ public:
   FInputMappingContexts InputMappingContexts;
 
   UEnhancedInputLocalPlayerSubsystem* InputSubsystem;
-  
+
   void SetControllerWidgetInteracting(EControllerHand Hand, bool bEnable);
   void SetControllerGrabbing(EControllerHand Hand, bool bEnable);
   void SetControllerParamInteracting(EControllerHand Hand, bool bEnable);
   void SetControllerPortInteracting(EControllerHand Hand, bool bEnable);
-  
+
   void GetRenderablePosition(FVector& Location, FRotator& Rotation);
   FRotator GetLookAtCameraRotation(FVector FromLocation);
   FVector GetMainMenuPosition();
+
+  void SetControllerLightHidden(bool bLightHidden, EControllerHand Hand);
+  void SetControllerTooltipHidden(bool bTooltipHidden, EControllerHand Hand);
 
 private:
   UPROPERTY(VisibleAnywhere)

@@ -21,6 +21,7 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/WidgetComponent.h"
 #include "Components/WidgetInteractionComponent.h"
+#include "Components/PointLightComponent.h"
 #include "DrawDebugHelpers.h"
 
 #include "NiagaraFunctionLibrary.h"
@@ -41,6 +42,9 @@ AVRMotionController::AVRMotionController() {
   GrabSphere = CreateDefaultSubobject<USphereComponent>(TEXT("GrabSphere"));
   GrabSphere->InitSphereRadius(GrabSphereRadius);
   GrabSphere->SetupAttachment(GetRootComponent());
+
+  Light = CreateDefaultSubobject<UPointLightComponent>(TEXT("PointLight"));
+  Light->SetupAttachment(GetRootComponent());
 
   TooltipWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("Tooltip"));
   TooltipWidgetComponent->SetupAttachment(GetRootComponent());
@@ -486,4 +490,12 @@ void AVRMotionController::GetHeldCableEndInfo(FVector& Location, FVector& Forwar
     MotionController->GetComponentLocation()
       + MotionController->GetForwardVector() * 3.f;
   ForwardVector = MotionController->GetForwardVector();
+}
+
+void AVRMotionController::SetLightHidden(bool bLightHidden) {
+  Light->SetHiddenInGame(bLightHidden);
+}
+
+void AVRMotionController::SetTooltipHidden(bool bTooltipHidden) {
+  TooltipWidgetComponent->SetHiddenInGame(bTooltipHidden);
 }
