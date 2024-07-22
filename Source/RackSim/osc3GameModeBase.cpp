@@ -109,11 +109,13 @@ void Aosc3GameModeBase::LoadUserSettings() {
   AVCVCable::CableColorCycleDirection = UserSettings->bCycleCableColors ? 1 : 0;
   AVCVCable::CurrentCableColorIndex = UserSettings->LastCableColorIndex;
 
-  PlayerPawn->SetControllerLightHidden(!UserSettings->bShowLeftControllerLight, EControllerHand::Left);
-  PlayerPawn->SetControllerLightHidden(!UserSettings->bShowRightControllerLight, EControllerHand::Right);
+  if (PlayerPawn) {
+    PlayerPawn->SetControllerLightHidden(!UserSettings->bShowLeftControllerLight, EControllerHand::Left);
+    PlayerPawn->SetControllerLightHidden(!UserSettings->bShowRightControllerLight, EControllerHand::Right);
 
-  PlayerPawn->SetControllerTooltipHidden(!UserSettings->bShowLeftControllerTooltip, EControllerHand::Left);
-  PlayerPawn->SetControllerTooltipHidden(!UserSettings->bShowRightControllerTooltip, EControllerHand::Right);
+    PlayerPawn->SetControllerTooltipHidden(!UserSettings->bShowLeftControllerTooltip, EControllerHand::Left);
+    PlayerPawn->SetControllerTooltipHidden(!UserSettings->bShowRightControllerTooltip, EControllerHand::Right);
+  }
 }
 
 void Aosc3GameModeBase::SaveUserSettings() {
