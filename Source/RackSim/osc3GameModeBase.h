@@ -108,11 +108,12 @@ public:
   void WeldModules(TArray<int64>& ModuleIds, bool bShouldArrangeRackside = false);
   void WeldModules(AVCVModule* LeftModule, AVCVModule* RightModule, bool bLeftIsAnchor = true, bool bShouldArrangeRackside = true);
 
+  UFUNCTION()
+  void SaveUserSettings();
+
 private:
   UFUNCTION()
   void LoadUserSettings();
-  UFUNCTION()
-  void SaveUserSettings();
   UFUNCTION()
   void Reset();
   UFUNCTION()

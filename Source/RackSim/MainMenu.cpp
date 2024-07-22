@@ -116,6 +116,7 @@ void AMainMenu::Init(
 void AMainMenu::Hide() {
   MainMenuWidget->SetVisibility(ESlateVisibility::Hidden);
   SetActorHiddenInGame(true);
+  GameMode->SaveUserSettings();
 }
 
 void AMainMenu::Show() {
