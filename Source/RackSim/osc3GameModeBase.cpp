@@ -108,6 +108,12 @@ void Aosc3GameModeBase::LoadUserSettings() {
 
   AVCVCable::CableColorCycleDirection = UserSettings->bCycleCableColors ? 1 : 0;
   AVCVCable::CurrentCableColorIndex = UserSettings->LastCableColorIndex;
+
+  PlayerPawn->SetControllerLightHidden(!UserSettings->bShowLeftControllerLight, EControllerHand::Left);
+  PlayerPawn->SetControllerLightHidden(!UserSettings->bShowRightControllerLight, EControllerHand::Right);
+
+  PlayerPawn->SetControllerTooltipHidden(!UserSettings->bShowLeftControllerTooltip, EControllerHand::Left);
+  PlayerPawn->SetControllerTooltipHidden(!UserSettings->bShowRightControllerTooltip, EControllerHand::Right);
 }
 
 void Aosc3GameModeBase::SaveUserSettings() {
@@ -1006,13 +1012,21 @@ void Aosc3GameModeBase::SpawnMainMenu() {
     },
     [&](bool bHide, EControllerHand Hand) { // show/hide controller light
       PlayerPawn->SetControllerLightHidden(bHide, Hand);
-      // TODO
-      // if (UserSettings) UserSettings->ControllerLightHidden[Hand] = bHide;
+      if (!UserSettings) return;
+
+      if (Hand == EControllerHand::Left)
+        UserSettings->bShowLeftControllerLight = !bHide;
+      if (Hand == EControllerHand::Right)
+        UserSettings->bShowRightControllerLight = !bHide;
     },
     [&](bool bHide, EControllerHand Hand) { // show/hide controller tooltip
       PlayerPawn->SetControllerTooltipHidden(bHide, Hand);
-      // TODO
-      // if (UserSettings) UserSettings->ControllerTooltipHidden[Hand] = bHide;
+      if (!UserSettings) return;
+
+      if (Hand == EControllerHand::Left)
+        UserSettings->bShowLeftControllerTooltip = !bHide;
+      if (Hand == EControllerHand::Right)
+        UserSettings->bShowRightControllerTooltip = !bHide;
     },
     [&](FString MapName) { LoadMap(MapName); }, // load map callback
     [&](float Amount) { AdjustLightIntensity(Amount); }, // set environment light intensity

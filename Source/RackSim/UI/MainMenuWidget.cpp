@@ -107,6 +107,12 @@ void UMainMenuWidget::UpdateSettings(URackSimGameUserSettings* UserSettings) {
   CableOpacitySlider->SetValue(UserSettings->CableOpacity);
 
   CableColorCycleToggleButton->SetToggleOneChecked(UserSettings->bCycleCableColors);
+
+  ControllerLightsToggleButton->SetToggleOneChecked(UserSettings->bShowLeftControllerLight);
+  ControllerLightsToggleButton->SetToggleTwoChecked(UserSettings->bShowRightControllerLight);
+
+  ControllerTooltipsToggleButton->SetToggleOneChecked(UserSettings->bShowLeftControllerTooltip);
+  ControllerTooltipsToggleButton->SetToggleTwoChecked(UserSettings->bShowRightControllerTooltip);
 }
 
 void UMainMenuWidget::UpdateState(Aosc3GameState* GameState) {
