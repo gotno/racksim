@@ -2,24 +2,37 @@
 
 #include "osc3GameState.h"
 #include "RackSimGameUserSettings.h"
+
 #include "UI/FileListEntryData.h"
 #include "UI/Keyboard.h"
+#include "UI/MultiToggleButton.h"
 
 #include "Components/Border.h"
 #include "Components/Button.h"
 #include "Components/ListView.h"
 #include "Components/TextBlock.h"
 #include "Components/Slider.h"
-#include "Components/CheckBox.h"
 #include "Components/SizeBox.h"
 #include "Components/HorizontalBox.h"
 #include "Components/VerticalBoxSlot.h"
 
+void UMainMenuWidget::SynchronizeProperties() {
+  Super::SynchronizeProperties();
+
+  if (CableColorCycleToggleButton)
+    CableColorCycleToggleButton->SetPrimaryLabel(TEXT("Auto-cycle cable color"));
+}
+
 void UMainMenuWidget::NativeConstruct() {
   Super::NativeConstruct();
-  
+
   ConfirmationConfirmButton->OnReleased.AddDynamic(this, &UMainMenuWidget::HandleConfirmationConfirmClick);
   ConfirmationCancelButton->OnReleased.AddDynamic(this, &UMainMenuWidget::HandleConfirmationCancelClick);
+
+  CableColorCycleToggleButton->OnToggleOneToggledDelegate.AddDynamic(
+    this,
+    &UMainMenuWidget::HandleCableColorCycleToggle
+  );
 
   ExitButton->OnReleased.AddDynamic(this, &UMainMenuWidget::HandleExitClick);
   SaveButton->OnReleased.AddDynamic(this, &UMainMenuWidget::HandleSaveClick);
@@ -36,8 +49,6 @@ void UMainMenuWidget::NativeConstruct() {
   CableTensionSlider->OnValueChanged.AddDynamic(this, &UMainMenuWidget::HandleCableTensionSliderChange);
   CableTensionSlider->OnMouseCaptureEnd.AddDynamic(this, &UMainMenuWidget::HandleCableTensionSliderRelease);
 
-  CableColorCycleToggle->OnCheckStateChanged.AddDynamic(this, &UMainMenuWidget::HandleCableColorCycleToggle);
-
   EnvironmentLightIntensitySlider->OnValueChanged.AddDynamic(this, &UMainMenuWidget::HandleEnvironmentLightIntensitySliderChange);
   EnvironmentLightAngleSlider->OnValueChanged.AddDynamic(this, &UMainMenuWidget::HandleEnvironmentLightAngleSliderChange);
 
@@ -53,7 +64,7 @@ void UMainMenuWidget::UpdateSettings(URackSimGameUserSettings* UserSettings) {
   CableOpacitySlider->SetValue(UserSettings->CableOpacity);
   HandleCableOpacitySliderChange(UserSettings->CableOpacity);
 
-  CableColorCycleToggle->SetIsChecked(UserSettings->bCycleCableColors);
+  CableColorCycleToggleButton->SetToggleOneChecked(UserSettings->bCycleCableColors);
 }
 
 void UMainMenuWidget::UpdateState(Aosc3GameState* GameState) {

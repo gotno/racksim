@@ -10,6 +10,8 @@
 class Aosc3GameState;
 class URackSimGameUserSettings;
 class AKeyboard;
+class UMultiToggleButton;
+
 class UBorder;
 class UButton;
 class UListView;
@@ -20,13 +22,17 @@ class UCheckBox;
 class USizeBox;
 class UHorizontalBox;
 
+
 UCLASS()
 class RACKSIM_API UMainMenuWidget : public UUserWidget
 {
   GENERATED_BODY()
+
   friend class AMainMenu;
 
 public:
+  virtual void SynchronizeProperties() override;
+
   UFUNCTION()
   void GotoMain();
 
@@ -96,7 +102,7 @@ public:
   void Alert(FString AlertLabel, FString ConfirmButtonLabel);
 
 protected:
-  virtual void NativeConstruct() override;	
+  virtual void NativeConstruct() override;
 
   // title
   UPROPERTY(meta = (BindWidget))
@@ -168,7 +174,9 @@ protected:
 
   // config section
   UPROPERTY(meta = (BindWidget))
-  USlider* CableOpacitySlider;
+  UMultiToggleButton* CableColorCycleToggleButton;
+
+  //
   UPROPERTY(meta = (BindWidget))
   UTextBlock* CableOpacitySliderLabel;
   UPROPERTY(meta = (BindWidget))
