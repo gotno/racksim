@@ -11,17 +11,16 @@ class Aosc3GameState;
 class URackSimGameUserSettings;
 class AKeyboard;
 class UMultiToggleButton;
+class ULabeledSlider;
 
 class UBorder;
 class UButton;
 class UListView;
 class UFileListEntryData;
 class UTextBlock;
-class USlider;
 class UCheckBox;
 class USizeBox;
 class UHorizontalBox;
-
 
 UCLASS()
 class RACKSIM_API UMainMenuWidget : public UUserWidget
@@ -175,16 +174,15 @@ protected:
   // config section
   UPROPERTY(meta = (BindWidget))
   UMultiToggleButton* CableColorCycleToggleButton;
+  UPROPERTY(meta = (BindWidget))
+  ULabeledSlider* CableOpacitySlider;
+  UPROPERTY(meta = (BindWidget))
+  ULabeledSlider* CableTensionSlider;
 
-  //
   UPROPERTY(meta = (BindWidget))
-  UTextBlock* CableOpacitySliderLabel;
+  UMultiToggleButton* ControllerTooltipsToggleButton;
   UPROPERTY(meta = (BindWidget))
-  USlider* CableTensionSlider;
-  UPROPERTY(meta = (BindWidget))
-  UTextBlock* CableTensionSliderLabel;
-  UPROPERTY(meta = (BindWidget))
-  UCheckBox* CableColorCycleToggle;
+  UMultiToggleButton* ControllerLightsToggleButton;
 
   UPROPERTY(meta = (BindWidget))
   UButton* MapOneButton;
@@ -193,13 +191,9 @@ protected:
   UPROPERTY(meta = (BindWidget))
   UButton* MapThreeButton;
   UPROPERTY(meta = (BindWidget))
-  USlider* EnvironmentLightIntensitySlider;
+  ULabeledSlider* EnvironmentLightIntensitySlider;
   UPROPERTY(meta = (BindWidget))
-  UTextBlock* EnvironmentLightIntensitySliderLabel;
-  UPROPERTY(meta = (BindWidget))
-  USlider* EnvironmentLightAngleSlider;
-  UPROPERTY(meta = (BindWidget))
-  UTextBlock* EnvironmentLightAngleSliderLabel;
+  ULabeledSlider* EnvironmentLightAngleSlider;
 
   UPROPERTY(meta = (BindWidget))
   UBorder* LoadingSection;
@@ -288,12 +282,8 @@ private:
   void SetFileListHeadingText(FString HeadingText);
 
   UFUNCTION()
-  void HandleCableOpacitySliderChange(float Value);
-  UFUNCTION()
   void HandleCableOpacitySliderRelease();
   TFunction<void (float)> CableOpacityUpdateFunction;
-  UFUNCTION()
-  void HandleCableTensionSliderChange(float Value);
   UFUNCTION()
   void HandleCableTensionSliderRelease();
   TFunction<void (float)> CableTensionUpdateFunction;
@@ -304,12 +294,10 @@ private:
   UFUNCTION()
   void HandleEnvironmentLightIntensitySliderChange(float Value);
   TFunction<void (float)> EnvironmentLightIntensityUpdateFunction;
-  void SetEnvironmentLightIntensitySliderLabel(float& Value);
 
   UFUNCTION()
   void HandleEnvironmentLightAngleSliderChange(float Value);
   TFunction<void (float)> EnvironmentLightAngleUpdateFunction;
-  void SetEnvironmentLightAngleSliderLabel(float& Value);
 
   TFunction<void (FString)> LoadMapFunction;
   UFUNCTION()

@@ -21,6 +21,35 @@ void UMainMenuWidget::SynchronizeProperties() {
 
   if (CableColorCycleToggleButton)
     CableColorCycleToggleButton->SetPrimaryLabel(TEXT("Auto-cycle cable color"));
+  if (CableOpacitySlider) {
+    CableOpacitySlider->SetLabel(TEXT("Cable opacity"));
+  }
+  if (CableTensionSlider) {
+    CableTensionSlider->SetLabel(TEXT("Cable Tension"));
+  }
+
+  if (ControllerTooltipsToggleButton) {
+    ControllerTooltipsToggleButton->SetPrimaryLabel(TEXT("Show controller tooltips"));
+    ControllerTooltipsToggleButton->SetToggleLabels(TEXT("L"), TEXT("R"));
+  }
+  if (ControllerLightsToggleButton) {
+    ControllerLightsToggleButton->SetPrimaryLabel(TEXT("Show controller lights"));
+    ControllerLightsToggleButton->SetToggleLabels(TEXT("L"), TEXT("R"));
+  }
+
+  if (EnvironmentLightIntensitySlider) {
+    EnvironmentLightIntensitySlider->SetLabel(TEXT("Room Brightness"));
+    EnvironmentLightIntensitySlider->SetValue(DEFAULT_ROOM_BRIGHTNESS_AMOUNT);
+  }
+
+  if (EnvironmentLightAngleSlider) {
+    EnvironmentLightAngleSlider->SetLabel(TEXT("Sun Angle"));
+    EnvironmentLightAngleSlider->SetMinValue(MIN_SUN_ANGLE);
+    EnvironmentLightAngleSlider->SetMaxValue(MAX_SUN_ANGLE);
+    EnvironmentLightAngleSlider->SetValue(DEFAULT_SUN_ANGLE_AMOUNT);
+    EnvironmentLightAngleSlider->SetValueMultiplier(1.f);
+    EnvironmentLightAngleSlider->SetUnit(TEXT(" degrees"));
+  }
 }
 
 void UMainMenuWidget::NativeConstruct() {
@@ -43,10 +72,7 @@ void UMainMenuWidget::NativeConstruct() {
   LoadButton->OnReleased.AddDynamic(this, &UMainMenuWidget::GotoFileManager);
   FileManagerCancelButton->OnReleased.AddDynamic(this, &UMainMenuWidget::GotoMain);
 
-  CableOpacitySlider->OnValueChanged.AddDynamic(this, &UMainMenuWidget::HandleCableOpacitySliderChange);
   CableOpacitySlider->OnMouseCaptureEnd.AddDynamic(this, &UMainMenuWidget::HandleCableOpacitySliderRelease);
-
-  CableTensionSlider->OnValueChanged.AddDynamic(this, &UMainMenuWidget::HandleCableTensionSliderChange);
   CableTensionSlider->OnMouseCaptureEnd.AddDynamic(this, &UMainMenuWidget::HandleCableTensionSliderRelease);
 
   EnvironmentLightIntensitySlider->OnValueChanged.AddDynamic(this, &UMainMenuWidget::HandleEnvironmentLightIntensitySliderChange);
@@ -59,10 +85,7 @@ void UMainMenuWidget::NativeConstruct() {
 
 void UMainMenuWidget::UpdateSettings(URackSimGameUserSettings* UserSettings) {
   CableTensionSlider->SetValue(UserSettings->CableTension);
-  HandleCableTensionSliderChange(UserSettings->CableTension);
-
   CableOpacitySlider->SetValue(UserSettings->CableOpacity);
-  HandleCableOpacitySliderChange(UserSettings->CableOpacity);
 
   CableColorCycleToggleButton->SetToggleOneChecked(UserSettings->bCycleCableColors);
 }
@@ -133,15 +156,11 @@ void UMainMenuWidget::UpdateState(Aosc3GameState* GameState) {
   // lighting controls
   if (GameState->CurrentMapName.Equals("park")) {
     EnvironmentLightAngleSlider->SetVisibility(ESlateVisibility::Visible);
-    EnvironmentLightAngleSliderLabel->SetVisibility(ESlateVisibility::Visible);
   } else {
     EnvironmentLightAngleSlider->SetVisibility(ESlateVisibility::Collapsed);
-    EnvironmentLightAngleSliderLabel->SetVisibility(ESlateVisibility::Collapsed);
   }
   EnvironmentLightIntensitySlider->SetValue(GameState->EnvironmentLightIntensityAmount);
-  SetEnvironmentLightIntensitySliderLabel(GameState->EnvironmentLightIntensityAmount);
   EnvironmentLightAngleSlider->SetValue(GameState->EnvironmentLightAngleAmount);
-  SetEnvironmentLightAngleSliderLabel(GameState->EnvironmentLightAngleAmount);
 
   // map load buttons
   MapOneButton->SetIsEnabled(!GameState->CurrentMapName.Equals("light_void"));
@@ -295,50 +314,20 @@ void UMainMenuWidget::ReloadDirectoryInFileManager() {
   LoadDirectoryInFileManager(CurrentFMDirectory);
 }
 
-void UMainMenuWidget::HandleCableOpacitySliderChange(float Value) {
-  FString label{"Cable opacity: "};
-  label.AppendInt(FMath::RoundToInt(Value * 100.f));
-  label.Append("%");
-  CableOpacitySliderLabel->SetText(FText::FromString(label));
-}
-
 void UMainMenuWidget::HandleCableOpacitySliderRelease() {
   CableOpacityUpdateFunction(CableOpacitySlider->GetValue());
 }
 
-void UMainMenuWidget::SetEnvironmentLightIntensitySliderLabel(float& Value) {
-  FString label{"Room brightness: "};
-  label.AppendInt(FMath::RoundToInt(Value * 100.f));
-  label.Append("%");
-  EnvironmentLightIntensitySliderLabel->SetText(FText::FromString(label));
+void UMainMenuWidget::HandleCableTensionSliderRelease() {
+  CableTensionUpdateFunction(CableTensionSlider->GetValue());
 }
 
 void UMainMenuWidget::HandleEnvironmentLightIntensitySliderChange(float Value) {
-  SetEnvironmentLightIntensitySliderLabel(Value);
   EnvironmentLightIntensityUpdateFunction(Value);
 }
 
-void UMainMenuWidget::SetEnvironmentLightAngleSliderLabel(float& Value) {
-  FString label{"Sun Angle: "};
-  label.AppendInt(FMath::RoundToInt(Value * (MAX_SUN_ANGLE - MIN_SUN_ANGLE) + MIN_SUN_ANGLE));
-  label.Append(" degrees");
-  EnvironmentLightAngleSliderLabel->SetText(FText::FromString(label));
-}
-
 void UMainMenuWidget::HandleEnvironmentLightAngleSliderChange(float Value) {
-  SetEnvironmentLightAngleSliderLabel(Value);
   EnvironmentLightAngleUpdateFunction(Value);
-}
-
-void UMainMenuWidget::HandleCableTensionSliderChange(float Value) {
-  FString label{"Cable tension: "};
-  label.AppendInt(FMath::RoundToInt(Value * 100.f));
-  label.Append("%");
-  CableTensionSliderLabel->SetText(FText::FromString(label));
-}
-
-void UMainMenuWidget::HandleCableTensionSliderRelease() {
-  CableTensionUpdateFunction(CableTensionSlider->GetValue());
 }
 
 void UMainMenuWidget::HandleCableColorCycleToggle(bool bIsChecked) {
