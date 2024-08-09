@@ -59,6 +59,7 @@ Feel free to file any bugs or feature requests over in [issues](https://github.c
 | Action | Control |
 | --- | --- |
 | Engage Param | hold [trigger](#trigger) |
+| Precision control for knobs | hold [near](#near) while engaging |
 | Reset Param to Default | tap [far](#far) while engaging |
 
 ### Port/Cable Interaction
