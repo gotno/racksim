@@ -72,7 +72,7 @@ void AVCVPort::Init(VCVPort* vcv_port) {
   Id = vcv_port->id;
   Type = vcv_port->type;
 
-  StaticMeshComponent->SetWorldScale3D(FVector(RENDER_SCALE, Model->box.size.x, Model->box.size.y));
+  StaticMeshComponent->SetWorldScale3D(FVector(1.f, Model->box.size.x, Model->box.size.y));
   
   BaseMaterialInstance->SetVectorParameterValue(FName("color"), Model->bodyColor);
   FaceMaterialInstance->SetVectorParameterValue(FName("background_color"), Model->bodyColor);

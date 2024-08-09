@@ -61,7 +61,7 @@ private:
   bool bFavoritesFilterActive;
   
   void SetScale();
-  float DesiredWidth{14.f * RENDER_SCALE};
+  float DesiredWidth{14.f * DEFAULT_RENDER_SCALE};
   float BasePadding{0.4f};
 
   // summoning

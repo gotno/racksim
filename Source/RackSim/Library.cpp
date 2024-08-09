@@ -159,14 +159,14 @@ void ALibrary::SetScale() {
 
   StaticMeshComponent->SetWorldScale3D(
     FVector(
-      DEFAULT_RENDER_SCALE * MODULE_DEPTH,
+      DEFAULT_RENDER_SCALE * UNSCALED_MODULE_DEPTH,
       desiredHeight,
       desiredHeight
     )
   );
   OutlineMeshComponent->SetWorldScale3D(
     FVector(
-      DEFAULT_RENDER_SCALE * MODULE_DEPTH,
+      DEFAULT_RENDER_SCALE * UNSCALED_MODULE_DEPTH,
       desiredHeight,
       desiredHeight
     )
@@ -370,7 +370,7 @@ void ALibrary::GetPosition(FVector& Location, FRotator& Rotation) {
 
 void ALibrary::GetModuleLandingPosition(const float& ModuleWidth, FVector& Location, FRotator& Rotation) {
   float toEdge = DesiredWidth * 0.5;
-  float moduleOffset = ModuleWidth * 0.5f + RENDER_SCALE;
+  float moduleOffset = ModuleWidth * 0.5f;
 
   GetPosition(Location, Rotation);
 

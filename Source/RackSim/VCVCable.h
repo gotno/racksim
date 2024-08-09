@@ -112,4 +112,8 @@ private:
   bool bLatched{false};
 
   float Tension{0.f};
+
+public:
+  static inline float Scale{1.f};
+  void Rescale();
 };

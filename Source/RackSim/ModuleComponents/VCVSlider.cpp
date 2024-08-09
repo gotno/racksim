@@ -94,7 +94,7 @@ void AVCVSlider::Tick(float DeltaTime) {
 void AVCVSlider::Init(VCVParam* vcv_param) {
 	Super::Init(vcv_param);
 
-  HandleMeshComponent->SetWorldScale3D(FVector(RENDER_SCALE, Model->handleBox.size.x, Model->handleBox.size.y));
+  HandleMeshComponent->SetWorldScale3D(FVector(1.f, Model->handleBox.size.x, Model->handleBox.size.y));
   SpawnLights(HandleMeshComponent);
 
   FVector minHandlePosition = GetActorLocation() + FVector(0, Model->minHandlePos.x, Model->minHandlePos.y);

@@ -75,6 +75,7 @@ void AVCVCable::BeginPlay() {
       );
   }
 
+  Rescale();
   CycleColor();
 }
 
@@ -246,4 +247,14 @@ void AVCVCable::CycleColor(int Direction) {
   }
 
   SetColor(CableColors[CurrentCableColorIndex]);
+}
+
+void AVCVCable::Rescale() {
+  CableEndA->SetActorScale3D(FVector(Scale));
+  CableEndA->UpdatePosition();
+  CableEndB->SetActorScale3D(FVector(Scale));
+  CableEndB->UpdatePosition();
+  CableFXComponent->SetFloatParameter(FName("cable_diameter"), 0.24f * Scale);
+  CableFXComponent->ReinitializeSystem();
+  RecalculatePosition();
 }

@@ -76,13 +76,13 @@ private:
   UFUNCTION()
   void HandleColliderOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
-  float ColliderCapsuleRadius{0.15f * RENDER_SCALE};
-  float ColliderCapsuleHalfHeight{0.4f * RENDER_SCALE};
+  float ColliderCapsuleRadius{0.15f};
+  float ColliderCapsuleHalfHeight{0.4f};
   FVector ColliderOffset{0.f, 0.f, -ColliderCapsuleHalfHeight};
 
   void RealignMesh();
   void OffsetMeshFrom(AActor* Actor);
-  float MeshOffset{0.2f * RENDER_SCALE};
+  float GetMeshOffset();
 
   bool bHeldByLeftHand{false};
   bool bHeldByRightHand{false};

@@ -10,10 +10,11 @@
 #include "UObject/ConstructorHelpers.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/WidgetComponent.h"
+#include "DrawDebugHelpers.h"
 #include "Algo/Reverse.h"
 
 AContextMenu::AContextMenu() {
-	PrimaryActorTick.bCanEverTick = true;
+  PrimaryActorTick.bCanEverTick = true;
 
   RootSceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root Scene Component"));
   SetRootComponent(RootSceneComponent);
@@ -34,39 +35,69 @@ AContextMenu::AContextMenu() {
 }
 
 void AContextMenu::BeginPlay() {
-	Super::BeginPlay();
+  Super::BeginPlay();
 
   GameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(this));
   Module = Cast<AVCVModule>(GetOwner());
-	
+
   ContextMenuWidget = Cast<UContextMenuWidget>(ContextMenuWidgetComponent->GetUserWidgetObject());
   ContextMenuWidgetComponent->SetWorldRotation(FRotator(0.f, 180.f, 0.f));
   ContextMenuWidgetComponent->SetVisibility(false);
-  
+
   GameMode->SubscribeMenuItemSyncedDelegate(this);
   GameMode->SubscribeMenuSyncedDelegate(this);
 }
 
 void AContextMenu::Tick(float DeltaTime) {
-	Super::Tick(DeltaTime);
+  Super::Tick(DeltaTime);
+
+  // DrawDebugSphere(
+  //   GetWorld(),
+  //   GetActorLocation(),
+  //   1.f,
+  //   16,
+  //   FColor::Blue
+  // );
+  // DrawDebugSphere(
+  //   GetWorld(),
+  //   RootSceneComponent->GetComponentLocation(),
+  //   0.8f,
+  //   16,
+  //   FColor::Red
+  // );
+  // DrawDebugSphere(
+  //   GetWorld(),
+  //   ContextMenuWidgetComponent->GetComponentLocation(),
+  //   0.8f,
+  //   16,
+  //   FColor::Magenta
+  // );
 }
 
-void AContextMenu::Init(const Vec2& ModuleSize) {
+void AContextMenu::Scale() {
   FVector2D drawSize(350.f, 700.f);
-  float desiredContextMenuHeight = ModuleSize.y - 2 * RENDER_SCALE;
-  float scale = desiredContextMenuHeight / drawSize.Y;
+
+  float desiredContextMenuHeight = Module->GetPanelHeight() - 2 * AVCVModule::Scale;
+  float drawScale = desiredContextMenuHeight / drawSize.Y;
 
   ContextMenuWidgetComponent->SetDrawSize(drawSize);
-  ContextMenuWidgetComponent->SetWorldScale3D(FVector(1.f, scale, scale));
+  ContextMenuWidgetComponent->SetWorldScale3D(FVector(1.f, drawScale, drawScale));
 
-  float halfModuleWidth = ModuleSize.x * 0.5f;
-  float halfMenuWidth = scale * drawSize.X * 0.5f;
+  float halfModuleWidth = Module->GetPanelWidth() * 0.5f;
+  float halfMenuWidth = drawScale * drawSize.X * 0.5f;
 
-  // TODO: dominant hand
-  ContextMenuWidgetComponent->AddWorldOffset(GetActorRightVector() * halfMenuWidth);
-  AddActorWorldOffset(GetActorRightVector() * (halfModuleWidth - 0.5f));
-  AddActorWorldOffset(-GetActorForwardVector() * (RENDER_SCALE + 1.f));
-  AddActorLocalRotation(FRotator(0.f, 15.f, 0.f));
+  // TODO: dominant hand?
+  // move actor to module side
+  SetActorLocation(
+    Module->GetActorLocation() +
+      Module->GetActorRightVector() * (halfModuleWidth - 0.5f * AVCVModule::Scale) +
+      -Module->GetActorForwardVector() * AVCVModule::Scale
+  );
+  // offset menu and rotate
+  ContextMenuWidgetComponent->SetWorldLocation(
+    GetActorLocation() + GetActorRightVector() * halfMenuWidth
+  );
+  SetActorRotation(FRotator(0.f, 15.f, 0.f));
 }
 
 void AContextMenu::AddMenuItem(FVCVMenuItem MenuItem) {

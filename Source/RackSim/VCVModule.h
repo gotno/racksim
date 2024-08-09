@@ -19,19 +19,19 @@ class UBoxComponent;
 
 UCLASS()
 class RACKSIM_API AVCVModule : public AGrabbableActor {
-	GENERATED_BODY()
-	
+  GENERATED_BODY()
+
   friend class AModuleWeldment;
 
 public:
-	AVCVModule();
+  AVCVModule();
 
 protected:
-	virtual void BeginPlay() override;
-	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+  virtual void BeginPlay() override;
+  virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
-public:	
-	virtual void Tick(float DeltaTime) override;
+public:
+  virtual void Tick(float DeltaTime) override;
 
   void Init(VCVModule vcv_module, TFunction<void ()> ReadyCallback);
   UFUNCTION()
@@ -161,4 +161,15 @@ private:
   TMap<int, AVCVParam*> ParamActors;
   TMap<int, AVCVPort*> InputActors;
   TMap<int, AVCVPort*> OutputActors;
+
+public:
+  static inline float Scale{1.f};
+  void Rescale();
+  float GetModuleDepth() { return UNSCALED_MODULE_DEPTH * Scale; }
+  float GetPanelWidth() { return UnscaledPanelWidth * Scale; }
+  float GetPanelHeight() { return UnscaledPanelHeight * Scale; }
+
+private:
+  float UnscaledPanelHeight{UNSCALED_MODULE_HEIGHT};
+  float UnscaledPanelWidth{0.508f}; // 1hp
 };

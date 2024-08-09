@@ -76,14 +76,12 @@ AVCVModule::AVCVModule() {
   // snap colliders
   SnapColliderLeft = CreateDefaultSubobject<UBoxComponent>(TEXT("Snap Collider Left"));
   SnapColliderLeft->InitBoxExtent(FVector(0.5f, 0.005f, 0.5f));
-  SnapColliderLeft->AddWorldOffset(StaticMeshComponent->GetForwardVector() * 0.5f);
   SnapColliderLeft->SetupAttachment(StaticMeshComponent);
   SnapColliderLeft->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
   SnapColliderLeft->SetCollisionObjectType(LEFT_SNAP_COLLIDER_OBJECT);
 
   SnapColliderRight = CreateDefaultSubobject<UBoxComponent>(TEXT("Snap Collider Right"));
   SnapColliderRight->InitBoxExtent(FVector(0.5f, 0.005f, 0.5f));
-  SnapColliderRight->AddWorldOffset(StaticMeshComponent->GetForwardVector() * 0.5f);
   SnapColliderRight->SetupAttachment(StaticMeshComponent);
   SnapColliderRight->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
   SnapColliderRight->SetCollisionObjectType(RIGHT_SNAP_COLLIDER_OBJECT);
@@ -170,34 +168,46 @@ void AVCVModule::Init(VCVModule vcv_module, TFunction<void ()> ReadyCallback) {
   Id = Model.id;
   Brand = Model.brand;
   Name = Model.name;
+  UnscaledPanelWidth = Model.box.size.x;
 
   VCVOverrides overrides;
-
   FLinearColor bodyColor;
   if (!overrides.getBodyColor(Model.brand, bodyColor)) bodyColor = Model.bodyColor;
 
   BaseMaterialInstance->SetVectorParameterValue(FName("color"), bodyColor);
   FaceMaterialInstance->SetVectorParameterValue(FName("background_color"), bodyColor);
 
-  StaticMeshComponent->SetWorldScale3D(FVector(RENDER_SCALE * MODULE_DEPTH, Model.box.size.x, Model.box.size.y));
-  OutlineMeshComponent->SetWorldScale3D(FVector(RENDER_SCALE * MODULE_DEPTH, Model.box.size.x, Model.box.size.y));
+  // initial values are UNSCALED
+  StaticMeshComponent->SetWorldScale3D(FVector(UNSCALED_MODULE_DEPTH, UnscaledPanelWidth, UnscaledPanelHeight));
+  OutlineMeshComponent->SetWorldScale3D(FVector(UNSCALED_MODULE_DEPTH, UnscaledPanelWidth, UnscaledPanelHeight));
 
-  float halfWidth = Model.box.size.x * 0.5f;
-  SnapColliderLeft->AddWorldOffset(-StaticMeshComponent->GetRightVector() * halfWidth);
-  SnapColliderRight->AddWorldOffset(StaticMeshComponent->GetRightVector() * halfWidth);
+  FVector snapIndicatorScale = FVector(UNSCALED_MODULE_DEPTH, 1, UnscaledPanelHeight);
+  SnapIndicatorLeft->SetWorldScale3D(snapIndicatorScale);
+  SnapIndicatorLeftReflected->SetWorldScale3D(snapIndicatorScale);
+  SnapIndicatorRight->SetWorldScale3D(snapIndicatorScale);
+  SnapIndicatorRightReflected->SetWorldScale3D(snapIndicatorScale);
 
-  SnapIndicatorLeft->SetWorldScale3D(FVector(RENDER_SCALE * MODULE_DEPTH, 1, Model.box.size.y));
-  SnapIndicatorLeftReflected->SetWorldScale3D(FVector(RENDER_SCALE * MODULE_DEPTH, 1, Model.box.size.y));
-  SnapIndicatorLeft->AddWorldOffset(-StaticMeshComponent->GetRightVector() * halfWidth);
-  SnapIndicatorRight->SetWorldScale3D(FVector(RENDER_SCALE * MODULE_DEPTH, 1, Model.box.size.y));
-  SnapIndicatorRightReflected->SetWorldScale3D(FVector(RENDER_SCALE * MODULE_DEPTH, 1, Model.box.size.y));
-  SnapIndicatorRight->AddWorldOffset(StaticMeshComponent->GetRightVector() * halfWidth);
+  FVector meshLocation = StaticMeshComponent->GetComponentLocation();
+  float halfWidth = UnscaledPanelWidth * 0.5f;
+  FVector rightVector = StaticMeshComponent->GetRightVector();
+  SnapIndicatorLeft->SetWorldLocation(meshLocation - rightVector * halfWidth);
+  SnapIndicatorRight->SetWorldLocation(meshLocation + rightVector * halfWidth);
+
+  float halfDepth = UNSCALED_MODULE_DEPTH * 0.5f;
+  FVector forwardVector = StaticMeshComponent->GetForwardVector();
+  SnapColliderLeft->SetWorldLocation(
+    meshLocation - rightVector * halfWidth + forwardVector * halfDepth
+  );
+  SnapColliderRight->SetWorldLocation(
+    meshLocation + rightVector * halfWidth + forwardVector * halfDepth
+  );
 
   SpawnComponents();
   SetHidden(false);
 
   GameMode->RequestTexture(Model.panelSvgPath, this, FName("SetTexture"));
 
+  Rescale();
   ReadyCallback();
 }
 
@@ -275,10 +285,11 @@ void AVCVModule::SpawnComponents() {
     StaticMeshComponent,
     FAttachmentTransformRules::KeepWorldTransform
   );
-  ContextMenu->Init(Model.box.size);
+  ContextMenu->Scale();
 
   for (TPair<int32, VCVParam>& param_kvp : Model.Params) {
     VCVParam& param = param_kvp.Value;
+
     AVCVParam* aParam = nullptr;
 
     if (param.type == ParamType::Knob) {
@@ -492,15 +503,15 @@ void AVCVModule::SetSnapMode(FSnapModeSide inSnapModeSide) {
 FHitResult AVCVModule::RunRightwardSnapTrace() {
   SnapIndicatorRight->SetVisibility(true);
 
-  float halfWidth = Model.box.size.x * 0.5f;
+  float halfWidth = GetPanelWidth() * 0.5f;
   FVector meshCenter =
     StaticMeshRoot->GetComponentLocation()
-      + (StaticMeshRoot->GetForwardVector() * MODULE_DEPTH * RENDER_SCALE * 0.5f);
+      + (StaticMeshRoot->GetForwardVector() * GetModuleDepth() * 0.5f);
 
   FVector traceStart =
     meshCenter + (StaticMeshRoot->GetRightVector() * (halfWidth + 0.1f));
   FVector traceEnd =
-    traceStart + StaticMeshRoot->GetRightVector() * SnapTraceDistance * RENDER_SCALE;
+    traceStart + StaticMeshRoot->GetRightVector() * SnapTraceDistance * Scale;
 
   FHitResult rightwardHit;
   FCollisionObjectQueryParams queryParams;
@@ -532,21 +543,21 @@ FHitResult AVCVModule::RunRightwardSnapTrace() {
 FHitResult AVCVModule::RunLeftwardSnapTrace() {
   SnapIndicatorLeft->SetVisibility(true);
 
-  float halfWidth = Model.box.size.x * 0.5f;
+  float halfWidth = GetPanelWidth() * 0.5f;
   FVector meshCenter =
     StaticMeshRoot->GetComponentLocation()
-      + (StaticMeshRoot->GetForwardVector() * MODULE_DEPTH * RENDER_SCALE * 0.5f);
+      + (StaticMeshRoot->GetForwardVector() * GetModuleDepth() * 0.5f);
 
   FVector traceStart =
     meshCenter - (StaticMeshRoot->GetRightVector() * (halfWidth + 0.1f));
   FVector traceEnd =
-    traceStart - StaticMeshRoot->GetRightVector() * SnapTraceDistance * RENDER_SCALE;
+    traceStart - StaticMeshRoot->GetRightVector() * SnapTraceDistance * Scale;
 
   FHitResult leftwardHit;
   FCollisionObjectQueryParams queryParams;
   queryParams.AddObjectTypesToQuery(RIGHT_SNAP_COLLIDER_OBJECT);
   GetWorld()->LineTraceSingleByObjectType(leftwardHit, traceStart, traceEnd, queryParams);
-  // DrawDebugLine(GetWorld(), traceStart, traceEnd, FColor::Red);
+  DrawDebugLine(GetWorld(), traceStart, traceEnd, FColor::Red);
 
   // give snappable target the indicator
   if (leftwardHit.GetActor()) {
@@ -569,7 +580,6 @@ FHitResult AVCVModule::RunLeftwardSnapTrace() {
   return leftwardHit;
 }
 
-// new
 void AVCVModule::GetAlignToMeshInfo(FSnapModeSide AlignToSide, FVector& outLocation, FVector& outVector, FRotator& outRotation) {
   checkf(
     AlignToSide == FSnapModeSide::Left || AlignToSide == FSnapModeSide::Right,
@@ -577,7 +587,7 @@ void AVCVModule::GetAlignToMeshInfo(FSnapModeSide AlignToSide, FVector& outLocat
   );
 
   int direction = AlignToSide == FSnapModeSide::Left ? -1 : 1;
-  float halfWidth = Model.box.size.x * 0.5f;
+  float halfWidth = GetPanelWidth() * 0.5f;
 
   outVector = StaticMeshComponent->GetRightVector() * direction;
   outLocation = StaticMeshComponent->GetComponentLocation() + outVector * halfWidth;
@@ -602,7 +612,8 @@ void AVCVModule::AlignMeshTo(AVCVModule* Module, FSnapModeSide AlignToSide, floa
   FRotator rotation;
   Module->GetAlignToMeshInfo(AlignToSide, edgeLocation, vector, rotation);
 
-  FVector location = edgeLocation + vector * (Model.box.size.x * 0.5f + Offset);
+  float halfWidth = GetPanelWidth() * 0.5f;
+  FVector location = edgeLocation + vector * (GetPanelWidth() * 0.5f + Offset);
   StaticMeshComponent->SetWorldLocation(location);
   StaticMeshComponent->SetWorldRotation(rotation);
 }
@@ -668,5 +679,10 @@ void AVCVModule::GetModulePosition(FVector& Location, FRotator& Rotation) {
 
 void AVCVModule::GetModuleLandingPosition(FVector& Location, FRotator& Rotation, bool bOffset) {
   GetModulePosition(Location, Rotation);
-  if (bOffset) Location -= StaticMeshComponent->GetForwardVector() * (2 * MODULE_DEPTH * RENDER_SCALE);
+  if (bOffset) Location -= StaticMeshComponent->GetForwardVector() * 2 * GetModuleDepth();
+}
+
+void AVCVModule::Rescale() {
+  SetActorScale3D(FVector(Scale));
+  ContextMenu->Scale();
 }

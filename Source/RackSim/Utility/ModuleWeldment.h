@@ -25,6 +25,7 @@ protected:
 public:	
   virtual void Tick(float DeltaTime) override;
   
+  void Reset();
   void AddModuleBack(AVCVModule* Module);
   void AddModuleFront(AVCVModule* Module);
 
@@ -63,6 +64,7 @@ private:
   void ValidateModuleInclusion(AVCVModule* Module);
   void PositionModule(int32 ModuleIndex, int32 RelativeToIndex);
 
+  void ResetPositions();
   void ResetLocation();
   void HighlightModules();
   void UnhighlightModules();

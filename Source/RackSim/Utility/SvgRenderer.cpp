@@ -5,6 +5,7 @@
 #include "ThirdParty/include/svgrender/svgrender.h"
 
 #include "Engine/Texture2D.h"
+#include "Engine/CanvasRenderTarget2D.h"
 
 void USvgRenderer::BeginDestroy() {
   Super::BeginDestroy();
@@ -18,7 +19,7 @@ void USvgRenderer::BeginDestroy() {
 void USvgRenderer::RenderTextureAsync(FString Filepath) {
   if (!Worker) Worker = new FSvgWorker();
 
-  float scale = 1.5 * RENDER_SCALE;
+  float scale = 2.5;
   int width, height;
 
   getSvgSize(TCHAR_TO_ANSI(*Filepath), width, height, scale);

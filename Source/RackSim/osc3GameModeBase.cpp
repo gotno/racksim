@@ -45,6 +45,9 @@ Aosc3GameModeBase::Aosc3GameModeBase() {
 void Aosc3GameModeBase::BeginPlay() {
   Super::BeginPlay();
 
+  AVCVModule::Scale = DEFAULT_RENDER_SCALE;
+  AVCVCable::Scale = DEFAULT_RENDER_SCALE;
+
   UHeadMountedDisplayFunctionLibrary::EnableHMD(true);
 
   TArray<AActor*> lights;
@@ -613,14 +616,19 @@ void Aosc3GameModeBase::SpawnModule(VCVModule vcv_module) {
   } else if (ReturnModulePositions.Contains(vcv_module.returnId)) {
     ReturnModulePosition& rmp = ReturnModulePositions[vcv_module.returnId];
     if (rmp.Location.IsZero()) {
-      LibraryActor->GetModuleLandingPosition(vcv_module.box.size.x, location, rotation);
+      LibraryActor->GetModuleLandingPosition(vcv_module.box.size.x * AVCVModule::Scale, location, rotation);
     } else {
       location = rmp.Location;
       rotation = rmp.Rotation;
     }
     ReturnModulePositions.Remove(vcv_module.returnId);
   } else { 
-    location = FVector(100.f, vcv_module.box.pos.x, -vcv_module.box.pos.y + 100.f);
+    location =
+      FVector(
+        100.f,
+        vcv_module.box.pos.x * AVCVModule::Scale,
+        -vcv_module.box.pos.y * AVCVModule::Scale + 100.f
+      );
     location.Y += vcv_module.box.size.x / 2;
     location.Z += vcv_module.box.size.y / 2;
     rotation = FRotator(-40.f, 0.f, 0.f);
@@ -646,11 +654,10 @@ void Aosc3GameModeBase::SpawnModule(VCVModule vcv_module) {
 
   module->SetActorRotation(rotation);
 
-  ProcessSpawnCableQueue();
-
   if (vcv_module.leftExpanderId > 0 || vcv_module.rightExpanderId > 0)
     ModulesSeekingWeldment.Add(vcv_module.id, vcv_module);
   ProcessWeldmentQueue();
+  ProcessSpawnCableQueue();
 }
 
 void Aosc3GameModeBase::QueueCableSpawn(VCVCable vcv_cable) {

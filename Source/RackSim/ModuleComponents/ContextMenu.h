@@ -23,10 +23,11 @@ protected:
 	virtual void BeginPlay() override;
 
 public:	
-	virtual void Tick(float DeltaTime) override;
+  virtual void Tick(float DeltaTime) override;
 
-  void Init(const Vec2& ModuleSize);
+  void Init();
   void ToggleVisible();
+  void Scale();
 
   // add incoming item to menu
   void AddMenuItem(FVCVMenuItem MenuItem);

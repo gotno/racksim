@@ -103,7 +103,7 @@ private:
   UPROPERTY(VisibleAnywhere)
   USphereComponent* GrabSphere;
   UPROPERTY(EditDefaultsOnly, Category="Interaction")
-  float GrabSphereRadius = MODULE_DEPTH * RENDER_SCALE * 1.5;
+  float GrabSphereRadius = UNSCALED_MODULE_DEPTH * 2.5;
 
   UPROPERTY(VisibleAnywhere)
   UPointLightComponent* Light;

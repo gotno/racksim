@@ -6,7 +6,7 @@
 #include "Algo/Reverse.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
-// #include "DrawDebugHelpers.h"
+#include "DrawDebugHelpers.h"
 #include "Components/BoxComponent.h"
 
 AModuleWeldment::AModuleWeldment() {
@@ -138,12 +138,22 @@ bool AModuleWeldment::SplitIfAdjacent(AVCVModule* leftModule, AVCVModule* rightM
   return bAdjacent;
 }
 
+void AModuleWeldment::Reset() {
+  ResetPositions();
+  ResetLocation();
+}
+
+void AModuleWeldment::ResetPositions() {
+  if (Modules.Num() < 2) return;
+  for (int i = 1; i < Modules.Num(); i++) PositionModule(i, i - 1);
+}
+
 void AModuleWeldment::ResetLocation() {
   FVector averageLocation{0.f};
 
   for (AVCVModule* module : Modules)
-    averageLocation = averageLocation + module->GetActorLocation();
-  averageLocation = averageLocation / (float)Modules.Num();
+    averageLocation += module->GetActorLocation();
+  averageLocation /= (float)Modules.Num();
 
   FVector offset = averageLocation - GetActorLocation();
 

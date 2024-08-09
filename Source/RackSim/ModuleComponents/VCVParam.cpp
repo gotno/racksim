@@ -40,11 +40,11 @@ void AVCVParam::Init(VCVParam* vcv_param) {
   Module = Cast<AVCVModule>(GetOwner());
   SetActorHiddenInGame(!Model->visible);
   SetActorEnableCollision(Model->visible);
-  SetActorScale3D(FVector(RENDER_SCALE, Model->box.size.x, Model->box.size.y));
+  SetActorScale3D(FVector(1.f, Model->box.size.x, Model->box.size.y));
 }
 
 float AVCVParam::GetOverlapDelta() {
-  return OverlapMesh->GetBounds().GetBox().GetSize().X * RENDER_SCALE;
+  return OverlapMesh->GetBounds().GetBox().GetSize().X;
 }
 
 void AVCVParam::Update(VCVParam& vcv_param) {

@@ -8,7 +8,7 @@
 #include "DrawDebugHelpers.h"
 
 ACableEnd::ACableEnd() {
-	PrimaryActorTick.bCanEverTick = true;
+  PrimaryActorTick.bCanEverTick = true;
 
   SceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Scene Component"));
   SetRootComponent(SceneComponent);
@@ -31,9 +31,6 @@ ACableEnd::ACableEnd() {
   static ConstructorHelpers::FObjectFinder<UStaticMesh> JackBody(JackMeshReference);
   if (JackBody.Object) {
     StaticMeshComponent->SetStaticMesh(JackBody.Object);
-
-    FVector scale{RENDER_SCALE * 0.8};
-    StaticMeshComponent->SetWorldScale3D(scale);
   }
 
   static ConstructorHelpers::FObjectFinder<UMaterial> BaseMaterial(BaseMaterialReference);
@@ -43,8 +40,8 @@ ACableEnd::ACableEnd() {
 }
 
 void ACableEnd::BeginPlay() {
-	Super::BeginPlay();
-  
+  Super::BeginPlay();
+
   Cable = Cast<AVCVCable>(GetOwner());
 
   if (BaseMaterialInterface) {
@@ -59,17 +56,17 @@ void ACableEnd::BeginPlay() {
 }
 
 void ACableEnd::Tick(float DeltaTime) {
-	Super::Tick(DeltaTime);
-  
+  Super::Tick(DeltaTime);
+
   // DrawDebugCapsule(
   //   GetWorld(),
   //   Collider->GetComponentLocation(),
-  //   Collider->GetUnscaledCapsuleHalfHeight(),
-  //   Collider->GetUnscaledCapsuleRadius(),
+  //   Collider->GetScaledCapsuleHalfHeight(),
+  //   Collider->GetScaledCapsuleRadius(),
   //   Collider->GetComponentRotation().Quaternion(),
   //   FColor::White
   // );
-  
+
   if (SnapToPort) {
     UpdatePosition();
   }
@@ -156,10 +153,14 @@ void ACableEnd::RealignMesh() {
   Cable->RecalculatePosition();
 }
 
+float ACableEnd::GetMeshOffset() {
+  return 0.2f * AVCVCable::Scale;
+}
+
 void ACableEnd::OffsetMeshFrom(AActor* Actor) {
   FVector forwardVector = Actor->GetActorForwardVector();
   StaticMeshComponent->SetWorldLocation(
-    Actor->GetActorLocation() - forwardVector * MeshOffset
+    Actor->GetActorLocation() - forwardVector * GetMeshOffset()
   );
   StaticMeshComponent->SetWorldRotation(forwardVector.Rotation());
   Cable->RecalculatePosition();

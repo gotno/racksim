@@ -126,7 +126,7 @@ void AVRMotionController::Tick(float DeltaTime) {
   if (TargetedParam) {
     if (Cast<AVCVKnob>(TargetedParam)) {
       indicatorLocation =
-        TargetedParam->GetActorLocation() - TargetedParam->GetActorForwardVector() * (RENDER_SCALE + 1.f);
+        TargetedParam->GetActorLocation() - TargetedParam->GetActorForwardVector() * (AVCVModule::Scale + 1.f);
       indicatorRotation = TargetedParam->GetActorRotation();
     } else if (Cast<AVCVSlider>(TargetedParam)) {
       AVCVSlider* slider = Cast<AVCVSlider>(TargetedParam);
