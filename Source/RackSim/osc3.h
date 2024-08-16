@@ -3,7 +3,7 @@
 #include "CoreMinimal.h"
 #include "UObject/ObjectMacros.h"
 
-#define DEFAULT_RENDER_SCALE 1.6f
+#define DEFAULT_RENDER_SCALE 1.667f
 #define UNSCALED_MODULE_HEIGHT 12.869334f
 #define UNSCALED_MODULE_DEPTH 2.f
 
