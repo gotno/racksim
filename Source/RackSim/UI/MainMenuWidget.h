@@ -91,6 +91,10 @@ public:
     LoadMapFunction = inLoadMapFunction;
   }
 
+  void SetScalingFactorUpdateFunction(TFunction<void (float)> inScalingFactorUpdateFunction) {
+    ScalingFactorUpdateFunction = inScalingFactorUpdateFunction;
+  }
+
   void SetKeyboard(AKeyboard* inKeyboard);
 
   void Confirm(
@@ -202,6 +206,9 @@ protected:
   ULabeledSlider* EnvironmentLightIntensitySlider;
   UPROPERTY(meta = (BindWidget))
   ULabeledSlider* EnvironmentLightAngleSlider;
+
+  UPROPERTY(meta = (BindWidget))
+  ULabeledSlider* ScalingFactorSlider;
 
   UPROPERTY(meta = (BindWidget))
   UBorder* LoadingSection;
@@ -319,6 +326,10 @@ private:
   UFUNCTION()
   void HandleEnvironmentLightAngleSliderChange(float Value);
   TFunction<void (float)> EnvironmentLightAngleUpdateFunction;
+
+  UFUNCTION()
+  void HandleScalingFactorSliderRelease();
+  TFunction<void (float)> ScalingFactorUpdateFunction;
 
   TFunction<void (FString)> LoadMapFunction;
   UFUNCTION()

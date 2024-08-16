@@ -70,6 +70,16 @@ void UMainMenuWidget::SynchronizeProperties() {
     EnvironmentLightAngleSlider->SetStepSize(0.1f);
     EnvironmentLightAngleSlider->SetLabelPrecision(1);
   }
+
+  if (ScalingFactorSlider) {
+    ScalingFactorSlider->SetLabel(TEXT("Module Scale"));
+    ScalingFactorSlider->SetUnit(TEXT("x"));
+    ScalingFactorSlider->SetMinValue(1.f);
+    ScalingFactorSlider->SetMaxValue(12.f);
+    ScalingFactorSlider->SetValue(DEFAULT_RENDER_SCALE);
+    ScalingFactorSlider->SetStepSize(0.001f);
+    ScalingFactorSlider->SetLabelPrecision(3);
+  }
 }
 
 void UMainMenuWidget::NativeConstruct() {
@@ -115,6 +125,8 @@ void UMainMenuWidget::NativeConstruct() {
 
   EnvironmentLightIntensitySlider->OnValueChanged.AddDynamic(this, &UMainMenuWidget::HandleEnvironmentLightIntensitySliderChange);
   EnvironmentLightAngleSlider->OnValueChanged.AddDynamic(this, &UMainMenuWidget::HandleEnvironmentLightAngleSliderChange);
+
+  ScalingFactorSlider->OnMouseCaptureEnd.AddDynamic(this, &UMainMenuWidget::HandleScalingFactorSliderRelease);
 
   MapOneButton->OnReleased.AddDynamic(this, &UMainMenuWidget::HandleMapOneClick);
   MapTwoButton->OnReleased.AddDynamic(this, &UMainMenuWidget::HandleMapTwoClick);
@@ -205,6 +217,8 @@ void UMainMenuWidget::UpdateState(Aosc3GameState* GameState) {
   }
   EnvironmentLightIntensitySlider->SetValue(GameState->EnvironmentLightIntensityAmount);
   EnvironmentLightAngleSlider->SetValue(GameState->EnvironmentLightAngleAmount);
+
+  ScalingFactorSlider->SetValue(GameState->ScalingFactorAmount);
 
   // map load buttons
   MapOneButton->SetIsEnabled(!GameState->CurrentMapName.Equals("light_void"));
@@ -372,6 +386,10 @@ void UMainMenuWidget::HandleEnvironmentLightIntensitySliderChange(float Value) {
 
 void UMainMenuWidget::HandleEnvironmentLightAngleSliderChange(float Value) {
   EnvironmentLightAngleUpdateFunction(Value);
+}
+
+void UMainMenuWidget::HandleScalingFactorSliderRelease() {
+  ScalingFactorUpdateFunction(ScalingFactorSlider->GetValue());
 }
 
 void UMainMenuWidget::HandleCableColorCycleToggle(bool bIsChecked) {

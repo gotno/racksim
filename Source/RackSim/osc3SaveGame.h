@@ -112,4 +112,7 @@ public:
   float EnvironmentLightIntensityAmount{-1.f};
   UPROPERTY(VisibleAnywhere, Category = Base)
   float EnvironmentLightAngleAmount{-1.f};
+
+  UPROPERTY(VisibleAnywhere, Category = Base)
+  float ScalingFactorAmount{-1.f};
 };

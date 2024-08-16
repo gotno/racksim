@@ -84,7 +84,8 @@ void AMainMenu::Init(
   TFunction<void (bool, EControllerHand)> ControllerTooltipToggleFunction,
   TFunction<void (FString)> LoadMapFunction,
   TFunction<void (float)> EnvironmentLightIntensityUpdateFunction,
-  TFunction<void (float)> EnvironmentLightAngleUpdateFunction
+  TFunction<void (float)> EnvironmentLightAngleUpdateFunction,
+  TFunction<void (float)> ScalingFactorUpdateFunction
 ) {
   MainMenuWidget->SetExitFunction(ExitFunction);
   MainMenuWidget->SetSaveFunction(SaveFunction);
@@ -101,6 +102,7 @@ void AMainMenu::Init(
   MainMenuWidget->SetLoadMapFunction(LoadMapFunction);
   MainMenuWidget->SetEnvironmentLightIntensityUpdateFunction(EnvironmentLightIntensityUpdateFunction);
   MainMenuWidget->SetEnvironmentLightAngleUpdateFunction(EnvironmentLightAngleUpdateFunction);
+  MainMenuWidget->SetScalingFactorUpdateFunction(ScalingFactorUpdateFunction);
 
   // these don't change, so they don't need to be in Refresh,
   // but they do need to be set before we Refresh

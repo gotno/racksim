@@ -321,10 +321,14 @@ void Aosc3GameModeBase::RackConnectionEstablished() {
     if (SaveData->EnvironmentLightAngleAmount != -1.f) {
       osc3GameState->EnvironmentLightAngleAmount = SaveData->EnvironmentLightAngleAmount;
     }
+    if (SaveData->ScalingFactorAmount != -1.f) {
+      osc3GameState->ScalingFactorAmount = SaveData->ScalingFactorAmount;
+    }
   }
 
   AdjustLightIntensity(osc3GameState->EnvironmentLightIntensityAmount);
   AdjustLightAngle(osc3GameState->EnvironmentLightAngleAmount);
+  AdjustScalingFactor(osc3GameState->ScalingFactorAmount);
   PlayerPawn->EnableWorldManipulation();
   MainMenu->Refresh();
   MainMenu->Hide();
@@ -526,6 +530,8 @@ Uosc3SaveGame* Aosc3GameModeBase::MakeSaveGame() {
       SaveGameInstance->EnvironmentLightIntensityAmount = osc3GameState->EnvironmentLightIntensityAmount;
       SaveGameInstance->EnvironmentLightAngleAmount = osc3GameState->EnvironmentLightAngleAmount;
     }
+
+    SaveGameInstance->ScalingFactorAmount = osc3GameState->ScalingFactorAmount;
 
     SaveGameInstance->MapName =
       !osc3GameInstance->NextMapName.IsEmpty()
@@ -1043,7 +1049,8 @@ void Aosc3GameModeBase::SpawnMainMenu() {
     },
     [&](FString MapName) { LoadMap(MapName); }, // load map callback
     [&](float Amount) { AdjustLightIntensity(Amount); }, // set environment light intensity
-    [&](float Amount) { AdjustLightAngle(Amount); } // set environment light angle
+    [&](float Amount) { AdjustLightAngle(Amount); }, // set environment light angle
+    [&](float Scale) { AdjustScalingFactor(Scale); } // set module scaling factor
   );
 }
 
@@ -1262,4 +1269,22 @@ void Aosc3GameModeBase::AdjustLightAngle(float Amount) {
   FRotator rotation = light->GetComponentRotation();
   rotation.Pitch = Amount;
   light->SetWorldRotation(rotation);
+}
+
+void Aosc3GameModeBase::AdjustScalingFactor(float Scale) {
+  AVCVModule::Scale = Scale;
+  for (auto& pair : ModuleActors) {
+    pair.Value->Rescale();
+  }
+
+  for (AModuleWeldment* weldment : ModuleWeldments) {
+    weldment->Reset();
+  }
+
+  AVCVCable::Scale = Scale;
+  for (AVCVCable* cable : CableActors) {
+    cable->Rescale();
+  }
+
+  osc3GameState->ScalingFactorAmount = Scale;
 }

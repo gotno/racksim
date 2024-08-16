@@ -61,6 +61,7 @@ public:
     return AutosaveName;
   }
 
+  float ScalingFactorAmount{DEFAULT_RENDER_SCALE};
   float EnvironmentLightIntensityAmount{0.24f};
   float EnvironmentLightAngleAmount{0.45f};
   FString CurrentMapName{"dark_void"};

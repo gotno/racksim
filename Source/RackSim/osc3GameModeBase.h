@@ -201,6 +201,8 @@ private:
   void AdjustLightIntensity(float Amount);
   void AdjustLightAngle(float Amount);
 
+  void AdjustScalingFactor(float Amount);
+
   void SavePatch(FString PatchPath = "");
   void LoadPatch(FString PatchPath);
   void LoadMap(FString MapName, FString NextPatchPath = "");

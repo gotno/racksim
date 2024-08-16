@@ -41,7 +41,8 @@ public:
     TFunction<void (bool, EControllerHand)> ControllerTooltipToggleFunction,
     TFunction<void (FString)> LoadMapFunction,
     TFunction<void (float)> EnvironmentLightIntensityUpdateFunction,
-    TFunction<void (float)> EnvironmentLightAngleUpdateFunction
+    TFunction<void (float)> EnvironmentLightAngleUpdateFunction,
+    TFunction<void (float)> ScalingFactorUpdateFunction
   );
   void Hide();
   void Show();
