@@ -23,11 +23,15 @@ public:
   float GetValue();
 
   void SetValue(float inValue);
-  void SetMinValue(float inValue);
-  void SetMaxValue(float inValue);
-  void SetValueMultiplier(float inMultiplier);
-  void SetUnit(const FString& inUnit);
+  void SetMinValue(float inMinValue);
+  void SetMaxValue(float inMaxValue);
+  void SetStepSize(float inStepSize);
+
   void SetLabel(const FString& Text);
+  void SetLabelPrecision(int inDecimalPlaces);
+  void SetUnit(const FString& inUnit);
+
+  void SetExponential(bool inbExponential);
 
 protected:
   virtual void NativeConstruct() override;
@@ -38,16 +42,22 @@ private:
   UPROPERTY(meta = (BindWidget))
   class UTextBlock* Label;
   FText LabelText;
-  FString Unit{TEXT("%")}; // directly concat'd with Value
+  FString Unit{TEXT("")}; // directly concat'd with Value
+  int LabelDecimalPlaces{0};
 
   UPROPERTY(meta = (BindWidget))
   class USlider* Slider;
-  float Value;
+  float Value{0.5f};
   float MinValue{0.f}, MaxValue{1.f};
-  float ValueMultiplier{100.f};
+  float StepSize{0.1f};
+
+  bool bExponential{false};
+
+  float ExponentialFromLinear();
+  float ExponentialToLinear(float inValue);
 
   UFUNCTION()
-  void HandleValueChanged(float Value);
+  void HandleValueChanged(float NewValue);
   UFUNCTION()
   void HandleMouseCaptureEnd();
 };

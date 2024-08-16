@@ -23,10 +23,22 @@ void UMainMenuWidget::SynchronizeProperties() {
   if (CableColorCycleToggleButton)
     CableColorCycleToggleButton->SetPrimaryLabel(TEXT("Auto-cycle cable color"));
   if (CableOpacitySlider) {
-    CableOpacitySlider->SetLabel(TEXT("Cable opacity"));
+    CableOpacitySlider->SetLabel(TEXT("Cable Opacity"));
+    CableOpacitySlider->SetUnit(TEXT("%"));
+    CableOpacitySlider->SetMinValue(0.f);
+    CableOpacitySlider->SetMaxValue(100.f);
+    CableOpacitySlider->SetValue(DEFAULT_CABLE_OPACITY);
+    CableOpacitySlider->SetStepSize(0.1f);
+    CableOpacitySlider->SetLabelPrecision(0);
   }
   if (CableTensionSlider) {
     CableTensionSlider->SetLabel(TEXT("Cable Tension"));
+    CableTensionSlider->SetUnit(TEXT("%"));
+    CableTensionSlider->SetMinValue(0.f);
+    CableTensionSlider->SetMaxValue(100.f);
+    CableTensionSlider->SetValue(DEFAULT_CABLE_TENSION);
+    CableTensionSlider->SetStepSize(0.1f);
+    CableTensionSlider->SetLabelPrecision(0);
   }
 
   if (ControllerTooltipsToggleButton) {
@@ -40,16 +52,23 @@ void UMainMenuWidget::SynchronizeProperties() {
 
   if (EnvironmentLightIntensitySlider) {
     EnvironmentLightIntensitySlider->SetLabel(TEXT("Room Brightness"));
-    EnvironmentLightIntensitySlider->SetValue(DEFAULT_ROOM_BRIGHTNESS_AMOUNT);
+    EnvironmentLightIntensitySlider->SetUnit(TEXT(" candelas"));
+    EnvironmentLightIntensitySlider->SetExponential(true);
+    EnvironmentLightIntensitySlider->SetMinValue(0.f);
+    EnvironmentLightIntensitySlider->SetMaxValue(MAX_ROOM_BRIGHTNESS);
+    EnvironmentLightIntensitySlider->SetValue(DEFAULT_ROOM_BRIGHTNESS);
+    EnvironmentLightIntensitySlider->SetStepSize(0.01f);
+    EnvironmentLightIntensitySlider->SetLabelPrecision(2);
   }
 
   if (EnvironmentLightAngleSlider) {
     EnvironmentLightAngleSlider->SetLabel(TEXT("Sun Angle"));
+    EnvironmentLightAngleSlider->SetUnit(TEXT(" degrees"));
     EnvironmentLightAngleSlider->SetMinValue(MIN_SUN_ANGLE);
     EnvironmentLightAngleSlider->SetMaxValue(MAX_SUN_ANGLE);
-    EnvironmentLightAngleSlider->SetValue(DEFAULT_SUN_ANGLE_AMOUNT);
-    EnvironmentLightAngleSlider->SetValueMultiplier(1.f);
-    EnvironmentLightAngleSlider->SetUnit(TEXT(" degrees"));
+    EnvironmentLightAngleSlider->SetValue(DEFAULT_SUN_ANGLE);
+    EnvironmentLightAngleSlider->SetStepSize(0.1f);
+    EnvironmentLightAngleSlider->SetLabelPrecision(1);
   }
 }
 

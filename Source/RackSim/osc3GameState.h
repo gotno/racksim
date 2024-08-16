@@ -88,10 +88,10 @@ private:
   FString AutosaveName{"autosave"};
 
   TMap<FString, float> LightIntensityMap = {
-    {"default", DEFAULT_ROOM_BRIGHTNESS_AMOUNT},
-    {"park", DEFAULT_ROOM_BRIGHTNESS_AMOUNT_WITH_SUN},
+    {"default", DEFAULT_ROOM_BRIGHTNESS},
+    {"park", DEFAULT_ROOM_BRIGHTNESS_WITH_SUN},
   };
   TMap<FString, float> LightAngleMap = {
-    {"default", DEFAULT_SUN_ANGLE_AMOUNT},
+    {"default", DEFAULT_SUN_ANGLE},
   };
 };

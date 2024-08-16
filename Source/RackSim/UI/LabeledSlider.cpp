@@ -12,12 +12,58 @@ void ULabeledSlider::SynchronizeProperties() {
 }
 
 void ULabeledSlider::NativeConstruct() {
+  Slider->SetValue(Value);
+  Slider->SetMinValue(MinValue);
+  Slider->SetMaxValue(MaxValue);
+  Slider->SetStepSize(StepSize);
+
   Slider->OnValueChanged.AddDynamic(this, &ULabeledSlider::HandleValueChanged);
   Slider->OnMouseCaptureEnd.AddDynamic(this, &ULabeledSlider::HandleMouseCaptureEnd);
 }
 
+void ULabeledSlider::SetValue(float inValue) {
+  float clamped = FMath::Clamp(inValue, MinValue, MaxValue);
+  Value = bExponential ? ExponentialToLinear(clamped) : clamped;
+  if (Slider) Slider->SetValue(Value);
+  UpdateLabel();
+}
+
 float ULabeledSlider::GetValue() {
+  if (bExponential) return ExponentialFromLinear();
   return Slider->GetValue();
+}
+
+void ULabeledSlider::SetExponential(bool inbExponential) {
+  bExponential = inbExponential;
+  UpdateLabel();
+}
+
+float ULabeledSlider::ExponentialFromLinear() {
+  // convert slider value to 0-1 range
+  float normalizedSliderPosition = (Value - MinValue) / (MaxValue - MinValue);
+
+  // convert normalized value to exponential scale
+  float expScale = (pow(20, normalizedSliderPosition) - 1) / 19;
+
+  // get exponential value
+  float expValue = MinValue + (MaxValue - MinValue) * expScale;
+
+  // round to nearest StepSize
+  return FMath::RoundToFloat(expValue / StepSize) * StepSize;
+}
+
+float ULabeledSlider::ExponentialToLinear(float inValue) {
+  // convert slider value to 0-1 range
+  float normalizedSliderPosition = (inValue - MinValue) / (MaxValue - MinValue);
+
+  // reverse the exponential scaling
+  float linearScale = log10(normalizedSliderPosition * 19 + 1) / log10(20);
+
+  // get linear value
+  float linearValue = MinValue + (MaxValue - MinValue) * linearScale;
+
+  // round to nearest StepSize
+  return FMath::RoundToFloat(linearValue / StepSize) * StepSize;
 }
 
 void ULabeledSlider::SetLabel(const FString& Text) {
@@ -25,24 +71,21 @@ void ULabeledSlider::SetLabel(const FString& Text) {
   UpdateLabel();
 }
 
-void ULabeledSlider::SetValue(float inValue) {
-  Value = inValue;
-  if (Slider) Slider->SetValue(inValue);
+void ULabeledSlider::SetMinValue(float inMinValue) {
+  MinValue = inMinValue;
+  if (Slider) Slider->SetMinValue(MinValue);
   UpdateLabel();
 }
 
-void ULabeledSlider::SetMinValue(float inValue) {
-  MinValue = inValue;
+void ULabeledSlider::SetMaxValue(float inMaxValue) {
+  MaxValue = inMaxValue;
+  if (Slider) Slider->SetMaxValue(MaxValue);
   UpdateLabel();
 }
 
-void ULabeledSlider::SetMaxValue(float inValue) {
-  MaxValue = inValue;
-  UpdateLabel();
-}
-
-void ULabeledSlider::SetValueMultiplier(float inMultiplier) {
-  ValueMultiplier = inMultiplier;
+void ULabeledSlider::SetStepSize(float inStepSize) {
+  StepSize = inStepSize;
+  if (Slider) Slider->SetStepSize(StepSize);
   UpdateLabel();
 }
 
@@ -55,21 +98,37 @@ void ULabeledSlider::UpdateLabel() {
   if (!Label) return;
 
   FString newLabel = LabelText.ToString();
-  newLabel = newLabel.Appendf(
-    TEXT(" %.0f%s"),
-    (Value * (MaxValue - MinValue) + MinValue) * ValueMultiplier,
-    *Unit
-  );
-
+  switch (LabelDecimalPlaces) {
+    case 0:
+      newLabel = newLabel.Appendf(TEXT(" %.0f%s"), GetValue(), *Unit);
+      break;
+    case 1:
+      newLabel = newLabel.Appendf(TEXT(" %.1f%s"), GetValue(), *Unit);
+      break;
+    case 2:
+      newLabel = newLabel.Appendf(TEXT(" %.2f%s"), GetValue(), *Unit);
+      break;
+    case 3:
+      newLabel = newLabel.Appendf(TEXT(" %.3f%s"), GetValue(), *Unit);
+      break;
+    default: // anything > 3 gets 4 decimal places.
+      newLabel = newLabel.Appendf(TEXT(" %.4f%s"), GetValue(), *Unit);
+      break;
+  }
   Label->SetText(FText::FromString(newLabel));
 }
 
-void ULabeledSlider::HandleValueChanged(float inValue) {
-  Value = inValue;
+void ULabeledSlider::HandleValueChanged(float NewValue) {
+  Value = NewValue;
   UpdateLabel();
-  OnValueChanged.Broadcast(Value);
+  OnValueChanged.Broadcast(GetValue());
 }
 
 void ULabeledSlider::HandleMouseCaptureEnd() {
   OnMouseCaptureEnd.Broadcast();
+}
+
+void ULabeledSlider::SetLabelPrecision(int inLabelDecimalPlaces) {
+  LabelDecimalPlaces = inLabelDecimalPlaces;
+  UpdateLabel();
 }

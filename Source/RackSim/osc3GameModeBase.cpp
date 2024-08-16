@@ -1003,17 +1003,21 @@ void Aosc3GameModeBase::SpawnMainMenu() {
     [&]() { LoadPatch(TEXT("autosave")); }, // 'continue with autosave' button callback
     [&]() { SavePatch(TEXT("new")); },  // 'overwrite template' button callback
     [&](FString PatchPath) { LoadPatch(PatchPath); }, // general load patch callback
-    [&](float CableOpacity) { // set cable opacity callback
+    [&](float Percent) { // set cable opacity callback
+      float opacity = Percent * 0.01f;
+
       for (AVCVCable* cable : CableActors) {
-        cable->SetOpacity(CableOpacity);
+        cable->SetOpacity(opacity);
       }
-      if (UserSettings) UserSettings->CableOpacity = CableOpacity;
+      if (UserSettings) UserSettings->CableOpacity = opacity;
     },
-    [&](float CableTension) { // set cable tension callback
+    [&](float Percent) { // set cable tension callback
+      float tension = Percent * 0.01f;
+
       for (AVCVCable* cable : CableActors) {
-        cable->SetTension(CableTension);
+        cable->SetTension(tension);
       }
-      if (UserSettings) UserSettings->CableTension = CableTension;
+      if (UserSettings) UserSettings->CableTension = tension;
     },
     [&](bool CycleColors) { // set auto-cycle cable colors
       AVCVCable::CableColorCycleDirection = CycleColors ? 1 : 0;
@@ -1242,9 +1246,7 @@ void Aosc3GameModeBase::AdjustLightIntensity(float Amount) {
     osc3GameState->SetUnsaved();
   }
 
-  // translate to exponential slider value
-  float expValue = (pow(20, Amount) - 1) / 19;
-  FillLight->GetLightComponent()->SetIntensity(expValue * MAX_ROOM_BRIGHTNESS);
+  FillLight->GetLightComponent()->SetIntensity(Amount);
 }
 
 void Aosc3GameModeBase::AdjustLightAngle(float Amount) {
@@ -1258,6 +1260,6 @@ void Aosc3GameModeBase::AdjustLightAngle(float Amount) {
   UDirectionalLightComponent* light =
     Cast<UDirectionalLightComponent>(SunLight->GetLightComponent());
   FRotator rotation = light->GetComponentRotation();
-  rotation.Pitch = Amount * (MAX_SUN_ANGLE - MIN_SUN_ANGLE) + MIN_SUN_ANGLE;
+  rotation.Pitch = Amount;
   light->SetWorldRotation(rotation);
 }
