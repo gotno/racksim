@@ -67,7 +67,7 @@ private:
   Aosc3GameModeBase* GameMode;
 
   float LastValue;
-  float AlterRatio = 0.8f;
+  float AlterRatio = 1.f;
 
   FVector LastControllerPosition;
   float LastPositionDelta{0.f};
@@ -76,13 +76,15 @@ private:
   FVector GetSliderDirectionVector();
   // max move distance
   float MaxOffset;
-  // offset to track dragged position vs snap position
-  float ShadowOffset;
-  // actual offset from zero in world
-  float WorldOffset;
+  // percent of MaxOffset, to track dragged position vs snap position
+  float ShadowOffsetPercent;
+  // percent of MaxOffset, actual offset from zero in world
+  float WorldOffsetPercent;
 
-  float getOffsetFromValue();
-  float getValueFromOffset();
+  float GetValueFromOffset();
+  float GetOffsetPercentFromValue(bool bUnscaled = false);
+  float GetMaxOffset(bool bUnscaled = false);
+  float GetWorldOffset(bool bUnscaled = false);
 public:
   void Engage(FVector ControllerPosition) override;
   void Alter(FVector ControllerPosition) override;
