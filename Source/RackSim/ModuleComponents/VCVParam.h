@@ -9,6 +9,7 @@
 
 class Aosc3GameModeBase;
 class Aosc3GameState;
+class AVCVModule;
 
 UCLASS()
 class RACKSIM_API AVCVParam : public AActor {
@@ -34,7 +35,7 @@ protected:
   UStaticMesh* OverlapMesh;
 
 private:
-  class AVCVModule* Module;
+  AVCVModule* Module;
 
   float AlterRatio{1.f};
 
@@ -43,6 +44,10 @@ private:
   Aosc3GameModeBase* GameMode;
   Aosc3GameState* GameState;
   float OldValue;
+
+  virtual float GetUnscaledInteractHeight() {
+    return 0.f;
+  }
 public:
   virtual void Tick(float DeltaTime) override;
 
@@ -65,4 +70,5 @@ public:
   virtual void ResetValue();
 
   void GetTooltipText(FString& Label, FString& DisplayValue);
+  float GetInteractHeight();
 };

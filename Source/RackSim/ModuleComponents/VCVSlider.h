@@ -85,6 +85,10 @@ private:
   float GetOffsetPercentFromValue(bool bUnscaled = false);
   float GetMaxOffset(bool bUnscaled = false);
   float GetWorldOffset(bool bUnscaled = false);
+
+  float GetUnscaledInteractHeight() override {
+    return 0.2f;
+  }
 public:
   void Engage(FVector ControllerPosition) override;
   void Alter(FVector ControllerPosition) override;

@@ -47,6 +47,10 @@ float AVCVParam::GetOverlapDelta() {
   return OverlapMesh->GetBounds().GetBox().GetSize().X;
 }
 
+float AVCVParam::GetInteractHeight() {
+  return GetUnscaledInteractHeight() * AVCVModule::Scale;
+}
+
 void AVCVParam::Update(VCVParam& vcv_param) {
   FScopeLock Lock(&DataGuard);
   Model->merge(vcv_param);

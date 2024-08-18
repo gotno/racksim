@@ -124,17 +124,19 @@ void AVRMotionController::Tick(float DeltaTime) {
   FVector indicatorLocation;
   FRotator indicatorRotation = MotionController->GetComponentRotation();
   if (TargetedParam) {
+    float indicatorDistance = 0.5f + 0.2f; // interactor radius + a small space
+    indicatorDistance += Cast<AVCVParam>(TargetedParam)->GetInteractHeight();
     if (Cast<AVCVKnob>(TargetedParam)) {
       indicatorLocation =
-        TargetedParam->GetActorLocation() - TargetedParam->GetActorForwardVector() * (AVCVModule::Scale + 1.f);
+        TargetedParam->GetActorLocation() - TargetedParam->GetActorForwardVector() * indicatorDistance;
       indicatorRotation = TargetedParam->GetActorRotation();
     } else if (Cast<AVCVSlider>(TargetedParam)) {
       AVCVSlider* slider = Cast<AVCVSlider>(TargetedParam);
       indicatorLocation =
-        slider->GetHandleLocation() - slider->GetActorForwardVector() * 1.5f;
+        slider->GetHandleLocation() - slider->GetActorForwardVector() * indicatorDistance;
     } else {
       indicatorLocation =
-        TargetedParam->GetActorLocation() - TargetedParam->GetActorForwardVector() * 1.f;
+        TargetedParam->GetActorLocation() - TargetedParam->GetActorForwardVector() * indicatorDistance;
     }
   // } else if (!bIsPortInteracting && TargetedOriginPort && !Cast<AVCVPort>(TargetedOriginPort)->HasConnections()) {
   //   indicatorLocation =

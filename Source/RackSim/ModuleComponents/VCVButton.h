@@ -9,16 +9,16 @@ class Aosc3GameModeBase;
 
 UCLASS()
 class RACKSIM_API AVCVButton : public AVCVParam {
-	GENERATED_BODY()
-    
+  GENERATED_BODY()
+
 public:
   AVCVButton();
 
 protected:
-	virtual void BeginPlay() override;
+  virtual void BeginPlay() override;
 
 public:
-	virtual void Tick(float DeltaTime) override;
+  virtual void Tick(float DeltaTime) override;
   void Init(VCVParam* vcv_param) override;
 
   UFUNCTION()
@@ -29,7 +29,7 @@ private:
 
   UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
   UStaticMeshComponent* MeshComponent;
-  
+
   UPROPERTY()
   UMaterialInstanceDynamic* BaseMaterialInstance;
   UPROPERTY()
@@ -42,9 +42,13 @@ private:
   TCHAR* MeshReference = TEXT("/Script/Engine.StaticMesh'/Game/meshes/faced/unit_button_faced.unit_button_faced'");
   TCHAR* BaseMaterialReference = TEXT("/Script/Engine.Material'/Game/meshes/faced/generic_base.generic_base'");
   TCHAR* FaceMaterialReference = TEXT("/Script/Engine.Material'/Game/meshes/faced/texture_face_bg.texture_face_bg'");
-  
+
   UPROPERTY()
   TArray<UTexture2D*> Frames;
+
+  float GetUnscaledInteractHeight() override {
+    return 0.2f;
+  }
 public:
   void Engage() override;
   void Release() override;

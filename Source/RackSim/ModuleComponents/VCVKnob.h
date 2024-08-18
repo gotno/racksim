@@ -13,16 +13,16 @@ class Aosc3GameModeBase;
 
 UCLASS()
 class RACKSIM_API AVCVKnob : public AVCVParam {
-	GENERATED_BODY()
-    
+  GENERATED_BODY()
+
 public:
   AVCVKnob();
 
 protected:
-	virtual void BeginPlay() override;
+  virtual void BeginPlay() override;
 
 public:
-	virtual void Tick(float DeltaTime) override;
+  virtual void Tick(float DeltaTime) override;
   void Init(struct VCVParam* vcv_param) override;
 
   UFUNCTION()
@@ -52,9 +52,9 @@ private:
   UTexture2D* Texture;
   UPROPERTY()
   UTexture2D* TextureForeground;
-  
+
   Aosc3GameModeBase* GameMode;
-  
+
   // TODO: user override of smoothing constant and ratio
   float AlterRatio{KNOB_ALTER_RATIO};
   float MovingAverageWeight{0.2f};
@@ -62,7 +62,7 @@ private:
   FRotator GetRotationFromValue();
   float GetValueFromRotation();
   void UpdateRotation(FRotator inRotation);
-  
+
   FRotator ShadowRotation;
   float LastControllerRoll;
   float LastDeltaRoll;
@@ -70,6 +70,9 @@ private:
   // gap between min and max position outside of knob range
   float Gap{0};
 
+  float GetUnscaledInteractHeight() override {
+    return 1.f;
+  }
 public:
   void Engage(float ControllerRoll) override;
   void Alter(float ControllerRoll) override;
