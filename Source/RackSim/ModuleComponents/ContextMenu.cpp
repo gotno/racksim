@@ -93,11 +93,10 @@ void AContextMenu::Scale() {
       Module->GetActorRightVector() * (halfModuleWidth - 0.5f * AVCVModule::Scale) +
       -Module->GetActorForwardVector() * AVCVModule::Scale
   );
-  // offset menu and rotate
+  // offset menu
   ContextMenuWidgetComponent->SetWorldLocation(
     GetActorLocation() + GetActorRightVector() * halfMenuWidth
   );
-  SetActorRotation(FRotator(0.f, 15.f, 0.f));
 }
 
 void AContextMenu::AddMenuItem(FVCVMenuItem MenuItem) {

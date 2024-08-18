@@ -286,6 +286,7 @@ void AVCVModule::SpawnComponents() {
     FAttachmentTransformRules::KeepWorldTransform
   );
   ContextMenu->Scale();
+  ContextMenu->SetActorRotation(FRotator(0.f, 15.f, 0.f));
 
   for (TPair<int32, VCVParam>& param_kvp : Model.Params) {
     VCVParam& param = param_kvp.Value;
