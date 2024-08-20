@@ -4,21 +4,32 @@
 
 #include "Components/Slider.h"
 #include "Components/TextBlock.h"
+#include "Components/Button.h"
+#include "Components/Overlay.h"
 
 void ULabeledSlider::SynchronizeProperties() {
   Super::SynchronizeProperties();
   
   SetLabel(LabelText.ToString());
+  SetShowAdjusters(false);
+  SetStepsFromStepSize();
+
+  if (Slider) {
+    Slider->SetValue(Value);
+    Slider->SetMinValue(MinValue);
+    Slider->SetMaxValue(MaxValue);
+    Slider->SetStepSize(StepSize);
+  }
 }
 
 void ULabeledSlider::NativeConstruct() {
-  Slider->SetValue(Value);
-  Slider->SetMinValue(MinValue);
-  Slider->SetMaxValue(MaxValue);
-  Slider->SetStepSize(StepSize);
-
   Slider->OnValueChanged.AddDynamic(this, &ULabeledSlider::HandleValueChanged);
   Slider->OnMouseCaptureEnd.AddDynamic(this, &ULabeledSlider::HandleMouseCaptureEnd);
+
+  DownCoarseButton->OnClicked.AddDynamic(this, &ULabeledSlider::HandleDownCoarseButtonClicked);
+  DownFineButton->OnClicked.AddDynamic(this, &ULabeledSlider::HandleDownFineButtonClicked);
+  UpFineButton->OnClicked.AddDynamic(this, &ULabeledSlider::HandleUpFineButtonClicked);
+  UpCoarseButton->OnClicked.AddDynamic(this, &ULabeledSlider::HandleUpCoarseButtonClicked);
 }
 
 void ULabeledSlider::SetValue(float inValue) {
@@ -36,6 +47,38 @@ float ULabeledSlider::GetValue() {
 void ULabeledSlider::SetExponential(bool inbExponential) {
   bExponential = inbExponential;
   UpdateLabel();
+}
+
+void ULabeledSlider::SetLabelPrecision(int inLabelDecimalPlaces) {
+  LabelDecimalPlaces = inLabelDecimalPlaces;
+  UpdateLabel();
+}
+
+void ULabeledSlider::SetShowCoarseAdjusters(bool bShow) {
+  if (DownCoarseContainer)
+    DownCoarseContainer->SetVisibility(
+      bShow ? ESlateVisibility::Visible : ESlateVisibility::Collapsed
+    );
+  if (UpCoarseContainer)
+    UpCoarseContainer->SetVisibility(
+      bShow ? ESlateVisibility::Visible : ESlateVisibility::Collapsed
+    );
+}
+
+void ULabeledSlider::SetShowFineAdjusters(bool bShow) {
+  if (DownFineContainer)
+    DownFineContainer->SetVisibility(
+      bShow ? ESlateVisibility::Visible : ESlateVisibility::Collapsed
+    );
+  if (UpFineContainer)
+    UpFineContainer->SetVisibility(
+      bShow ? ESlateVisibility::Visible : ESlateVisibility::Collapsed
+    );
+}
+
+void ULabeledSlider::SetShowAdjusters(bool bShow) {
+  SetShowCoarseAdjusters(bShow);
+  SetShowFineAdjusters(bShow);
 }
 
 float ULabeledSlider::ExponentialFromLinear() {
@@ -86,7 +129,16 @@ void ULabeledSlider::SetMaxValue(float inMaxValue) {
 void ULabeledSlider::SetStepSize(float inStepSize) {
   StepSize = inStepSize;
   if (Slider) Slider->SetStepSize(StepSize);
+  SetStepsFromStepSize();
   UpdateLabel();
+}
+
+void ULabeledSlider::OverrideCoarseStep(float inCoarseStep) {
+  CoarseStep = inCoarseStep;
+}
+
+void ULabeledSlider::OverrideFineStep(float inFineStep) {
+  FineStep = inFineStep;
 }
 
 void ULabeledSlider::SetUnit(const FString& inUnit) {
@@ -118,6 +170,11 @@ void ULabeledSlider::UpdateLabel() {
   Label->SetText(FText::FromString(newLabel));
 }
 
+void ULabeledSlider::SetStepsFromStepSize() {
+  FineStep = StepSize;
+  CoarseStep = StepSize * 10;
+}
+
 void ULabeledSlider::HandleValueChanged(float NewValue) {
   Value = NewValue;
   UpdateLabel();
@@ -128,7 +185,27 @@ void ULabeledSlider::HandleMouseCaptureEnd() {
   OnMouseCaptureEnd.Broadcast();
 }
 
-void ULabeledSlider::SetLabelPrecision(int inLabelDecimalPlaces) {
-  LabelDecimalPlaces = inLabelDecimalPlaces;
-  UpdateLabel();
+void ULabeledSlider::Broadcast() {
+  OnMouseCaptureEnd.Broadcast();
+  OnValueChanged.Broadcast(GetValue());
+}
+
+void ULabeledSlider::HandleDownCoarseButtonClicked() {
+  SetValue(GetValue() - CoarseStep);
+  Broadcast();
+}
+
+void ULabeledSlider::HandleDownFineButtonClicked() {
+  SetValue(GetValue() - FineStep);
+  Broadcast();
+}
+
+void ULabeledSlider::HandleUpFineButtonClicked() {
+  SetValue(GetValue() + FineStep);
+  Broadcast();
+}
+
+void ULabeledSlider::HandleUpCoarseButtonClicked() {
+  SetValue(GetValue() + CoarseStep);
+  Broadcast();
 }

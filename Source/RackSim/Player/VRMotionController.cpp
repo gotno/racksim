@@ -471,6 +471,9 @@ void AVRMotionController::EndGrab() {
 
 void AVRMotionController::StartWidgetLeftClick() {
   WidgetInteractionComponent->PressPointerKey(EKeys::LeftMouseButton);
+
+  // TODO: timer delay Xms, starts: timer looping Yms, runs: release, press
+  // can we read a prop from the button to gate this behavior?
 }
 
 void AVRMotionController::WidgetScroll(float ScrollDelta) {
@@ -479,6 +482,8 @@ void AVRMotionController::WidgetScroll(float ScrollDelta) {
 
 void AVRMotionController::EndWidgetLeftClick() {
   WidgetInteractionComponent->ReleasePointerKey(EKeys::LeftMouseButton);
+
+  // TODO: kill timer
 }
 
 void AVRMotionController::SetTooltipVisibility(bool bVisible) {

@@ -25,20 +25,22 @@ void UMainMenuWidget::SynchronizeProperties() {
   if (CableOpacitySlider) {
     CableOpacitySlider->SetLabel(TEXT("Cable Opacity"));
     CableOpacitySlider->SetUnit(TEXT("%"));
+    CableOpacitySlider->SetLabelPrecision(0);
+
     CableOpacitySlider->SetMinValue(0.f);
     CableOpacitySlider->SetMaxValue(100.f);
     CableOpacitySlider->SetValue(DEFAULT_CABLE_OPACITY);
     CableOpacitySlider->SetStepSize(0.1f);
-    CableOpacitySlider->SetLabelPrecision(0);
   }
   if (CableTensionSlider) {
     CableTensionSlider->SetLabel(TEXT("Cable Tension"));
     CableTensionSlider->SetUnit(TEXT("%"));
+    CableTensionSlider->SetLabelPrecision(0);
+
     CableTensionSlider->SetMinValue(0.f);
     CableTensionSlider->SetMaxValue(100.f);
     CableTensionSlider->SetValue(DEFAULT_CABLE_TENSION);
     CableTensionSlider->SetStepSize(0.1f);
-    CableTensionSlider->SetLabelPrecision(0);
   }
 
   if (ControllerTooltipsToggleButton) {
@@ -52,33 +54,44 @@ void UMainMenuWidget::SynchronizeProperties() {
 
   if (EnvironmentLightIntensitySlider) {
     EnvironmentLightIntensitySlider->SetLabel(TEXT("Room Brightness"));
-    EnvironmentLightIntensitySlider->SetUnit(TEXT(" candelas"));
+    EnvironmentLightIntensitySlider->SetUnit(TEXT(" cd"));
+    EnvironmentLightIntensitySlider->SetLabelPrecision(2);
+
     EnvironmentLightIntensitySlider->SetExponential(true);
     EnvironmentLightIntensitySlider->SetMinValue(0.f);
     EnvironmentLightIntensitySlider->SetMaxValue(MAX_ROOM_BRIGHTNESS);
     EnvironmentLightIntensitySlider->SetValue(DEFAULT_ROOM_BRIGHTNESS);
     EnvironmentLightIntensitySlider->SetStepSize(0.01f);
-    EnvironmentLightIntensitySlider->SetLabelPrecision(2);
+
+    EnvironmentLightIntensitySlider->SetShowAdjusters(true);
+    EnvironmentLightIntensitySlider->OverrideCoarseStep(1.f);
+    EnvironmentLightIntensitySlider->OverrideFineStep(0.1f);
   }
 
   if (EnvironmentLightAngleSlider) {
     EnvironmentLightAngleSlider->SetLabel(TEXT("Sun Angle"));
     EnvironmentLightAngleSlider->SetUnit(TEXT(" degrees"));
+    EnvironmentLightAngleSlider->SetLabelPrecision(1);
+
     EnvironmentLightAngleSlider->SetMinValue(MIN_SUN_ANGLE);
     EnvironmentLightAngleSlider->SetMaxValue(MAX_SUN_ANGLE);
     EnvironmentLightAngleSlider->SetValue(DEFAULT_SUN_ANGLE);
     EnvironmentLightAngleSlider->SetStepSize(0.1f);
-    EnvironmentLightAngleSlider->SetLabelPrecision(1);
+
+    EnvironmentLightAngleSlider->SetShowAdjusters(true);
   }
 
   if (ScalingFactorSlider) {
     ScalingFactorSlider->SetLabel(TEXT("Module Scale"));
     ScalingFactorSlider->SetUnit(TEXT("x"));
+    ScalingFactorSlider->SetLabelPrecision(3);
+
     ScalingFactorSlider->SetMinValue(1.f);
     ScalingFactorSlider->SetMaxValue(12.f);
     ScalingFactorSlider->SetValue(DEFAULT_RENDER_SCALE);
     ScalingFactorSlider->SetStepSize(0.001f);
-    ScalingFactorSlider->SetLabelPrecision(3);
+
+    ScalingFactorSlider->SetShowAdjusters(true);
   }
 }
 
