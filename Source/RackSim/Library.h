@@ -37,6 +37,10 @@ public:
   void ClearTagsFilter();
   void Summon(FVector Location, FRotator Rotation);
 
+  void SetPreviewsPath(FString& Path);
+  void ShowPreview(FString& PluginSlug, FString& ModuleSlug);
+  void HidePreview();
+
   void SetJsonPath(FString& JsonPath);
   void GetPosition(FVector& Location, FRotator& Rotation);
   void GetModuleLandingPosition(const float& ModuleWidth, FVector& Location, FRotator& Rotation);
@@ -45,11 +49,24 @@ private:
   UMaterialInstanceDynamic* BaseMaterialInstance;
   UPROPERTY()
   UMaterialInterface* BaseMaterialInterface;
-  
+
+  UPROPERTY(VisibleAnywhere)
+  UStaticMeshComponent* PreviewMeshComponent;
+  UPROPERTY()
+  UMaterialInstanceDynamic* PreviewMaterialInstance;
+  UPROPERTY()
+  UMaterialInterface* PreviewMaterialInterface;
+  UPROPERTY()
+  UTexture2D* PreviewTexture;
+  UPROPERTY()
+  UMaterialInstanceDynamic* LoadingMaterialInstance;
+  UPROPERTY()
+  UMaterialInterface* LoadingMaterialInterface;
+
   UPROPERTY(EditDefaultsOnly)
   UWidgetComponent* LibraryWidgetComponent;
   ULibraryWidget* LibraryWidget;
-  
+
   void ParseLibraryJson(FString& JsonStr);
   VCVLibrary Model;
 
@@ -59,10 +76,12 @@ private:
   FString BrandFilter;
   TSet<int> TagFilters;
   bool bFavoritesFilterActive;
-  
+
   void SetScale();
   float DesiredWidth{14.f * DEFAULT_RENDER_SCALE};
   float BasePadding{0.4f};
+
+  FString PreviewsPath;
 
   // summoning
   FVector StartLocation, TargetLocation;

@@ -30,6 +30,10 @@ public:
     return hRackProc.IsValid() && FPlatformProcess::IsProcRunning(hRackProc);
   }
 
+  FString GetUserPath() {
+    return RackUserPath;
+  }
+
   float AutosaveInterval{15.f};
   TArray<FColor> CableColors;
 

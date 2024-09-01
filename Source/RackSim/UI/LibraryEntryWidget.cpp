@@ -1,6 +1,7 @@
 #include "UI/LibraryEntryWidget.h"
 
 #include "osc3GameModeBase.h"
+#include "Library.h"
 #include "UI/LibraryEntry.h"
 
 #include "CommonTextBlock.h"
@@ -43,22 +44,25 @@ void ULibraryEntryWidget::NativeOnListItemObjectSet(UObject* ListItemObject) {
 }
 
 void ULibraryEntryWidget::RequestModuleSpawn() {
-  // UE_LOG(LogTemp, Warning, TEXT("requesting spawn- %s:%s"), *PluginSlug, *ModuleSlug);
-  if (GameMode) GameMode->RequestModuleSpawn(PluginSlug, ModuleSlug);
+  if (!GameMode) return;
+  GameMode->GetLibrary()->HidePreview();
+  GameMode->RequestModuleSpawn(PluginSlug, ModuleSlug);
 }
 
 void ULibraryEntryWidget::HandleButtonHover() {
+  if (GameMode) GameMode->GetLibrary()->ShowPreview(PluginSlug, ModuleSlug);
   DescriptionText->SetVisibility(ESlateVisibility::Collapsed);
   TagsText->SetVisibility(ESlateVisibility::Visible);
 }
 
 void ULibraryEntryWidget::HandleButtonUnhover() {
+  if (GameMode) GameMode->GetLibrary()->HidePreview();
   DescriptionText->SetVisibility(ESlateVisibility::Visible);
   TagsText->SetVisibility(ESlateVisibility::Collapsed);
 }
 
 void ULibraryEntryWidget::HandleFavoriteClick() {
-  GameMode->SetModuleFavorite(PluginSlug, ModuleSlug, !bFavorite);
+  if (GameMode) GameMode->SetModuleFavorite(PluginSlug, ModuleSlug, !bFavorite);
 }
 
 void ULibraryEntryWidget::HandleFavoriteHover() {

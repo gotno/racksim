@@ -1,28 +1,52 @@
 #include "Library.h"
 
+#include "VCVModule.h"
+
 #include "UI/LibraryWidget.h"
 #include "UI/LibraryEntry.h"
 #include "UI/FilterListEntryData.h"
 
 #include "UObject/ConstructorHelpers.h"
 #include "Components/PrimitiveComponent.h"
+#include "Components/StaticMeshComponent.h"
 #include "Components/WidgetComponent.h"
+#include "Engine/Texture2D.h"
 #include "Json.h"
 
+#include "Kismet/KismetRenderingLibrary.h"
+
 ALibrary::ALibrary() {
-	PrimaryActorTick.bCanEverTick = true;
+  PrimaryActorTick.bCanEverTick = true;
 
   // RootSceneComponent/StaticMeshComponent/OutlineMeshComponent setup in GrabbableActor
-  
+
   static ConstructorHelpers::FObjectFinder<UStaticMesh> MeshBody(TEXT("/Script/Engine.StaticMesh'/Game/meshes/unit_module.unit_module'"));
-  
   if (MeshBody.Object) {
     StaticMeshComponent->SetStaticMesh(MeshBody.Object);
     OutlineMeshComponent->SetStaticMesh(MeshBody.Object);
   }
 
+  PreviewMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Preview Mesh"));
+  static ConstructorHelpers::FObjectFinder<UStaticMesh> PreviewMeshBody(TEXT("/Script/Engine.StaticMesh'/Game/meshes/faced/unit_module_faced.unit_module_faced'"));
+  if (PreviewMeshBody.Object) PreviewMeshComponent->SetStaticMesh(PreviewMeshBody.Object);
+  PreviewMeshComponent->SetupAttachment(StaticMeshRoot);
+  // PreviewMeshComponent->SetHiddenInGame(true);
+
   static ConstructorHelpers::FObjectFinder<UMaterial> BaseMaterial(TEXT("/Script/Engine.Material'/Game/materials/generic_color.generic_color'"));
   if (BaseMaterial.Object) BaseMaterialInterface = Cast<UMaterial>(BaseMaterial.Object);
+
+  static ConstructorHelpers::FObjectFinder<UMaterial> PreviewMaterialFinder(
+    TEXT("/Script/Engine.Material'/Game/meshes/faced/texture_face_bg.texture_face_bg'")
+  );
+  if (PreviewMaterialFinder.Object)
+    PreviewMaterialInterface = Cast<UMaterial>(PreviewMaterialFinder.Object);
+
+  // loading indicator material
+  static ConstructorHelpers::FObjectFinder<UMaterial> LoadingMaterialFinder(
+    TEXT("/Script/Engine.Material'/Game/materials/loading.loading'")
+  );
+  if (LoadingMaterialFinder.Object)
+    LoadingMaterialInterface = Cast<UMaterial>(LoadingMaterialFinder.Object);
 
   // OutlineMaterialInterface setup in GrabbableActor
 
@@ -47,7 +71,16 @@ void ALibrary::BeginPlay() {
   if (BaseMaterialInterface) {
     BaseMaterialInstance = UMaterialInstanceDynamic::Create(BaseMaterialInterface, this);
     StaticMeshComponent->SetMaterial(0, BaseMaterialInstance);
+    PreviewMeshComponent->SetMaterial(0, BaseMaterialInstance);
     BaseMaterialInstance->SetVectorParameterValue(TEXT("Color"), FLinearColor::Black);
+  }
+
+  if (PreviewMaterialInterface) {
+    PreviewMaterialInstance = UMaterialInstanceDynamic::Create(PreviewMaterialInterface, this);
+  }
+
+  if (LoadingMaterialInterface) {
+    LoadingMaterialInstance = UMaterialInstanceDynamic::Create(LoadingMaterialInterface, this);
   }
 
   LibraryWidget = Cast<ULibraryWidget>(LibraryWidgetComponent->GetUserWidgetObject());
@@ -176,6 +209,48 @@ void ALibrary::SetScale() {
   float scale = desiredMenuHeight / drawSize.Y;
   LibraryWidgetComponent->SetDrawSize(drawSize);
   LibraryWidgetComponent->SetWorldScale3D(FVector(1.f, scale, scale));
+}
+
+void ALibrary::SetPreviewsPath(FString& inPreviewsPath) {
+  PreviewsPath = inPreviewsPath;
+}
+
+void ALibrary::ShowPreview(FString& PluginSlug, FString& ModuleSlug) {
+  PreviewMeshComponent->SetMaterial(1, LoadingMaterialInstance);
+  PreviewMeshComponent->SetHiddenInGame(false);
+
+  FString texturePath = PreviewsPath;
+  texturePath.Appendf(TEXT("%s/%s.png"), *PluginSlug, *ModuleSlug);
+  UTexture2D* Texture =
+    UKismetRenderingLibrary::ImportFileAsTexture2D(this, texturePath);
+  if (!Texture) {
+    HidePreview();
+    return;
+  }
+  PreviewMeshComponent->SetMaterial(1, PreviewMaterialInstance);
+  PreviewMaterialInstance->SetTextureParameterValue(FName("texture"), Texture);
+
+  FVector previewScale =
+    FVector(
+      AVCVModule::Scale * UNSCALED_MODULE_DEPTH,
+      1.f,
+      AVCVModule::Scale * UNSCALED_MODULE_HEIGHT
+    );
+
+  // height scaled by texture aspect ratio
+  previewScale.Y =
+    previewScale.Z * Texture->GetSurfaceWidth() / Texture->GetSurfaceHeight();
+  PreviewMeshComponent->SetWorldScale3D(previewScale);
+
+  FVector previewLocation;
+  FRotator previewRotation;
+  GetModuleLandingPosition(previewScale.Y, previewLocation, previewRotation);
+  PreviewMeshComponent->SetWorldLocation(previewLocation);
+  PreviewMeshComponent->SetWorldRotation(previewRotation);
+}
+
+void ALibrary::HidePreview() {
+  PreviewMeshComponent->SetHiddenInGame(true);
 }
 
 TArray<ULibraryEntry*> ALibrary::GenerateLibraryEntries() {
