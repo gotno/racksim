@@ -567,7 +567,7 @@ FHitResult AVCVModule::RunLeftwardSnapTrace() {
   FCollisionObjectQueryParams queryParams;
   queryParams.AddObjectTypesToQuery(RIGHT_SNAP_COLLIDER_OBJECT);
   GetWorld()->LineTraceSingleByObjectType(leftwardHit, traceStart, traceEnd, queryParams);
-  DrawDebugLine(GetWorld(), traceStart, traceEnd, FColor::Red);
+  // DrawDebugLine(GetWorld(), traceStart, traceEnd, FColor::Red);
 
   // give snappable target the indicator
   if (leftwardHit.GetActor()) {
