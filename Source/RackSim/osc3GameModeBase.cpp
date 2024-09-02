@@ -983,7 +983,7 @@ void Aosc3GameModeBase::SpawnLibrary() {
 
   FString previewsPath = rackman->GetUserPath();
   previewsPath.Append(TEXT("screenshots/"));
-  LibraryActor->SetPreviewsPath(previewPath);
+  LibraryActor->SetPreviewsPath(previewsPath);
 
   LibraryActor->SetActorHiddenInGame(true);
 }
