@@ -1016,7 +1016,7 @@ void Aosc3GameModeBase::SpawnMainMenu() {
     [&](FString PatchPath) { SavePatch(PatchPath); }, // 'save as' button callback
     [&]() { LoadPatch(TEXT("new")); }, // 'new' button callback
     [&]() { LoadPatch(TEXT("autosave")); }, // 'continue with autosave' button callback
-    [&]() { SavePatch(TEXT("new")); },  // 'overwrite template' button callback
+    [&]() { SavePatch(TEXT("new")); }, // 'overwrite template' button callback
     [&](FString PatchPath) { LoadPatch(PatchPath); }, // general load patch callback
     [&](float Percent) { // set cable opacity callback
       float opacity = Percent * 0.01f;
