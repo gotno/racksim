@@ -94,26 +94,6 @@ void ALibrary::BeginPlay() {
 
 void ALibrary::Tick(float DeltaTime) {
   Super::Tick(DeltaTime);
-
-  if (bSummoned) {
-    SummonAlpha += DeltaTime / 0.4f; // seconds to finish
-
-    SetActorLocation(
-      FMath::InterpEaseOut<FVector>(
-        StartLocation, TargetLocation, SummonAlpha, 4.f
-      )
-    );
-    SetActorRotation(
-      FMath::InterpEaseOut<FRotator>(
-        StartRotation, TargetRotation, SummonAlpha, 4.f
-      )
-    );
-
-    if (SummonAlpha >= 1.f) {
-      SummonAlpha = 0.f;
-      bSummoned = false;
-    }
-  }
 }
 
 void ALibrary::SetJsonPath(FString& JsonPath) {
@@ -512,13 +492,4 @@ void ALibrary::GetModuleLandingPosition(const float& ModuleWidth, FVector& Locat
 
   // TODO: dominant hand
   Location += StaticMeshComponent->GetRightVector() * (toEdge + moduleOffset);
-}
-
-void ALibrary::Summon(FVector Location, FRotator Rotation) {
-  StartLocation = GetActorLocation();
-  StartRotation = GetActorRotation();
-  TargetLocation = Location;
-  TargetRotation = Rotation;
-  SetActorHiddenInGame(false);
-  bSummoned = true;
 }

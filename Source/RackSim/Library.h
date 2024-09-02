@@ -37,7 +37,6 @@ public:
   void SetModuleFavorite(FString PluginSlug, FString ModuleSlug, bool bFavorite);
   void ClearBrandFilter();
   void ClearTagsFilter();
-  void Summon(FVector Location, FRotator Rotation);
 
   void SetPreviewsPath(FString& Path);
   void ShowPreview(FString& PluginSlug, FString& ModuleSlug);
@@ -86,12 +85,6 @@ private:
   float BasePadding{0.4f};
 
   FString PreviewsPath;
-
-  // summoning
-  FVector StartLocation, TargetLocation;
-  FRotator StartRotation, TargetRotation;
-  float SummonAlpha{0.f};
-  bool bSummoned;
 
   UPROPERTY()
   TArray<AVCVModule*> ParkedModules;

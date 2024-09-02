@@ -7,7 +7,7 @@
 #include "Kismet/GameplayStatics.h"
 
 AGrabbableActor::AGrabbableActor() {
-	PrimaryActorTick.bCanEverTick = true;
+  PrimaryActorTick.bCanEverTick = true;
 
   RootSceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root Scene Component"));
   SetRootComponent(RootSceneComponent);
@@ -46,7 +46,42 @@ void AGrabbableActor::BeginPlay() {
 }
 
 void AGrabbableActor::Tick(float DeltaTime) {
-	Super::Tick(DeltaTime);
+  Super::Tick(DeltaTime);
+
+  if (bSummoned) {
+    SummonAlpha += DeltaTime / SummonDuration;
+
+    SetActorLocation(
+      FMath::InterpEaseOut<FVector>(
+        StartLocation, TargetLocation, SummonAlpha, 4.f
+      )
+    );
+    SetActorRotation(
+      FMath::InterpEaseOut<FRotator>(
+        StartRotation, TargetRotation, SummonAlpha, 4.f
+      )
+    );
+
+    if (SummonAlpha >= 1.f) {
+      SummonAlpha = 0.f;
+      bSummoned = false;
+    }
+  }
+}
+
+void AGrabbableActor::Summon(FVector Location, FRotator Rotation, bool bInstant) {
+  if (bInstant) {
+    SetActorLocation(Location);
+    SetActorRotation(Rotation);
+    return;
+  }
+
+  StartLocation = GetActorLocation();
+  StartRotation = GetActorRotation();
+  TargetLocation = Location;
+  TargetRotation = Rotation;
+  SetActorHiddenInGame(false);
+  bSummoned = true;
 }
 
 void AGrabbableActor::SetHighlighted(bool bHighlighted, FLinearColor OutlineColor) {

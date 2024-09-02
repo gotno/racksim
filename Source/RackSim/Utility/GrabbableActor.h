@@ -12,21 +12,23 @@ class AModuleWeldment;
 UCLASS()
 class RACKSIM_API AGrabbableActor : public AActor
 {
-	GENERATED_BODY()
-	
-public:	
-	AGrabbableActor();
+  GENERATED_BODY()
+
+public:
+  AGrabbableActor();
 
 protected:
-	virtual void BeginPlay() override;
+  virtual void BeginPlay() override;
 
-public:	
-	virtual void Tick(float DeltaTime) override;
-  
+public:
+  virtual void Tick(float DeltaTime) override;
+
   virtual void EngageGrab(FVector GrabbedLocation, FRotator GrabbedRotation);
   virtual void AlterGrab(FVector GrabbedLocation, FRotator GrabbedRotation);
   virtual void ReleaseGrab();
   virtual void SetHighlighted(bool bHighlighted, FLinearColor OutlineColor = OUTLINE_COLOR);
+
+  void Summon(FVector Location, FRotator Rotation, bool bInstant = false);
 
   bool IsInWeldment() { return !!Weldment; }
   AModuleWeldment* GetWeldment() {
@@ -60,6 +62,13 @@ protected:
 
   void ResetMeshPosition();
   void CenterActorOnMesh();
+
+  // summoning
+  FVector StartLocation, TargetLocation;
+  FRotator StartRotation, TargetRotation;
+  float SummonAlpha{0.f};
+  bool bSummoned;
+  float SummonDuration{0.4f}; // seconds
 public:
   // delegate stuff
   void HighlightIfTargeted(AActor* GrabbableTarget, EControllerHand Hand);
