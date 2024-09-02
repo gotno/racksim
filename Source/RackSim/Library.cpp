@@ -229,12 +229,12 @@ void ALibrary::ShowPreview(FString& PluginSlug, FString& ModuleSlug) {
   PreviewMeshComponent->SetWorldLocation(previewLocation);
   PreviewMeshComponent->SetWorldRotation(previewRotation);
 
-  UpdateLot(previewPanelWidth);
+  UpdateLot(previewPanelWidth, true);
 }
 
 void ALibrary::HidePreview() {
   PreviewMeshComponent->SetHiddenInGame(true);
-  UpdateLot();
+  UpdateLot(true);
 }
 
 void ALibrary::ParkModule(AVCVModule* Module) {
@@ -246,7 +246,7 @@ void ALibrary::ParkModule(AVCVModule* Module) {
   for (auto& Module : ParkedModules) newParkedModules.Add(Module);
 
   ParkedModules = newParkedModules;
-  UpdateLot();
+  UpdateLot(true);
 }
 
 void ALibrary::UnparkModule(AVCVModule* Module) {
@@ -260,9 +260,12 @@ void ALibrary::UnparkModule(AVCVModule* Module) {
   UpdateLot();
 }
 
-void ALibrary::UpdateLot(float PreviewPanelWidth) {
+void ALibrary::UpdateLot(bool bInstant) {
+  UpdateLot(0.f, bInstant);
+}
+
+void ALibrary::UpdateLot(float PreviewPanelWidth, bool bInstant) {
   if (ParkedModules.Num() == 0) return;
-  bool bPreviewActive = PreviewPanelWidth > 0.f;
 
   FVector parkingLocation;
   FRotator parkingRotation;
@@ -272,12 +275,11 @@ void ALibrary::UpdateLot(float PreviewPanelWidth) {
     parkingLocation,
     parkingRotation
   );
-  if (bPreviewActive)
+  if (PreviewPanelWidth > 0.f) {
     parkingLocation +=
       StaticMeshComponent->GetRightVector() * (PreviewPanelWidth + 2.f);
-
-  ParkedModules[0]->SetActorLocation(parkingLocation);
-  ParkedModules[0]->SetActorRotation(parkingRotation);
+  }
+  ParkedModules[0]->Summon(parkingLocation, parkingRotation, bInstant);
 
   if (ParkedModules.Num() == 1) return;
 
@@ -289,8 +291,7 @@ void ALibrary::UpdateLot(float PreviewPanelWidth) {
     );
     parkingLocation += StaticMeshComponent->GetRightVector() * distanceToNextPosition;
 
-    ParkedModules[i]->SetActorLocation(parkingLocation);
-    ParkedModules[i]->SetActorRotation(parkingRotation);
+    ParkedModules[i]->Summon(parkingLocation, parkingRotation, bInstant);
   }
 }
 

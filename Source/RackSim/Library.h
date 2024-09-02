@@ -91,5 +91,6 @@ private:
   UFUNCTION()
   void UnparkModule(AVCVModule* Module);
   // arrange parked modules
-  void UpdateLot(float Offset = 0.f);
+  void UpdateLot(float Offset = 0.f, bool bInstant = false);
+  void UpdateLot(bool bInstant);
 };
