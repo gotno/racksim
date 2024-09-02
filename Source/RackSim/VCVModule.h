@@ -17,6 +17,8 @@ class AModuleWeldment;
 class UTexture2D;
 class UBoxComponent;
 
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnFirstGrabSignature, AVCVModule* /* this */);
+
 UCLASS()
 class RACKSIM_API AVCVModule : public AGrabbableActor {
   GENERATED_BODY()
@@ -71,6 +73,7 @@ public:
   FString Brand;
   FString Name;
 
+  void EngageGrab(FVector GrabbedLocation, FRotator GrabbedRotation) override;
   void AlterGrab(FVector GrabbedLocation, FRotator GrabbedRotation) override;
   void ReleaseGrab() override;
 
@@ -172,4 +175,10 @@ public:
 private:
   float UnscaledPanelHeight{UNSCALED_MODULE_HEIGHT};
   float UnscaledPanelWidth{0.508f}; // 1hp
+
+// delegate stuff
+public:
+  FOnFirstGrabSignature OnFirstGrabbed;
+private:
+  bool bHasBeenGrabbed{false};
 };

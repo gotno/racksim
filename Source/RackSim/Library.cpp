@@ -66,7 +66,7 @@ ALibrary::ALibrary() {
 }
 
 void ALibrary::BeginPlay() {
-	Super::BeginPlay();
+  Super::BeginPlay();
 
   if (BaseMaterialInterface) {
     BaseMaterialInstance = UMaterialInstanceDynamic::Create(BaseMaterialInterface, this);
@@ -93,7 +93,7 @@ void ALibrary::BeginPlay() {
 }
 
 void ALibrary::Tick(float DeltaTime) {
-	Super::Tick(DeltaTime);
+  Super::Tick(DeltaTime);
 
   if (bSummoned) {
     SummonAlpha += DeltaTime / 0.4f; // seconds to finish
@@ -238,8 +238,9 @@ void ALibrary::ShowPreview(FString& PluginSlug, FString& ModuleSlug) {
     );
 
   // height scaled by texture aspect ratio
-  previewScale.Y =
+  float previewPanelWidth =
     previewScale.Z * Texture->GetSurfaceWidth() / Texture->GetSurfaceHeight();
+  previewScale.Y = previewPanelWidth;
   PreviewMeshComponent->SetWorldScale3D(previewScale);
 
   FVector previewLocation;
@@ -247,10 +248,70 @@ void ALibrary::ShowPreview(FString& PluginSlug, FString& ModuleSlug) {
   GetModuleLandingPosition(previewScale.Y, previewLocation, previewRotation);
   PreviewMeshComponent->SetWorldLocation(previewLocation);
   PreviewMeshComponent->SetWorldRotation(previewRotation);
+
+  UpdateLot(previewPanelWidth);
 }
 
 void ALibrary::HidePreview() {
   PreviewMeshComponent->SetHiddenInGame(true);
+  UpdateLot();
+}
+
+void ALibrary::ParkModule(AVCVModule* Module) {
+  Module->OnFirstGrabbed.AddUObject(this, &ALibrary::UnparkModule);
+  Module->AttachToComponent(StaticMeshRoot, FAttachmentTransformRules::KeepWorldTransform);
+
+  TArray<AVCVModule*> newParkedModules;
+  newParkedModules.Add(Module);
+  for (auto& Module : ParkedModules) newParkedModules.Add(Module);
+
+  ParkedModules = newParkedModules;
+  UpdateLot();
+}
+
+void ALibrary::UnparkModule(AVCVModule* Module) {
+  Module->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+
+  ParkedModules = ParkedModules.FilterByPredicate(
+    [Module](AVCVModule* ParkedModule) {
+      return ParkedModule != Module;
+    }
+  );
+  UpdateLot();
+}
+
+void ALibrary::UpdateLot(float PreviewPanelWidth) {
+  if (ParkedModules.Num() == 0) return;
+  bool bPreviewActive = PreviewPanelWidth > 0.f;
+
+  FVector parkingLocation;
+  FRotator parkingRotation;
+
+  GetModuleLandingPosition(
+    ParkedModules[0]->GetPanelWidth(),
+    parkingLocation,
+    parkingRotation
+  );
+  if (bPreviewActive)
+    parkingLocation +=
+      StaticMeshComponent->GetRightVector() * (PreviewPanelWidth + 2.f);
+
+  ParkedModules[0]->SetActorLocation(parkingLocation);
+  ParkedModules[0]->SetActorRotation(parkingRotation);
+
+  if (ParkedModules.Num() == 1) return;
+
+  for (int i = 1; i < ParkedModules.Num(); i++) {
+    float distanceToNextPosition = (
+      ParkedModules[i - 1]->GetPanelWidth() * 0.5f +
+      1.f +
+      ParkedModules[i]->GetPanelWidth() * 0.5f
+    );
+    parkingLocation += StaticMeshComponent->GetRightVector() * distanceToNextPosition;
+
+    ParkedModules[i]->SetActorLocation(parkingLocation);
+    ParkedModules[i]->SetActorRotation(parkingRotation);
+  }
 }
 
 TArray<ULibraryEntry*> ALibrary::GenerateLibraryEntries() {

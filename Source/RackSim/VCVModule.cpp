@@ -389,6 +389,15 @@ void AVCVModule::SpawnComponents() {
   for (auto& pair : ParamLightActors) pair.Value->HandleOverlap();
 }
 
+void AVCVModule::EngageGrab(FVector GrabbedLocation, FRotator GrabbedRotation) {
+  if (!bHasBeenGrabbed) {
+    bHasBeenGrabbed = true;
+    OnFirstGrabbed.Broadcast(this);
+  }
+
+  Super::EngageGrab(GrabbedLocation, GrabbedRotation);
+}
+
 void AVCVModule::AlterGrab(FVector GrabbedLocation, FRotator GrabbedRotation) {
   Super::AlterGrab(GrabbedLocation, GrabbedRotation);
 
@@ -422,7 +431,7 @@ void AVCVModule::ToggleContextMenu() {
 }
 
 void AVCVModule::Tick(float DeltaTime) {
-	Super::Tick(DeltaTime);
+  Super::Tick(DeltaTime);
 
   SnapModeTick();
 

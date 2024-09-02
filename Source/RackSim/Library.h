@@ -6,6 +6,8 @@
 
 #include "Library.generated.h"
 
+class AVCVModule;
+
 class UWidgetComponent;
 class ULibraryWidget;
 class ULibraryEntryWidget;
@@ -14,17 +16,17 @@ class UFilterListEntryData;
 
 UCLASS()
 class RACKSIM_API ALibrary : public AGrabbableActor {
-	GENERATED_BODY()
-	
-public:	
-	ALibrary();
+  GENERATED_BODY()
+
+public:
+  ALibrary();
 
 protected:
-	virtual void BeginPlay() override;
+  virtual void BeginPlay() override;
 
-public:	
-	virtual void Tick(float DeltaTime) override;
-  
+public:
+  virtual void Tick(float DeltaTime) override;
+
   void Refresh();
   void RefreshLibraryList();
   void RefreshBrandFilterList();
@@ -43,7 +45,9 @@ public:
 
   void SetJsonPath(FString& JsonPath);
   void GetPosition(FVector& Location, FRotator& Rotation);
+
   void GetModuleLandingPosition(const float& ModuleWidth, FVector& Location, FRotator& Rotation);
+  void ParkModule(AVCVModule* Module);
 private:
   UPROPERTY()
   UMaterialInstanceDynamic* BaseMaterialInstance;
@@ -88,4 +92,11 @@ private:
   FRotator StartRotation, TargetRotation;
   float SummonAlpha{0.f};
   bool bSummoned;
+
+  UPROPERTY()
+  TArray<AVCVModule*> ParkedModules;
+  UFUNCTION()
+  void UnparkModule(AVCVModule* Module);
+  // arrange parked modules
+  void UpdateLot(float Offset = 0.f);
 };

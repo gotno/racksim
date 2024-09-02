@@ -613,6 +613,8 @@ void Aosc3GameModeBase::SpawnModule(VCVModule vcv_module) {
   FVector location;
   FRotator rotation;
 
+  bool bFromLibrary{false};
+
   if (vcv_module.returnId == 0 && ModuleActors.Contains(LastClickedMenuModuleId)) {
     AVCVModule* lastClickedModule = ModuleActors[LastClickedMenuModuleId];
     lastClickedModule->GetModuleLandingPosition(location, rotation, true);
@@ -622,7 +624,7 @@ void Aosc3GameModeBase::SpawnModule(VCVModule vcv_module) {
   } else if (ReturnModulePositions.Contains(vcv_module.returnId)) {
     ReturnModulePosition& rmp = ReturnModulePositions[vcv_module.returnId];
     if (rmp.Location.IsZero()) {
-      LibraryActor->GetModuleLandingPosition(vcv_module.box.size.x * AVCVModule::Scale, location, rotation);
+      bFromLibrary = true;
     } else {
       location = rmp.Location;
       rotation = rmp.Rotation;
@@ -652,7 +654,6 @@ void Aosc3GameModeBase::SpawnModule(VCVModule vcv_module) {
     vcv_module,
     [&]() {
       OSCctrl->NotifyReceived(TEXT("module"), vcv_module.id);
-
       bSpawningModule = false;
       SpawnNextModule();
     }
@@ -660,8 +661,11 @@ void Aosc3GameModeBase::SpawnModule(VCVModule vcv_module) {
 
   module->SetActorRotation(rotation);
 
-  if (vcv_module.leftExpanderId > 0 || vcv_module.rightExpanderId > 0)
+  if (bFromLibrary) {
+    LibraryActor->ParkModule(module);
+  } else if (vcv_module.leftExpanderId > 0 || vcv_module.rightExpanderId > 0) {
     ModulesSeekingWeldment.Add(vcv_module.id, vcv_module);
+  }
   ProcessWeldmentQueue();
   ProcessSpawnCableQueue();
 }
