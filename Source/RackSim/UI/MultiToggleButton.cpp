@@ -13,14 +13,6 @@ void UMultiToggleButton::SynchronizeProperties() {
 }
 
 void UMultiToggleButton::NativeConstruct() {
-  // by default,
-  // only one toggle is visible
-  // and the button is disabled
-  // and it has no label.
-  //
-  // SetToggleLabels() will make both visible,
-  // and enable the button
-  // and set the labels.
   Button->OnReleased.AddDynamic(this, &UMultiToggleButton::HandleClick);
   ToggleOne->OnToggledDelegate.AddDynamic(this, &UMultiToggleButton::HandleToggle);
   ToggleTwo->OnToggledDelegate.AddDynamic(this, &UMultiToggleButton::HandleToggle);
@@ -32,6 +24,14 @@ void UMultiToggleButton::SetPrimaryLabel(const FString& Text) {
 } 
 
 void UMultiToggleButton::SetToggleLabels(const FString& ToggleOneLabel, const FString& ToggleTwoLabel) {
+  // by default,
+  // only one toggle is visible
+  // and its button is disabled
+  // and it has no label.
+  //
+  // SetToggleLabels() will make both visible,
+  // and enable their buttons
+  // and set their labels.
   ToggleOne->SetLabel(ToggleOneLabel);
   ToggleTwo->SetLabel(ToggleTwoLabel);
 
