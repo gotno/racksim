@@ -7,6 +7,7 @@
 
 #include "Components/ListView.h"
 #include "Components/TextBlock.h"
+#include "Components/SizeBox.h"
 #include "Components/Button.h"
 #include "Components/Border.h"
 
@@ -39,12 +40,14 @@ void ULibraryWidget::SetTagsFilterListItems(TArray<UFilterListEntryData*> Entrie
 }
 
 void ULibraryWidget::SetBrandFilterButtonLabel(const FString& inLabel, const bool& bClearable) const {
-  BrandFilterClearButton->SetVisibility(bClearable ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
+  BrandFilterClearButtonContainer->SetVisibility(bClearable ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
   BrandFilterToggleButtonLabel->SetText(FText::FromString(inLabel));
+  // center justified text doesn't honor the overflow:ellipsis policy
+  BrandFilterToggleButtonLabel->SetJustification(bClearable ? ETextJustify::Left : ETextJustify::Center);
 }
 
 void ULibraryWidget::SetTagsFilterButtonLabel(const FString& inLabel, const bool& bClearable) const {
-  TagsFilterClearButton->SetVisibility(bClearable ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
+  TagsFilterClearButtonContainer->SetVisibility(bClearable ? ESlateVisibility::Visible : ESlateVisibility::Collapsed);
   TagsFilterToggleButtonLabel->SetText(FText::FromString(inLabel));
   // center justified text doesn't honor the overflow:ellipsis policy
   TagsFilterToggleButtonLabel->SetJustification(bClearable ? ETextJustify::Left : ETextJustify::Center);

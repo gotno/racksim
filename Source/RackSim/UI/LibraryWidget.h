@@ -9,6 +9,7 @@ class UListView;
 class UButton;
 class UBorder;
 class UTextBlock;
+class USizeBox;
 
 class Aosc3GameModeBase;
 class ULibraryEntry;
@@ -55,6 +56,8 @@ protected:
   UPROPERTY(meta = (BindWidget))
   UTextBlock* BrandFilterToggleButtonLabel;
   UPROPERTY(meta = (BindWidget))
+  USizeBox* BrandFilterClearButtonContainer;
+  UPROPERTY(meta = (BindWidget))
   UButton* BrandFilterClearButton;
   UPROPERTY(meta = (BindWidget))
 	UBorder* BrandFilterContainer;
@@ -65,6 +68,8 @@ protected:
   UButton* TagsFilterToggleButton;
   UPROPERTY(meta = (BindWidget))
   UTextBlock* TagsFilterToggleButtonLabel;
+  UPROPERTY(meta = (BindWidget))
+  USizeBox* TagsFilterClearButtonContainer;
   UPROPERTY(meta = (BindWidget))
   UButton* TagsFilterClearButton;
   UPROPERTY(meta = (BindWidget))
