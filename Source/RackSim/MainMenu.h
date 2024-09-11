@@ -42,7 +42,8 @@ public:
     TFunction<void (FString)> LoadMapFunction,
     TFunction<void (float)> EnvironmentLightIntensityUpdateFunction,
     TFunction<void (float)> EnvironmentLightAngleUpdateFunction,
-    TFunction<void (float)> ScalingFactorUpdateFunction
+    TFunction<void (float)> ScalingFactorUpdateFunction,
+    TFunction<void ()> GeneratePreviewsFunction
   );
   void Hide();
   void Show();
@@ -53,6 +54,13 @@ public:
     FString ConfirmationLabel,
     FString ConfirmButtonLabel,
     TFunction<void ()> inConfirmationConfirmFunction
+  );
+  void Confirm(
+    FString ConfirmationLabel,
+    FString ConfirmButtonOneLabel,
+    FString ConfirmButtonTwoLabel,
+    TFunction<void ()> inConfirmationConfirmOneFunction,
+    TFunction<void ()> inConfirmationConfirmTwoFunction
   );
   void Alert(FString AlertLabel, FString ConfirmButtonLabel);
 

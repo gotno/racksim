@@ -85,7 +85,8 @@ void AMainMenu::Init(
   TFunction<void (FString)> LoadMapFunction,
   TFunction<void (float)> EnvironmentLightIntensityUpdateFunction,
   TFunction<void (float)> EnvironmentLightAngleUpdateFunction,
-  TFunction<void (float)> ScalingFactorUpdateFunction
+  TFunction<void (float)> ScalingFactorUpdateFunction,
+  TFunction<void ()> GeneratePreviewsFunction
 ) {
   MainMenuWidget->SetExitFunction(ExitFunction);
   MainMenuWidget->SetSaveFunction(SaveFunction);
@@ -103,6 +104,7 @@ void AMainMenu::Init(
   MainMenuWidget->SetEnvironmentLightIntensityUpdateFunction(EnvironmentLightIntensityUpdateFunction);
   MainMenuWidget->SetEnvironmentLightAngleUpdateFunction(EnvironmentLightAngleUpdateFunction);
   MainMenuWidget->SetScalingFactorUpdateFunction(ScalingFactorUpdateFunction);
+  MainMenuWidget->SetGeneratePreviewsFunction(GeneratePreviewsFunction);
 
   // these don't change, so they don't need to be in Refresh,
   // but they do need to be set before we Refresh
@@ -153,6 +155,27 @@ void AMainMenu::Confirm(
     ConfirmationLabel,
     ConfirmButtonLabel,
     inConfirmationConfirmFunction,
+    [&]() {
+      MainMenuWidget->GotoMain();
+    },
+    true // solo
+  );
+}
+
+void AMainMenu::Confirm(
+  FString ConfirmationLabel,
+  FString ConfirmButtonOneLabel,
+  FString ConfirmButtonTwoLabel,
+  TFunction<void ()> inConfirmationConfirmOneFunction,
+  TFunction<void ()> inConfirmationConfirmTwoFunction
+) {
+  Show();
+  MainMenuWidget->Confirm(
+    ConfirmationLabel,
+    ConfirmButtonOneLabel,
+    ConfirmButtonTwoLabel,
+    inConfirmationConfirmOneFunction,
+    inConfirmationConfirmTwoFunction,
     [&]() {
       MainMenuWidget->GotoMain();
     },

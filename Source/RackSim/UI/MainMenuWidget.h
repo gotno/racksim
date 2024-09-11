@@ -94,6 +94,9 @@ public:
   void SetScalingFactorUpdateFunction(TFunction<void (float)> inScalingFactorUpdateFunction) {
     ScalingFactorUpdateFunction = inScalingFactorUpdateFunction;
   }
+  void SetGeneratePreviewsFunction(TFunction<void ()> inGeneratePreviewsFunction) {
+    GeneratePreviewsFunction = inGeneratePreviewsFunction;
+  }
 
   void SetKeyboard(AKeyboard* inKeyboard);
 
@@ -101,12 +104,15 @@ public:
     FString ConfirmationLabel,
     FString ConfirmButtonLabel,
     TFunction<void ()> inConfirmationConfirmFunction,
+    TFunction<void ()> inConfirmationCancelFunction,
     bool bSolo = false
   );
   void Confirm(
     FString ConfirmationLabel,
     FString ConfirmButtonLabel,
+    FString ConfirmButtonAltLabel,
     TFunction<void ()> inConfirmationConfirmFunction,
+    TFunction<void ()> inConfirmationConfirmAltFunction,
     TFunction<void ()> inConfirmationCancelFunction,
     bool bSolo = false
   );
@@ -133,7 +139,9 @@ protected:
   UPROPERTY(meta = (BindWidget))
   UTextBlock* ConfirmationConfirmButtonLabel;
   UPROPERTY(meta = (BindWidget))
-  USizeBox* ConfirmationCancelButtonContainer;
+  UButton* ConfirmationConfirmButtonAlt;
+  UPROPERTY(meta = (BindWidget))
+  UTextBlock* ConfirmationConfirmButtonAltLabel;
   UPROPERTY(meta = (BindWidget))
   UButton* ConfirmationCancelButton;
   UPROPERTY(meta = (BindWidget))
@@ -209,6 +217,8 @@ protected:
 
   UPROPERTY(meta = (BindWidget))
   ULabeledSlider* ScalingFactorSlider;
+  UPROPERTY(meta = (BindWidget))
+  UButton* GeneratePreviewsButton;
 
   UPROPERTY(meta = (BindWidget))
   UBorder* LoadingSection;
@@ -237,7 +247,11 @@ private:
 
   TFunction<void ()> ConfirmationConfirmFunction;
   UFUNCTION()
-  void HandleConfirmationConfirmClick();
+  void HandleConfirmationConfirmClicked();
+
+  TFunction<void ()> ConfirmationConfirmAltFunction;
+  UFUNCTION()
+  void HandleConfirmationConfirmAltClicked();
 
   TFunction<void ()> ConfirmationCancelFunction;
   UFUNCTION()
@@ -330,6 +344,9 @@ private:
   UFUNCTION()
   void HandleScalingFactorSliderRelease();
   TFunction<void (float)> ScalingFactorUpdateFunction;
+  UFUNCTION()
+  void HandleGeneratePreviewsClick();
+  TFunction<void ()> GeneratePreviewsFunction;
 
   TFunction<void (FString)> LoadMapFunction;
   UFUNCTION()

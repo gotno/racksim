@@ -73,6 +73,10 @@ void Aosc3GameModeBase::BeginPlay() {
   LoadUserSettings();
 
   rackman->Init();
+  rackman->OnPreviewGeneratedStatus.AddUObject(
+    this,
+    &Aosc3GameModeBase::HandlePreviewGeneratedStatus
+  );
   AVCVCable::CableColors = rackman->CableColors;
 
   SpawnLibrary();
@@ -1059,7 +1063,16 @@ void Aosc3GameModeBase::SpawnMainMenu() {
     [&](FString MapName) { LoadMap(MapName); }, // load map callback
     [&](float Amount) { AdjustLightIntensity(Amount); }, // set environment light intensity
     [&](float Amount) { AdjustLightAngle(Amount); }, // set environment light angle
-    [&](float Scale) { AdjustScalingFactor(Scale); } // set module scaling factor
+    [&](float Scale) { AdjustScalingFactor(Scale); }, // set module scaling factor
+    [&] { // confirm generate module previews
+      MainMenu->Confirm(
+        TEXT("This will generate previews for all modules in the library.\nThe process may take quite a while, but it can be interrupted and resumed."),
+        TEXT("Generate missing"),
+        TEXT("(Re)generate all"),
+        [&]() { rackman->GenerateModulePreviews(); },
+        [&]() { rackman->RegenerateModulePreviews(); }
+      );
+    }
   );
 }
 
@@ -1296,4 +1309,11 @@ void Aosc3GameModeBase::AdjustScalingFactor(float Scale) {
   }
 
   osc3GameState->ScalingFactorAmount = Scale;
+}
+
+// TODO: update to use mainmenu status with button
+// update to two params: status and button text
+// void Aosc3GameModeBase::HandlePreviewGeneratedStatus(FString Status, bool bCancellable) {
+void Aosc3GameModeBase::HandlePreviewGeneratedStatus(FString Status) {
+  MainMenu->Alert(Status, "Ok");
 }

@@ -209,6 +209,9 @@ private:
   void StartRack(FString PatchPath);
   void RestartRack(FString PatchPath);
   FString PatchPathToBootstrap{""};
+
+  UFUNCTION()
+  void HandlePreviewGeneratedStatus(FString Status);
 public:
   // delegate stuff
   void SubscribeMenuItemSyncedDelegate(AContextMenu* ContextMenu);

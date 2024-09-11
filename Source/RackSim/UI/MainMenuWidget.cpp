@@ -98,7 +98,8 @@ void UMainMenuWidget::SynchronizeProperties() {
 void UMainMenuWidget::NativeConstruct() {
   Super::NativeConstruct();
 
-  ConfirmationConfirmButton->OnReleased.AddDynamic(this, &UMainMenuWidget::HandleConfirmationConfirmClick);
+  ConfirmationConfirmButton->OnReleased.AddDynamic(this, &UMainMenuWidget::HandleConfirmationConfirmClicked);
+  ConfirmationConfirmButtonAlt->OnReleased.AddDynamic(this, &UMainMenuWidget::HandleConfirmationConfirmAltClicked);
   ConfirmationCancelButton->OnReleased.AddDynamic(this, &UMainMenuWidget::HandleConfirmationCancelClick);
 
   CableColorCycleToggleButton->OnToggleOneToggledDelegate.AddDynamic(
@@ -140,6 +141,7 @@ void UMainMenuWidget::NativeConstruct() {
   EnvironmentLightAngleSlider->OnValueChanged.AddDynamic(this, &UMainMenuWidget::HandleEnvironmentLightAngleSliderChange);
 
   ScalingFactorSlider->OnMouseCaptureEnd.AddDynamic(this, &UMainMenuWidget::HandleScalingFactorSliderRelease);
+  GeneratePreviewsButton->OnReleased.AddDynamic(this, &UMainMenuWidget::HandleGeneratePreviewsClick);
 
   MapOneButton->OnReleased.AddDynamic(this, &UMainMenuWidget::HandleMapOneClick);
   MapTwoButton->OnReleased.AddDynamic(this, &UMainMenuWidget::HandleMapTwoClick);
@@ -263,7 +265,8 @@ void UMainMenuWidget::HandleKeyboardInputConfirmed(FString Input) {
       [this, path]() {
         GotoStatus(TEXT(""), TEXT("saving patch"));
         SaveAsFunction(path);
-      }
+      },
+      [this]() { GotoMain(); }
     );
   } else {
     GotoStatus(TEXT(""), TEXT("saving patch"));
@@ -405,6 +408,10 @@ void UMainMenuWidget::HandleScalingFactorSliderRelease() {
   ScalingFactorUpdateFunction(ScalingFactorSlider->GetValue());
 }
 
+void UMainMenuWidget::HandleGeneratePreviewsClick() {
+  GeneratePreviewsFunction();
+}
+
 void UMainMenuWidget::HandleCableColorCycleToggle(bool bIsChecked) {
   CableColorCycleToggleFunction(bIsChecked);
 }
@@ -439,9 +446,14 @@ void UMainMenuWidget::HandleSaveAsClick() {
   Keyboard->SetActorHiddenInGame(false);
 }
 
-void UMainMenuWidget::HandleConfirmationConfirmClick() {
+void UMainMenuWidget::HandleConfirmationConfirmClicked() {
   ConfirmationSection->SetVisibility(ESlateVisibility::Hidden);
   ConfirmationConfirmFunction();
+}
+
+void UMainMenuWidget::HandleConfirmationConfirmAltClicked() {
+  ConfirmationSection->SetVisibility(ESlateVisibility::Hidden);
+  ConfirmationConfirmAltFunction();
 }
 
 void UMainMenuWidget::HandleConfirmationCancelClick() {
@@ -458,7 +470,8 @@ void UMainMenuWidget::HandleLoadPatch(FString PatchPath) {
       TEXT("Yes, open patch"),
       [this, PatchPath]() {
         LoadFunction(PatchPath);
-      }
+      },
+      [this]() { GotoMain(); }
     );
   }
 }
@@ -472,7 +485,8 @@ void UMainMenuWidget::HandleNewClick() {
       TEXT("Yes, create patch"),
       [this]() {
         NewFunction();
-      }
+      },
+      [this]() { GotoMain(); }
     );
   }
 }
@@ -484,26 +498,12 @@ void UMainMenuWidget::HandleOverwriteTemplateClick() {
     [this]() {
       GotoStatus(TEXT(""), TEXT("overwriting template"));
       OverwriteTemplateFunction();
-    }
+    },
+    [this]() { GotoMain(); }
   );
 }
 
-void UMainMenuWidget::Confirm(
-  FString ConfirmationLabel,
-  FString ConfirmButtonLabel,
-  TFunction<void ()> inConfirmationConfirmFunction,
-  bool bSolo
-) {
-  if (bSolo) HideAll();
-  ConfirmationText->SetText(FText::FromString(ConfirmationLabel));
-  ConfirmationConfirmButtonLabel->SetText(FText::FromString(ConfirmButtonLabel));
-  ConfirmationConfirmFunction = inConfirmationConfirmFunction;
-  ConfirmationCancelFunction = [this]() {
-    ConfirmationSection->SetVisibility(ESlateVisibility::Hidden);
-  };
-  ConfirmationSection->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
-}
-
+// one option
 void UMainMenuWidget::Confirm(
   FString ConfirmationLabel,
   FString ConfirmButtonLabel,
@@ -512,20 +512,46 @@ void UMainMenuWidget::Confirm(
   bool bSolo
 ) {
   if (bSolo) HideAll();
+  ConfirmationConfirmButtonAlt->SetVisibility(ESlateVisibility::Collapsed);
+
   ConfirmationText->SetText(FText::FromString(ConfirmationLabel));
   ConfirmationConfirmButtonLabel->SetText(FText::FromString(ConfirmButtonLabel));
   ConfirmationConfirmFunction = inConfirmationConfirmFunction;
+  ConfirmationCancelFunction = inConfirmationCancelFunction;
+  ConfirmationSection->SetVisibility(ESlateVisibility::SelfHitTestInvisible);
+}
+
+// two options
+void UMainMenuWidget::Confirm(
+  FString ConfirmationLabel,
+  FString ConfirmButtonLabel,
+  FString ConfirmButtonAltLabel,
+  TFunction<void ()> inConfirmationConfirmFunction,
+  TFunction<void ()> inConfirmationConfirmAltFunction,
+  TFunction<void ()> inConfirmationCancelFunction,
+  bool bSolo
+) {
+  if (bSolo) HideAll();
+  ConfirmationConfirmButtonAlt->SetVisibility(ESlateVisibility::Visible);
+
+  ConfirmationText->SetText(FText::FromString(ConfirmationLabel));
+  ConfirmationConfirmButtonLabel->SetText(FText::FromString(ConfirmButtonLabel));
+  ConfirmationConfirmButtonAltLabel->SetText(FText::FromString(ConfirmButtonAltLabel));
+  ConfirmationConfirmFunction = inConfirmationConfirmFunction;
+  ConfirmationConfirmAltFunction = inConfirmationConfirmAltFunction;
   ConfirmationCancelFunction = inConfirmationCancelFunction;
   ConfirmationSection->SetVisibility(ESlateVisibility::Visible);
 }
 
 void UMainMenuWidget::Alert(FString AlertLabel, FString ConfirmButtonLabel) {
   HideAll();
+  ConfirmationCancelButton->SetVisibility(ESlateVisibility::Collapsed);
+  ConfirmationConfirmButtonAlt->SetVisibility(ESlateVisibility::Collapsed);
+
   ConfirmationText->SetText(FText::FromString(AlertLabel));
   ConfirmationConfirmButtonLabel->SetText(FText::FromString(ConfirmButtonLabel));
-  ConfirmationCancelButtonContainer->SetVisibility(ESlateVisibility::Collapsed);
   ConfirmationConfirmFunction = [&]() {
-    ConfirmationCancelButtonContainer->SetVisibility(ESlateVisibility::Visible);
+    ConfirmationCancelButton->SetVisibility(ESlateVisibility::Visible);
     GotoMain();
   };
   ConfirmationSection->SetVisibility(ESlateVisibility::Visible);
