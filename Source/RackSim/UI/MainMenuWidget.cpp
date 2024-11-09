@@ -29,7 +29,7 @@ void UMainMenuWidget::SynchronizeProperties() {
 
     CableOpacitySlider->SetMinValue(0.f);
     CableOpacitySlider->SetMaxValue(100.f);
-    CableOpacitySlider->SetValue(DEFAULT_CABLE_OPACITY);
+    CableOpacitySlider->SetValue(DEFAULT_CABLE_OPACITY_PERCENT);
     CableOpacitySlider->SetStepSize(0.1f);
   }
   if (CableTensionSlider) {
@@ -39,7 +39,7 @@ void UMainMenuWidget::SynchronizeProperties() {
 
     CableTensionSlider->SetMinValue(0.f);
     CableTensionSlider->SetMaxValue(100.f);
-    CableTensionSlider->SetValue(DEFAULT_CABLE_TENSION);
+    CableTensionSlider->SetValue(DEFAULT_CABLE_TENSION_PERCENT);
     CableTensionSlider->SetStepSize(0.1f);
   }
 

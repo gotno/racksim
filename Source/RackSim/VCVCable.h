@@ -89,12 +89,12 @@ public:
   };
   static inline int CurrentCableColorIndex{-1};
 
-  static inline float Tension{DEFAULT_CABLE_TENSION * 0.01f};
+  static inline float Tension{DEFAULT_CABLE_TENSION_PERCENT * 0.01f};
   static void SetTension(float Percent) {
     Tension = Percent * 0.01f;
   }
 
-  static inline float Opacity{DEFAULT_CABLE_OPACITY * 0.01f};
+  static inline float Opacity{DEFAULT_CABLE_OPACITY_PERCENT * 0.01f};
   static void SetOpacity(float Percent) {
     Opacity = Percent * 0.01f;
   }

@@ -14,9 +14,9 @@ class RACKSIM_API URackSimGameUserSettings : public UGameUserSettings {
 public:
   // cables
   UPROPERTY(Config)
-  float CableOpacity;
+  float CableOpacityPercent;
   UPROPERTY(Config)
-  float CableTension;
+  float CableTensionPercent;
   UPROPERTY(Config)
   bool bCycleCableColors;
   UPROPERTY(Config)
@@ -42,8 +42,8 @@ public:
   }
 
   void Init() {
-    CableOpacity = DEFAULT_CABLE_OPACITY;
-    CableTension = DEFAULT_CABLE_TENSION;
+    CableOpacityPercent = DEFAULT_CABLE_OPACITY_PERCENT;
+    CableTensionPercent = DEFAULT_CABLE_TENSION_PERCENT;
     bCycleCableColors = true;
     LastCableColorIndex = -1;
 
@@ -57,8 +57,8 @@ public:
   }
 
   void Print() {
-    UE_LOG(LogTemp, Warning, TEXT("RackGameUserSettings::CableOpacity: %f"), CableOpacity);
-    UE_LOG(LogTemp, Warning, TEXT("RackGameUserSettings::CableTension: %f"), CableTension);
+    UE_LOG(LogTemp, Warning, TEXT("RackGameUserSettings::CableOpacityPercent: %f"), CableOpacityPercent);
+    UE_LOG(LogTemp, Warning, TEXT("RackGameUserSettings::CableTensionPercent: %f"), CableTensionPercent);
     UE_LOG(LogTemp, Warning, TEXT("RackGameUserSettings::bCycleCableColors: %d"), bCycleCableColors);
     UE_LOG(LogTemp, Warning, TEXT("RackGameUserSettings::LastCableColorIndex: %d"), LastCableColorIndex);
     UE_LOG(LogTemp, Warning, TEXT("\n"));
