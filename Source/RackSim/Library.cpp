@@ -243,7 +243,7 @@ void ALibrary::ParkModule(AVCVModule* Module) {
 
   TArray<AVCVModule*> newParkedModules;
   newParkedModules.Add(Module);
-  for (auto& Module : ParkedModules) newParkedModules.Add(Module);
+  for (auto& ParkedModule : ParkedModules) newParkedModules.Add(ParkedModule);
 
   ParkedModules = newParkedModules;
   UpdateLot(true);
