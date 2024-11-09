@@ -48,24 +48,26 @@ void AGrabbableActor::BeginPlay() {
 void AGrabbableActor::Tick(float DeltaTime) {
   Super::Tick(DeltaTime);
 
-  if (bSummoned) {
-    SummonAlpha += DeltaTime / SummonDuration;
+  if (bSummoned) HandleSummons(DeltaTime);
+}
 
-    SetActorLocation(
-      FMath::InterpEaseOut<FVector>(
-        StartLocation, TargetLocation, SummonAlpha, 4.f
-      )
-    );
-    SetActorRotation(
-      FMath::InterpEaseOut<FRotator>(
-        StartRotation, TargetRotation, SummonAlpha, 4.f
-      )
-    );
+void AGrabbableActor::HandleSummons(float DeltaTime) {
+  SummonAlpha += DeltaTime / SummonDuration;
 
-    if (SummonAlpha >= 1.f) {
-      SummonAlpha = 0.f;
-      bSummoned = false;
-    }
+  SetActorLocation(
+    FMath::InterpEaseOut<FVector>(
+      StartLocation, TargetLocation, SummonAlpha, 4.f
+    )
+  );
+  SetActorRotation(
+    FMath::InterpEaseOut<FRotator>(
+      StartRotation, TargetRotation, SummonAlpha, 4.f
+    )
+  );
+
+  if (SummonAlpha >= 1.f) {
+    SummonAlpha = 0.f;
+    bSummoned = false;
   }
 }
 

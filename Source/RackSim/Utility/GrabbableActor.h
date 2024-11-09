@@ -62,6 +62,7 @@ protected:
 
   void ResetMeshPosition();
   void CenterActorOnMesh();
+  virtual void HandleSummons(float DeltaTime);
 
   // summoning
   FVector StartLocation, TargetLocation;
