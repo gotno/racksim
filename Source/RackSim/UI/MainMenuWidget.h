@@ -36,7 +36,7 @@ public:
   void GotoMain();
 
   void GotoStatus(FString UpperText = "", FString LowerText = "");
-  void UpdateSettings(URackSimGameUserSettings* UserSettings);
+  void UpdateSettings();
   void UpdateState(Aosc3GameState* GameState);
 
   void SetExitFunction(TFunction<void ()> inExitFunction) {

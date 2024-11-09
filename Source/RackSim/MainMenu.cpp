@@ -110,10 +110,6 @@ void AMainMenu::Init(
   // but they do need to be set before we Refresh
   MainMenuWidget->SetFMShortcutsListItems(GenerateFMShortcutsEntries());
 
-  URackSimGameUserSettings* UserSettings =
-    Cast<URackSimGameUserSettings>(UGameUserSettings::GetGameUserSettings());
-  if (UserSettings) MainMenuWidget->UpdateSettings(UserSettings);
-
   Refresh();
 }
 

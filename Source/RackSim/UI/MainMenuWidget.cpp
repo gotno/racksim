@@ -17,6 +17,8 @@
 #include "Components/HorizontalBox.h"
 #include "Components/VerticalBoxSlot.h"
 
+#include "GameFramework/GameUserSettings.h"
+
 void UMainMenuWidget::SynchronizeProperties() {
   Super::SynchronizeProperties();
 
@@ -93,6 +95,8 @@ void UMainMenuWidget::SynchronizeProperties() {
 
     ScalingFactorSlider->SetShowAdjusters(true);
   }
+
+  UpdateSettings();
 }
 
 void UMainMenuWidget::NativeConstruct() {
@@ -146,11 +150,19 @@ void UMainMenuWidget::NativeConstruct() {
   MapOneButton->OnReleased.AddDynamic(this, &UMainMenuWidget::HandleMapOneClick);
   MapTwoButton->OnReleased.AddDynamic(this, &UMainMenuWidget::HandleMapTwoClick);
   MapThreeButton->OnReleased.AddDynamic(this, &UMainMenuWidget::HandleMapThreeClick);
+
+  UpdateSettings();
 }
 
-void UMainMenuWidget::UpdateSettings(URackSimGameUserSettings* UserSettings) {
-  CableTensionSlider->SetValue(UserSettings->CableTension);
-  CableOpacitySlider->SetValue(UserSettings->CableOpacity);
+void UMainMenuWidget::UpdateSettings() {
+  URackSimGameUserSettings* UserSettings =
+    Cast<URackSimGameUserSettings>(UGameUserSettings::GetGameUserSettings());
+  if (!UserSettings) return;
+
+  UserSettings->LoadSettings();
+
+  CableTensionSlider->SetValue(UserSettings->CableTensionPercent);
+  CableOpacitySlider->SetValue(UserSettings->CableOpacityPercent);
 
   CableColorCycleToggleButton->SetToggleOneChecked(UserSettings->bCycleCableColors);
 
