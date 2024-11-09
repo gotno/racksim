@@ -31,6 +31,7 @@ public:
 protected:
   virtual void BeginPlay() override;
   virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+  virtual void HandleSummons(float DeltaTime) override;
 
 public:
   virtual void Tick(float DeltaTime) override;

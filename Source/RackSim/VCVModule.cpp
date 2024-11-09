@@ -389,6 +389,11 @@ void AVCVModule::SpawnComponents() {
   for (auto& pair : ParamLightActors) pair.Value->HandleOverlap();
 }
 
+void AVCVModule::HandleSummons(float DeltaTime) {
+  Super::HandleSummons(DeltaTime);
+  TriggerCableUpdates();
+}
+
 void AVCVModule::EngageGrab(FVector GrabbedLocation, FRotator GrabbedRotation) {
   if (!bHasBeenGrabbed) {
     bHasBeenGrabbed = true;
@@ -400,7 +405,6 @@ void AVCVModule::EngageGrab(FVector GrabbedLocation, FRotator GrabbedRotation) {
 
 void AVCVModule::AlterGrab(FVector GrabbedLocation, FRotator GrabbedRotation) {
   Super::AlterGrab(GrabbedLocation, GrabbedRotation);
-
   TriggerCableUpdates();
 }
 
