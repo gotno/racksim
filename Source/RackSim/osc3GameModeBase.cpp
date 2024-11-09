@@ -115,6 +115,8 @@ void Aosc3GameModeBase::LoadUserSettings() {
 
   AVCVCable::CableColorCycleDirection = UserSettings->bCycleCableColors ? 1 : 0;
   AVCVCable::CurrentCableColorIndex = UserSettings->LastCableColorIndex;
+  AVCVCable::SetOpacity(UserSettings->CableOpacityPercent);
+  AVCVCable::SetTension(UserSettings->CableTensionPercent);
 
   if (PlayerPawn) {
     PlayerPawn->SetControllerLightHidden(!UserSettings->bShowLeftControllerLight, EControllerHand::Left);
@@ -1023,20 +1025,18 @@ void Aosc3GameModeBase::SpawnMainMenu() {
     [&]() { SavePatch(TEXT("new")); }, // 'overwrite template' button callback
     [&](FString PatchPath) { LoadPatch(PatchPath); }, // general load patch callback
     [&](float Percent) { // set cable opacity callback
-      float opacity = Percent * 0.01f;
-
+      AVCVCable::SetOpacity(Percent);
       for (AVCVCable* cable : CableActors) {
-        cable->SetOpacity(opacity);
+        cable->UpdateCable();
       }
-      if (UserSettings) UserSettings->CableOpacity = opacity;
+      if (UserSettings) UserSettings->CableOpacityPercent = Percent;
     },
     [&](float Percent) { // set cable tension callback
-      float tension = Percent * 0.01f;
-
+      AVCVCable::SetTension(Percent);
       for (AVCVCable* cable : CableActors) {
-        cable->SetTension(tension);
+        cable->UpdateCable();
       }
-      if (UserSettings) UserSettings->CableTension = tension;
+      if (UserSettings) UserSettings->CableTensionPercent = Percent;
     },
     [&](bool CycleColors) { // set auto-cycle cable colors
       AVCVCable::CableColorCycleDirection = CycleColors ? 1 : 0;

@@ -150,7 +150,7 @@ void ACableEnd::UpdatePosition() {
 void ACableEnd::RealignMesh() {
   StaticMeshComponent->SetWorldLocation(GetActorLocation());
   StaticMeshComponent->SetWorldRotation(GetActorForwardVector().Rotation());
-  Cable->RecalculatePosition();
+  Cable->UpdateCable();
 }
 
 float ACableEnd::GetMeshOffset() {
@@ -163,7 +163,7 @@ void ACableEnd::OffsetMeshFrom(AActor* Actor) {
     Actor->GetActorLocation() - forwardVector * GetMeshOffset()
   );
   StaticMeshComponent->SetWorldRotation(forwardVector.Rotation());
-  Cable->RecalculatePosition();
+  Cable->UpdateCable();
 }
 
 void ACableEnd::GetPosition(FVector& Location, FRotator& Rotation) {
@@ -174,7 +174,7 @@ void ACableEnd::GetPosition(FVector& Location, FRotator& Rotation) {
 void ACableEnd::SetPosition(FVector Location, FRotator Rotation) {
   SetActorLocation(Location);
   SetActorRotation(Rotation);
-  Cable->RecalculatePosition();
+  Cable->UpdateCable();
 }
 
 void ACableEnd::HandleCableTargeted(AActor* CableEnd, EControllerHand Hand) {

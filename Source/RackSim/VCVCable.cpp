@@ -15,7 +15,7 @@
 #include "NiagaraComponent.h"
 
 AVCVCable::AVCVCable() {
-	PrimaryActorTick.bCanEverTick = true;
+  PrimaryActorTick.bCanEverTick = true;
 
   RootSceneComponent = CreateDefaultSubobject<USceneComponent>(TEXT("Root Scene"));
   SetRootComponent(RootSceneComponent);
@@ -25,7 +25,7 @@ AVCVCable::AVCVCable() {
 }
 
 void AVCVCable::BeginPlay() {
-	Super::BeginPlay();
+  Super::BeginPlay();
 
   GameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(GetWorld()));
 
@@ -39,13 +39,6 @@ void AVCVCable::BeginPlay() {
       EAttachLocation::KeepRelativeOffset,
       true
     );
-
-    URackSimGameUserSettings* UserSettings =
-      Cast<URackSimGameUserSettings>(UGameUserSettings::GetGameUserSettings());
-    if (UserSettings) {
-      SetOpacity(UserSettings->CableOpacity);
-      Tension = UserSettings->CableTension;
-    }
   }
 
   FActorSpawnParameters spawnParams;
@@ -80,8 +73,8 @@ void AVCVCable::BeginPlay() {
 }
 
 void AVCVCable::EndPlay(const EEndPlayReason::Type EndPlayReason) {
-	Super::EndPlay(EndPlayReason);
-  
+  Super::EndPlay(EndPlayReason);
+
   CableEndA->Disconnect();
   CableEndA->Destroy();
   CableEndB->Disconnect();
@@ -89,24 +82,30 @@ void AVCVCable::EndPlay(const EEndPlayReason::Type EndPlayReason) {
 }
 
 void AVCVCable::Tick(float DeltaTime) {
-	Super::Tick(DeltaTime);
+  Super::Tick(DeltaTime);
 }
 
-void AVCVCable::RecalculatePosition() {
+void AVCVCable::UpdateCable() {
   if (!CableFXComponent) return;
 
+  CableFXComponent->SetFloatParameter(FName("alpha"), Opacity);
+
+  FVector endAVector = -CableEndA->GetActorForwardVector();
+  FVector endBVector = -CableEndA->GetActorForwardVector();
+  FVector socketLocationB = CableEndB->GetMesh()->GetSocketLocation(TEXT("wire"));
+
   if (FMath::IsNearlyZero(Tension)) {
-    CableFXComponent->SetVectorParameter(FName("start_tangent"), -CableEndA->GetActorForwardVector());
-    CableFXComponent->SetVectorParameter(FName("end_tangent"), -CableEndB->GetActorForwardVector());
-    CableFXComponent->SetVectorParameter(FName("cable_end"), CableEndB->GetMesh()->GetSocketLocation(TEXT("wire")));
+    CableFXComponent->SetVectorParameter(FName("start_tangent"), endAVector);
+    CableFXComponent->SetVectorParameter(FName("end_tangent"), endBVector);
+    CableFXComponent->SetVectorParameter(FName("cable_end"), socketLocationB);
   } else {
     FVector socketLocationA = CableEndA->GetMesh()->GetSocketLocation(TEXT("wire"));
-    FVector socketLocationB = CableEndB->GetMesh()->GetSocketLocation(TEXT("wire"));
     FVector abLookAtVector =
       UKismetMathLibrary::FindLookAtRotation(
         socketLocationA,
         socketLocationB
       ).Vector();
+
     CableFXComponent->SetVectorParameter(
       FName("start_tangent"),
       FMath::Lerp(-CableEndA->GetActorForwardVector(), abLookAtVector, Tension)
@@ -211,17 +210,6 @@ bool AVCVCable::IsComplete() {
   return CableEndA->IsConnected() && CableEndB->IsConnected();
 }
 
-void AVCVCable::SetTension(float inTension) {
-  Tension = inTension;
-  RecalculatePosition();
-}
-
-void AVCVCable::SetOpacity(float Opacity) {
-  if (!CableFXComponent) return;
-
-  CableFXComponent->SetFloatParameter(FName("alpha"), Opacity);
-}
-
 void AVCVCable::SetColor(FColor Color) {
   CableColor = Color;
 
@@ -256,5 +244,5 @@ void AVCVCable::Rescale() {
   CableEndB->UpdatePosition();
   CableFXComponent->SetFloatParameter(FName("cable_diameter"), 0.24f * Scale);
   CableFXComponent->ReinitializeSystem();
-  RecalculatePosition();
+  UpdateCable();
 }

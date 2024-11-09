@@ -68,8 +68,6 @@ public:
 
   bool IsComplete();
 
-  void SetTension(float inTension);
-  void SetOpacity(float Opacity);
   void SetColor(FColor Color);
   FColor GetColor() {
     return CableColor;
@@ -78,7 +76,7 @@ public:
   void CycleColor();
   static inline int CableColorCycleDirection{1};
 
-  void RecalculatePosition();
+  void UpdateCable();
 
   // rack's default cable colors. these will be replaced with
   // colors from settings.json after rackman->Init grabs them
@@ -90,6 +88,16 @@ public:
     FColor::FromHex(FString("#8b4ade"))
   };
   static inline int CurrentCableColorIndex{-1};
+
+  static inline float Tension{DEFAULT_CABLE_TENSION * 0.01f};
+  static void SetTension(float Percent) {
+    Tension = Percent * 0.01f;
+  }
+
+  static inline float Opacity{DEFAULT_CABLE_OPACITY * 0.01f};
+  static void SetOpacity(float Percent) {
+    Opacity = Percent * 0.01f;
+  }
 private:
   UPROPERTY(VisibleAnywhere)
   USceneComponent* RootSceneComponent;
@@ -110,8 +118,6 @@ private:
 
   // allowed to exist even if unattached
   bool bLatched{false};
-
-  float Tension{0.f};
 
 public:
   static inline float Scale{1.f};
