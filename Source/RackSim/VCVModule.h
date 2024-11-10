@@ -35,6 +35,7 @@ protected:
 
 public:
   virtual void Tick(float DeltaTime) override;
+  virtual void Summon(FVector Location, FRotator Rotation, bool bInstant = false) override;
 
   void Init(VCVModule vcv_module, TFunction<void ()> ReadyCallback);
   UFUNCTION()

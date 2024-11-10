@@ -28,7 +28,7 @@ public:
   virtual void ReleaseGrab();
   virtual void SetHighlighted(bool bHighlighted, FLinearColor OutlineColor = OUTLINE_COLOR);
 
-  void Summon(FVector Location, FRotator Rotation, bool bInstant = false);
+  virtual void Summon(FVector Location, FRotator Rotation, bool bInstant = false);
 
   bool IsInWeldment() { return !!Weldment; }
   AModuleWeldment* GetWeldment() {

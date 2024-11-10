@@ -389,6 +389,11 @@ void AVCVModule::SpawnComponents() {
   for (auto& pair : ParamLightActors) pair.Value->HandleOverlap();
 }
 
+void AVCVModule::Summon(FVector Location, FRotator Rotation, bool bInstant) {
+  Super::Summon(Location, Rotation, bInstant);
+  if (bInstant) TriggerCableUpdates();
+}
+
 void AVCVModule::HandleSummons(float DeltaTime) {
   Super::HandleSummons(DeltaTime);
   TriggerCableUpdates();
