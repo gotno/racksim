@@ -122,7 +122,8 @@ void ALibrary::ParseLibraryJson(FString& JsonStr) {
 
       VCVPluginInfo& plugin = Model.Plugins.Emplace(pluginPair.Key, pluginPair.Key);
       plugin.Name = pluginJ->GetStringField(FString("name"));
-        
+      plugin.Version = pluginJ->GetStringField(FString("version"));
+
       for (auto& modulePair : pluginJ->GetObjectField("modules")->Values) {
         // UE_LOG(LogTemp, Warning, TEXT("ParseLibraryJson\t  module: %s"), *modulePair.Key);
         TSharedPtr<FJsonObject> moduleJ = modulePair.Value->AsObject();
