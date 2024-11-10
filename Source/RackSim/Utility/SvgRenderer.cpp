@@ -24,6 +24,10 @@ void USvgRenderer::RenderTextureAsync(FString Filepath) {
 
   getSvgSize(TCHAR_TO_ANSI(*Filepath), width, height, scale);
 
+  // this seems to mostly fix a scaling issue,
+  // specifically with some 4ms modules
+  if (height > 950) height = 950;
+
   TextureTarget = UTexture2D::CreateTransient(width, height, PF_R8G8B8A8);
   if (!TextureTarget) {
     UE_LOG(LogTemp, Warning, TEXT("SvgRenderer unable to create texture"));
