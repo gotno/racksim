@@ -272,7 +272,8 @@ TArray<FString> URackManager::GetRecentPatchPaths() {
 // need:
 // - update warning to indicate rack will close
 // - close rack if running
-// - menu: add cancel button to status section
+// x menu: add cancel button to status section
+//   add cancel function to rackman
 void URackManager::RegenerateModulePreviews() {
   FPlatformFileManager::Get()
     .GetPlatformFile()
@@ -280,7 +281,15 @@ void URackManager::RegenerateModulePreviews() {
   GenerateModulePreviews();
 }
 
-void URackManager::GenerateModulePreviews(bool bIsRestart) {
+void URackManager::GenerateModulePreviews(TArray<FString>& PluginSlugs) {
+  IPlatformFile& fm = FPlatformFileManager::Get().GetPlatformFile();
+  for (FString& slug : PluginSlugs) {
+    fm.DeleteDirectoryRecursively(*(RackUserPath + "screenshots/" + slug + "/"));
+  }
+  GenerateModulePreviews();
+}
+
+void URackManager::GenerateModulePreviews() {
   FPlatformProcess::CreatePipe(StdOutReadHandle, StdOutWriteHandle);
 
   hRackProc = FPlatformProcess::CreateProc(
@@ -298,11 +307,6 @@ void URackManager::GenerateModulePreviews(bool bIsRestart) {
 
   if (hRackProc.IsValid()) {
     LastPreviewModule = "";
-
-    if (!bIsRestart) {
-      UE_LOG(LogTemp, Warning, TEXT("Initializing preview generation..."));
-      OnPreviewGeneratedStatus.Broadcast(FString("Initializing preview generation..."));
-    }
 
     GetWorld()->GetTimerManager().SetTimer(
       hPipeReadTimer,
@@ -349,18 +353,18 @@ void URackManager::ReadScreenshottingLog() {
 
     FString msg;
     msg.Appendf(TEXT("Previews for plugin %s stalled, skipping..."), *CurrentPreviewPlugin);
-    OnPreviewGeneratedStatus.Broadcast(msg);
+    OnPreviewGeneratedStatus.Broadcast(msg, false);
     UE_LOG(LogTemp, Error, TEXT("Previews for plugin %s stalled, skipping..."), *CurrentPreviewPlugin);
 
     HidePlugin(CurrentPreviewPlugin);
-    GenerateModulePreviews(true);
+    GenerateModulePreviews();
     return;
   }
 
   FRegexPattern finishRegex(TEXT("Finished screenshotting modules"));
   FRegexMatcher finishMatcher(finishRegex, stdOut);
   if (finishMatcher.FindNext()) {
-    OnPreviewGeneratedStatus.Broadcast(FString("Previews generated!"));
+    OnPreviewGeneratedStatus.Broadcast(FString("Previews generated!"), true);
     UE_LOG(LogTemp, Warning, TEXT("Previews generated!"));
     ClearPreviewGenerationTimers();
     UnhidePlugins();
@@ -380,7 +384,7 @@ void URackManager::ReadScreenshottingLog() {
 
     FString msg;
     msg.Appendf(TEXT("Generating preview for %s/%s"), *plugin, *module);
-    OnPreviewGeneratedStatus.Broadcast(msg);
+    OnPreviewGeneratedStatus.Broadcast(msg, false);
     UE_LOG(LogTemp, Warning, TEXT("Generating preview for %s/%s"), *plugin, *module);
   }
 }
@@ -396,12 +400,12 @@ void URackManager::CheckPreviewGenerationStalled() {
 
   FString msg;
   msg.Appendf(TEXT("Previews for plugin %s stalled, skipping..."), *CurrentPreviewPlugin);
-  OnPreviewGeneratedStatus.Broadcast(msg);
+  OnPreviewGeneratedStatus.Broadcast(msg, false);
   UE_LOG(LogTemp, Error, TEXT("Previews for plugin %s stalled, skipping..."), *CurrentPreviewPlugin);
 
   CallOnExit([this]() {
     HidePlugin(CurrentPreviewPlugin);
-    GenerateModulePreviews(true);
+    GenerateModulePreviews();
   });
   KillRack();
 }

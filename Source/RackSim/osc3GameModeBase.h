@@ -111,6 +111,9 @@ public:
   UFUNCTION()
   void SaveUserSettings();
 
+  void AlertGeneratePreviews();
+  void AlertGeneratePreviews(TArray<FString>& PluginSlugs);
+
 private:
   UFUNCTION()
   void LoadUserSettings();
@@ -211,7 +214,7 @@ private:
   FString PatchPathToBootstrap{""};
 
   UFUNCTION()
-  void HandlePreviewGeneratedStatus(FString Status);
+  void HandlePreviewGeneratedStatus(FString Status, bool bSuccess);
 public:
   // delegate stuff
   void SubscribeMenuItemSyncedDelegate(AContextMenu* ContextMenu);

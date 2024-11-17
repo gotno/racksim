@@ -104,7 +104,9 @@ void UMainMenuWidget::NativeConstruct() {
 
   ConfirmationConfirmButton->OnReleased.AddDynamic(this, &UMainMenuWidget::HandleConfirmationConfirmClicked);
   ConfirmationConfirmButtonAlt->OnReleased.AddDynamic(this, &UMainMenuWidget::HandleConfirmationConfirmAltClicked);
-  ConfirmationCancelButton->OnReleased.AddDynamic(this, &UMainMenuWidget::HandleConfirmationCancelClick);
+  ConfirmationCancelButton->OnReleased.AddDynamic(this, &UMainMenuWidget::HandleConfirmationCancelClicked);
+
+  StatusCancelButton->OnReleased.AddDynamic(this, &UMainMenuWidget::HandleStatusCancelClicked);
 
   CableColorCycleToggleButton->OnToggleOneToggledDelegate.AddDynamic(
     this,
@@ -286,9 +288,15 @@ void UMainMenuWidget::HandleKeyboardInputConfirmed(FString Input) {
   }
 }
 
+void UMainMenuWidget::GotoStatus(FString UpperText, FString LowerText, TFunction<void ()> inStatusCancelFunction) {
+  StatusCancelFunction = inStatusCancelFunction;
+  StatusCancelButtonContainer->SetVisibility(ESlateVisibility::Visible);
+  GotoStatus(UpperText, LowerText);
+}
+
 void UMainMenuWidget::GotoStatus(FString UpperText, FString LowerText) {
   HideAll();
-  LoadingSection->SetVisibility(ESlateVisibility::HitTestInvisible);
+  StatusSection->SetVisibility(ESlateVisibility::HitTestInvisible);
   UpperLoadingText->SetText(FText::FromString(UpperText));
   LowerLoadingText->SetText(FText::FromString(LowerText));
 }
@@ -306,7 +314,7 @@ void UMainMenuWidget::GotoFileManager() {
 void UMainMenuWidget::HideAll() {
   MainSection->SetVisibility(ESlateVisibility::Hidden);
   FileManagerSection->SetVisibility(ESlateVisibility::Hidden);
-  LoadingSection->SetVisibility(ESlateVisibility::Hidden);
+  StatusSection->SetVisibility(ESlateVisibility::Hidden);
   ConfirmationSection->SetVisibility(ESlateVisibility::Hidden);
 
   // keyboard/input
@@ -468,9 +476,15 @@ void UMainMenuWidget::HandleConfirmationConfirmAltClicked() {
   ConfirmationConfirmAltFunction();
 }
 
-void UMainMenuWidget::HandleConfirmationCancelClick() {
+void UMainMenuWidget::HandleConfirmationCancelClicked() {
   ConfirmationSection->SetVisibility(ESlateVisibility::Hidden);
   ConfirmationCancelFunction();
+}
+
+void UMainMenuWidget::HandleStatusCancelClicked() {
+  StatusSection->SetVisibility(ESlateVisibility::Hidden);
+  StatusCancelButtonContainer->SetVisibility(ESlateVisibility::Collapsed);
+  StatusCancelFunction();
 }
 
 void UMainMenuWidget::HandleLoadPatch(FString PatchPath) {

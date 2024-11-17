@@ -15,6 +15,9 @@ public:
   UPROPERTY()
   Uosc3SaveGame* SaveData{nullptr};
 
+  UPROPERTY()
+  bool bAskedToGeneratePreviews{false};
+
   FProcHandle hRackProc;
   bool RackIsRunning() {
     return hRackProc.IsValid() && FPlatformProcess::IsProcRunning(hRackProc);

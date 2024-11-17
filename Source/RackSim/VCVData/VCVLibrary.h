@@ -26,4 +26,5 @@ struct VCVPluginInfo {
 struct VCVLibrary {
   TMap<FString, VCVPluginInfo> Plugins;
   TMap<int, FString> TagNames;
+  TMap<FString, FString> PreviewVersions;
 };

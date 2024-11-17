@@ -430,7 +430,8 @@ void Aosc3GameModeBase::CheckRackRunning() {
     TEXT("Yes, reload autosave"),
     [&]() {
       LoadPatch(osc3GameState->GetAutosaveName());
-    }
+    },
+    true
   );
 }
 
@@ -1066,11 +1067,12 @@ void Aosc3GameModeBase::SpawnMainMenu() {
     [&](float Scale) { AdjustScalingFactor(Scale); }, // set module scaling factor
     [&] { // confirm generate module previews
       MainMenu->Confirm(
-        TEXT("This will generate previews for all modules in the library.\nThe process may take quite a while, but it can be interrupted and resumed."),
+        TEXT("Generate previews for the library?\nThis might take a minute."),
         TEXT("Generate missing"),
         TEXT("(Re)generate all"),
         [&]() { rackman->GenerateModulePreviews(); },
-        [&]() { rackman->RegenerateModulePreviews(); }
+        [&]() { rackman->RegenerateModulePreviews(); },
+        true
       );
     }
   );
@@ -1314,6 +1316,61 @@ void Aosc3GameModeBase::AdjustScalingFactor(float Scale) {
 // TODO: update to use mainmenu status with button
 // update to two params: status and button text
 // void Aosc3GameModeBase::HandlePreviewGeneratedStatus(FString Status, bool bCancellable) {
-void Aosc3GameModeBase::HandlePreviewGeneratedStatus(FString Status) {
-  MainMenu->Alert(Status, "Ok");
+void Aosc3GameModeBase::HandlePreviewGeneratedStatus(FString Status, bool bSuccess) {
+  if (bSuccess) {
+    MainMenu->Alert(Status);
+  } else {
+    MainMenu->Status(
+      TEXT("Generating library previews..."),
+      Status,
+      [&]() {
+        ODB("cancelled")
+        ODB("cancelled")
+        ODB("cancelled")
+        ODB("cancelled")
+        ODB("cancelled")
+        ODB("cancelled")
+        ODB("cancelled")
+        ODB("cancelled")
+        ODB("cancelled")
+        ODB("cancelled")
+      }
+    );
+  }
+}
+
+void Aosc3GameModeBase::AlertGeneratePreviews() {
+  if (osc3GameInstance->bAskedToGeneratePreviews) return;
+  osc3GameInstance->bAskedToGeneratePreviews = true;
+
+  MainMenu->Confirm(
+    TEXT("Looks like you haven't generated previews for the library.\nWould you like to do that now?"),
+    TEXT("Yes, generate previews"),
+    [&]() {
+      MainMenu->Status(
+        TEXT("Initializing preview generation..."),
+        TEXT("This might take a minute.")
+      );
+      rackman->GenerateModulePreviews();
+    },
+    false
+  );
+}
+
+void Aosc3GameModeBase::AlertGeneratePreviews(TArray<FString>& PluginSlugs) {
+  if (osc3GameInstance->bAskedToGeneratePreviews) return;
+  osc3GameInstance->bAskedToGeneratePreviews = true;
+
+  MainMenu->Confirm(
+    TEXT("You have new or updated plugins.\nWould you like to (re)generate library previews for them?"),
+    TEXT("Yes, generate previews"),
+    [&]() {
+      MainMenu->Status(
+        TEXT("Initializing preview generation..."),
+        TEXT("This might take a minute.")
+      );
+      rackman->GenerateModulePreviews(PluginSlugs);
+    },
+    false
+  );
 }

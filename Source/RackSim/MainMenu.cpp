@@ -141,10 +141,15 @@ void AMainMenu::Status(FString UpperText, FString LowerText) {
   MainMenuWidget->GotoStatus(UpperText, LowerText);
 }
 
+void AMainMenu::Status(FString UpperText, FString LowerText, TFunction<void ()> StatusCancelFunction) {
+  MainMenuWidget->GotoStatus(UpperText, LowerText, StatusCancelFunction);
+}
+
 void AMainMenu::Confirm(
   FString ConfirmationLabel,
   FString ConfirmButtonLabel,
-  TFunction<void ()> inConfirmationConfirmFunction
+  TFunction<void ()> inConfirmationConfirmFunction,
+  bool bCancelBackToMenu
 ) {
   Show();
   MainMenuWidget->Confirm(
@@ -152,7 +157,7 @@ void AMainMenu::Confirm(
     ConfirmButtonLabel,
     inConfirmationConfirmFunction,
     [&]() {
-      MainMenuWidget->GotoMain();
+      if (bCancelBackToMenu) MainMenuWidget->GotoMain();
     },
     true // solo
   );
@@ -163,7 +168,8 @@ void AMainMenu::Confirm(
   FString ConfirmButtonOneLabel,
   FString ConfirmButtonTwoLabel,
   TFunction<void ()> inConfirmationConfirmOneFunction,
-  TFunction<void ()> inConfirmationConfirmTwoFunction
+  TFunction<void ()> inConfirmationConfirmTwoFunction,
+  bool bCancelBackToMenu
 ) {
   Show();
   MainMenuWidget->Confirm(
@@ -173,7 +179,7 @@ void AMainMenu::Confirm(
     inConfirmationConfirmOneFunction,
     inConfirmationConfirmTwoFunction,
     [&]() {
-      MainMenuWidget->GotoMain();
+      if (bCancelBackToMenu) MainMenuWidget->GotoMain();
     },
     true // solo
   );

@@ -49,20 +49,27 @@ public:
   void Show();
   void Refresh();
   void Toggle();
-  void Status(FString UpperText = "", FString LowerText = "");
+  void Status(FString UpperText, FString LowerText);
+  void Status(
+    FString UpperText,
+    FString LowerText,
+    TFunction<void ()> StatusCancelFunction
+  );
   void Confirm(
     FString ConfirmationLabel,
     FString ConfirmButtonLabel,
-    TFunction<void ()> inConfirmationConfirmFunction
+    TFunction<void ()> inConfirmationConfirmFunction,
+    bool bCancelBackToMenu
   );
   void Confirm(
     FString ConfirmationLabel,
     FString ConfirmButtonOneLabel,
     FString ConfirmButtonTwoLabel,
     TFunction<void ()> inConfirmationConfirmOneFunction,
-    TFunction<void ()> inConfirmationConfirmTwoFunction
+    TFunction<void ()> inConfirmationConfirmTwoFunction,
+    bool bCancelBackToMenu
   );
-  void Alert(FString AlertLabel, FString ConfirmButtonLabel);
+  void Alert(FString AlertLabel, FString ConfirmButtonLabel = TEXT("OK"));
 
 private:
   Aosc3GameModeBase* GameMode;

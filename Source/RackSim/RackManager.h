@@ -7,7 +7,7 @@
 
 #include "RackManager.generated.h"
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnPreviewGeneratedSignature, FString);
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnPreviewGeneratedSignature, FString /* StatusText */, bool /* bSuccess */);
 
 UCLASS()
 class RACKSIM_API URackManager : public UObject {
@@ -16,7 +16,10 @@ class RACKSIM_API URackManager : public UObject {
 public:
   void Init();
   void Run(FString PatchPath, TFunction<void ()> inFinishRunCallback);
-  void GenerateModulePreviews(bool bIsRestart = false);
+  // generate previews for all plugins
+  void GenerateModulePreviews();
+  // delete previews for these plugins, then generate
+  void GenerateModulePreviews(TArray<FString>& PluginSlugs);
   void RegenerateModulePreviews();
   void CancelPreviewGeneration();
   void Cleanup();

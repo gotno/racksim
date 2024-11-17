@@ -1,5 +1,6 @@
 #include "Library.h"
 
+#include "osc3GameModeBase.h"
 #include "VCVModule.h"
 
 #include "UI/LibraryWidget.h"
@@ -13,6 +14,7 @@
 #include "Engine/Texture2D.h"
 #include "Json.h"
 
+#include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetRenderingLibrary.h"
 
 ALibrary::ALibrary() {
@@ -67,6 +69,8 @@ ALibrary::ALibrary() {
 
 void ALibrary::BeginPlay() {
   Super::BeginPlay();
+
+  GameMode = Cast<Aosc3GameModeBase>(UGameplayStatics::GetGameMode(this));
 
   if (BaseMaterialInterface) {
     BaseMaterialInstance = UMaterialInstanceDynamic::Create(BaseMaterialInterface, this);
@@ -142,7 +146,6 @@ void ALibrary::ParseLibraryJson(FString& JsonStr) {
       // UE_LOG(LogTemp, Warning, TEXT("ParseLibraryJson\ttagName: %d- %s"), FCString::Atoi(*tagNamePair.Key), *tagNamePair.Value->AsString());
       Model.TagNames.Add(FCString::Atoi(*tagNamePair.Key), tagNamePair.Value->AsString());
     }
-    
   } else {
     UE_LOG(LogTemp, Warning, TEXT("trouble deserializing library json"));
   }
@@ -194,9 +197,62 @@ void ALibrary::SetScale() {
 
 void ALibrary::SetPreviewsPath(FString& inPreviewsPath) {
   PreviewsPath = inPreviewsPath;
+
+  PreviewVersionsJsonPath = PreviewsPath;
+  PreviewVersionsJsonPath.Append(TEXT("screenshot_plugin_versions.json"));
+  ParsePreviewVersionsJson();
+}
+
+void ALibrary::ParsePreviewVersionsJson() {
+  FString JsonStr;
+  if (!FFileHelper::LoadFileToString(JsonStr, *PreviewVersionsJsonPath)) return;
+
+  TSharedRef<TJsonReader<TCHAR>> JsonReader =
+    TJsonReaderFactory<TCHAR>::Create(*JsonStr);
+  TSharedPtr<FJsonValue> OutJson;
+
+  if (!FJsonSerializer::Deserialize(JsonReader, OutJson)) return;
+
+  TSharedPtr<FJsonObject> rootJ = OutJson->AsObject();
+  for (auto& versionPair : rootJ->Values) {
+    Model.PreviewVersions.Add(versionPair.Key, versionPair.Value->AsString());
+  }
+}
+
+void ALibrary::CheckPluginVersionsForPreviewUpdates() {
+  if (bCheckedPreviews) return;
+  bCheckedPreviews = true;
+
+  if (!FPaths::FileExists(*PreviewVersionsJsonPath)) {
+    GameMode->AlertGeneratePreviews();
+    return;
+  }
+
+  TArray<FString> previewUpdatePluginSlugs;
+  FString previewVersion;
+
+  // check for updated plugins
+  for (auto& pluginPair : Model.Plugins) {
+    VCVPluginInfo& plugin = pluginPair.Value;
+
+    if (Model.PreviewVersions.Contains(plugin.Slug)) {
+      previewVersion = Model.PreviewVersions[plugin.Slug];
+      if (!previewVersion.Equals(plugin.Version))
+        previewUpdatePluginSlugs.Add(plugin.Slug);
+    }
+  }
+
+  // check for new plugins
+  bool newPlugins = Model.Plugins.Num() > Model.PreviewVersions.Num();
+
+  if (newPlugins || previewUpdatePluginSlugs.Num() > 0) {
+    GameMode->AlertGeneratePreviews(previewUpdatePluginSlugs);
+  }
 }
 
 void ALibrary::ShowPreview(FString& PluginSlug, FString& ModuleSlug) {
+  CheckPluginVersionsForPreviewUpdates();
+
   PreviewMeshComponent->SetMaterial(1, LoadingMaterialInstance);
   PreviewMeshComponent->SetHiddenInGame(false);
 

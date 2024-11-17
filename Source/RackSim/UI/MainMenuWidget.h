@@ -35,7 +35,8 @@ public:
   UFUNCTION()
   void GotoMain();
 
-  void GotoStatus(FString UpperText = "", FString LowerText = "");
+  void GotoStatus(FString UpperText, FString LowerText);
+  void GotoStatus(FString UpperText, FString LowerText, TFunction<void ()> inStatusCancelFunction);
   void UpdateSettings();
   void UpdateState(Aosc3GameState* GameState);
 
@@ -221,12 +222,17 @@ protected:
   UButton* GeneratePreviewsButton;
 
   UPROPERTY(meta = (BindWidget))
-  UBorder* LoadingSection;
-  // UBorder* StatusSection; // aactually
+  UBorder* StatusSection;
   UPROPERTY(meta = (BindWidget))
   UTextBlock* UpperLoadingText;
   UPROPERTY(meta = (BindWidget))
   UTextBlock* LowerLoadingText;
+  UPROPERTY(meta = (BindWidget))
+  USizeBox* StatusCancelButtonContainer;
+  UPROPERTY(meta = (BindWidget))
+  UButton* StatusCancelButton;
+  UPROPERTY(meta = (BindWidget))
+  UTextBlock* StatusCancelButtonLabel;
 
   UPROPERTY(meta = (BindWidget))
   UBorder* FilenameInputContainer;
@@ -255,19 +261,23 @@ private:
 
   TFunction<void ()> ConfirmationCancelFunction;
   UFUNCTION()
-  void HandleConfirmationCancelClick();
+  void HandleConfirmationCancelClicked();
+
+  TFunction<void ()> StatusCancelFunction;
+  UFUNCTION()
+  void HandleStatusCancelClicked();
 
   TFunction<void ()> ExitFunction;
   UFUNCTION()
   void HandleExitClick() {
-    GotoStatus("goodbye", "leaving simulation");
+    GotoStatus(TEXT("goodbye"), TEXT("leaving simulation"));
     ExitFunction();
   }
 
   TFunction<void ()> SaveFunction;
   UFUNCTION()
   void HandleSaveClick() {
-    GotoStatus();
+    GotoStatus(TEXT(""), TEXT(""));
     SaveFunction();
   }
 

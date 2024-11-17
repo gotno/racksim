@@ -6,6 +6,7 @@
 
 #include "Library.generated.h"
 
+class Aosc3GameModeBase;
 class AVCVModule;
 
 class UWidgetComponent;
@@ -48,6 +49,8 @@ public:
   void GetModuleLandingPosition(const float& ModuleWidth, FVector& Location, FRotator& Rotation);
   void ParkModule(AVCVModule* Module);
 private:
+  Aosc3GameModeBase* GameMode;
+
   UPROPERTY()
   UMaterialInstanceDynamic* BaseMaterialInstance;
   UPROPERTY()
@@ -73,6 +76,12 @@ private:
   void ParseLibraryJson(FString& JsonStr);
   VCVLibrary Model;
 
+  FString PreviewsPath;
+  FString PreviewVersionsJsonPath;
+  void ParsePreviewVersionsJson();
+  void CheckPluginVersionsForPreviewUpdates();
+  bool bCheckedPreviews{false};
+
   TArray<ULibraryEntry*> GenerateLibraryEntries();
   TArray<UFilterListEntryData*> GenerateBrandFilterEntries();
   TArray<UFilterListEntryData*> GenerateTagsFilterEntries();
@@ -83,8 +92,6 @@ private:
   void SetScale();
   float DesiredWidth{14.f * DEFAULT_RENDER_SCALE};
   float BasePadding{0.4f};
-
-  FString PreviewsPath;
 
   UPROPERTY()
   TArray<AVCVModule*> ParkedModules;
