@@ -295,7 +295,7 @@ void ALibrary::HidePreview() {
 }
 
 void ALibrary::ParkModule(AVCVModule* Module) {
-  Module->OnFirstGrabbed.AddUObject(this, &ALibrary::UnparkModule);
+  Module->OnFirstMoved.AddUObject(this, &ALibrary::UnparkModule);
   Module->AttachToComponent(StaticMeshRoot, FAttachmentTransformRules::KeepWorldTransform);
 
   TArray<AVCVModule*> newParkedModules;

@@ -94,8 +94,8 @@ void AModuleWeldment::AddModuleBack(AVCVModule* Module) {
 }
 
 void AModuleWeldment::AddModule(AVCVModule* Module) {
-  Module->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
   Module->SetWeldment(this);
+  Module->AttachToActor(this, FAttachmentTransformRules::KeepWorldTransform);
   ResetLocation();
   HighlightModules();
 }

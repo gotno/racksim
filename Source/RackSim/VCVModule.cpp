@@ -399,12 +399,15 @@ void AVCVModule::HandleSummons(float DeltaTime) {
   TriggerCableUpdates();
 }
 
-void AVCVModule::EngageGrab(FVector GrabbedLocation, FRotator GrabbedRotation) {
-  if (!bHasBeenGrabbed) {
-    bHasBeenGrabbed = true;
-    OnFirstGrabbed.Broadcast(this);
-  }
 
+void AVCVModule::HandleFirstMoved() {
+  if (bHasBeenMoved) return;
+  bHasBeenMoved = true;
+  OnFirstMoved.Broadcast(this);
+}
+
+void AVCVModule::EngageGrab(FVector GrabbedLocation, FRotator GrabbedRotation) {
+  HandleFirstMoved();
   Super::EngageGrab(GrabbedLocation, GrabbedRotation);
 }
 

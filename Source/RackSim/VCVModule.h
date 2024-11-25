@@ -17,7 +17,8 @@ class AModuleWeldment;
 class UTexture2D;
 class UBoxComponent;
 
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnFirstGrabSignature, AVCVModule* /* this */);
+// used to remove module from library parking lot
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnFirstMovedSignature, AVCVModule* /* this */);
 
 UCLASS()
 class RACKSIM_API AVCVModule : public AGrabbableActor {
@@ -80,6 +81,7 @@ public:
   void ReleaseGrab() override;
 
   void SetWeldment(AModuleWeldment* inWeldment) {
+    HandleFirstMoved();
     Weldment = inWeldment;
   }
 
@@ -160,7 +162,9 @@ private:
   void SnapMesh();
   // make the snap permanent
   void WeldSnap();
-  
+
+  void HandleFirstMoved();
+
   Aosc3GameModeBase* GameMode;
 
   TMap<int, AVCVParam*> ParamActors;
@@ -180,7 +184,7 @@ private:
 
 // delegate stuff
 public:
-  FOnFirstGrabSignature OnFirstGrabbed;
+  FOnFirstMovedSignature OnFirstMoved;
 private:
-  bool bHasBeenGrabbed{false};
+  bool bHasBeenMoved{false};
 };
