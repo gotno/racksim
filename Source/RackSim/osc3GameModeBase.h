@@ -112,7 +112,7 @@ public:
   void SaveUserSettings();
 
   void AlertGeneratePreviews();
-  void AlertGeneratePreviews(TArray<FString>& PluginSlugs);
+  void AlertGeneratePreviews(TArray<FString> PluginSlugs);
 
 private:
   UFUNCTION()

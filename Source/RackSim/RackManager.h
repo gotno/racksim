@@ -19,7 +19,8 @@ public:
   // generate previews for all plugins
   void GenerateModulePreviews();
   // delete previews for these plugins, then generate
-  void GenerateModulePreviews(TArray<FString>& PluginSlugs);
+  void GenerateModulePreviews(TArray<FString> PluginSlugs);
+  // delete previews for all plugins, then generate
   void RegenerateModulePreviews();
   void CancelPreviewGeneration();
   void Cleanup();

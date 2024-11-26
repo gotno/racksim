@@ -35,7 +35,7 @@ public:
   UFUNCTION()
   void GotoMain();
 
-  void GotoStatus(FString UpperText, FString LowerText);
+  void GotoStatus(FString UpperText, FString LowerText, bool bCancellable = false);
   void GotoStatus(FString UpperText, FString LowerText, TFunction<void ()> inStatusCancelFunction);
   void UpdateSettings();
   void UpdateState(Aosc3GameState* GameState);

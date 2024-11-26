@@ -281,7 +281,7 @@ void URackManager::RegenerateModulePreviews() {
   GenerateModulePreviews();
 }
 
-void URackManager::GenerateModulePreviews(TArray<FString>& PluginSlugs) {
+void URackManager::GenerateModulePreviews(TArray<FString> PluginSlugs) {
   IPlatformFile& fm = FPlatformFileManager::Get().GetPlatformFile();
   for (FString& slug : PluginSlugs) {
     fm.DeleteDirectoryRecursively(*(RackUserPath + "screenshots/" + slug + "/"));

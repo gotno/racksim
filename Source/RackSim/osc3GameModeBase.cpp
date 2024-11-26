@@ -1070,8 +1070,28 @@ void Aosc3GameModeBase::SpawnMainMenu() {
         TEXT("Generate previews for the library?\nThis might take a minute."),
         TEXT("Generate missing"),
         TEXT("(Re)generate all"),
-        [&]() { rackman->GenerateModulePreviews(); },
-        [&]() { rackman->RegenerateModulePreviews(); },
+        [this]() {
+          if (rackman->RackIsRunning()) {
+            rackman->CallOnExit([this]() {
+              rackman->GenerateModulePreviews();
+            });
+            OSCctrl->SendAutosaveAndExit();
+            Reset();
+          } else {
+            rackman->GenerateModulePreviews();
+          }
+        },
+        [this]() {
+          if (rackman->RackIsRunning()) {
+            rackman->CallOnExit([this]() {
+              rackman->RegenerateModulePreviews();
+            });
+            OSCctrl->SendAutosaveAndExit();
+            Reset();
+          } else {
+            rackman->RegenerateModulePreviews();
+          }
+        },
         true
       );
     }
@@ -1346,30 +1366,38 @@ void Aosc3GameModeBase::AlertGeneratePreviews() {
   MainMenu->Confirm(
     TEXT("Looks like you haven't generated previews for the library.\nWould you like to do that now?"),
     TEXT("Yes, generate previews"),
-    [&]() {
+    [this] {
       MainMenu->Status(
         TEXT("Initializing preview generation..."),
         TEXT("This might take a minute.")
       );
-      rackman->GenerateModulePreviews();
+      rackman->CallOnExit([this]() {
+        rackman->GenerateModulePreviews();
+      });
+      OSCctrl->SendAutosaveAndExit();
+      Reset();
     },
     false
   );
 }
 
-void Aosc3GameModeBase::AlertGeneratePreviews(TArray<FString>& PluginSlugs) {
+void Aosc3GameModeBase::AlertGeneratePreviews(TArray<FString> PluginSlugs) {
   if (osc3GameInstance->bAskedToGeneratePreviews) return;
   osc3GameInstance->bAskedToGeneratePreviews = true;
 
   MainMenu->Confirm(
     TEXT("You have new or updated plugins.\nWould you like to (re)generate library previews for them?"),
     TEXT("Yes, generate previews"),
-    [&]() {
+    [this, PluginSlugs] {
       MainMenu->Status(
         TEXT("Initializing preview generation..."),
         TEXT("This might take a minute.")
       );
-      rackman->GenerateModulePreviews(PluginSlugs);
+      rackman->CallOnExit([this, PluginSlugs]() {
+        rackman->GenerateModulePreviews(PluginSlugs);
+      });
+      OSCctrl->SendAutosaveAndExit();
+      Reset();
     },
     false
   );

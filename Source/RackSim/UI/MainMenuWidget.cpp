@@ -290,12 +290,14 @@ void UMainMenuWidget::HandleKeyboardInputConfirmed(FString Input) {
 
 void UMainMenuWidget::GotoStatus(FString UpperText, FString LowerText, TFunction<void ()> inStatusCancelFunction) {
   StatusCancelFunction = inStatusCancelFunction;
-  StatusCancelButtonContainer->SetVisibility(ESlateVisibility::Visible);
-  GotoStatus(UpperText, LowerText);
+  GotoStatus(UpperText, LowerText, true);
 }
 
-void UMainMenuWidget::GotoStatus(FString UpperText, FString LowerText) {
+void UMainMenuWidget::GotoStatus(FString UpperText, FString LowerText, bool bCancellable) {
   HideAll();
+  StatusCancelButtonContainer->SetVisibility(
+    bCancellable ? ESlateVisibility::Visible : ESlateVisibility::Collapsed
+  );
   StatusSection->SetVisibility(ESlateVisibility::HitTestInvisible);
   UpperLoadingText->SetText(FText::FromString(UpperText));
   LowerLoadingText->SetText(FText::FromString(LowerText));
