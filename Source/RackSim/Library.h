@@ -100,4 +100,5 @@ private:
   // arrange parked modules
   void UpdateLot(float Offset = 0.f, bool bInstant = false);
   void UpdateLot(bool bInstant);
+  float ParkingLotGutter{1.f};
 };

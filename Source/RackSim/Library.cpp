@@ -334,7 +334,7 @@ void ALibrary::UpdateLot(float PreviewPanelWidth, bool bInstant) {
   );
   if (PreviewPanelWidth > 0.f) {
     parkingLocation +=
-      StaticMeshComponent->GetRightVector() * (PreviewPanelWidth + 2.f);
+      StaticMeshComponent->GetRightVector() * (PreviewPanelWidth + ParkingLotGutter);
   }
   ParkedModules[0]->Summon(parkingLocation, parkingRotation, bInstant);
 
@@ -343,7 +343,7 @@ void ALibrary::UpdateLot(float PreviewPanelWidth, bool bInstant) {
   for (int i = 1; i < ParkedModules.Num(); i++) {
     float distanceToNextPosition = (
       ParkedModules[i - 1]->GetPanelWidth() * 0.5f +
-      1.f +
+      ParkingLotGutter +
       ParkedModules[i]->GetPanelWidth() * 0.5f
     );
     parkingLocation += StaticMeshComponent->GetRightVector() * distanceToNextPosition;
