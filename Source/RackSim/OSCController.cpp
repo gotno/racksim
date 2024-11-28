@@ -453,7 +453,7 @@ void AOSCController::AddContextMenuItem(const FOSCAddress& AddressPattern, const
   UOSCManager::GetFloat(message, 10, menuItem.quantityDefaultValue);
   UOSCManager::GetString(message, 11, menuItem.quantityLabel);
   UOSCManager::GetString(message, 12, menuItem.quantityUnit);
-  
+
   OnMenuItemSyncedDelegate.Broadcast(menuItem);
 }
 
