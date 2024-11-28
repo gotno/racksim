@@ -20,17 +20,19 @@ DECLARE_MULTICAST_DELEGATE_OneParam(FOnDestinationPortTargetedSignature, AVCVPor
 
 UCLASS()
 class RACKSIM_API ACableEnd : public AActor {
-	GENERATED_BODY()
-	
-public:	
-	ACableEnd();
+  GENERATED_BODY()
+
+  friend class AVCVCable;
+
+public:
+  ACableEnd();
 
 protected:
-	virtual void BeginPlay() override;
+  virtual void BeginPlay() override;
 
-public:	
-	virtual void Tick(float DeltaTime) override;
-  
+public:
+  virtual void Tick(float DeltaTime) override;
+
   AVCVPort* ConnectedPort{nullptr};
   void Connect(AVCVPort* Port);
   void Disconnect();
@@ -40,14 +42,13 @@ public:
   bool Drop();
 
   AVCVPort* SnapToPort{nullptr};
-  
+
   void SetColor(FColor Color);
-  UStaticMeshComponent* GetMesh() { return StaticMeshComponent; }
   AVCVCable* Cable;
   PortType GetType();
   AVCVPort* GetPort();
   AVCVPort* GetConnectedPort();
-  
+
   void GetPosition(FVector& Location, FRotator& Rotation);
   void SetPosition(FVector Location, FRotator Rotation);
   void UpdatePosition();
@@ -80,6 +81,10 @@ private:
   float ColliderCapsuleHalfHeight{0.4f};
   FVector ColliderOffset{0.f, 0.f, -ColliderCapsuleHalfHeight};
 
+  FDelegateHandle hPortTransformUpdated;
+
+  UStaticMeshComponent* GetMesh() { return StaticMeshComponent; }
+
   void RealignMesh();
   void OffsetMeshFrom(AActor* Actor);
   float GetMeshOffset();
@@ -87,8 +92,13 @@ private:
   bool bHeldByLeftHand{false};
   bool bHeldByRightHand{false};
   bool IsHeld() { return bHeldByLeftHand || bHeldByRightHand; }
-  
+
   void SetSnapToPort(AVCVPort* Port);
+  void HandlePortTransformUpdated(
+    USceneComponent* _UpdatedComponent,
+    EUpdateTransformFlags _UpdateTransformFlags,
+    ETeleportType _Teleport
+  );
 
 public:
   // delegate stuff

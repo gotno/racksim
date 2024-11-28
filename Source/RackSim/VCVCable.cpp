@@ -10,6 +10,7 @@
 #include "UObject/ConstructorHelpers.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Components/StaticMeshComponent.h"
 
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
@@ -57,6 +58,10 @@ void AVCVCable::BeginPlay() {
       FAttachmentTransformRules::SnapToTargetNotIncludingScale,
       TEXT("wire")
     );
+    CableEndA->GetMesh()->TransformUpdated.AddUObject(
+      this,
+      &AVCVCable::HandleEndTransformUpdated
+    );
   }
   if (!CableEndB) {
     CableEndB =
@@ -66,10 +71,22 @@ void AVCVCable::BeginPlay() {
         FRotator(0.f),
         spawnParams
       );
+    CableEndB->GetMesh()->TransformUpdated.AddUObject(
+      this,
+      &AVCVCable::HandleEndTransformUpdated
+    );
   }
 
   Rescale();
   CycleColor();
+}
+
+void AVCVCable::HandleEndTransformUpdated(
+  USceneComponent* _UpdatedComponent,
+  EUpdateTransformFlags _UpdateTransformFlags,
+  ETeleportType _Teleport
+) {
+  UpdateCable();
 }
 
 void AVCVCable::EndPlay(const EEndPlayReason::Type EndPlayReason) {

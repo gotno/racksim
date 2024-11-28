@@ -391,12 +391,10 @@ void AVCVModule::SpawnComponents() {
 
 void AVCVModule::Summon(FVector Location, FRotator Rotation, bool bInstant) {
   Super::Summon(Location, Rotation, bInstant);
-  if (bInstant) TriggerCableUpdates();
 }
 
 void AVCVModule::HandleSummons(float DeltaTime) {
   Super::HandleSummons(DeltaTime);
-  TriggerCableUpdates();
 }
 
 
@@ -413,7 +411,6 @@ void AVCVModule::EngageGrab(FVector GrabbedLocation, FRotator GrabbedRotation) {
 
 void AVCVModule::AlterGrab(FVector GrabbedLocation, FRotator GrabbedRotation) {
   Super::AlterGrab(GrabbedLocation, GrabbedRotation);
-  TriggerCableUpdates();
 }
 
 void AVCVModule::ReleaseGrab() {
@@ -431,11 +428,6 @@ void AVCVModule::WeldSnap() {
   }
 
   SnapToSide = nullptr;
-}
-
-void AVCVModule::TriggerCableUpdates() {
-  for (auto& pair : InputActors) pair.Value->TriggerCableUpdates();
-  for (auto& pair : OutputActors) pair.Value->TriggerCableUpdates();
 }
 
 void AVCVModule::ToggleContextMenu() {

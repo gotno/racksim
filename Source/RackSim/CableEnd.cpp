@@ -74,7 +74,12 @@ void ACableEnd::Tick(float DeltaTime) {
 
 void ACableEnd::Connect(AVCVPort* Port) {
   ConnectedPort = Port;
-  Port->Connect(this);
+  ConnectedPort->Connect(this);
+  hPortTransformUpdated =
+    ConnectedPort->GetRootComponent()->TransformUpdated.AddUObject(
+      this,
+      &ACableEnd::HandlePortTransformUpdated
+    );
   SetSnapToPort(nullptr);
   RealignMesh();
   UpdatePosition();
@@ -89,7 +94,12 @@ void ACableEnd::HandleDisconnected() {
 }
 
 void ACableEnd::Disconnect() {
-  if (ConnectedPort) ConnectedPort->Disconnect(this);
+  if (ConnectedPort) {
+    ConnectedPort->GetRootComponent()->TransformUpdated.Remove(
+      hPortTransformUpdated
+    );
+    ConnectedPort->Disconnect(this);
+  }
   HandleDisconnected();
 }
 
@@ -117,7 +127,7 @@ AVCVPort* ACableEnd::GetPort() {
 
 PortType ACableEnd::GetType() {
   AVCVPort* port;
-  
+
   port = GetPort();
   if (port) return port->Type;
 
@@ -131,10 +141,18 @@ PortType ACableEnd::GetType() {
   return PortType::Any;
 }
 
+void ACableEnd::HandlePortTransformUpdated(
+  USceneComponent* UpdatedComponent,
+  EUpdateTransformFlags _UpdateTransformFlags,
+  ETeleportType _Teleport
+) {
+  UpdatePosition();
+}
+
 void ACableEnd::UpdatePosition() {
   AVCVPort* port = GetPort();
   if (!port) return;
-  
+
   if (port == ConnectedPort) {
     SetPosition(
       port->GetActorLocation(),
@@ -150,7 +168,6 @@ void ACableEnd::UpdatePosition() {
 void ACableEnd::RealignMesh() {
   StaticMeshComponent->SetWorldLocation(GetActorLocation());
   StaticMeshComponent->SetWorldRotation(GetActorForwardVector().Rotation());
-  Cable->UpdateCable();
 }
 
 float ACableEnd::GetMeshOffset() {
@@ -163,7 +180,6 @@ void ACableEnd::OffsetMeshFrom(AActor* Actor) {
     Actor->GetActorLocation() - forwardVector * GetMeshOffset()
   );
   StaticMeshComponent->SetWorldRotation(forwardVector.Rotation());
-  Cable->UpdateCable();
 }
 
 void ACableEnd::GetPosition(FVector& Location, FRotator& Rotation) {
@@ -174,7 +190,6 @@ void ACableEnd::GetPosition(FVector& Location, FRotator& Rotation) {
 void ACableEnd::SetPosition(FVector Location, FRotator Rotation) {
   SetActorLocation(Location);
   SetActorRotation(Rotation);
-  Cable->UpdateCable();
 }
 
 void ACableEnd::HandleCableTargeted(AActor* CableEnd, EControllerHand Hand) {

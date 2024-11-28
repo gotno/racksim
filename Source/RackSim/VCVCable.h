@@ -119,6 +119,12 @@ private:
   // allowed to exist even if unattached
   bool bLatched{false};
 
+  void HandleEndTransformUpdated(
+    USceneComponent* _UpdatedComponent,
+    EUpdateTransformFlags _UpdateTransformFlags,
+    ETeleportType _Teleport
+  );
+
 public:
   static inline float Scale{1.f};
   void Rescale();

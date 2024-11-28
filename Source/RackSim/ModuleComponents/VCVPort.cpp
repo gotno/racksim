@@ -125,12 +125,6 @@ void AVCVPort::Disconnect(ACableEnd* CableEnd) {
   ConnectedCableEnds.Remove(CableEnd);
 }
 
-void AVCVPort::TriggerCableUpdates() {
-  for (ACableEnd* cableEnd : ConnectedCableEnds) {
-    cableEnd->UpdatePosition();
-  }
-}
-
 void AVCVPort::GetTooltipText(FString& Name, FString& Description) {
   Name = Model->name;
   if (Name.IsEmpty()) {

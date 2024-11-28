@@ -59,8 +59,6 @@ public:
 
   void ToggleContextMenu();
 
-  void TriggerCableUpdates();
-
   void InitSnapMode();
   void CancelSnapMode();
   bool IsInSnapMode(bool bActual = false);

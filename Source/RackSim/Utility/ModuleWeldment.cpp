@@ -195,9 +195,6 @@ void AModuleWeldment::AlterGrab(FVector GrabbedLocation, FRotator GrabbedRotatio
 
   LastGrabbedLocation = GrabbedLocation;
   LastGrabbedRotation = qTo.Rotator();
-  
-  for (AVCVModule* module : Modules)
-    module->TriggerCableUpdates();
 }
 
 void AModuleWeldment::HighlightModules() {
